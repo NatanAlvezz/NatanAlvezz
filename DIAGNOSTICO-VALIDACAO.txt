@@ -1,0 +1,23 @@
+DIAGNÓSTICO TÉCNICO · LEADS IMÓVEIS CRM FASE 2
+
+Arquivos verificados:
+- index.html
+- login.html
+- supabase-config.js
+- auth-guard.js
+- supabase-schema.sql
+- assets/leads-logo.jpeg
+- assets/login-preview.png
+
+Validação executada:
+- Conferência de links/caminhos internos.
+- Checagem de sintaxe JavaScript com node --check.
+- Conferência do pacote ZIP final sem duplicidade de arquivos.
+
+Resultado:
+- Sem erro de sintaxe JavaScript encontrado.
+- Caminhos locais OK.
+- Estrutura pronta para publicar.
+
+Observação:
+A execução real do SQL e o teste de conexão dependem do painel Supabase do usuário. Sem acesso ao painel, a validação foi feita de forma local/estática nos arquivos.

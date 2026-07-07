@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="auth-guard.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -29,7 +30,7 @@ button,input,select,textarea{font:inherit;color:inherit;} button{cursor:pointer;
 .app{display:grid;grid-template-columns:var(--sidebar) minmax(0,1fr) var(--right);min-height:100vh;}
 .sidebar{position:sticky;top:0;height:100vh;background:linear-gradient(180deg,rgba(10,10,11,.96),rgba(7,7,8,.98));border-right:1px solid var(--line);padding:14px 12px;display:flex;flex-direction:column;gap:16px;z-index:50;box-shadow:18px 0 70px rgba(0,0,0,.28);}
 .brand{height:64px;display:flex;align-items:center;gap:12px;padding:6px 8px;border-bottom:1px solid rgba(216,181,109,.12);}
-.brand img{width:132px;max-height:58px;object-fit:contain;filter:drop-shadow(0 6px 18px rgba(255,255,255,.12));}
+.brand img{width:60px;height:50px;border-radius:10px;object-fit:cover;object-position:center;filter:drop-shadow(0 6px 18px rgba(255,255,255,.12));border:1px solid rgba(216,181,109,.18);}
 .brandText{display:block}.brandText b{font-size:14px;letter-spacing:2px}.brandText small{display:block;color:var(--mut2);font-size:10px;letter-spacing:3px;margin-top:3px;}
 .nav{display:flex;flex-direction:column;gap:7px;overflow-y:auto;padding:3px 0 10px;}
 .nav button{display:flex;align-items:center;gap:12px;width:100%;border:1px solid transparent;background:transparent;color:#e5e1d7;padding:12px 12px;border-radius:12px;font-size:14px;text-align:left;transition:.2s ease;}
@@ -64,7 +65,7 @@ dialog{border:none;background:transparent;width:min(930px,94vw);max-height:90vh;
 <body>
 <div class="app">
   <aside class="sidebar" id="sidebar">
-    <div class="brand"><div class="brandText"><b>LEADS</b><small>IMÓVEIS</small></div></div>
+    <div class="brand"><img src="assets/leads-logo.jpeg" alt="Leads Imóveis"><div class="brandText"><b>LEADS</b><small>IMÓVEIS</small></div></div>
     <nav class="nav" id="nav">
       <button class="active" data-view="dashboard">⌘ <span>Dashboard</span></button>
       <button data-view="leads">♙ <span>Leads</span></button>
@@ -135,7 +136,7 @@ dialog{border:none;background:transparent;width:min(930px,94vw);max-height:90vh;
       </div>
 
       <div class="view" id="view-config">
-        <div class="panel"><div class="panel-head"><h2>Configurações e dados</h2></div><div class="panel-body"><div class="toolbar"><button class="btn" onclick="exportBackup()">Backup JSON</button><button class="btn btn-ghost" onclick="document.getElementById('importBackup').click()">Restaurar backup</button><button class="btn btn-ghost" onclick="exportCSV('imoveis')">Exportar imóveis CSV</button><button class="btn btn-ghost" onclick="exportCSV('clientes')">Exportar leads CSV</button><button class="btn btn-danger" onclick="resetDemo()">Limpar e recriar exemplo</button><input id="importBackup" class="hidden-file" type="file" accept="application/json,.json" onchange="importBackup(event)"></div><p class="mut"><b>Versão operacional final:</b> CRM premium em HTML, com armazenamento local no navegador, backup JSON, funil, captação de imóveis, fotos, leads, propostas, tarefas, relatórios e Assistente IA interno. Para vários corretores usarem a mesma base em tempo real, o próximo passo profissional é conectar backend/banco online, como Supabase ou Firebase, ou hospedar uma API própria.</p></div></div>
+        <div class="panel"><div class="panel-head"><h2>Configurações e dados</h2></div><div class="panel-body"><div class="toolbar"><button class="btn" onclick="exportBackup()">Backup JSON</button><button class="btn btn-ghost" onclick="document.getElementById('importBackup').click()">Restaurar backup</button><button class="btn btn-ghost" onclick="exportCSV('imoveis')">Exportar imóveis CSV</button><button class="btn btn-ghost" onclick="exportCSV('clientes')">Exportar leads CSV</button><button class="btn btn-danger" onclick="resetDemo()">Limpar e recriar exemplo</button><button class="btn btn-ghost" onclick="logout()">Sair</button><input id="importBackup" class="hidden-file" type="file" accept="application/json,.json" onchange="importBackup(event)"></div><p class="mut"><b>Versão fase 2:</b> CRM premium em HTML conectado ao Supabase, com login, sincronização online, atualização em tempo real para equipe, backup JSON, funil, captação de imóveis, fotos, leads, propostas, tarefas, relatórios e Assistente IA interno.</p></div></div>
         <div class="two-col">
           <div class="panel"><div class="panel-head"><h2>Plano de operação para hoje</h2></div><div class="panel-body"><div class="check-list">
             <label><input type="checkbox"> 1. Subir o arquivo <b>index.html</b> em um serviço de hospedagem estática.</label>
@@ -184,6 +185,12 @@ let db=loadDB();
 let activePropertyId=db.imoveis[0]?.id || null;
 let currentEdit={type:null,id:null};
 let showAllActivities=false;
+const CRM_STATE_ID='leads-imoveis-main';
+let cloudReady=false;
+let cloudUserId=null;
+let cloudApplying=false;
+let saveTimer=null;
+let realtimeChannel=null;
 const modal=document.getElementById('modal');
 
 function placeholderStyle(seed='luxury'){
@@ -223,7 +230,91 @@ function seedData(){
   }
 }
 function loadDB(){try{const raw=localStorage.getItem(STORAGE_KEY);if(raw){return JSON.parse(raw)}}catch(e){} const data=seedData(); localStorage.setItem(STORAGE_KEY,JSON.stringify(data)); return data;}
-function saveDB(){localStorage.setItem(STORAGE_KEY,JSON.stringify(db));}
+function saveDB(){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
+  if(cloudReady && !cloudApplying) scheduleCloudSave();
+}
+function scheduleCloudSave(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(saveDBToCloud,650);
+}
+async function saveDBToCloud(){
+  if(!cloudReady || !window.supabaseClient) return;
+  try{
+    const {error}=await window.supabaseClient.from('crm_state').upsert({
+      id:CRM_STATE_ID,
+      data:db,
+      updated_by:cloudUserId,
+      updated_at:new Date().toISOString()
+    });
+    if(error){console.error('Erro Supabase:',error); toast('Erro ao sincronizar com Supabase.');}
+  }catch(e){console.error(e);}
+}
+async function initCloudSync(){
+  const client=window.supabaseClient;
+  if(!client){console.warn('Supabase não configurado. Usando modo local.');return;}
+  try{
+    const {data:sessionData,error:sessionError}=await client.auth.getSession();
+    if(sessionError){console.error(sessionError);return;}
+    const session=sessionData?.session;
+    if(!session){return;}
+    cloudUserId=session.user?.id||null;
+    const {data,error}=await client.from('crm_state').select('data,updated_at,updated_by').eq('id',CRM_STATE_ID).maybeSingle();
+    if(error){console.error('Erro ao carregar CRM na nuvem:',error); toast('Não foi possível carregar a base online.');return;}
+    if(data?.data){
+      db=data.data;
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
+      activePropertyId=db.imoveis?.[0]?.id||null;
+    }else{
+      await client.from('crm_state').upsert({id:CRM_STATE_ID,data:db,updated_by:cloudUserId,updated_at:new Date().toISOString()});
+    }
+    cloudReady=true;
+    startRealtimeSync();
+    toast('CRM conectado ao Supabase.');
+  }catch(e){console.error(e); toast('Falha ao iniciar sincronização online.');}
+}
+function startRealtimeSync(){
+  const client=window.supabaseClient;
+  if(!client || realtimeChannel) return;
+  realtimeChannel=client.channel('leads-imoveis-crm-sync')
+    .on('postgres_changes',{event:'*',schema:'public',table:'crm_state',filter:`id=eq.${CRM_STATE_ID}`},payload=>{
+      const next=payload.new?.data;
+      if(!next) return;
+      if(payload.new?.updated_by && payload.new.updated_by===cloudUserId) return;
+      cloudApplying=true;
+      db=next;
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
+      activePropertyId=db.imoveis?.find(x=>x.id===activePropertyId)?.id || db.imoveis?.[0]?.id || null;
+      renderAll();
+      renderChat();
+      cloudApplying=false;
+      toast('Base atualizada pela equipe.');
+    })
+    .subscribe(status=>{console.log('Realtime Supabase:',status)});
+}
+async function uploadPhotoToSupabase(dataUrl,file,propId){
+  if(!cloudReady || !window.supabaseClient) return null;
+  try{
+    const blob=dataURLtoBlob(dataUrl);
+    const base=safeFileName(file.name).replace(/\.[^.]+$/,'') || 'foto';
+    const path=`${propId}/${Date.now()}-${base}.jpg`;
+    const {error}=await window.supabaseClient.storage.from('property-photos').upload(path,blob,{contentType:'image/jpeg',upsert:false});
+    if(error){console.warn('Upload Storage falhou, usando base local:',error);return null;}
+    const {data}=window.supabaseClient.storage.from('property-photos').getPublicUrl(path);
+    return {url:data.publicUrl,path};
+  }catch(e){console.warn('Upload Storage falhou:',e);return null;}
+}
+function dataURLtoBlob(dataUrl){
+  const parts=dataUrl.split(',');
+  const mime=(parts[0].match(/:(.*?);/)||[])[1]||'image/jpeg';
+  const bin=atob(parts[1]);
+  const len=bin.length;
+  const arr=new Uint8Array(len);
+  for(let i=0;i<len;i++) arr[i]=bin.charCodeAt(i);
+  return new Blob([arr],{type:mime});
+}
+function safeFileName(name){return String(name||'foto').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/^-+|-+$/g,'').toLowerCase()}
+async function logout(){if(window.supabaseClient){await window.supabaseClient.auth.signOut()} location.href='login.html'}
 function uid(prefix){return prefix+'_'+Date.now()+'_'+Math.floor(Math.random()*9999)}
 function money(v){const n=Number(v)||0;return n? n.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}) : 'A consultar'}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
@@ -234,8 +325,14 @@ function coverPhoto(prop){return prop?.photos?.find(p=>p.cover)||prop?.photos?.[
 function addActivity(t,d,tag='Novo'){db.activities.unshift({t,d,tag});db.activities=db.activities.slice(0,30);saveDB();renderActivities();}
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2600)}
 
-function init(){
+async function init(){
+  await initCloudSync();
   document.getElementById('userNameTop').textContent=db.settings.user||'Natan Alves';
+  if(window.supabaseClient){
+    const {data}=await window.supabaseClient.auth.getUser();
+    const email=data?.user?.email;
+    if(email) document.getElementById('userNameTop').textContent=email.split('@')[0];
+  }
   document.querySelectorAll('#nav button').forEach(btn=>btn.addEventListener('click',()=>switchView(btn.dataset.view)));
   populateFilters();renderAll();renderChat();
   document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();document.getElementById('globalSearch').focus();}});
@@ -296,8 +393,15 @@ async function handlePhotoFiles(files){
   if(!arr.length){toast('Selecione imagens válidas.');return}
   toast('Processando fotos...');
   for(const file of arr){
-    try{const data=await compressImage(file,1600,.82); const cat=guessPhotoCategory(file.name); prop.photos=prop.photos||[]; prop.photos.push({id:uid('ph'),name:file.name,cat,status:'Pendente',cover:!prop.photos.some(p=>p.cover),data,note:''});}
-    catch(e){console.error(e)}
+    try{
+      let data=await compressImage(file,1600,.82);
+      let storagePath='';
+      const uploaded=await uploadPhotoToSupabase(data,file,prop.id);
+      if(uploaded?.url){data=uploaded.url;storagePath=uploaded.path;}
+      const cat=guessPhotoCategory(file.name);
+      prop.photos=prop.photos||[];
+      prop.photos.push({id:uid('ph'),name:file.name,cat,status:'Pendente',cover:!prop.photos.some(p=>p.cover),data,storagePath,note:''});
+    }catch(e){console.error(e)}
   }
   prop.checklist=prop.checklist||{}; prop.checklist.photos=prop.photos.length>=5; prop.updated=Date.now(); saveDB();renderAll();toast(arr.length+' foto(s) adicionada(s).');
 }

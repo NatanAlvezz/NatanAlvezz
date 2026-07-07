@@ -1,0 +1,99 @@
+LEADS IMÓVEIS CRM · FASE 2 SUPABASE · VERSÃO VALIDADA
+
+STATUS DA VALIDAÇÃO LOCAL
+- Estrutura de arquivos conferida.
+- Caminhos internos conferidos: index.html, login.html, supabase-config.js, auth-guard.js e assets/leads-logo.jpeg.
+- JavaScript conferido com validação de sintaxe: index.html, login.html, supabase-config.js e auth-guard.js sem erro de sintaxe.
+- SQL revisado: cria tabela crm_state, ativa RLS, cria políticas para authenticated, ativa Realtime e cria bucket property-photos.
+- Pacote ZIP limpo, sem arquivos duplicados.
+
+IMPORTANTE
+O CRM fica hospedado na Vercel. O Supabase será o banco de dados, autenticação, realtime e armazenamento das fotos.
+Não coloque senha do banco PostgreSQL, service_role key ou secret key no frontend.
+
+ARQUIVOS
+1. index.html              CRM atualizado com login, Supabase e realtime.
+2. login.html              Tela premium de login/cadastro de corretores.
+3. supabase-config.js      URL e publishable key do seu projeto Supabase.
+4. auth-guard.js           Proteção para bloquear acesso sem login.
+5. supabase-schema.sql     Script para criar banco, RLS, realtime e bucket de fotos.
+6. assets/leads-logo.jpeg  Logo oficial dentro do sistema.
+7. assets/login-preview.png Prévia visual da tela premium.
+
+PASSO 1 · PREPARAR O SUPABASE
+1. Acesse https://supabase.com/dashboard
+2. Abra o projeto zyfbgydbwsvbaogbxzrd.
+3. Vá em SQL Editor.
+4. Clique em New Query.
+5. Abra o arquivo supabase-schema.sql.
+6. Copie tudo.
+7. Cole no SQL Editor.
+8. Clique em Run.
+
+Depois do Run, confirme:
+- Table Editor > public > crm_state existe.
+- Authentication > Users está disponível.
+- Storage > property-photos existe.
+- Database > Publications > supabase_realtime contém crm_state.
+
+PASSO 2 · CONFIGURAR USUÁRIOS
+Opção profissional recomendada:
+1. Supabase > Authentication > Users.
+2. Crie manualmente o usuário administrador e os corretores.
+3. Depois de criar todos, desative cadastro público de novos usuários.
+
+Opção rápida para testar:
+1. Abra login.html no site publicado.
+2. Digite e-mail e senha.
+3. Clique em Criar usuário autorizado.
+4. Se o Supabase exigir confirmação de e-mail, confirme.
+5. Volte ao login e entre.
+
+PASSO 3 · SUBIR NA VERCEL
+1. Entre no painel da Vercel.
+2. Abra o projeto leads-imoveis-crm-operacional.
+3. Se usa GitHub, substitua os arquivos no repositório e faça commit.
+4. Se usa upload manual, envie todos os arquivos deste pacote para a raiz do projeto.
+5. Faça redeploy.
+
+Arquivos obrigatórios na raiz:
+- index.html
+- login.html
+- supabase-config.js
+- auth-guard.js
+- pasta assets
+
+PASSO 4 · TESTE FINAL
+1. Abra o site publicado.
+2. Deve aparecer a tela login.html com logo premium.
+3. Faça login.
+4. O CRM deve abrir index.html.
+5. Cadastre um lead.
+6. Abra em outro navegador/celular com outro usuário.
+7. O lead deve aparecer na outra tela após sincronizar.
+8. Cadastre um imóvel com foto.
+9. A foto deve aparecer no card e ir para o bucket property-photos.
+
+SE DER ERRO
+Erro: Invalid login credentials
+- E-mail ou senha incorretos, ou usuário ainda não existe.
+
+Erro: Email not confirmed
+- Confirme o e-mail ou desative temporariamente confirmação no Supabase para teste.
+
+Erro: permission denied / RLS
+- Rode novamente o supabase-schema.sql completo no SQL Editor.
+
+Erro: Bucket not found
+- Confirme se property-photos existe em Storage. Se não existir, rode o SQL novamente.
+
+Erro: Realtime não atualiza
+- Confirme se crm_state está na publicação supabase_realtime.
+- Atualize as duas abas do navegador e teste novamente.
+
+SEGURANÇA RECOMENDADA
+- Após criar os corretores, desative cadastro público se não quiser qualquer pessoa criando usuário.
+- Não envie documentos pessoais, matrículas, contratos ou dados sensíveis para o bucket público property-photos.
+- Fotos comerciais dos imóveis podem ficar públicas para facilitar exibição no CRM e anúncios.
+- Use senhas fortes para todos os corretores.
+
