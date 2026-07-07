@@ -1,0 +1,39 @@
+LEADS IMÓVEIS CRM · IA AVANÇADA
+
+O que foi criado:
+- api/ai.js: rota serverless da Vercel que conversa com a OpenAI sem expor a chave no navegador.
+- index.html atualizado: o chat do CRM agora tenta usar a IA avançada e, se der erro, usa a IA local como fallback.
+- A IA recebe um resumo do CRM: leads, imóveis, propostas, imóvel ativo, atividades e prioridades.
+
+IMPORTANTE:
+Nunca coloque OPENAI_API_KEY no HTML, GitHub ou frontend.
+A chave precisa ficar somente na Vercel em Environment Variables.
+
+PASSO A PASSO NA VERCEL:
+1. Entre na Vercel.
+2. Abra o projeto leads-imoveis-crm-operacional.
+3. Vá em Settings > Environment Variables.
+4. Adicione:
+   Name: OPENAI_API_KEY
+   Value: sua chave secreta da OpenAI
+   Environment: Production
+5. Opcional:
+   Name: OPENAI_MODEL
+   Value: gpt-5.5
+   Environment: Production
+6. Clique em Save.
+7. Faça Redeploy do projeto.
+
+ARQUIVOS PARA SUBIR NO GITHUB:
+- index.html
+- api/ai.js
+
+COMO TESTAR:
+1. Abra o CRM publicado na Vercel.
+2. Faça login.
+3. No Assistente IA, pergunte:
+   "Quais são minhas prioridades de hoje?"
+   "Crie uma mensagem de WhatsApp para meus leads quentes."
+   "Sugira imóveis para meus leads qualificados."
+   "Crie um anúncio premium para o imóvel ativo."
+4. Se aparecer mensagem sobre OPENAI_API_KEY, revise a variável na Vercel e faça novo Redeploy.

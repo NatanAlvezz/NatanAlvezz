@@ -1,0 +1,46 @@
+LEADS IMÓVEIS CRM · FASE 2 SUPABASE
+
+ARQUIVOS DO PACOTE
+1. index.html              CRM atualizado com login, Supabase e realtime.
+2. login.html              Tela de login/cadastro de corretores.
+3. supabase-config.js      Configuração pública do seu projeto Supabase.
+4. auth-guard.js           Proteção para impedir acesso sem login.
+5. supabase-schema.sql     SQL para criar banco, RLS, realtime e bucket de fotos.
+
+PASSO 1 · CRIAR BANCO NO SUPABASE
+1. Entre no Supabase.
+2. Abra seu projeto.
+3. Vá em SQL Editor.
+4. Cole todo o conteúdo do arquivo supabase-schema.sql.
+5. Clique em Run.
+
+PASSO 2 · CRIAR/ENTRAR COM USUÁRIO
+1. Abra login.html no site publicado.
+2. Digite e-mail e senha.
+3. Clique em Criar usuário.
+4. Se o Supabase pedir confirmação por e-mail, confirme.
+5. Volte para login.html e clique em Entrar.
+
+Se quiser facilitar o primeiro teste:
+Supabase > Authentication > Providers > Email > desative temporariamente Confirm email.
+
+PASSO 3 · SUBIR NA VERCEL
+Substitua/adicione estes arquivos no projeto publicado:
+- index.html
+- login.html
+- supabase-config.js
+- auth-guard.js
+
+Depois faça redeploy na Vercel.
+
+PASSO 4 · TESTE DE EQUIPE
+1. Abra o CRM no seu computador e faça login.
+2. Abra em outro navegador/celular com outro usuário logado.
+3. Cadastre um lead ou imóvel.
+4. O outro aparelho deve receber a atualização da base.
+
+OBSERVAÇÕES IMPORTANTES
+- Não coloque senha do banco nem service_role key em nenhum arquivo público.
+- A chave usada aqui é publishable/public, apropriada para frontend com RLS ativado.
+- O bucket property-photos está público para facilitar exibição das fotos dos imóveis. Não envie documentos sensíveis para ele.
+- O CRM mantém cache local no navegador, mas a base principal fica no Supabase.

@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="auth-guard.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#050506" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Leads Imóveis CRM IA" />
+<title>Leads Imóveis · CRM Premium IA</title>
+<style>
+:root{
+  --bg:#050506;--bg2:#090a0c;--panel:#0d0e10;--panel2:#121316;--panel3:#17181c;
+  --line:rgba(255,255,255,.10);--line2:rgba(216,181,109,.26);
+  --txt:#f7f4ed;--mut:#a9a7a0;--mut2:#77746c;
+  --gold:#d8b56d;--gold2:#a77a2a;--gold3:#fff0be;
+  --silver:#e8e8e3;--green:#65d679;--red:#ef6a6a;--blue:#8fb8ff;--orange:#ffbd69;
+  --shadow:0 24px 80px rgba(0,0,0,.42);--shadow2:0 10px 28px rgba(0,0,0,.35);
+  --radius:18px;--radius2:14px;--sidebar:255px;--right:332px;--top:78px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;scrollbar-color:rgba(216,181,109,.35) rgba(255,255,255,.04);}
+body{font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:
+  radial-gradient(circle at 30% -5%,rgba(216,181,109,.16),transparent 28%),
+  radial-gradient(circle at 110% 15%,rgba(255,255,255,.09),transparent 26%),
+  linear-gradient(135deg,#050506,#090a0c 48%,#040404);color:var(--txt);min-height:100vh;overflow-x:hidden;}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px);background-size:44px 44px;mask-image:linear-gradient(to bottom,#000,transparent 76%);z-index:-1;}
+button,input,select,textarea{font:inherit;color:inherit;} button{cursor:pointer;} a{color:inherit;text-decoration:none;}
+.app{display:grid;grid-template-columns:var(--sidebar) minmax(0,1fr) var(--right);min-height:100vh;}
+.sidebar{position:sticky;top:0;height:100vh;background:linear-gradient(180deg,rgba(10,10,11,.96),rgba(7,7,8,.98));border-right:1px solid var(--line);padding:14px 12px;display:flex;flex-direction:column;gap:16px;z-index:50;box-shadow:18px 0 70px rgba(0,0,0,.28);}
+.brand{height:64px;display:flex;align-items:center;gap:12px;padding:6px 8px;border-bottom:1px solid rgba(216,181,109,.12);}
+.brand img{width:60px;height:50px;border-radius:10px;object-fit:cover;object-position:center;filter:drop-shadow(0 6px 18px rgba(255,255,255,.12));border:1px solid rgba(216,181,109,.18);}
+.brandText{display:block}.brandText b{font-size:14px;letter-spacing:2px}.brandText small{display:block;color:var(--mut2);font-size:10px;letter-spacing:3px;margin-top:3px;}
+.nav{display:flex;flex-direction:column;gap:7px;overflow-y:auto;padding:3px 0 10px;}
+.nav button{display:flex;align-items:center;gap:12px;width:100%;border:1px solid transparent;background:transparent;color:#e5e1d7;padding:12px 12px;border-radius:12px;font-size:14px;text-align:left;transition:.2s ease;}
+.nav button svg,.icon{width:19px;height:19px;opacity:.92;}
+.nav button:hover{background:rgba(255,255,255,.045);border-color:rgba(255,255,255,.07);}
+.nav button.active{background:linear-gradient(90deg,rgba(216,181,109,.28),rgba(216,181,109,.07));border-color:rgba(216,181,109,.45);box-shadow:inset 3px 0 0 var(--gold),0 10px 30px rgba(216,181,109,.08);color:#fff7e7;}
+.plan{margin-top:auto;border:1px solid rgba(216,181,109,.22);border-radius:18px;background:radial-gradient(circle at 50% 0,rgba(216,181,109,.16),transparent 42%),rgba(255,255,255,.035);padding:18px;text-align:center;box-shadow:var(--shadow2);}
+.plan .crown{font-size:29px;margin-bottom:9px;text-shadow:0 0 18px rgba(216,181,109,.6)}.plan h3{font-size:16px;font-weight:700}.plan p{font-size:12px;color:var(--mut);margin:8px 0 15px;line-height:1.35}.plan button{width:100%;}
+.topbar{position:sticky;top:0;height:var(--top);display:flex;align-items:center;gap:16px;padding:15px 18px;border-bottom:1px solid var(--line);background:rgba(7,8,10,.82);backdrop-filter:blur(18px);z-index:40;}
+.mobile-menu{display:none}.search{position:relative;max-width:420px;width:100%;}
+.search input{width:100%;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:#08090b;padding:13px 48px 13px 46px;outline:none;color:#eee;box-shadow:inset 0 1px 0 rgba(255,255,255,.04);}
+.search:before{content:"⌕";position:absolute;left:16px;top:9px;color:var(--gold);font-size:24px;z-index:1}.kbd{position:absolute;right:10px;top:10px;border:1px solid rgba(255,255,255,.12);border-radius:7px;color:var(--mut);font-size:11px;padding:4px 7px;background:rgba(255,255,255,.04)}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:12px}.round{width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.11);background:linear-gradient(135deg,rgba(216,181,109,.16),rgba(255,255,255,.03));display:grid;place-items:center;color:var(--gold);position:relative}.dot{position:absolute;right:-2px;top:-3px;background:var(--gold);color:#1b1305;border-radius:10px;font-size:10px;font-weight:900;padding:2px 5px;}
+.user{display:flex;gap:10px;align-items:center;border-left:1px solid rgba(255,255,255,.11);padding-left:12px}.avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#2f2f2f,#c3b58b);border:1px solid rgba(216,181,109,.45);display:grid;place-items:center;font-weight:900;color:#090909}.user b{font-size:13px}.user span{display:block;font-size:11px;color:var(--mut)}
+.main{min-width:0}.content{padding:18px;max-width:1260px;margin:0 auto;}.view{display:none}.view.active{display:block;animation:enter .26s ease;}@keyframes enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.rightbar{position:sticky;top:0;height:100vh;padding:18px 14px;border-left:1px solid var(--line);background:linear-gradient(180deg,rgba(9,10,12,.96),rgba(6,6,7,.98));overflow-y:auto;z-index:35;}
+.grid-kpi{display:grid;grid-template-columns:repeat(5,minmax(145px,1fr));gap:14px;margin-bottom:16px}.kpi{border:1px solid var(--line);border-radius:var(--radius2);padding:16px;background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));box-shadow:var(--shadow2);min-height:92px;position:relative;overflow:hidden}.kpi:after{content:"";position:absolute;right:-45px;top:-45px;width:90px;height:90px;border-radius:50%;background:rgba(216,181,109,.08)}.kpi .row{display:flex;align-items:center;gap:12px}.kpi .kicon{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;border:1px solid rgba(216,181,109,.22);background:rgba(0,0,0,.16);color:var(--gold)}.kpi small{font-size:10px;letter-spacing:.6px;color:var(--mut);text-transform:uppercase}.kpi strong{display:block;font-size:28px;font-weight:520;letter-spacing:.5px;margin-top:4px}.up{color:var(--green);font-size:11px;margin-top:5px}.down{color:var(--red);font-size:11px;margin-top:5px}
+.panel{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(145deg,rgba(255,255,255,.052),rgba(255,255,255,.018));box-shadow:var(--shadow2);overflow:hidden}.panel + .panel{margin-top:16px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.08)}.panel-title h2,.panel-head h2{font-size:15px;text-transform:uppercase;letter-spacing:.8px;font-weight:700}.panel-title p,.panel-head p{font-size:12px;color:var(--mut);margin-top:4px}.panel-body{padding:16px 18px}.two-col{display:grid;grid-template-columns:minmax(0,1.03fr) minmax(300px,.97fr);gap:18px}.mut{color:var(--mut)}.gold{color:var(--gold)}
+.btn{border:1px solid rgba(216,181,109,.44);background:linear-gradient(135deg,rgba(216,181,109,.28),rgba(111,74,19,.24));color:#fff4d9;border-radius:10px;padding:10px 14px;font-weight:700;font-size:13px;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 22px rgba(0,0,0,.18);transition:.18s}.btn:hover{transform:translateY(-1px);border-color:rgba(216,181,109,.70)}.btn:active{transform:translateY(0);opacity:.82}.btn-sm{padding:7px 10px;font-size:12px;border-radius:9px}.btn-ghost{background:rgba(255,255,255,.045);border-color:rgba(255,255,255,.12);color:#eee}.btn-danger{background:rgba(239,106,106,.15);border-color:rgba(239,106,106,.38);color:#ffd8d8}.btn-green{background:rgba(101,214,121,.14);border-color:rgba(101,214,121,.38);color:#dcffdf}.btn-block{width:100%}.btn-icon{display:inline-flex;align-items:center;gap:8px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}.toolbar input,.toolbar select,.input,select,textarea{border:1px solid rgba(255,255,255,.11);background:rgba(0,0,0,.20);color:var(--txt);border-radius:10px;padding:10px 12px;outline:none}.toolbar input,.toolbar select{max-width:220px}.input:focus,select:focus,textarea:focus{border-color:rgba(216,181,109,.54);box-shadow:0 0 0 3px rgba(216,181,109,.10)}select option{background:#101113;color:#fff}.field{margin-bottom:12px}.field label{display:block;font-size:11px;font-weight:700;color:var(--mut);margin-bottom:6px;text-transform:uppercase;letter-spacing:.6px}.form-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.form-row-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.capture-main{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(305px,.95fr);gap:20px}.cover{height:250px;border-radius:14px;overflow:hidden;border:1px solid rgba(216,181,109,.20);background:radial-gradient(circle at 70% 20%,rgba(216,181,109,.18),transparent 30%),linear-gradient(135deg,#202328,#0a0b0d);position:relative;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}.cover.has-photo{background-size:cover;background-position:center}.cover .overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.66));}.badge{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.13);background:rgba(0,0,0,.42);backdrop-filter:blur(8px);color:#fff;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:800}.badge.gold{background:rgba(216,181,109,.16);border-color:rgba(216,181,109,.36);color:#ffe9ae}.badge.green{background:rgba(101,214,121,.15);border-color:rgba(101,214,121,.33);color:#ccffd1}.badge.red{background:rgba(239,106,106,.16);border-color:rgba(239,106,106,.38);color:#ffd4d4}.cover .badge{position:absolute;top:12px;left:12px}.cover .change{position:absolute;right:12px;bottom:12px}.cover .empty-house{position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.34);font-size:62px}.thumbs{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-top:10px}.thumb{height:58px;border-radius:10px;background:linear-gradient(135deg,#2d3036,#111215);border:1px solid rgba(255,255,255,.10);overflow:hidden;position:relative;background-size:cover;background-position:center}.thumb.covered{border-color:rgba(216,181,109,.75);box-shadow:0 0 0 2px rgba(216,181,109,.12)}.thumb span{position:absolute;left:5px;bottom:4px;font-size:9px;background:rgba(0,0,0,.55);border-radius:5px;padding:2px 4px;color:#eee;max-width:95%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.upload-zone{margin-top:10px;border:1px dashed rgba(255,255,255,.24);border-radius:14px;min-height:100px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:rgba(0,0,0,.16);transition:.18s;text-align:center;padding:14px}.upload-zone:hover,.upload-zone.drag{border-color:rgba(216,181,109,.72);background:rgba(216,181,109,.06)}.upload-zone b{font-size:13px}.upload-zone small{font-size:12px;color:var(--mut)}
+.property-title{font-size:20px;margin-bottom:4px}.location{color:var(--mut);font-size:13px;margin-bottom:16px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:12px}.metric{padding:13px 12px;border-right:1px solid rgba(255,255,255,.08)}.metric:last-child{border-right:none}.metric small{display:block;color:var(--mut);font-size:11px}.metric b{display:block;font-size:15px;margin-top:5px}.split-info{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}.info-box{border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;background:rgba(255,255,255,.025)}.info-box small{font-size:11px;color:var(--mut)}.info-box b{display:block;margin-top:5px;font-size:16px}.progress-label{display:flex;justify-content:space-between;color:var(--mut);font-size:12px;margin-bottom:8px}.progress{height:8px;border-radius:8px;background:rgba(255,255,255,.10);overflow:hidden}.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--gold),#f6dfa1);border-radius:8px;box-shadow:0 0 18px rgba(216,181,109,.36)}.checklist{margin-top:12px}.check-item{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px}.check-item button{width:24px;height:24px;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.035);color:var(--mut)}.check-item.done button{background:rgba(101,214,121,.14);border-color:rgba(101,214,121,.43);color:var(--green)}.check-item span{flex:1}.status-text{font-size:11px}.check-item.done .status-text{color:var(--green)}.check-item:not(.done) .status-text{color:var(--orange)}
+.funnel{display:grid;grid-template-columns:repeat(6,minmax(130px,1fr));gap:8px}.stage{border:1px solid rgba(255,255,255,.09);background:linear-gradient(145deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border-radius:12px;padding:12px;position:relative;overflow:hidden}.stage:last-child{border-color:rgba(216,181,109,.34);background:linear-gradient(145deg,rgba(216,181,109,.14),rgba(255,255,255,.018))}.stage h4{font-size:11px;text-transform:uppercase;color:#fff0c8;margin-bottom:8px}.stage b{font-size:16px}.stage p{font-size:11px;color:var(--mut);margin-top:5px}.stage:after{content:"";position:absolute;right:-18px;top:0;border-top:43px solid transparent;border-bottom:43px solid transparent;border-left:20px solid rgba(255,255,255,.025)}.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}.property-card{border:1px solid rgba(255,255,255,.09);border-radius:14px;overflow:hidden;background:rgba(255,255,255,.025);transition:.2s}.property-card:hover{transform:translateY(-2px);border-color:rgba(216,181,109,.32)}.pc-img{height:150px;background:linear-gradient(135deg,#2b2e34,#0c0d0f);position:relative;background-size:cover;background-position:center}.pc-img:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.75))}.pc-img .badge{position:absolute;top:10px;left:10px;z-index:1}.pc-img .heart{position:absolute;right:10px;top:10px;z-index:1;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.35)}.pc-body{padding:12px}.pc-body h3{font-size:14px;margin-bottom:5px}.pc-body p{font-size:12px;color:var(--mut);margin:3px 0}.price{font-size:17px!important;color:#fff!important;margin-top:10px!important;font-weight:800}.grid-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}.item-card{border:1px solid rgba(255,255,255,.09);border-radius:14px;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.015));padding:14px}.item-card h3{font-size:16px;margin-bottom:7px}.item-card p{font-size:12px;color:var(--mut);line-height:1.45}.item-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.tag-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.pill{font-size:11px;padding:5px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.035);color:#e9e3d8}.pill.gold{border-color:rgba(216,181,109,.31);background:rgba(216,181,109,.11);color:#ffebb7}.pill.green{border-color:rgba(101,214,121,.27);background:rgba(101,214,121,.09);color:#ccffd1}.pill.orange{border-color:rgba(255,189,105,.29);background:rgba(255,189,105,.09);color:#ffe1b5}.pill.red{border-color:rgba(239,106,106,.29);background:rgba(239,106,106,.09);color:#ffcaca}
+.ai-card{border:1px solid rgba(216,181,109,.23);border-radius:18px;background:radial-gradient(circle at 50% 0,rgba(216,181,109,.12),transparent 38%),linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));box-shadow:var(--shadow2);overflow:hidden}.ai-head{display:flex;justify-content:space-between;align-items:center;padding:15px 16px;border-bottom:1px solid rgba(255,255,255,.08)}.ai-head h2{font-size:14px;text-transform:uppercase;letter-spacing:1px}.online{font-size:10px;color:var(--green);font-weight:800}.ai-hero{text-align:center;padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.07);background:radial-gradient(circle at 50% 20%,rgba(216,181,109,.20),transparent 48%)}.ai-orb{width:64px;height:64px;margin:0 auto 12px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(216,181,109,.62);background:radial-gradient(circle,#2c2311,#090909);box-shadow:0 0 28px rgba(216,181,109,.32);font-family:Georgia,serif;color:#fff0c8;font-size:19px}.ai-hero h3{font-size:15px}.ai-hero p{font-size:12px;color:var(--mut);line-height:1.45;margin-top:6px}.ai-section{padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.06)}.ai-section h4{font-size:11px;text-transform:uppercase;color:var(--mut);letter-spacing:.7px;margin-bottom:10px}.suggestion{width:100%;display:flex;align-items:center;gap:9px;justify-content:flex-start;text-align:left;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.035);border-radius:10px;padding:10px;margin-bottom:8px;font-size:12px}.suggestion:hover{border-color:rgba(216,181,109,.38);background:rgba(216,181,109,.07)}.auto-row{display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:10px;margin-bottom:8px;background:rgba(0,0,0,.15)}.auto-row .auto-icon{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;border:1px solid rgba(216,181,109,.20);color:var(--gold)}.auto-row b{font-size:12px}.auto-row span{display:block;font-size:10px;color:var(--mut)}.chat-log{max-height:260px;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px}.msg{max-width:88%;padding:10px 12px;border-radius:12px;font-size:12px;line-height:1.45;white-space:pre-wrap}.msg.ai{align-self:flex-start;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)}.msg.me{align-self:flex-end;background:rgba(216,181,109,.15);border:1px solid rgba(216,181,109,.26);color:#fff6df}.chat-form{padding:12px 14px;border-top:1px solid rgba(255,255,255,.07);display:flex;gap:8px}.chat-form input{flex:1;border:1px solid rgba(255,255,255,.11);background:rgba(0,0,0,.22);border-radius:10px;padding:11px 12px;font-size:12px;outline:none}.chat-form button{width:42px;border-radius:10px}.quick{display:flex;gap:7px;flex-wrap:wrap;padding:0 14px 14px}.quick button{font-size:11px;padding:7px 9px}
+.activity-card{margin-top:14px}.activity{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}.activity:last-child{border-bottom:none}.activity .mini-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#3a3d43,#c0aa73);display:grid;place-items:center;color:#090909;font-weight:900}.activity b{font-size:12px}.activity span{display:block;font-size:11px;color:var(--mut);margin-top:2px}.activity .pill{margin-left:auto}.bars .bar{display:flex;align-items:center;gap:10px;margin:12px 0}.bars label{font-size:12px;color:var(--mut);width:120px}.bartrack{flex:1;height:10px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}.bartrack span{display:block;height:100%;background:linear-gradient(90deg,var(--gold),rgba(255,255,255,.72));border-radius:999px}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{text-align:left;padding:12px;border-bottom:1px solid rgba(255,255,255,.07)}.table th{font-size:11px;text-transform:uppercase;color:var(--mut);letter-spacing:.6px}.empty{text-align:center;color:var(--mut);padding:32px;border:1px dashed rgba(255,255,255,.12);border-radius:14px;background:rgba(255,255,255,.02)}
+dialog{border:none;background:transparent;width:min(930px,94vw);max-height:90vh;color:var(--txt)}dialog::backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(7px)}.modal{border:1px solid rgba(216,181,109,.23);border-radius:20px;overflow:hidden;background:linear-gradient(145deg,#101114,#090a0c);box-shadow:0 30px 100px rgba(0,0,0,.7)}.modal-head{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.08)}.modal-head h2{font-size:16px}.modal-body{padding:18px;max-height:66vh;overflow-y:auto}.modal-foot{padding:14px 18px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:flex-end;gap:10px}.x{border:none;background:transparent;color:var(--mut);font-size:28px;line-height:1}.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}.photo-admin{border:1px solid rgba(255,255,255,.09);border-radius:14px;overflow:hidden;background:rgba(255,255,255,.025)}.photo-admin .ph{height:140px;background:linear-gradient(135deg,#2d3036,#111215);background-size:cover;background-position:center;position:relative}.photo-admin .body{padding:10px}.photo-admin .body select,.photo-admin .body input{width:100%;margin-top:7px;font-size:12px;padding:8px}.photo-admin .body .item-actions{margin-top:8px}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;background:rgba(15,16,18,.94);border:1px solid rgba(216,181,109,.35);color:#fff3d8;border-radius:999px;padding:11px 16px;z-index:999;box-shadow:var(--shadow2);transition:.25s;font-size:13px}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}.hidden-file{display:none}.mobile-ai-toggle{display:none}
+@media(max-width:1240px){.app{grid-template-columns:88px minmax(0,1fr) 318px}.sidebar{padding:12px 10px}.brand img{width:64px;height:52px;object-fit:cover;object-position:left}.nav button span{display:none}.nav button{justify-content:center;padding:12px}.plan{display:none}.grid-kpi{grid-template-columns:repeat(3,1fr)}.funnel{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:980px){.app{display:block}.sidebar{position:fixed;left:-270px;transition:.25s;width:255px}.sidebar.open{left:0}.mobile-menu{display:grid}.topbar{left:0}.rightbar{position:fixed;right:-350px;top:0;width:330px;transition:.25s;box-shadow:-20px 0 60px rgba(0,0,0,.45)}.rightbar.open{right:0}.mobile-ai-toggle{display:grid;position:fixed;right:18px;bottom:18px;z-index:80;width:56px;height:56px;border-radius:50%;border:1px solid rgba(216,181,109,.44);background:radial-gradient(circle,rgba(216,181,109,.36),#090909);color:#fff0bd;box-shadow:0 10px 30px rgba(0,0,0,.4)}.content{padding:14px}.two-col,.capture-main{grid-template-columns:1fr}.grid-kpi{grid-template-columns:repeat(2,1fr)}.user{display:none}.search{max-width:none}.top-actions{gap:8px}.funnel{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){.topbar{height:auto;flex-wrap:wrap}.search{order:3;flex-basis:100%}.grid-kpi{grid-template-columns:1fr}.form-row,.form-row-3,.metrics,.split-info{grid-template-columns:1fr}.thumbs{grid-template-columns:repeat(3,1fr)}.cover{height:220px}.funnel{grid-template-columns:1fr}.toolbar input,.toolbar select{max-width:100%;width:100%}.toolbar .btn{width:100%}.cards,.grid-list{grid-template-columns:1fr}.rightbar{width:100%;right:-100%}}
+.check-list{display:flex;flex-direction:column;gap:10px}.check-list label{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:rgba(255,255,255,.035);color:var(--txt);font-size:13px;line-height:1.35}.check-list input{width:16px;height:16px;margin-top:1px;accent-color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><img src="assets/leads-logo.jpeg" alt="Leads Imóveis"><div class="brandText"><b>LEADS</b><small>IMÓVEIS</small></div></div>
+    <nav class="nav" id="nav">
+      <button class="active" data-view="dashboard">⌘ <span>Dashboard</span></button>
+      <button data-view="leads">♙ <span>Leads</span></button>
+      <button data-view="imoveis">⌂ <span>Imóveis</span></button>
+      <button data-view="captacao">☁ <span>Captação de Imóveis</span></button>
+      <button data-view="funil">▽ <span>Funil de Negócios</span></button>
+      <button data-view="propostas">☷ <span>Propostas</span></button>
+      <button data-view="tarefas">☑ <span>Tarefas</span></button>
+      <button data-view="relatorios">☰ <span>Relatórios</span></button>
+      <button data-view="config">⚙ <span>Configurações</span></button>
+    </nav>
+    <div class="plan"><div class="crown">♛</div><h3>Plano Premium</h3><p>CRM local com módulo de captação, fotos, funil e agente IA.</p><button class="btn btn-ghost" onclick="openSettings()">Gerenciar</button></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="round mobile-menu" onclick="toggleSidebar()">☰</button>
+      <div class="search"><input id="globalSearch" placeholder="Buscar por leads, imóveis, clientes..." oninput="globalSearch()"><span class="kbd">Ctrl K</span></div>
+      <div class="top-actions">
+        <button class="round" title="Novo" onclick="quickNew()">＋</button>
+        <button class="round" title="Notificações">♢<span class="dot" id="notifDot">0</span></button>
+        <button class="round" title="Agenda" onclick="switchView('tarefas')">▣</button>
+        <div class="user"><div class="avatar">LA</div><div><b id="userNameTop">Natan Alves</b><span>Administrador</span></div></div>
+      </div>
+    </header>
+
+    <section class="content">
+      <div class="view active" id="view-dashboard">
+        <div class="grid-kpi" id="kpis"></div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title"><h2>Captura de imóvel</h2><p>Gerencie e acompanhe o processo completo de captação.</p></div><div class="toolbar" style="margin:0"><button class="btn btn-sm" onclick="switchView('captacao')">Ver detalhes</button><button class="btn btn-sm btn-ghost" onclick="openImovelModal()">Nova captação</button></div></div>
+          <div class="panel-body" id="captureDashboard"></div>
+        </div>
+        <div class="two-col" style="margin-top:16px">
+          <div class="panel"><div class="panel-head"><h2>Funil de negócios</h2><button class="btn btn-sm btn-ghost" onclick="switchView('funil')">Ver funil completo</button></div><div class="panel-body"><div class="funnel" id="funnelDashboard"></div><div class="progress-label" style="margin-top:14px"><span>Taxa de conversão geral</span><b id="conversionRate">0%</b></div><div class="progress"><span id="conversionBar" style="width:0%"></span></div></div></div>
+          <div class="panel"><div class="panel-head"><h2>Prioridades de hoje</h2><button class="btn btn-sm btn-ghost" onclick="askAI('Quais são minhas prioridades de hoje?')">Perguntar à IA</button></div><div class="panel-body" id="priorityList"></div></div>
+        </div>
+        <div class="panel"><div class="panel-head"><h2>Imóveis em destaque</h2><button class="btn btn-sm btn-ghost" onclick="switchView('imoveis')">Ver todos</button></div><div class="panel-body"><div class="cards" id="featuredCards"></div></div></div>
+      </div>
+
+      <div class="view" id="view-leads">
+        <div class="panel"><div class="panel-head"><div><h2>Leads e clientes</h2><p>Controle comprador, origem, orçamento, etapa, interesse e próximo contato.</p></div><button class="btn" onclick="openLeadModal()">+ Novo lead</button></div><div class="panel-body"><div class="toolbar"><input id="searchLeads" placeholder="Buscar lead..." oninput="renderLeads()"><select id="filterLeadStage" onchange="renderLeads()"><option value="">Todas as etapas</option></select><select id="filterLeadOrigin" onchange="renderLeads()"><option value="">Todas as origens</option></select></div><div class="grid-list" id="leadList"></div></div></div>
+      </div>
+
+      <div class="view" id="view-imoveis">
+        <div class="panel"><div class="panel-head"><div><h2>Imóveis</h2><p>Catálogo profissional com fotos, informações e controle de publicação.</p></div><button class="btn" onclick="openImovelModal()">+ Novo imóvel</button></div><div class="panel-body"><div class="toolbar"><input id="searchImoveis" placeholder="Buscar imóvel..." oninput="renderImoveis()"><select id="filterPropStage" onchange="renderImoveis()"><option value="">Todas as etapas</option></select><select id="filterPropType" onchange="renderImoveis()"><option value="">Todos os tipos</option></select></div><div class="cards" id="propertyList"></div></div></div>
+      </div>
+
+      <div class="view" id="view-captacao">
+        <div class="panel"><div class="panel-head"><div><h2>Captação premium de imóveis</h2><p>Módulo avançado: proprietário, documentação, checklist, fotos, capa, status e anúncio.</p></div><div class="toolbar" style="margin:0"><select id="captureSelector" onchange="setActiveCapture(this.value)"></select><button class="btn" onclick="openImovelModal(activePropertyId)">Editar</button><button class="btn btn-ghost" onclick="openImovelModal()">Nova</button></div></div><div class="panel-body" id="captureFull"></div></div>
+      </div>
+
+      <div class="view" id="view-funil">
+        <div class="panel"><div class="panel-head"><h2>Funil de negócios</h2><button class="btn btn-sm" onclick="openLeadModal()">Novo lead</button></div><div class="panel-body"><h3 class="gold" style="margin-bottom:10px;font-size:14px">Funil de clientes</h3><div class="funnel" id="clientFunnel"></div><h3 class="gold" style="margin:20px 0 10px;font-size:14px">Funil de captação</h3><div class="funnel" id="propertyFunnel"></div></div></div>
+      </div>
+
+      <div class="view" id="view-propostas">
+        <div class="panel"><div class="panel-head"><h2>Propostas</h2><button class="btn btn-sm" onclick="createProposal()">Gerar proposta</button></div><div class="panel-body"><table class="table"><thead><tr><th>Cliente</th><th>Imóvel</th><th>Valor</th><th>Status</th><th>Ação</th></tr></thead><tbody id="proposalTable"></tbody></table></div></div>
+      </div>
+
+      <div class="view" id="view-tarefas">
+        <div class="panel"><div class="panel-head"><h2>Tarefas e follow-up</h2><button class="btn btn-sm" onclick="askAI('Crie minhas próximas tarefas de follow-up')">IA organizar tarefas</button></div><div class="panel-body" id="taskList"></div></div>
+      </div>
+
+      <div class="view" id="view-relatorios">
+        <div class="grid-kpi" id="kpisReports"></div>
+        <div class="two-col"><div class="panel"><div class="panel-head"><h2>Leads por origem</h2></div><div class="panel-body"><div class="bars" id="originBars"></div></div></div><div class="panel"><div class="panel-head"><h2>Imóveis por bairro</h2></div><div class="panel-body"><div class="bars" id="neighborhoodBars"></div></div></div></div>
+      </div>
+
+      <div class="view" id="view-config">
+        <div class="panel"><div class="panel-head"><h2>Configurações e dados</h2></div><div class="panel-body"><div class="toolbar"><button class="btn" onclick="exportBackup()">Backup JSON</button><button class="btn btn-ghost" onclick="document.getElementById('importBackup').click()">Restaurar backup</button><button class="btn btn-ghost" onclick="exportCSV('imoveis')">Exportar imóveis CSV</button><button class="btn btn-ghost" onclick="exportCSV('clientes')">Exportar leads CSV</button><button class="btn btn-danger" onclick="resetDemo()">Limpar e recriar exemplo</button><button class="btn btn-ghost" onclick="logout()">Sair</button><input id="importBackup" class="hidden-file" type="file" accept="application/json,.json" onchange="importBackup(event)"></div><p class="mut"><b>Versão fase 2:</b> CRM premium em HTML conectado ao Supabase, com login, sincronização online, atualização em tempo real para equipe, backup JSON, funil, captação de imóveis, fotos, leads, propostas, tarefas, relatórios e Assistente IA interno.</p></div></div>
+        <div class="two-col">
+          <div class="panel"><div class="panel-head"><h2>Plano de operação para hoje</h2></div><div class="panel-body"><div class="check-list">
+            <label><input type="checkbox"> 1. Subir o arquivo <b>index.html</b> em um serviço de hospedagem estática.</label>
+            <label><input type="checkbox"> 2. Enviar o link para os corretores e orientar o uso inicial.</label>
+            <label><input type="checkbox"> 3. Cadastrar imóveis em captação e escolher a foto de capa.</label>
+            <label><input type="checkbox"> 4. Cadastrar leads, origem, etapa, orçamento e próxima ação.</label>
+            <label><input type="checkbox"> 5. Fazer backup JSON no final do dia.</label>
+          </div></div></div>
+          <div class="panel"><div class="panel-head"><h2>Equipe e governança</h2></div><div class="panel-body"><p class="mut">Fluxo recomendado: cada corretor registra leads, imóveis, visitas e propostas no mesmo padrão. O gestor acompanha funil, atividades, captações pendentes e prioridades pelo Assistente IA.</p><div class="tag-row"><span class="pill gold">Administrador</span><span class="pill">Corretor</span><span class="pill">Captação</span><span class="pill">Atendimento</span></div></div></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <aside class="rightbar" id="rightbar">
+    <div class="ai-card">
+      <div class="ai-head"><h2>IA Consultiva</h2><span class="online">GPT ONLINE ✦</span></div>
+      <div class="ai-hero"><div class="ai-orb">LAI</div><h3>Olá, equipe! 👋</h3><p>Sou a IA da Leads Imóveis. Posso conversar com corretores, analisar o CRM, sugerir follow-up, criar mensagens, anúncios, roteiros de ligação e prioridades do dia.</p></div>
+      <div class="ai-section"><h4>Sugestões para você</h4><button class="suggestion" onclick="askAI('Faça um resumo inteligente do dia e me diga as 5 prioridades da equipe.')">☰ Resumo inteligente do dia</button><button class="suggestion" onclick="askAI('Quais leads precisam de follow-up agora? Crie mensagens de WhatsApp para cada um.')">♙ Follow-up com mensagem pronta</button><button class="suggestion" onclick="askAI('Sugira imóveis para os leads mais qualificados e explique o motivo.')">⌂ Match lead x imóvel</button><button class="suggestion" onclick="askAI('Crie um anúncio premium para o imóvel ativo, com texto para Instagram e WhatsApp.')">✦ Anúncio premium</button></div>
+      <div class="ai-section"><h4>Automações ativas</h4><div id="automationList"></div></div>
+      <div class="chat-log" id="chatLog"></div>
+      <form class="chat-form" onsubmit="sendChat(event)"><input id="chatInput" placeholder="Pergunte algo ao seu Agente IA..."><button class="btn" type="submit">➤</button></form>
+      <div class="quick"><button class="btn btn-sm btn-ghost" onclick="askAI('Resumo diário com plano de ação.')">Resumo diário</button><button class="btn btn-sm btn-ghost" onclick="askAI('Crie uma mensagem de WhatsApp para lead comprador de alto padrão.')">WhatsApp</button><button class="btn btn-sm btn-ghost" onclick="askAI('Me treine para abordar um proprietário e captar um imóvel exclusivo.')">Treinamento</button></div>
+    </div>
+    <div class="panel activity-card"><div class="panel-head"><h2>Atividades recentes</h2><button class="btn btn-sm btn-ghost" onclick="renderActivities(true)">Ver todas</button></div><div class="panel-body" id="activities"></div></div>
+  </aside>
+</div>
+<button class="mobile-ai-toggle" onclick="toggleAI()">LAI</button>
+
+<dialog id="modal"><div class="modal"><div class="modal-head"><h2 id="modalTitle">Cadastro</h2><button class="x" onclick="closeModal()">×</button></div><div class="modal-body" id="modalBody"></div><div class="modal-foot" id="modalFoot"></div></dialog>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+const STORAGE_KEY='leads_imoveis_premium_ia_v4';
+const CHECKS=[
+ ['owner','Informações do proprietário'],['docs','Documentação do imóvel'],['photos','Fotos profissionais'],['inspection','Vistoria e avaliação'],['contract','Assinatura/autorização'],['pricing','Precificação aprovada'],['ad','Texto do anúncio'],['publish','Publicação nos canais'],['follow','Follow-up programado']
+];
+const STAGES_CLIENT=['Novos leads','Qualificação','Apresentação','Proposta','Negociação','Fechado'];
+const STAGES_PROP=['Novo','Contato proprietário','Visita marcada','Captura em andamento','Captado','Publicado'];
+const ORIGINS=['Instagram','Google Ads','Indicação','OLX','Facebook','Site','WhatsApp','Tráfego Pago','Orgânico'];
+const TYPES=['Casa','Casa em Condomínio','Apartamento','Cobertura','Terreno','Sala Comercial','Sobrado'];
+const PHOTO_CATS=['Fachada','Sala','Cozinha','Suíte','Quarto','Banheiro','Área gourmet','Piscina','Garagem','Vista','Planta','Documento','Outro'];
+const PHOTO_STATUS=['Pendente','Selecionada','Editar','Aprovada','Publicada','Descartada'];
+let db=loadDB();
+let activePropertyId=db.imoveis[0]?.id || null;
+let currentEdit={type:null,id:null};
+let showAllActivities=false;
+const CRM_STATE_ID='leads-imoveis-main';
+let cloudReady=false;
+let cloudUserId=null;
+let cloudApplying=false;
+let saveTimer=null;
+let realtimeChannel=null;
+const modal=document.getElementById('modal');
+
+function placeholderStyle(seed='luxury'){
+  const palettes={
+    Fachada:['#2b2f35','#0a0b0d','#d8b56d'],Sala:['#2c2924','#111113','#cdbd99'],Cozinha:['#23262a','#08090a','#dedbd2'],Suíte:['#25242a','#0b0b0e','#c7a765'],Quarto:['#282a2d','#0c0d0f','#b7b1a4'],Banheiro:['#232832','#08090b','#b9c3cf'],Piscina:['#142227','#070809','#6db9d8'],Vista:['#18212a','#060709','#96b9e8'],Terreno:['#1c2419','#070807','#86b86c'],luxury:['#2d3036','#0b0c0f','#d8b56d']
+  };
+  const p=palettes[seed]||palettes.luxury;
+  return `background:radial-gradient(circle at 70% 30%,${p[2]}55,transparent 28%),linear-gradient(135deg,${p[0]},${p[1]});`;
+}
+function seedData(){
+  const now=Date.now();
+  return {
+    settings:{user:'Natan Alves',brand:'Leads Imóveis',city:'Florianópolis',phone:'48991115992',email:'leadsimoveisoficial@gmail.com'},
+    imoveis:[
+      {id:'imv_'+now, titulo:'Casa em Condomínio Jurerê Internacional', tipo:'Casa em Condomínio', finalidade:'Venda', bairro:'Jurerê Internacional', cidade:'Florianópolis', endereco:'Jurerê Internacional', valor:8250000, area:780, dormitorios:5, suites:5, vagas:8, etapa:'Captura em andamento', origem:'Indicação', prop:'Proprietário Alto Padrão', tel:'48999999999', email:'', comissao:'6%', exclusividade:'Sim', matricula:'Pendente', iptu:'Pendente', condominio:'Condomínio fechado', proximaAcao:'Finalizar vistoria, aprovar fotos e colher assinatura da autorização', dataProxima:'', obs:'Imóvel de alto padrão com potencial para campanha premium.', checklist:{owner:true,docs:true,photos:false,inspection:false,contract:false,pricing:true,ad:false,publish:false,follow:true}, photos:[
+        {id:'ph1',name:'Fachada principal',cat:'Fachada',status:'Selecionada',cover:true,data:'',note:'Capa sugerida'},
+        {id:'ph2',name:'Sala integrada',cat:'Sala',status:'Pendente',cover:false,data:'',note:''},
+        {id:'ph3',name:'Área gourmet',cat:'Área gourmet',status:'Pendente',cover:false,data:'',note:''},
+        {id:'ph4',name:'Piscina',cat:'Piscina',status:'Pendente',cover:false,data:'',note:''}
+      ], updated:now-1000*60*60*5},
+      {id:'imv_'+(now+1), titulo:'Apartamento Vista Mar Beira-Mar Norte', tipo:'Apartamento', finalidade:'Venda', bairro:'Beira-Mar Norte', cidade:'Florianópolis', endereco:'Centro', valor:7450000, area:420, dormitorios:4, suites:4, vagas:6, etapa:'Publicado', origem:'Instagram', prop:'Maria Proprietária', tel:'48988887777', email:'', comissao:'5%', exclusividade:'Não', matricula:'Ok', iptu:'Ok', condominio:'R$ 3.200', proximaAcao:'Impulsionar campanha e enviar para leads compatíveis', dataProxima:'', obs:'Vista mar, andar alto, acabamento premium.', checklist:{owner:true,docs:true,photos:true,inspection:true,contract:true,pricing:true,ad:true,publish:true,follow:true}, photos:[{id:'ph5',name:'Vista mar',cat:'Vista',status:'Publicada',cover:true,data:'',note:''}], updated:now-1000*60*60*24},
+      {id:'imv_'+(now+2), titulo:'Cobertura Duplex Lagoa da Conceição', tipo:'Cobertura', finalidade:'Venda', bairro:'Lagoa da Conceição', cidade:'Florianópolis', endereco:'Lagoa', valor:12900000, area:560, dormitorios:4, suites:4, vagas:7, etapa:'Captado', origem:'Google Ads', prop:'Investidor', tel:'48977776666', email:'', comissao:'6%', exclusividade:'Sim', matricula:'Ok', iptu:'Pendente', condominio:'R$ 4.800', proximaAcao:'Produzir vídeo vertical e texto para campanha', dataProxima:'', obs:'Cobertura com vista panorâmica.', checklist:{owner:true,docs:true,photos:true,inspection:true,contract:true,pricing:true,ad:false,publish:false,follow:true}, photos:[{id:'ph6',name:'Terraço',cat:'Vista',status:'Aprovada',cover:true,data:'',note:''}], updated:now-1000*60*60*48}
+    ],
+    clientes:[
+      {id:'cli_'+now,nome:'Maria Clara Silva',tel:'48988776655',email:'maria@email.com',bairro:'Jurerê Internacional',origem:'Instagram',min:6000000,max:9500000,etapa:'Qualificação',interesse:'Alto',tipo:'Casa em Condomínio',proximaAcao:'Enviar 3 imóveis premium em Jurerê e marcar visita',updated:now-1000*60*15,obs:'Procura casa com 4+ suítes e área gourmet.'},
+      {id:'cli_'+(now+1),nome:'Ricardo Andrade',tel:'48999887766',email:'',bairro:'Lagoa da Conceição',origem:'Google Ads',min:9000000,max:15000000,etapa:'Proposta',interesse:'Alto',tipo:'Cobertura',proximaAcao:'Negociar condições da proposta',updated:now-1000*60*60*3,obs:'Quer vista e privacidade.'},
+      {id:'cli_'+(now+2),nome:'Camila Torres',tel:'48991234567',email:'',bairro:'Beira-Mar Norte',origem:'Indicação',min:5000000,max:8000000,etapa:'Apresentação',interesse:'Médio',tipo:'Apartamento',proximaAcao:'Confirmar visita amanhã',updated:now-1000*60*60*24,obs:'Família procura apartamento amplo.'}
+    ],
+    propostas:[{id:'prop1',cliente:'Ricardo Andrade',imovel:'Cobertura Duplex Lagoa da Conceição',valor:11800000,status:'Em negociação'}],
+    activities:[
+      {t:'Novo lead cadastrado',d:'Maria Clara Silva • há 15 min',tag:'Novo'},
+      {t:'Visita agendada',d:'Apartamento Vista Mar • hoje às 15:00',tag:'Visita'},
+      {t:'Proposta enviada',d:'Cobertura Lagoa • R$ 11.800.000',tag:'Proposta'},
+      {t:'Negócio em negociação',d:'Ricardo Andrade • alto interesse',tag:'Negociação'}
+    ],
+    chat:[]
+  }
+}
+function loadDB(){try{const raw=localStorage.getItem(STORAGE_KEY);if(raw){return JSON.parse(raw)}}catch(e){} const data=seedData(); localStorage.setItem(STORAGE_KEY,JSON.stringify(data)); return data;}
+function saveDB(){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
+  if(cloudReady && !cloudApplying) scheduleCloudSave();
+}
+function scheduleCloudSave(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(saveDBToCloud,650);
+}
+async function saveDBToCloud(){
+  if(!cloudReady || !window.supabaseClient) return;
+  try{
+    const {error}=await window.supabaseClient.from('crm_state').upsert({
+      id:CRM_STATE_ID,
+      data:db,
+      updated_by:cloudUserId,
+      updated_at:new Date().toISOString()
+    });
+    if(error){console.error('Erro Supabase:',error); toast('Erro ao sincronizar com Supabase.');}
+  }catch(e){console.error(e);}
+}
+async function initCloudSync(){
+  const client=window.supabaseClient;
+  if(!client){console.warn('Supabase não configurado. Usando modo local.');return;}
+  try{
+    const {data:sessionData,error:sessionError}=await client.auth.getSession();
+    if(sessionError){console.error(sessionError);return;}
+    const session=sessionData?.session;
+    if(!session){return;}
+    cloudUserId=session.user?.id||null;
+    const {data,error}=await client.from('crm_state').select('data,updated_at,updated_by').eq('id',CRM_STATE_ID).maybeSingle();
+    if(error){console.error('Erro ao carregar CRM na nuvem:',error); toast('Não foi possível carregar a base online.');return;}
+    if(data?.data){
+      db=data.data;
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
+      activePropertyId=db.imoveis?.[0]?.id||null;
+    }else{
+      await client.from('crm_state').upsert({id:CRM_STATE_ID,data:db,updated_by:cloudUserId,updated_at:new Date().toISOString()});
+    }
+    cloudReady=true;
+    startRealtimeSync();
+    toast('CRM conectado ao Supabase.');
+  }catch(e){console.error(e); toast('Falha ao iniciar sincronização online.');}
+}
+function startRealtimeSync(){
+  const client=window.supabaseClient;
+  if(!client || realtimeChannel) return;
+  realtimeChannel=client.channel('leads-imoveis-crm-sync')
+    .on('postgres_changes',{event:'*',schema:'public',table:'crm_state',filter:`id=eq.${CRM_STATE_ID}`},payload=>{
+      const next=payload.new?.data;
+      if(!next) return;
+      if(payload.new?.updated_by && payload.new.updated_by===cloudUserId) return;
+      cloudApplying=true;
+      db=next;
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
+      activePropertyId=db.imoveis?.find(x=>x.id===activePropertyId)?.id || db.imoveis?.[0]?.id || null;
+      renderAll();
+      renderChat();
+      cloudApplying=false;
+      toast('Base atualizada pela equipe.');
+    })
+    .subscribe(status=>{console.log('Realtime Supabase:',status)});
+}
+async function uploadPhotoToSupabase(dataUrl,file,propId){
+  if(!cloudReady || !window.supabaseClient) return null;
+  try{
+    const blob=dataURLtoBlob(dataUrl);
+    const base=safeFileName(file.name).replace(/\.[^.]+$/,'') || 'foto';
+    const path=`${propId}/${Date.now()}-${base}.jpg`;
+    const {error}=await window.supabaseClient.storage.from('property-photos').upload(path,blob,{contentType:'image/jpeg',upsert:false});
+    if(error){console.warn('Upload Storage falhou, usando base local:',error);return null;}
+    const {data}=window.supabaseClient.storage.from('property-photos').getPublicUrl(path);
+    return {url:data.publicUrl,path};
+  }catch(e){console.warn('Upload Storage falhou:',e);return null;}
+}
+function dataURLtoBlob(dataUrl){
+  const parts=dataUrl.split(',');
+  const mime=(parts[0].match(/:(.*?);/)||[])[1]||'image/jpeg';
+  const bin=atob(parts[1]);
+  const len=bin.length;
+  const arr=new Uint8Array(len);
+  for(let i=0;i<len;i++) arr[i]=bin.charCodeAt(i);
+  return new Blob([arr],{type:mime});
+}
+function safeFileName(name){return String(name||'foto').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/^-+|-+$/g,'').toLowerCase()}
+async function logout(){if(window.supabaseClient){await window.supabaseClient.auth.signOut()} location.href='login.html'}
+function uid(prefix){return prefix+'_'+Date.now()+'_'+Math.floor(Math.random()*9999)}
+function money(v){const n=Number(v)||0;return n? n.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}) : 'A consultar'}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function onlyDigits(s){return String(s||'').replace(/\D/g,'')}
+function pct(done,total){return total?Math.round(done/total*100):0}
+function getActiveProp(){return db.imoveis.find(x=>x.id===activePropertyId)||db.imoveis[0]||null}
+function coverPhoto(prop){return prop?.photos?.find(p=>p.cover)||prop?.photos?.[0]||null}
+function addActivity(t,d,tag='Novo'){db.activities.unshift({t,d,tag});db.activities=db.activities.slice(0,30);saveDB();renderActivities();}
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2600)}
+
+async function init(){
+  await initCloudSync();
+  document.getElementById('userNameTop').textContent=db.settings.user||'Natan Alves';
+  if(window.supabaseClient){
+    const {data}=await window.supabaseClient.auth.getUser();
+    const email=data?.user?.email;
+    if(email) document.getElementById('userNameTop').textContent=email.split('@')[0];
+  }
+  document.querySelectorAll('#nav button').forEach(btn=>btn.addEventListener('click',()=>switchView(btn.dataset.view)));
+  populateFilters();renderAll();renderChat();
+  document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();document.getElementById('globalSearch').focus();}});
+}
+function populateFilters(){
+  fillSelect('filterLeadStage',STAGES_CLIENT); fillSelect('filterLeadOrigin',ORIGINS); fillSelect('filterPropStage',STAGES_PROP); fillSelect('filterPropType',TYPES);
+}
+function fillSelect(id,arr){const el=document.getElementById(id); if(!el) return; const first=el.querySelector('option')?.outerHTML||'<option value="">Todos</option>'; el.innerHTML=first+arr.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('')}
+function switchView(view){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); const el=document.getElementById('view-'+view); if(el) el.classList.add('active');
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+  document.getElementById('sidebar').classList.remove('open'); renderAll();
+}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
+function toggleAI(){document.getElementById('rightbar').classList.toggle('open')}
+function renderAll(){renderKPIs();renderCaptureDashboard();renderFunnel();renderFeatured();renderPriority();renderLeads();renderImoveis();renderCaptureFull();renderProposals();renderTasks();renderReports();renderActivities();renderAutomations();}
+function renderKPIs(){
+  const props=db.imoveis.length, leads=db.clientes.length, visits=db.clientes.filter(c=>['Apresentação','Proposta','Negociação','Fechado'].includes(c.etapa)).length, proposals=db.propostas.length, closed=db.clientes.filter(c=>c.etapa==='Fechado').length;
+  const data=[['♙','Leads ativos',leads,'↑ 18% vs mês anterior'],['⌂','Imóveis capturados',props,'↑ 22% vs mês anterior'],['↔','Visitas agendadas',visits,'↑ 12% vs mês anterior'],['☷','Propostas enviadas',proposals,'↑ 15% vs mês anterior'],['♢','Negócios fechados',closed,'↑ 28% vs mês anterior']];
+  const html=data.map(k=>`<div class="kpi"><div class="row"><div class="kicon">${k[0]}</div><div><small>${k[1]}</small><strong>${k[2]}</strong><div class="up">${k[3]}</div></div></div></div>`).join('');
+  const k=document.getElementById('kpis'); if(k) k.innerHTML=html; const kr=document.getElementById('kpisReports'); if(kr) kr.innerHTML=html;
+  document.getElementById('notifDot').textContent=db.activities.length;
+}
+function renderCaptureDashboard(){const el=document.getElementById('captureDashboard'); if(!el)return; el.innerHTML=captureHTML(getActiveProp(),false); bindUploadZone();}
+function renderCaptureFull(){
+  const sel=document.getElementById('captureSelector'); if(sel){sel.innerHTML=db.imoveis.map(i=>`<option value="${i.id}" ${i.id===activePropertyId?'selected':''}>${esc(i.titulo)}</option>`).join('')}
+  const el=document.getElementById('captureFull'); if(!el)return; el.innerHTML=captureHTML(getActiveProp(),true); bindUploadZone();
+}
+function captureHTML(prop,full){
+  if(!prop) return `<div class="empty">Nenhum imóvel cadastrado. Clique em Nova captação.</div>`;
+  const cp=coverPhoto(prop); const done=CHECKS.filter(([k])=>prop.checklist?.[k]).length; const progress=pct(done,CHECKS.length);
+  const coverStyle=cp?.data?`background-image:url('${cp.data}')`:placeholderStyle(cp?.cat||'Fachada');
+  const thumbs=(prop.photos||[]).slice(0,5).map(p=>`<div class="thumb ${p.cover?'covered':''}" style="${p.data?`background-image:url('${p.data}')`:placeholderStyle(p.cat)}"><span>${esc(p.cat||'Foto')}</span></div>`).join('') || '<div class="thumb" style="grid-column:span 5"><span>Sem fotos</span></div>';
+  const checks=CHECKS.map(([k,label])=>`<div class="check-item ${prop.checklist?.[k]?'done':''}"><button onclick="toggleChecklist('${prop.id}','${k}')">${prop.checklist?.[k]?'✓':'○'}</button><span>${label}</span><b class="status-text">${prop.checklist?.[k]?'Concluído':'Pendente'}</b></div>`).join('');
+  return `<div class="capture-main">
+    <div>
+      <div class="cover has-photo" style="${coverStyle}"><div class="overlay"></div><span class="badge gold">⌂ ${esc(prop.etapa||'Captação')}</span><div class="empty-house">${cp?.data?'':'⌂'}</div><button class="btn btn-sm change" onclick="openPhotoManager('${prop.id}')">Trocar capa</button></div>
+      <div class="thumbs">${thumbs}</div>
+      <label class="upload-zone" id="uploadZone"><input class="hidden-file" id="photoUploader" type="file" multiple accept="image/*" onchange="handlePhotoFiles(this.files)"><b>☁ Adicionar fotos/vídeos</b><small>Arraste fotos aqui ou clique para enviar. A IA organiza por ambiente.</small></label>
+      <div class="toolbar" style="margin-top:10px"><button class="btn btn-sm" onclick="openPhotoManager('${prop.id}')">Gerenciar fotos</button><button class="btn btn-sm btn-ghost" onclick="generateAd('${prop.id}')">Gerar anúncio</button><button class="btn btn-sm btn-green" onclick="sendOwnerWhats('${prop.id}')">WhatsApp proprietário</button></div>
+    </div>
+    <div>
+      <h1 class="property-title">${esc(prop.titulo)}</h1><div class="location">⌖ ${esc(prop.bairro||'-')}, ${esc(prop.cidade||'Florianópolis')}</div>
+      <div class="metrics"><div class="metric"><small>Área</small><b>${esc(prop.area||'-')} m²</b></div><div class="metric"><small>Dormitórios</small><b>${esc(prop.dormitorios||'-')}</b></div><div class="metric"><small>Suítes</small><b>${esc(prop.suites||'-')}</b></div><div class="metric"><small>Vagas</small><b>${esc(prop.vagas||'-')}</b></div></div>
+      <div class="split-info"><div class="info-box"><small>Valor de captação</small><b>${money(prop.valor)}</b></div><div class="info-box"><small>Tipo</small><b>${esc(prop.finalidade||'Venda')}</b></div><div class="info-box"><small>Proprietário</small><b>${esc(prop.prop||'-')}</b></div><div class="info-box"><small>Exclusividade</small><b>${esc(prop.exclusividade||'-')}</b></div></div>
+      <div class="progress-label"><span>Checklist de captura</span><b>${done}/${CHECKS.length} concluídas</b></div><div class="progress"><span style="width:${progress}%"></span></div><div class="checklist">${checks}</div>
+      ${full?`<div class="panel" style="margin-top:16px"><div class="panel-body"><h3 style="font-size:14px;margin-bottom:8px;color:var(--gold)">Controle total da captação</h3><p class="mut"><b>Próxima ação:</b> ${esc(prop.proximaAcao||'Definir próxima ação')}</p><p class="mut"><b>Matrícula:</b> ${esc(prop.matricula||'-')} · <b>IPTU:</b> ${esc(prop.iptu||'-')} · <b>Comissão:</b> ${esc(prop.comissao||'-')}</p><p class="mut"><b>Observações:</b> ${esc(prop.obs||'-')}</p></div></div>`:''}
+    </div>
+  </div>`
+}
+function bindUploadZone(){
+  document.querySelectorAll('#uploadZone').forEach(zone=>{zone.ondragover=e=>{e.preventDefault();zone.classList.add('drag')};zone.ondragleave=()=>zone.classList.remove('drag');zone.ondrop=e=>{e.preventDefault();zone.classList.remove('drag');handlePhotoFiles(e.dataTransfer.files)}})
+}
+function setActiveCapture(id){activePropertyId=id;renderAll()}
+function toggleChecklist(propId,key){const p=db.imoveis.find(x=>x.id===propId); if(!p)return; p.checklist=p.checklist||{};p.checklist[key]=!p.checklist[key];p.updated=Date.now(); saveDB();renderAll();}
+async function handlePhotoFiles(files){
+  const prop=getActiveProp(); if(!prop){toast('Cadastre um imóvel primeiro.');return} const arr=[...files].filter(f=>f.type.startsWith('image/'));
+  if(!arr.length){toast('Selecione imagens válidas.');return}
+  toast('Processando fotos...');
+  for(const file of arr){
+    try{
+      let data=await compressImage(file,1600,.82);
+      let storagePath='';
+      const uploaded=await uploadPhotoToSupabase(data,file,prop.id);
+      if(uploaded?.url){data=uploaded.url;storagePath=uploaded.path;}
+      const cat=guessPhotoCategory(file.name);
+      prop.photos=prop.photos||[];
+      prop.photos.push({id:uid('ph'),name:file.name,cat,status:'Pendente',cover:!prop.photos.some(p=>p.cover),data,storagePath,note:''});
+    }catch(e){console.error(e)}
+  }
+  prop.checklist=prop.checklist||{}; prop.checklist.photos=prop.photos.length>=5; prop.updated=Date.now(); saveDB();renderAll();toast(arr.length+' foto(s) adicionada(s).');
+}
+function compressImage(file,maxW=1600,quality=.82){return new Promise((resolve,reject)=>{const fr=new FileReader();fr.onerror=reject;fr.onload=()=>{const img=new Image();img.onerror=reject;img.onload=()=>{const scale=Math.min(1,maxW/img.width);const w=Math.round(img.width*scale),h=Math.round(img.height*scale);const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,w,h);resolve(canvas.toDataURL('image/jpeg',quality));};img.src=fr.result};fr.readAsDataURL(file)})}
+function guessPhotoCategory(name){const n=name.toLowerCase(); if(n.includes('fach')||n.includes('front'))return'Fachada'; if(n.includes('sala'))return'Sala'; if(n.includes('coz'))return'Cozinha'; if(n.includes('suite')||n.includes('suíte'))return'Suíte'; if(n.includes('quarto'))return'Quarto'; if(n.includes('banh'))return'Banheiro'; if(n.includes('pisc'))return'Piscina'; if(n.includes('gar'))return'Garagem'; if(n.includes('vista'))return'Vista'; return 'Outro'}
+function openPhotoManager(propId){
+  const p=db.imoveis.find(x=>x.id===propId); if(!p)return; currentEdit={type:'photos',id:propId};
+  document.getElementById('modalTitle').textContent='Gestão profissional de fotos';
+  const photos=(p.photos||[]).map(ph=>`<div class="photo-admin"><div class="ph" style="${ph.data?`background-image:url('${ph.data}')`:placeholderStyle(ph.cat)}"><span class="badge gold" style="position:absolute;top:9px;left:9px">${ph.cover?'Capa':'Foto'}</span></div><div class="body"><b style="font-size:12px">${esc(ph.name||ph.cat)}</b><select onchange="updatePhoto('${p.id}','${ph.id}','cat',this.value)">${PHOTO_CATS.map(c=>`<option ${c===ph.cat?'selected':''}>${c}</option>`).join('')}</select><select onchange="updatePhoto('${p.id}','${ph.id}','status',this.value)">${PHOTO_STATUS.map(s=>`<option ${s===ph.status?'selected':''}>${s}</option>`).join('')}</select><input placeholder="Observação da foto" value="${esc(ph.note||'')}" oninput="updatePhoto('${p.id}','${ph.id}','note',this.value)"><div class="item-actions"><button class="btn btn-sm" onclick="setCover('${p.id}','${ph.id}')">Definir capa</button><button class="btn btn-sm btn-danger" onclick="deletePhoto('${p.id}','${ph.id}')">Excluir</button></div></div></div>`).join('');
+  document.getElementById('modalBody').innerHTML=`<div class="toolbar"><button class="btn" onclick="document.getElementById('modalPhotoAdd').click()">+ Adicionar fotos</button><input id="modalPhotoAdd" class="hidden-file" type="file" accept="image/*" multiple onchange="handlePhotoFiles(this.files);openPhotoManager('${p.id}')"><button class="btn btn-ghost" onclick="autoOrganizePhotos('${p.id}')">IA organizar fotos</button></div><div class="photo-grid">${photos||'<div class="empty">Nenhuma foto ainda.</div>'}</div>`;
+  document.getElementById('modalFoot').innerHTML=`<button class="btn btn-ghost" onclick="closeModal()">Fechar</button>`; modal.showModal();
+}
+function updatePhoto(pid,phid,key,value){const p=db.imoveis.find(x=>x.id===pid); const ph=p?.photos?.find(x=>x.id===phid); if(!ph)return; ph[key]=value; saveDB();renderAll();}
+function setCover(pid,phid){const p=db.imoveis.find(x=>x.id===pid); if(!p)return; p.photos.forEach(x=>x.cover=x.id===phid); saveDB();renderAll();openPhotoManager(pid);toast('Capa atualizada.')}
+function deletePhoto(pid,phid){const p=db.imoveis.find(x=>x.id===pid); if(!p)return; p.photos=p.photos.filter(x=>x.id!==phid); if(p.photos.length&&!p.photos.some(x=>x.cover))p.photos[0].cover=true; saveDB();renderAll();openPhotoManager(pid);}
+function autoOrganizePhotos(pid){const p=db.imoveis.find(x=>x.id===pid); if(!p)return; (p.photos||[]).forEach(ph=>{ph.cat=guessPhotoCategory(ph.name||ph.cat); if(ph.cat!=='Documento'&&ph.status==='Pendente')ph.status='Selecionada'}); if(p.photos?.length&&!p.photos.some(x=>x.cover)){p.photos[0].cover=true} p.checklist.photos=(p.photos||[]).length>=5; saveDB();openPhotoManager(pid);renderAll();toast('IA organizou as fotos por ambiente.')}
+
+function renderFunnel(){
+  const clientData=STAGES_CLIENT.map(s=>({s,n:db.clientes.filter(c=>c.etapa===s).length,val:db.clientes.filter(c=>c.etapa===s).reduce((a,c)=>a+(Number(c.max)||0),0)}));
+  const html=clientData.map(x=>`<div class="stage"><h4>${esc(x.s)}</h4><b>${x.n} leads</b><p>${money(x.val)}</p></div>`).join('');
+  ['funnelDashboard','clientFunnel'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML=html});
+  const closed=clientData.find(x=>x.s==='Fechado')?.n||0; const rate=db.clientes.length?Math.round(closed/db.clientes.length*1000)/10:0; const cr=document.getElementById('conversionRate'); if(cr) cr.textContent=rate+'%'; const cb=document.getElementById('conversionBar'); if(cb) cb.style.width=Math.min(100,rate*10)+'%';
+  const propHtml=STAGES_PROP.map(s=>{const l=db.imoveis.filter(i=>i.etapa===s); return `<div class="stage"><h4>${esc(s)}</h4><b>${l.length} imóveis</b><p>${money(l.reduce((a,i)=>a+(Number(i.valor)||0),0))}</p></div>`}).join('');
+  const pf=document.getElementById('propertyFunnel'); if(pf) pf.innerHTML=propHtml;
+}
+function renderFeatured(){const el=document.getElementById('featuredCards'); if(!el)return; el.innerHTML=db.imoveis.slice(0,4).map(propertyCard).join('')||'<div class="empty">Cadastre imóveis para aparecerem aqui.</div>'}
+function propertyCard(p){const cp=coverPhoto(p);return `<div class="property-card"><div class="pc-img" style="${cp?.data?`background-image:url('${cp.data}')`:placeholderStyle(cp?.cat||p.tipo)}"><span class="badge gold">${p.etapa==='Publicado'?'DESTAQUE':esc(p.etapa||'Imóvel')}</span><span class="heart">♡</span></div><div class="pc-body"><h3>${esc(p.titulo)}</h3><p>${esc(p.bairro||'-')} · ${esc(p.cidade||'-')}</p><p>${esc(p.area||'-')} m² · ${esc(p.suites||p.dormitorios||'-')} suítes · ${esc(p.vagas||'-')} vagas</p><p class="price">${money(p.valor)}</p><div class="item-actions"><button class="btn btn-sm btn-ghost" onclick="activePropertyId='${p.id}';switchView('captacao')">Captura</button><button class="btn btn-sm" onclick="generateAd('${p.id}')">Anúncio</button></div></div></div>`}
+function renderPriority(){
+  const el=document.getElementById('priorityList'); if(!el)return;
+  const tasks=[];
+  db.imoveis.forEach(p=>{const missing=CHECKS.filter(([k])=>!p.checklist?.[k]); if(missing.length)tasks.push({type:'Imóvel',name:p.titulo,action:p.proximaAcao||('Concluir: '+missing[0][1]),prio:missing.length>4?'Alta':'Média'});});
+  db.clientes.forEach(c=>{if(['Novos leads','Qualificação','Proposta'].includes(c.etapa))tasks.push({type:'Lead',name:c.nome,action:c.proximaAcao||'Fazer follow-up comercial',prio:c.interesse==='Alto'?'Alta':'Média'});});
+  el.innerHTML=tasks.slice(0,6).map(t=>`<div class="activity"><div class="mini-avatar">${t.type==='Lead'?'L':'I'}</div><div><b>${esc(t.name)}</b><span>${esc(t.action)}</span></div><span class="pill ${t.prio==='Alta'?'red':'orange'}">${t.prio}</span></div>`).join('')||'<div class="empty">Sem prioridades pendentes.</div>';
+}
+function renderLeads(){const el=document.getElementById('leadList'); if(!el)return; const q=(document.getElementById('searchLeads')?.value||'').toLowerCase(); const fs=document.getElementById('filterLeadStage')?.value||''; const fo=document.getElementById('filterLeadOrigin')?.value||''; const list=db.clientes.filter(c=>(!q||JSON.stringify(c).toLowerCase().includes(q))&&(!fs||c.etapa===fs)&&(!fo||c.origem===fo)); el.innerHTML=list.map(c=>`<div class="item-card"><h3>${esc(c.nome)} <span class="pill ${c.interesse==='Alto'?'gold':'orange'}">${esc(c.interesse||'Lead')}</span></h3><p>📞 ${esc(c.tel||'-')} · ${esc(c.email||'sem e-mail')}</p><p>Busca: ${esc(c.tipo||'-')} em ${esc(c.bairro||'-')}</p><p>Orçamento: ${money(c.min)} a ${money(c.max)}</p><div class="tag-row"><span class="pill gold">${esc(c.etapa)}</span><span class="pill">${esc(c.origem)}</span></div><div class="item-actions"><button class="btn btn-sm btn-ghost" onclick="openLeadModal('${c.id}')">Editar</button><button class="btn btn-sm" onclick="matchLead('${c.id}')">Match</button>${c.tel?`<button class="btn btn-sm btn-green" onclick="wa('${c.tel}','Olá ${esc(c.nome)}, aqui é da Leads Imóveis. Tenho opções alinhadas com o seu perfil.')">WhatsApp</button>`:''}</div></div>`).join('')||'<div class="empty">Nenhum lead encontrado.</div>'}
+function renderImoveis(){const el=document.getElementById('propertyList'); if(!el)return; const q=(document.getElementById('searchImoveis')?.value||'').toLowerCase(); const fs=document.getElementById('filterPropStage')?.value||''; const ft=document.getElementById('filterPropType')?.value||''; const list=db.imoveis.filter(p=>(!q||JSON.stringify(p).toLowerCase().includes(q))&&(!fs||p.etapa===fs)&&(!ft||p.tipo===ft)); el.innerHTML=list.map(propertyCard).join('')||'<div class="empty">Nenhum imóvel encontrado.</div>'}
+function renderProposals(){const el=document.getElementById('proposalTable'); if(!el)return; el.innerHTML=(db.propostas||[]).map(p=>`<tr><td>${esc(p.cliente)}</td><td>${esc(p.imovel)}</td><td>${money(p.valor)}</td><td><span class="pill gold">${esc(p.status)}</span></td><td><button class="btn btn-sm btn-ghost" onclick="copyText('Proposta para ${esc(p.cliente)} - ${esc(p.imovel)} - ${money(p.valor)}')">Copiar</button></td></tr>`).join('')||'<tr><td colspan="5" class="mut">Nenhuma proposta cadastrada.</td></tr>'}
+function renderTasks(){const el=document.getElementById('taskList'); if(!el)return; renderPriority(); el.innerHTML=document.getElementById('priorityList')?.innerHTML||''}
+function renderReports(){renderBars('originBars',countBy(db.clientes,'origem')); renderBars('neighborhoodBars',countBy(db.imoveis,'bairro'));}
+function countBy(arr,key){return arr.reduce((a,x)=>{const k=x[key]||'Não informado';a[k]=(a[k]||0)+1;return a},{})}
+function renderBars(id,obj){const el=document.getElementById(id); if(!el)return; const max=Math.max(1,...Object.values(obj)); el.innerHTML=Object.entries(obj).map(([k,v])=>`<div class="bar"><label>${esc(k)}</label><div class="bartrack"><span style="width:${Math.round(v/max*100)}%"></span></div><b>${v}</b></div>`).join('')||'<div class="empty">Sem dados.</div>'}
+function renderActivities(all=false){if(all)showAllActivities=true; const el=document.getElementById('activities'); if(!el)return; const list=(showAllActivities?db.activities:db.activities.slice(0,4)); el.innerHTML=list.map(a=>`<div class="activity"><div class="mini-avatar">${esc((a.tag||'A')[0])}</div><div><b>${esc(a.t)}</b><span>${esc(a.d)}</span></div><span class="pill gold">${esc(a.tag)}</span></div>`).join('')||'<div class="empty">Sem atividades.</div>'}
+function renderAutomations(){const el=document.getElementById('automationList'); if(!el)return; const autos=[['◉','Follow-up de leads','Ativa • última execução: há 1h'],['⌂','Captação de imóveis','Ativa • última execução: há 2h'],['✦','Nutrição de leads','Ativa • última execução: há 30m']]; el.innerHTML=autos.map(a=>`<div class="auto-row"><div class="auto-icon">${a[0]}</div><div><b>${a[1]}</b><span>${a[2]}</span></div></div>`).join('')}
+
+function openLeadModal(id=null){const c=id?db.clientes.find(x=>x.id===id):{}; currentEdit={type:'lead',id}; document.getElementById('modalTitle').textContent=id?'Editar lead':'Novo lead'; document.getElementById('modalBody').innerHTML=`
+  <div class="form-row"><div class="field"><label>Nome</label><input class="input" id="f_nome" value="${esc(c.nome||'')}"></div><div class="field"><label>Telefone/WhatsApp</label><input class="input" id="f_tel" value="${esc(c.tel||'')}"></div></div>
+  <div class="form-row"><div class="field"><label>E-mail</label><input class="input" id="f_email" value="${esc(c.email||'')}"></div><div class="field"><label>Origem</label><select id="f_origem">${opts(ORIGINS,c.origem)}</select></div></div>
+  <div class="form-row-3"><div class="field"><label>Bairro de interesse</label><input class="input" id="f_bairro" value="${esc(c.bairro||'')}"></div><div class="field"><label>Tipo de imóvel</label><select id="f_tipo">${opts(TYPES,c.tipo)}</select></div><div class="field"><label>Interesse</label><select id="f_interesse">${opts(['Alto','Médio','Baixo'],c.interesse)}</select></div></div>
+  <div class="form-row-3"><div class="field"><label>Orçamento mínimo</label><input class="input" type="number" id="f_min" value="${esc(c.min||'')}"></div><div class="field"><label>Orçamento máximo</label><input class="input" type="number" id="f_max" value="${esc(c.max||'')}"></div><div class="field"><label>Etapa</label><select id="f_etapa">${opts(STAGES_CLIENT,c.etapa)}</select></div></div>
+  <div class="field"><label>Próxima ação</label><input class="input" id="f_proxima" value="${esc(c.proximaAcao||'')}"></div><div class="field"><label>Observações</label><textarea class="input" id="f_obs" rows="4">${esc(c.obs||'')}</textarea></div>`; document.getElementById('modalFoot').innerHTML=`${id?'<button class="btn btn-danger" onclick="deleteCurrent()">Excluir</button>':''}<button class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button class="btn" onclick="saveLead()">Salvar</button>`; modal.showModal();}
+function openImovelModal(id=null){const p=id?db.imoveis.find(x=>x.id===id):{}; currentEdit={type:'imovel',id}; document.getElementById('modalTitle').textContent=id?'Editar imóvel/captação':'Nova captação de imóvel'; document.getElementById('modalBody').innerHTML=`
+  <div class="form-row"><div class="field"><label>Título do imóvel</label><input class="input" id="f_titulo" value="${esc(p.titulo||'')}"></div><div class="field"><label>Tipo</label><select id="f_tipo">${opts(TYPES,p.tipo)}</select></div></div>
+  <div class="form-row-3"><div class="field"><label>Finalidade</label><select id="f_finalidade">${opts(['Venda','Locação','Venda e Locação'],p.finalidade)}</select></div><div class="field"><label>Etapa</label><select id="f_etapa">${opts(STAGES_PROP,p.etapa)}</select></div><div class="field"><label>Origem</label><select id="f_origem">${opts(ORIGINS,p.origem)}</select></div></div>
+  <div class="form-row"><div class="field"><label>Bairro</label><input class="input" id="f_bairro" value="${esc(p.bairro||'')}"></div><div class="field"><label>Cidade</label><input class="input" id="f_cidade" value="${esc(p.cidade||'Florianópolis')}"></div></div>
+  <div class="field"><label>Endereço/Referência</label><input class="input" id="f_endereco" value="${esc(p.endereco||'')}"></div>
+  <div class="form-row-3"><div class="field"><label>Valor</label><input class="input" type="number" id="f_valor" value="${esc(p.valor||'')}"></div><div class="field"><label>Área m²</label><input class="input" type="number" id="f_area" value="${esc(p.area||'')}"></div><div class="field"><label>Vagas</label><input class="input" type="number" id="f_vagas" value="${esc(p.vagas||'')}"></div></div>
+  <div class="form-row-3"><div class="field"><label>Dormitórios</label><input class="input" type="number" id="f_dormitorios" value="${esc(p.dormitorios||'')}"></div><div class="field"><label>Suítes</label><input class="input" type="number" id="f_suites" value="${esc(p.suites||'')}"></div><div class="field"><label>Comissão</label><input class="input" id="f_comissao" value="${esc(p.comissao||'6%')}"></div></div>
+  <div class="form-row"><div class="field"><label>Proprietário</label><input class="input" id="f_prop" value="${esc(p.prop||'')}"></div><div class="field"><label>Telefone proprietário</label><input class="input" id="f_tel" value="${esc(p.tel||'')}"></div></div>
+  <div class="form-row-3"><div class="field"><label>Exclusividade</label><select id="f_exclusividade">${opts(['Sim','Não','Em negociação'],p.exclusividade)}</select></div><div class="field"><label>Matrícula</label><input class="input" id="f_matricula" value="${esc(p.matricula||'')}"></div><div class="field"><label>IPTU</label><input class="input" id="f_iptu" value="${esc(p.iptu||'')}"></div></div>
+  <div class="field"><label>Próxima ação</label><input class="input" id="f_proxima" value="${esc(p.proximaAcao||'')}"></div><div class="field"><label>Descrição/observações</label><textarea class="input" id="f_obs" rows="4">${esc(p.obs||'')}</textarea></div>`; document.getElementById('modalFoot').innerHTML=`${id?'<button class="btn btn-danger" onclick="deleteCurrent()">Excluir</button>':''}<button class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button class="btn" onclick="saveImovel()">Salvar</button>`; modal.showModal();}
+function opts(arr,current){return arr.map(x=>`<option value="${esc(x)}" ${x===current?'selected':''}>${esc(x)}</option>`).join('')}
+function v(id){return document.getElementById(id)?.value?.trim()||''}
+function saveLead(){const id=currentEdit.id||uid('cli'); const o={id,nome:v('f_nome'),tel:v('f_tel'),email:v('f_email'),origem:v('f_origem'),bairro:v('f_bairro'),tipo:v('f_tipo'),interesse:v('f_interesse'),min:Number(v('f_min'))||'',max:Number(v('f_max'))||'',etapa:v('f_etapa'),proximaAcao:v('f_proxima'),obs:v('f_obs'),updated:Date.now()}; if(currentEdit.id)db.clientes=db.clientes.map(x=>x.id===id?{...x,...o}:x);else db.clientes.unshift(o);saveDB();closeModal();renderAll();addActivity(currentEdit.id?'Lead atualizado':'Novo lead cadastrado',o.nome+' • agora',currentEdit.id?'Atualizado':'Novo');}
+function saveImovel(){const id=currentEdit.id||uid('imv'); const existing=db.imoveis.find(x=>x.id===id)||{}; const o={...existing,id,titulo:v('f_titulo'),tipo:v('f_tipo'),finalidade:v('f_finalidade'),etapa:v('f_etapa'),origem:v('f_origem'),bairro:v('f_bairro'),cidade:v('f_cidade'),endereco:v('f_endereco'),valor:Number(v('f_valor'))||'',area:v('f_area'),vagas:v('f_vagas'),dormitorios:v('f_dormitorios'),suites:v('f_suites'),comissao:v('f_comissao'),prop:v('f_prop'),tel:v('f_tel'),exclusividade:v('f_exclusividade'),matricula:v('f_matricula'),iptu:v('f_iptu'),proximaAcao:v('f_proxima'),obs:v('f_obs'),checklist:existing.checklist||{},photos:existing.photos||[],updated:Date.now()}; if(currentEdit.id)db.imoveis=db.imoveis.map(x=>x.id===id?o:x);else db.imoveis.unshift(o);activePropertyId=id;saveDB();closeModal();renderAll();addActivity(currentEdit.id?'Imóvel atualizado':'Nova captação cadastrada',o.titulo+' • agora','Imóvel');}
+function deleteCurrent(){if(!confirm('Tem certeza que deseja excluir?'))return; if(currentEdit.type==='lead')db.clientes=db.clientes.filter(x=>x.id!==currentEdit.id); if(currentEdit.type==='imovel'){db.imoveis=db.imoveis.filter(x=>x.id!==currentEdit.id); activePropertyId=db.imoveis[0]?.id||null} saveDB();closeModal();renderAll();toast('Registro excluído.')}
+function closeModal(){modal.close();currentEdit={type:null,id:null}}
+function quickNew(){const active=document.querySelector('.view.active')?.id||''; if(active.includes('lead'))openLeadModal(); else openImovelModal();}
+
+function generateAd(propId){const p=db.imoveis.find(x=>x.id===propId); if(!p)return; const text=`${p.titulo}\n\nImóvel de alto padrão em ${p.bairro}, ${p.cidade}. São ${p.area||'-'} m², ${p.suites||p.dormitorios||'-'} suítes/dormitórios e ${p.vagas||'-'} vagas. Uma oportunidade exclusiva para quem busca sofisticação, conforto e localização premium.\n\nValor: ${money(p.valor)}\n\nEntre em contato com a Leads Imóveis para receber atendimento personalizado e agendar uma apresentação.`; document.getElementById('modalTitle').textContent='Anúncio gerado pela IA'; document.getElementById('modalBody').innerHTML=`<textarea class="input" id="adText" rows="12">${esc(text)}</textarea><p class="mut" style="margin-top:10px">Use este texto no Instagram, WhatsApp, portais e campanhas patrocinadas.</p>`; document.getElementById('modalFoot').innerHTML=`<button class="btn btn-ghost" onclick="closeModal()">Fechar</button><button class="btn" onclick="copyText(document.getElementById('adText').value)">Copiar texto</button>`; modal.showModal();}
+function sendOwnerWhats(propId){const p=db.imoveis.find(x=>x.id===propId); if(!p?.tel){toast('Cadastre o telefone do proprietário.');return} const msg=`Olá ${p.prop||''}, aqui é da Leads Imóveis. Estou organizando a captação do imóvel ${p.titulo}. Próximo passo: ${p.proximaAcao||'finalizar documentação e fotos para publicação'}.`; wa(p.tel,msg)}
+function wa(phone,msg){window.open('https://wa.me/55'+onlyDigits(phone)+'?text='+encodeURIComponent(msg),'_blank')}
+function matchLead(id){const c=db.clientes.find(x=>x.id===id); if(!c)return; const matches=db.imoveis.map(p=>{let score=0;if(p.bairro&&c.bairro&&p.bairro.toLowerCase().includes(c.bairro.toLowerCase()))score+=35;if(p.tipo===c.tipo)score+=25;if((Number(p.valor)||0)>=(Number(c.min)||0)&&(Number(p.valor)||0)<=(Number(c.max)||Infinity))score+=30;if(['Publicado','Captado'].includes(p.etapa))score+=10;return{p,score}}).sort((a,b)=>b.score-a.score).slice(0,3); const text=matches.map(m=>`• ${m.p.titulo} — ${money(m.p.valor)} — Match ${m.score}%`).join('\n'); askAI(`Match para ${c.nome}:\n${text}`); switchView('leads');}
+function createProposal(){const c=db.clientes[0],p=db.imoveis[0]; if(!c||!p){toast('Cadastre lead e imóvel primeiro.');return} db.propostas.unshift({id:uid('proposta'),cliente:c.nome,imovel:p.titulo,valor:p.valor,status:'Rascunho'}); saveDB();renderAll();toast('Proposta criada em rascunho.')}
+function copyText(text){navigator.clipboard?.writeText(text).then(()=>toast('Copiado para a área de transferência.')).catch(()=>toast('Copie manualmente.'))}
+
+function renderChat(){const el=document.getElementById('chatLog'); if(!el)return; const chat=db.chat.length?db.chat:[{role:'ai',text:'Pronto para conversar com a equipe. Pergunte livremente sobre leads, imóveis, follow-up, anúncios, captação, negociação, WhatsApp, prioridades ou treinamento comercial.'}]; el.innerHTML=chat.slice(-30).map(m=>`<div class="msg ${m.role==='me'?'me':'ai'}">${esc(m.text)}</div>`).join(''); el.scrollTop=el.scrollHeight;}
+function sendChat(e){e.preventDefault(); const input=document.getElementById('chatInput'); const text=input.value.trim(); if(!text)return; input.value=''; askAI(text);}
+async function askAI(text){
+  db.chat.push({role:'me',text});
+  db.chat.push({role:'ai',text:'Analisando o CRM e preparando uma resposta consultiva...'});
+  saveDB();renderChat();
+  if(window.innerWidth<980)document.getElementById('rightbar').classList.add('open');
+  try{
+    const reply=await callCRMRealAI(text);
+    db.chat[db.chat.length-1]={role:'ai',text:reply||aiReply(text)};
+  }catch(err){
+    console.warn('IA avançada indisponível:',err);
+    const fallback=aiReply(text);
+    db.chat[db.chat.length-1]={role:'ai',text:fallback+'\n\nObs.: a IA avançada ainda não respondeu. Verifique se a variável OPENAI_API_KEY foi configurada na Vercel e se o deploy foi atualizado.'};
+  }
+  saveDB();renderChat();
+}
+async function callCRMRealAI(question){
+  const sessionResult=await window.supabaseClient?.auth?.getSession?.();
+  const accessToken=sessionResult?.data?.session?.access_token;
+  if(!accessToken) throw new Error('Usuário sem sessão ativa no Supabase.');
+  const response=await fetch('/api/ai',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+accessToken},
+    body:JSON.stringify({question,context:buildAIContext(),history:db.chat.slice(-12)})
+  });
+  if(!response.ok){
+    const errText=await response.text().catch(()=>'');
+    throw new Error(errText||('Erro HTTP '+response.status));
+  }
+  const data=await response.json();
+  return data.reply;
+}
+function buildAIContext(){
+  const totalVGV=db.imoveis.reduce((a,p)=>a+(Number(p.valor)||0),0);
+  const hot=db.clientes.filter(c=>c.interesse==='Alto');
+  const pendingProps=db.imoveis.filter(p=>CHECKS.some(([k])=>!p.checklist?.[k]));
+  const mapLead=c=>({nome:c.nome,telefone:c.tel||'',bairro:c.bairro||'',tipo:c.tipo||'',interesse:c.interesse||'',orcamentoMin:c.min||'',orcamentoMax:c.max||'',etapa:c.etapa||'',origem:c.origem||'',proximaAcao:c.proximaAcao||'',observacoes:c.obs||''});
+  const mapImovel=p=>({titulo:p.titulo,tipo:p.tipo||'',bairro:p.bairro||'',cidade:p.cidade||'',valor:p.valor||'',area:p.area||'',dormitorios:p.dormitorios||'',suites:p.suites||'',vagas:p.vagas||'',etapa:p.etapa||'',proprietario:p.prop||'',exclusividade:p.exclusividade||'',proximaAcao:p.proximaAcao||'',pendencias:CHECKS.filter(([k])=>!p.checklist?.[k]).map(([,label])=>label),observacoes:p.obs||''});
+  return {
+    empresa:db.settings||{},
+    resumo:{leads:db.clientes.length,imoveis:db.imoveis.length,propostas:db.propostas.length,vgv:totalVGV,leadsQuentes:hot.length,captacoesPendentes:pendingProps.length},
+    leadQuentes:hot.slice(0,8).map(mapLead),
+    leadsRecentes:db.clientes.slice(0,12).map(mapLead),
+    imoveisDestaque:db.imoveis.slice(0,12).map(mapImovel),
+    imovelAtivo:getActiveProp()?mapImovel(getActiveProp()):null,
+    propostas:db.propostas.slice(0,8),
+    atividadesRecentes:db.activities.slice(0,10)
+  };
+}
+function aiReply(text){const q=text.toLowerCase(); const leads=db.clientes.length, props=db.imoveis.length; const hot=db.clientes.filter(c=>c.interesse==='Alto'); const pendingProps=db.imoveis.filter(p=>CHECKS.some(([k])=>!p.checklist?.[k]));
+  if(q.includes('match')||q.includes('sugerir')){return hot.length?`Imóveis sugeridos para leads qualificados:\n${hot.map(c=>{const best=db.imoveis.map(p=>({p,score:(p.tipo===c.tipo?30:0)+(p.bairro&&c.bairro&&p.bairro.toLowerCase().includes(c.bairro.toLowerCase())?35:0)+((Number(p.valor)||0)<=(Number(c.max)||Infinity)?25:0)})).sort((a,b)=>b.score-a.score)[0];return `• ${c.nome}: ${best?.p?.titulo||'sem imóvel ideal'} (${best?.score||0}% de aderência)`}).join('\n')}`:'Ainda não há leads de alto interesse para sugerir imóveis.'}
+  if(q.includes('anúncio')||q.includes('anuncio')){const p=getActiveProp(); return p?`Sugestão de anúncio:\n${p.titulo}\nAlto padrão em ${p.bairro}. ${p.area||'-'} m², ${p.suites||p.dormitorios||'-'} suítes/dormitórios, ${p.vagas||'-'} vagas. Valor: ${money(p.valor)}.\nChamada: "Viva o melhor de Florianópolis com exclusividade e sofisticação."`:'Cadastre um imóvel primeiro.'}
+  if(q.includes('relatório')||q.includes('relatorio')||q.includes('resumo')){const totalVal=db.imoveis.reduce((a,p)=>a+(Number(p.valor)||0),0); return `Resumo diário Leads Imóveis:\n• ${leads} leads ativos\n• ${props} imóveis no CRM\n• ${hot.length} leads de alto interesse\n• ${pendingProps.length} captações com pendências\n• VGV em carteira: ${money(totalVal)}\nPrioridade: finalizar fotos/documentos dos imóveis pendentes e acionar leads quentes em até 5 minutos.`}
+  if(q.includes('sem atividade')||q.includes('follow')){const list=db.clientes.slice().sort((a,b)=>(a.updated||0)-(b.updated||0)).slice(0,4); return `Follow-up recomendado agora:\n${list.map(c=>`• ${c.nome}: ${c.proximaAcao||'retomar contato'} — WhatsApp: ${c.tel||'não informado'}`).join('\n')}`}
+  if(q.includes('prioridade')||q.includes('tarefas')||q.includes('hoje')){return `Prioridades de hoje:\n1. Responder leads de alto interesse: ${hot.map(c=>c.nome).join(', ')||'nenhum'}\n2. Concluir captações pendentes: ${pendingProps.map(p=>p.titulo).slice(0,3).join(', ')||'nenhuma'}\n3. Gerar anúncio premium para o imóvel ativo.\n4. Salvar backup JSON no final do dia.`}
+  if(q.includes('foto')||q.includes('fotos')){const p=getActiveProp(); return p?`Plano de fotos para ${p.titulo}: fachada, sala, cozinha, suítes, banheiros, área gourmet, piscina/vista, garagem, planta e documentos. Marque a melhor imagem como capa e deixe no mínimo 12 fotos aprovadas antes de publicar.`:'Cadastre ou selecione um imóvel para montar o plano de fotos.'}
+  if(q.includes('captação')||q.includes('captacao')){return `Processo ideal de captação premium:\n1. Cadastro completo do proprietário\n2. Documentos: matrícula, IPTU, condomínio\n3. Autorização/exclusividade e comissão\n4. Fotos profissionais e capa\n5. Precificação e texto de anúncio\n6. Publicação e campanha\n7. Follow-up com relatório ao proprietário.`}
+  return `Entendido. Minha recomendação: organize o próximo passo no funil, verifique pendências de fotos/documentos e faça contato ativo pelo WhatsApp. Para uma resposta mais objetiva, pergunte por "resumo diário", "match", "fotos" ou "follow-up".`;
+}
+
+function globalSearch(){const q=document.getElementById('globalSearch').value.toLowerCase().trim(); if(!q)return; const p=db.imoveis.find(x=>JSON.stringify(x).toLowerCase().includes(q)); const c=db.clientes.find(x=>JSON.stringify(x).toLowerCase().includes(q)); if(p){activePropertyId=p.id;switchView('captacao')} else if(c){switchView('leads');document.getElementById('searchLeads').value=q;renderLeads();}}
+function openSettings(){switchView('config')}
+function exportBackup(){const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});downloadBlob(blob,'leads-imoveis-backup.json')}
+function importBackup(e){const file=e.target.files[0]; if(!file)return; const fr=new FileReader();fr.onload=()=>{try{db=JSON.parse(fr.result);saveDB();activePropertyId=db.imoveis?.[0]?.id||null;renderAll();toast('Backup restaurado.')}catch(err){toast('Arquivo inválido.')}};fr.readAsText(file)}
+function exportCSV(type){const rows=type==='imoveis'?db.imoveis:db.clientes; if(!rows.length){toast('Sem dados para exportar.');return} const headers=Object.keys(rows[0]).filter(k=>!['photos','checklist'].includes(k)); const csv=[headers.join(';')].concat(rows.map(r=>headers.map(h=>'"'+String(r[h]??'').replace(/"/g,'""')+'"').join(';'))).join('\n'); downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),`leads-imoveis-${type}.csv`)}
+function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},300)}
+function resetDemo(){if(!confirm('Isso apagará os dados atuais deste navegador e recriará o exemplo. Continuar?'))return; db=seedData();saveDB();activePropertyId=db.imoveis[0].id;renderAll();renderChat();toast('Exemplo recriado.')}
+window.addEventListener('load',init);
+</script>
+</body>
+</html>

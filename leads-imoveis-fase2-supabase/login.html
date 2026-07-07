@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#050506" />
+  <title>Login · Leads Imóveis CRM</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <style>
+    :root{
+      --bg:#050506;--bg2:#090a0c;--panel:#0d0e10;--panel2:#141416;
+      --txt:#f7f4ed;--mut:#b6b0a6;--mut2:#d8d2c8;--gold:#d8b56d;--gold2:#a77a2a;--gold3:#fff0be;
+      --line:rgba(255,255,255,.12);--lineGold:rgba(216,181,109,.32);
+      --shadow:0 28px 90px rgba(0,0,0,.58);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      min-height:100vh;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--txt);
+      background:
+        radial-gradient(circle at 50% -10%,rgba(216,181,109,.22),transparent 28%),
+        radial-gradient(circle at 92% 18%,rgba(216,181,109,.10),transparent 22%),
+        linear-gradient(135deg,#030304,#090a0c 48%,#020202);
+      overflow-x:hidden;
+    }
+    body:before{
+      content:"";position:fixed;inset:0;pointer-events:none;opacity:.8;
+      background-image:
+        linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px);
+      background-size:46px 46px;
+      mask-image:linear-gradient(to bottom,#000,transparent 82%);
+    }
+    .splash{
+      position:fixed;inset:0;z-index:50;display:grid;place-items:center;
+      background:radial-gradient(circle at center,rgba(216,181,109,.10),transparent 34%),#030304;
+      animation:splashOut .9s ease 1.25s forwards;
+    }
+    .splash img{
+      width:min(380px,78vw);border-radius:18px;filter:drop-shadow(0 22px 44px rgba(216,181,109,.18));
+      animation:logoIn .9s ease forwards;
+    }
+    .splash .shine{position:absolute;bottom:18%;width:260px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);box-shadow:0 0 22px var(--gold)}
+    @keyframes logoIn{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+    @keyframes splashOut{to{opacity:0;visibility:hidden;pointer-events:none}}
+
+    .page{min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) minmax(410px,520px);position:relative;isolation:isolate}
+    .page:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(0,0,0,.18),rgba(0,0,0,.04) 46%,rgba(0,0,0,.58))}
+
+    .hero{padding:42px clamp(24px,5vw,82px);display:flex;flex-direction:column;justify-content:space-between;min-height:100vh;position:relative;overflow:hidden;gap:24px}
+    .hero:before{
+      content:"";position:absolute;right:-10%;bottom:-8%;width:62vw;height:62vw;border:1px solid rgba(216,181,109,.18);border-radius:50%;opacity:.72;
+      box-shadow:inset 0 0 90px rgba(216,181,109,.05);
+    }
+    .hero:after{
+      content:"";position:absolute;left:-4%;top:-8%;width:min(420px,44vw);height:min(420px,44vw);border-radius:50%;
+      background:radial-gradient(circle,rgba(216,181,109,.18),transparent 62%);filter:blur(18px);opacity:.36;
+    }
+
+    .brandTop{position:relative;z-index:2;display:flex;align-items:center;gap:12px;color:#f4ead2;font-weight:700;letter-spacing:1px}
+    .brandTop img{width:42px;height:42px;object-fit:cover;border-radius:12px;border:1px solid rgba(216,181,109,.18)}
+    .brandTop small{display:block;color:var(--gold);font-size:10px;letter-spacing:2.6px;text-transform:uppercase;margin-top:2px}
+
+    .heroMain{position:relative;z-index:2;display:grid;grid-template-columns:minmax(280px,1.2fr) minmax(260px,.8fr);gap:22px;align-items:end}
+    .heroImageCard{
+      min-height:460px;border-radius:32px;overflow:hidden;position:relative;border:1px solid rgba(216,181,109,.20);
+      box-shadow:0 28px 90px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.04);
+      background:
+        linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.68)),
+        url('assets/florianopolis-login.jpg') center/cover no-repeat;
+    }
+    .heroImageCard:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.02) 0%,rgba(0,0,0,.12) 34%,rgba(4,4,5,.88) 100%)}
+    .heroImageCard:after{content:"";position:absolute;inset:auto 0 0 0;height:140px;background:linear-gradient(180deg,transparent,rgba(3,3,4,.96))}
+    .heroCopy{position:absolute;left:26px;right:26px;bottom:24px;z-index:2}
+    .heroCopy .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid rgba(216,181,109,.34);background:rgba(0,0,0,.30);backdrop-filter:blur(8px);color:#fff1c7;font-size:11px;text-transform:uppercase;letter-spacing:.8px;font-weight:700}
+    .heroCopy h1{font-size:clamp(28px,3.6vw,56px);line-height:1.02;margin:16px 0 14px;letter-spacing:-1.6px;max-width:620px}
+    .heroCopy p{max-width:680px;color:#ded8cf;font-size:15px;line-height:1.65}
+    .goldLine{width:220px;height:1px;background:linear-gradient(90deg,var(--gold),transparent);margin:18px 0 16px;box-shadow:0 0 18px rgba(216,181,109,.55)}
+
+    .motivationPanel{
+      border:1px solid rgba(216,181,109,.20);background:rgba(8,8,9,.62);backdrop-filter:blur(14px);border-radius:24px;padding:20px;
+      box-shadow:0 16px 40px rgba(0,0,0,.24);
+    }
+    .motivationPanel h2{font-size:18px;text-align:left;margin:0 0 10px;color:#fff5d7}
+    .motivationPanel p{font-size:13px;line-height:1.62;color:var(--mut2)}
+    .quote{margin:16px 0;padding:16px;border-radius:18px;background:linear-gradient(145deg,rgba(216,181,109,.12),rgba(255,255,255,.03));border:1px solid rgba(216,181,109,.18)}
+    .quote b{display:block;font-size:16px;line-height:1.4;color:#fff4ce}
+    .quote span{display:block;margin-top:7px;color:var(--gold);font-size:12px}
+    .miniList{display:grid;gap:10px;margin-top:14px}
+    .miniItem{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+    .miniItem i{font-style:normal;color:var(--gold);font-size:15px;line-height:1.2;margin-top:1px}
+    .miniItem div b{display:block;font-size:13px;margin-bottom:3px;color:#f8f3e7}
+    .miniItem div span{display:block;font-size:12px;color:var(--mut)}
+
+    .stats{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,minmax(120px,1fr));gap:14px;max-width:840px}
+    .stat{border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.035);backdrop-filter:blur(14px);border-radius:18px;padding:16px;box-shadow:0 16px 40px rgba(0,0,0,.20)}
+    .stat b{display:block;color:var(--gold3);font-size:13px;margin-bottom:6px}
+    .stat span{color:var(--mut);font-size:12px;line-height:1.45}
+
+    .loginSide{min-height:100vh;display:grid;place-items:center;padding:28px;background:linear-gradient(180deg,rgba(0,0,0,.34),rgba(0,0,0,.72));border-left:1px solid rgba(216,181,109,.12)}
+    .card{
+      width:min(460px,100%);border:1px solid var(--lineGold);border-radius:28px;
+      background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.022));
+      box-shadow:var(--shadow);padding:30px;backdrop-filter:blur(20px);position:relative;overflow:hidden;
+    }
+    .card:before{content:"";position:absolute;left:50%;top:0;transform:translateX(-50%);width:68%;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);box-shadow:0 0 18px rgba(216,181,109,.8)}
+    .miniBrand{text-align:center;margin-bottom:22px}
+    .miniBrand img{width:190px;border-radius:14px;filter:drop-shadow(0 14px 28px rgba(0,0,0,.55))}
+    .miniBrand small{display:block;margin-top:10px;color:var(--gold);letter-spacing:3px;font-size:10px;text-transform:uppercase}
+
+    h3.cardTitle{font-size:25px;text-align:center;margin-bottom:7px}
+    .subtitle{color:var(--mut);text-align:center;font-size:13px;line-height:1.55;margin-bottom:24px}
+    label{display:block;font-size:11px;color:#d9d2c6;font-weight:800;letter-spacing:.7px;text-transform:uppercase;margin:14px 0 7px}
+    .inputWrap{position:relative}
+    .inputWrap span{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--gold);font-size:16px;opacity:.88}
+    .inputWrap button{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;padding:0;background:transparent;border:0;color:var(--mut);box-shadow:none}
+    input{width:100%;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.34);color:var(--txt);padding:14px 46px;outline:none;transition:.18s}
+    input:focus{border-color:rgba(216,181,109,.62);box-shadow:0 0 0 4px rgba(216,181,109,.10)}
+    .options{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0 18px;color:var(--mut);font-size:12px}
+    .remember{display:flex;align-items:center;gap:8px}
+    .remember input{width:16px;height:16px;padding:0;accent-color:var(--gold)}
+    .linkBtn{border:0;background:transparent;color:var(--gold);padding:0;font-size:12px;box-shadow:none;white-space:nowrap}
+    .row{display:grid;gap:11px;margin-top:12px}
+    button{border:1px solid rgba(216,181,109,.52);border-radius:14px;background:linear-gradient(135deg,#f1d796,#a4772a 58%,#6f4615);color:#171005;font-weight:900;padding:14px 15px;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.32),0 16px 30px rgba(0,0,0,.23);transition:.18s}
+    button:hover{transform:translateY(-1px);filter:brightness(1.05)}
+    button:active{transform:translateY(0)}
+    button.secondary{background:rgba(255,255,255,.035);border-color:rgba(216,181,109,.38);color:#ffe9b5;box-shadow:none}
+    .divider{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:12px;margin:16px 0 5px}
+    .divider:before,.divider:after{content:"";height:1px;flex:1;background:rgba(255,255,255,.11)}
+    .msg{margin-top:15px;color:var(--gold3);font-size:13px;min-height:20px;white-space:pre-wrap;text-align:center}
+    .hint{margin-top:18px;border-top:1px solid var(--line);padding-top:14px;font-size:12px;color:var(--mut);line-height:1.5;text-align:center}
+
+    @media(max-width:1180px){
+      .heroMain{grid-template-columns:1fr;align-items:stretch}
+      .motivationPanel{max-width:720px}
+    }
+    @media(max-width:980px){
+      .page{display:block}
+      .hero{min-height:auto;padding:28px 20px 0;text-align:left}
+      .heroMain{grid-template-columns:1fr}
+      .heroImageCard{min-height:360px}
+      .heroCopy h1{font-size:34px}
+      .stats{grid-template-columns:1fr;max-width:none}
+      .loginSide{min-height:auto;padding:22px 16px 40px;border-left:0}
+      .card{padding:24px}
+      .miniBrand img{width:158px}
+    }
+    @media(max-width:620px){
+      .brandTop{justify-content:center;text-align:center}
+      .hero{padding:24px 14px 0}
+      .heroCopy{left:18px;right:18px;bottom:18px}
+      .heroCopy h1{font-size:28px}
+      .heroCopy p{font-size:14px}
+      .heroImageCard{min-height:320px;border-radius:24px}
+      .motivationPanel{padding:16px;border-radius:20px}
+      .options{flex-direction:column;align-items:flex-start}
+      .linkBtn{padding-top:2px}
+    }
+  </style>
+</head>
+<body>
+  <div class="splash" aria-hidden="true"><img src="assets/leads-logo.jpeg" alt="Leads Imóveis"><div class="shine"></div></div>
+  <main class="page">
+    <section class="hero">
+      <div class="brandTop">
+        <img src="assets/leads-logo.jpeg" alt="Leads Imóveis" />
+        <div>Leads Imóveis<small>CRM Premium · Florianópolis</small></div>
+      </div>
+
+      <div class="heroMain">
+        <div class="heroImageCard">
+          <div class="heroCopy">
+            <span class="pill">Florianópolis · Mercado de alto padrão</span>
+            <h1>Todos os dias começam com uma nova oportunidade de fechar grandes negócios.</h1>
+            <div class="goldLine"></div>
+            <p>Seu time entra, organiza a operação, acompanha os leads certos e transforma relacionamento em resultado. Disciplina diária, atendimento de excelência e consistência geram vendas.</p>
+          </div>
+        </div>
+
+        <aside class="motivationPanel">
+          <h2>Motivação diária da equipe</h2>
+          <p>Entre no CRM com foco, clareza e velocidade. Cada acesso é o início de mais um dia de atendimento premium, acompanhamento inteligente e fechamento de oportunidades qualificadas.</p>
+          <div class="quote">
+            <b>“Quem acompanha melhor, vende mais. Quem responde mais rápido, fecha primeiro.”</b>
+            <span>Rotina de alta performance para corretores</span>
+          </div>
+          <div class="miniList">
+            <div class="miniItem"><i>✓</i><div><b>Comece pelo follow-up</b><span>Retorne os leads prioritários e confirme as próximas visitas do dia.</span></div></div>
+            <div class="miniItem"><i>✓</i><div><b>Mantenha o funil atualizado</b><span>Organize etapas, propostas e imóveis para não perder nenhuma negociação.</span></div></div>
+            <div class="miniItem"><i>✓</i><div><b>Atenda com excelência</b><span>Use agilidade, clareza e postura consultiva para encantar clientes de alto padrão.</span></div></div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><b>Gestão Inteligente</b><span>Mais controle para você e seus corretores atuarem com disciplina e eficiência.</span></div>
+        <div class="stat"><b>Equipe Conectada</b><span>Dados online para todos trabalharem na mesma base, com visão clara das prioridades.</span></div>
+        <div class="stat"><b>Performance Premium</b><span>Uma operação sofisticada para captação, atendimento, proposta e fechamento.</span></div>
+      </div>
+    </section>
+
+    <section class="loginSide">
+      <div class="card">
+        <div class="miniBrand"><img src="assets/leads-logo.jpeg" alt="Leads Imóveis"><small>Conectando sonhos. Realizando histórias.</small></div>
+        <h3 class="cardTitle">Bem-vindo de volta</h3>
+        <p class="subtitle">Acesse sua conta para entrar no CRM operacional da Leads Imóveis.</p>
+        <form id="loginForm">
+          <label for="email">E-mail</label>
+          <div class="inputWrap"><span>♙</span><input id="email" type="email" autocomplete="email" required placeholder="seuemail@dominio.com" /></div>
+          <label for="password">Senha</label>
+          <div class="inputWrap"><span>▣</span><input id="password" type="password" autocomplete="current-password" required placeholder="mínimo de 6 caracteres" /><button type="button" onclick="togglePassword()" aria-label="Mostrar senha">◉</button></div>
+          <div class="options"><label class="remember"><input id="remember" type="checkbox"> Lembrar-me</label><button class="linkBtn" type="button" onclick="forgotPassword()">Esqueceu sua senha?</button></div>
+          <div class="row"><button type="submit">Entrar no CRM →</button></div>
+          <div class="divider">ou</div>
+          <div class="row"><button class="secondary" type="button" onclick="signup()">Criar usuário autorizado</button></div>
+          <div class="msg" id="msg"></div>
+        </form>
+        <div class="hint">Depois de entrar, todos os corretores autenticados verão a mesma base do CRM em tempo real.</div>
+      </div>
+    </section>
+  </main>
+  <script>
+    const client = window.supabaseClient;
+    const msg = document.getElementById('msg');
+    const emailInput = document.getElementById('email');
+    const savedEmail = localStorage.getItem('leads_login_email');
+    if (savedEmail) {
+      emailInput.value = savedEmail;
+      document.getElementById('remember').checked = true;
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.textContent = 'Entrando...';
+      const email = emailInput.value.trim();
+      const password = document.getElementById('password').value;
+      const { error } = await client.auth.signInWithPassword({ email, password });
+      if (error) {
+        msg.textContent = 'Erro: ' + traduzErro(error.message);
+        return;
+      }
+      if (document.getElementById('remember').checked) {
+        localStorage.setItem('leads_login_email', email);
+      } else {
+        localStorage.removeItem('leads_login_email');
+      }
+      location.href = 'index.html';
+    });
+
+    async function signup() {
+      msg.textContent = 'Criando usuário...';
+      const email = emailInput.value.trim();
+      const password = document.getElementById('password').value;
+      if (!email || !password) {
+        msg.textContent = 'Informe e-mail e senha para criar o usuário.';
+        return;
+      }
+      const { error } = await client.auth.signUp({ email, password });
+      if (error) {
+        msg.textContent = 'Erro: ' + traduzErro(error.message);
+        return;
+      }
+      msg.textContent = 'Usuário criado. Se o Supabase solicitar confirmação, confirme o e-mail e depois clique em Entrar.';
+    }
+
+    async function forgotPassword() {
+      const email = emailInput.value.trim();
+      if (!email) {
+        msg.textContent = 'Digite seu e-mail para recuperar a senha.';
+        return;
+      }
+      const redirectTo = new URL('login.html', location.href).href;
+      const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo });
+      msg.textContent = error ? 'Erro: ' + traduzErro(error.message) : 'Enviamos o link de recuperação para o seu e-mail.';
+    }
+
+    function togglePassword() {
+      const input = document.getElementById('password');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    function traduzErro(text) {
+      return String(text || '')
+        .replace('Invalid login credentials', 'E-mail ou senha incorretos')
+        .replace('Email not confirmed', 'E-mail ainda não confirmado')
+        .replace('Password should be at least 6 characters', 'A senha precisa ter pelo menos 6 caracteres')
+        .replace('Unable to validate email address: invalid format', 'Formato de e-mail inválido');
+    }
+
+    (async () => {
+      const { data } = await client.auth.getSession();
+      if (data.session) location.href = 'index.html';
+    })();
+  </script>
+</body>
+</html>
