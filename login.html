@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Entrar · Leads Imóveis CRM</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      --grafite: #0C0F14;
+      --painel: #12161E;
+      --latao: #C9A86A;
+      --latao-claro: #D8BC85;
+      --marfim: #EDE6D6;
+      --aco: #8B93A3;
+      --erro: #E4574C;
+      --borda: rgba(201, 168, 106, 0.22);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { height: 100%; }
+
+    body {
+      background: radial-gradient(1100px 700px at 70% -10%, #171C26 0%, var(--grafite) 55%);
+      color: var(--marfim);
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    /* Planta baixa: porta se abrindo (marca da tela de entrada) */
+    .planta {
+      position: fixed;
+      right: -60px;
+      top: 50%;
+      transform: translateY(-52%);
+      width: min(46vw, 560px);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    .planta line, .planta path { stroke: var(--latao); }
+
+    .cartao {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      background: var(--painel);
+      border: 1px solid var(--borda);
+      border-radius: 16px;
+      padding: 40px 36px 32px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      animation: subir 0.5s ease both;
+    }
+    .cartao::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 28px; right: 28px;
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent, var(--latao), transparent);
+    }
+    @keyframes subir {
+      from { opacity: 0; transform: translateY(12px); }
+    }
+
+    .selo {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      color: var(--latao);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 600;
+      font-size: 32px;
+      letter-spacing: 0.01em;
+      line-height: 1.1;
+    }
+
+    .sub {
+      color: var(--aco);
+      font-size: 13.5px;
+      margin-top: 6px;
+      margin-bottom: 28px;
+    }
+
+    label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--aco);
+      letter-spacing: 0.04em;
+      margin-bottom: 7px;
+    }
+
+    .campo { margin-bottom: 18px; }
+    .campo-envolto { position: relative; }
+
+    input {
+      width: 100%;
+      background: #0D1118;
+      border: 1px solid rgba(139, 147, 163, 0.28);
+      border-radius: 10px;
+      color: var(--marfim);
+      font: 400 15px/1 "Inter", sans-serif;
+      padding: 13px 14px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    input::placeholder { color: rgba(139, 147, 163, 0.55); }
+    input:focus-visible {
+      outline: none;
+      border-color: var(--latao);
+      box-shadow: 0 0 0 3px rgba(201, 168, 106, 0.18);
+    }
+
+    .mostrar {
+      position: absolute;
+      right: 8px; top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--latao);
+      font: 500 12px "Inter", sans-serif;
+      letter-spacing: 0.03em;
+      padding: 6px 8px;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+    .mostrar:focus-visible {
+      outline: 2px solid var(--latao);
+      outline-offset: 1px;
+    }
+
+    .aviso {
+      display: none;
+      border-radius: 10px;
+      font-size: 13.5px;
+      line-height: 1.45;
+      padding: 12px 14px;
+      margin-bottom: 18px;
+    }
+    .aviso.visivel { display: block; }
+    .aviso-erro {
+      background: rgba(228, 87, 76, 0.12);
+      border: 1px solid rgba(228, 87, 76, 0.4);
+      color: #F3A79F;
+    }
+    .aviso-config {
+      background: rgba(201, 168, 106, 0.1);
+      border: 1px solid rgba(201, 168, 106, 0.4);
+      color: var(--latao-claro);
+    }
+
+    .entrar {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(180deg, var(--latao-claro), var(--latao));
+      color: #10131A;
+      border: none;
+      border-radius: 10px;
+      font: 600 15px "Inter", sans-serif;
+      letter-spacing: 0.02em;
+      padding: 14px;
+      margin-top: 6px;
+      cursor: pointer;
+      transition: transform 0.12s ease, filter 0.12s ease;
+    }
+    .entrar:hover:not(:disabled) { filter: brightness(1.06); }
+    .entrar:active:not(:disabled) { transform: translateY(1px); }
+    .entrar:disabled { opacity: 0.65; cursor: default; }
+    .entrar:focus-visible {
+      outline: 2px solid var(--marfim);
+      outline-offset: 2px;
+    }
+
+    .giro {
+      width: 15px; height: 15px;
+      border: 2px solid rgba(16, 19, 26, 0.3);
+      border-top-color: #10131A;
+      border-radius: 50%;
+      animation: girar 0.7s linear infinite;
+    }
+    @keyframes girar { to { transform: rotate(360deg); } }
+
+    .rodape {
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(139, 147, 163, 0.15);
+      font-size: 12.5px;
+      color: var(--aco);
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    @media (max-width: 760px) {
+      .planta { display: none; }
+      .cartao { padding: 32px 24px 26px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cartao { animation: none; }
+      .giro { animation-duration: 1.4s; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Símbolo de planta baixa: uma porta aberta -->
+  <svg class="planta" viewBox="0 0 600 600" fill="none" aria-hidden="true">
+    <g stroke-width="2" opacity="0.16">
+      <line x1="40" y1="460" x2="140" y2="460" />
+      <line x1="380" y1="460" x2="560" y2="460" />
+      <line x1="140" y1="460" x2="140" y2="220" />
+      <path d="M140,220 A240,240 0 0 1 380,460" stroke-dasharray="3 9" />
+      <circle cx="140" cy="460" r="5" fill="#C9A86A" stroke="none" />
+    </g>
+    <g stroke-width="1" opacity="0.08">
+      <line x1="40" y1="500" x2="560" y2="500" />
+      <line x1="40" y1="492" x2="40" y2="508" />
+      <line x1="560" y1="492" x2="560" y2="508" />
+    </g>
+  </svg>
+
+  <main class="cartao">
+    <p class="selo">Acesso da equipe</p>
+    <h1>Leads Imóveis</h1>
+    <p class="sub">CRM Premium IA — entre com seu e-mail e senha.</p>
+
+    <div id="aviso-config" class="aviso aviso-config" role="alert">
+      Configuração pendente: abra o arquivo <strong>supabase-config.js</strong>
+      e cole a Project URL e a chave anon do seu projeto Supabase.
+    </div>
+
+    <div id="aviso-erro" class="aviso aviso-erro" role="alert"></div>
+
+    <form id="form-login" novalidate>
+      <div class="campo">
+        <label for="email">E-mail</label>
+        <input
+          id="email"
+          type="email"
+          autocomplete="username"
+          placeholder="voce@imobiliaria.com"
+          required
+          autofocus
+        />
+      </div>
+
+      <div class="campo">
+        <label for="senha">Senha</label>
+        <div class="campo-envolto">
+          <input
+            id="senha"
+            type="password"
+            autocomplete="current-password"
+            placeholder="Sua senha"
+            required
+            style="padding-right: 84px;"
+          />
+          <button type="button" id="mostrar" class="mostrar" aria-pressed="false">
+            Mostrar
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" id="entrar" class="entrar">
+        <span id="entrar-texto">Entrar</span>
+        <span id="entrar-giro" class="giro" hidden></span>
+      </button>
+    </form>
+
+    <p class="rodape">
+      Acesso restrito à equipe autorizada.<br />
+      Esqueceu a senha? Fale com o administrador do sistema.
+    </p>
+  </main>
+
+  <script src="supabase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      var form = document.getElementById("form-login");
+      var email = document.getElementById("email");
+      var senha = document.getElementById("senha");
+      var botao = document.getElementById("entrar");
+      var botaoTexto = document.getElementById("entrar-texto");
+      var botaoGiro = document.getElementById("entrar-giro");
+      var avisoErro = document.getElementById("aviso-erro");
+      var avisoConfig = document.getElementById("aviso-config");
+      var mostrar = document.getElementById("mostrar");
+
+      // Botão de mostrar/ocultar a senha
+      mostrar.addEventListener("click", function () {
+        var oculta = senha.type === "password";
+        senha.type = oculta ? "text" : "password";
+        mostrar.textContent = oculta ? "Ocultar" : "Mostrar";
+        mostrar.setAttribute("aria-pressed", String(oculta));
+        senha.focus();
+      });
+
+      function erro(mensagem) {
+        avisoErro.textContent = mensagem;
+        avisoErro.classList.add("visivel");
+      }
+
+      function limparErro() {
+        avisoErro.textContent = "";
+        avisoErro.classList.remove("visivel");
+      }
+
+      function carregando(sim) {
+        botao.disabled = sim;
+        email.disabled = sim;
+        senha.disabled = sim;
+        botaoTexto.textContent = sim ? "Entrando..." : "Entrar";
+        botaoGiro.hidden = !sim;
+      }
+
+      function configPendente() {
+        var url = window.SUPABASE_URL;
+        var key = window.SUPABASE_ANON_KEY;
+        return !(
+          typeof url === "string" &&
+          url.indexOf("https://") === 0 &&
+          url.indexOf("COLE_AQUI") === -1 &&
+          typeof key === "string" &&
+          key.length > 20 &&
+          key.indexOf("COLE_AQUI") === -1
+        );
+      }
+
+      function traduzir(mensagem) {
+        var m = String(mensagem || "").toLowerCase();
+        if (m.indexOf("invalid login credentials") !== -1) {
+          return "E-mail ou senha incorretos. Confira e tente de novo.";
+        }
+        if (m.indexOf("email not confirmed") !== -1) {
+          return "Este e-mail ainda não foi confirmado. Peça ao administrador " +
+                 "para desativar a opção \"Confirm email\" no Supabase.";
+        }
+        if (m.indexOf("rate limit") !== -1 || m.indexOf("too many") !== -1) {
+          return "Muitas tentativas seguidas. Aguarde um instante e tente de novo.";
+        }
+        if (m.indexOf("fetch") !== -1 || m.indexOf("network") !== -1) {
+          return "Falha de conexão com o servidor. Verifique sua internet.";
+        }
+        return "Não foi possível entrar: " + mensagem;
+      }
+
+      // Configuração ainda não preenchida: orienta e trava o formulário
+      if (configPendente()) {
+        avisoConfig.classList.add("visivel");
+        carregando(true);
+        botaoTexto.textContent = "Aguardando configuração";
+        botaoGiro.hidden = true;
+        return;
+      }
+
+      // Biblioteca do Supabase não carregou (sem internet, por exemplo)
+      if (!window.supabase) {
+        erro("Não foi possível carregar o serviço de login. Verifique sua internet e recarregue a página.");
+        return;
+      }
+
+      var sb = window.supabase.createClient(
+        window.SUPABASE_URL,
+        window.SUPABASE_ANON_KEY
+      );
+
+      // Já está logado? Vai direto para o sistema.
+      sb.auth.getSession().then(function (res) {
+        var session = res && res.data ? res.data.session : null;
+        if (session) {
+          window.location.replace("./");
+        }
+      });
+
+      form.addEventListener("submit", function (evento) {
+        evento.preventDefault();
+        limparErro();
+
+        var vEmail = email.value.trim();
+        var vSenha = senha.value;
+
+        if (!vEmail || !vSenha) {
+          erro("Preencha o e-mail e a senha para entrar.");
+          return;
+        }
+
+        carregando(true);
+
+        sb.auth
+          .signInWithPassword({ email: vEmail, password: vSenha })
+          .then(function (res) {
+            if (res.error) {
+              carregando(false);
+              erro(traduzir(res.error.message));
+              return;
+            }
+            window.location.replace("./");
+          })
+          .catch(function (excecao) {
+            carregando(false);
+            erro(traduzir(excecao && excecao.message));
+          });
+      });
+    })();
+  </script>
+</body>
+</html>
