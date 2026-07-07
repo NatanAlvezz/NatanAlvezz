@@ -153,13 +153,13 @@ dialog{border:none;background:transparent;width:min(930px,94vw);max-height:90vh;
 
   <aside class="rightbar" id="rightbar">
     <div class="ai-card">
-      <div class="ai-head"><h2>Assistente IA</h2><span class="online">ONLINE ✦</span></div>
-      <div class="ai-hero"><div class="ai-orb">LAI</div><h3>Olá, Natan! 👋</h3><p>Sou seu Agente IA da Leads Imóveis. Posso sugerir próximos passos, textos de anúncio, follow-up e prioridades.</p></div>
-      <div class="ai-section"><h4>Sugestões para você</h4><button class="suggestion" onclick="askAI('Acompanhar leads sem atividade')">♙ Acompanhar leads sem atividade</button><button class="suggestion" onclick="askAI('Sugerir imóveis para leads qualificados')">⌂ Sugerir imóveis para leads qualificados</button><button class="suggestion" onclick="askAI('Gerar relatório de desempenho')">☰ Gerar relatório de desempenho</button><button class="suggestion" onclick="askAI('Criar campanha de follow-up')">✦ Criar campanha de follow-up</button></div>
+      <div class="ai-head"><h2>IA Consultiva</h2><span class="online">GPT ONLINE ✦</span></div>
+      <div class="ai-hero"><div class="ai-orb">LAI</div><h3>Olá, equipe! 👋</h3><p>Sou a IA da Leads Imóveis. Posso conversar com corretores, analisar o CRM, sugerir follow-up, criar mensagens, anúncios, roteiros de ligação e prioridades do dia.</p></div>
+      <div class="ai-section"><h4>Sugestões para você</h4><button class="suggestion" onclick="askAI('Faça um resumo inteligente do dia e me diga as 5 prioridades da equipe.')">☰ Resumo inteligente do dia</button><button class="suggestion" onclick="askAI('Quais leads precisam de follow-up agora? Crie mensagens de WhatsApp para cada um.')">♙ Follow-up com mensagem pronta</button><button class="suggestion" onclick="askAI('Sugira imóveis para os leads mais qualificados e explique o motivo.')">⌂ Match lead x imóvel</button><button class="suggestion" onclick="askAI('Crie um anúncio premium para o imóvel ativo, com texto para Instagram e WhatsApp.')">✦ Anúncio premium</button></div>
       <div class="ai-section"><h4>Automações ativas</h4><div id="automationList"></div></div>
       <div class="chat-log" id="chatLog"></div>
       <form class="chat-form" onsubmit="sendChat(event)"><input id="chatInput" placeholder="Pergunte algo ao seu Agente IA..."><button class="btn" type="submit">➤</button></form>
-      <div class="quick"><button class="btn btn-sm btn-ghost" onclick="askAI('Resumo diário')">Resumo diário</button><button class="btn btn-sm btn-ghost" onclick="askAI('Novos leads')">Novos leads</button><button class="btn btn-sm btn-ghost" onclick="askAI('Imóveis sugeridos')">Imóveis sugeridos</button></div>
+      <div class="quick"><button class="btn btn-sm btn-ghost" onclick="askAI('Resumo diário com plano de ação.')">Resumo diário</button><button class="btn btn-sm btn-ghost" onclick="askAI('Crie uma mensagem de WhatsApp para lead comprador de alto padrão.')">WhatsApp</button><button class="btn btn-sm btn-ghost" onclick="askAI('Me treine para abordar um proprietário e captar um imóvel exclusivo.')">Treinamento</button></div>
     </div>
     <div class="panel activity-card"><div class="panel-head"><h2>Atividades recentes</h2><button class="btn btn-sm btn-ghost" onclick="renderActivities(true)">Ver todas</button></div><div class="panel-body" id="activities"></div></div>
   </aside>
@@ -477,9 +477,92 @@ function matchLead(id){const c=db.clientes.find(x=>x.id===id); if(!c)return; con
 function createProposal(){const c=db.clientes[0],p=db.imoveis[0]; if(!c||!p){toast('Cadastre lead e imóvel primeiro.');return} db.propostas.unshift({id:uid('proposta'),cliente:c.nome,imovel:p.titulo,valor:p.valor,status:'Rascunho'}); saveDB();renderAll();toast('Proposta criada em rascunho.')}
 function copyText(text){navigator.clipboard?.writeText(text).then(()=>toast('Copiado para a área de transferência.')).catch(()=>toast('Copie manualmente.'))}
 
-function renderChat(){const el=document.getElementById('chatLog'); if(!el)return; const chat=db.chat.length?db.chat:[{role:'ai',text:'Pronto para trabalhar. Pergunte: "prioridades de hoje", "gerar anúncio", "leads sem atividade" ou "sugerir imóveis".'}]; el.innerHTML=chat.slice(-25).map(m=>`<div class="msg ${m.role==='me'?'me':'ai'}">${esc(m.text)}</div>`).join(''); el.scrollTop=el.scrollHeight;}
+function renderChat(){const el=document.getElementById('chatLog'); if(!el)return; const chat=db.chat.length?db.chat:[{role:'ai',text:'Pronto para conversar com a equipe. Pergunte livremente sobre leads, imóveis, follow-up, anúncios, captação, negociação, WhatsApp, prioridades ou treinamento comercial.'}]; el.innerHTML=chat.slice(-30).map(m=>`<div class="msg ${m.role==='me'?'me':'ai'}">${esc(m.text)}</div>`).join(''); el.scrollTop=el.scrollHeight;}
 function sendChat(e){e.preventDefault(); const input=document.getElementById('chatInput'); const text=input.value.trim(); if(!text)return; input.value=''; askAI(text);}
-function askAI(text){db.chat.push({role:'me',text}); const reply=aiReply(text); setTimeout(()=>{db.chat.push({role:'ai',text:reply});saveDB();renderChat();},250); saveDB();renderChat(); if(window.innerWidth<980)document.getElementById('rightbar').classList.add('open')}
+async function askAI(text){
+  db.chat.push({role:'me',text});
+  db.chat.push({role:'ai',text:'Analisando o CRM e preparando uma resposta consultiva...'});
+  saveDB();renderChat();
+  if(window.innerWidth<980)document.getElementById('rightbar').classList.add('open');
+  try{
+    const reply=await callCRMRealAI(text);
+    db.chat[db.chat.length-1]={role:'ai',text:reply||aiReply(text)};
+  }catch(err){
+    console.warn('IA avançada indisponível:',err);
+    const fallback=aiReply(text);
+    db.chat[db.chat.length-1]={role:'ai',text:fallback+'\n\nObs.: a IA avançada ainda não respondeu. Verifique se a Edge Function crm-ai-assistant foi publicada no Supabase e se os secrets OPENAI_API_KEY e OPENAI_MODEL estão configurados.'};
+  }
+  saveDB();renderChat();
+}
+async function callCRMRealAI(question, opts = {}){
+  if(!window.supabaseClient?.functions?.invoke){
+    throw new Error('Supabase Functions não está disponível neste navegador.');
+  }
+
+  const sessionResult = await window.supabaseClient.auth.getSession();
+  const accessToken = sessionResult?.data?.session?.access_token;
+  if(!accessToken){
+    throw new Error('Usuário sem sessão ativa no Supabase. Faça login novamente.');
+  }
+
+  const history = (db.chat || [])
+    .slice(-10)
+    .map(m => ({
+      role: m.role === 'me' ? 'user' : 'assistant',
+      text: String(m.text || '')
+        .replace('Analisando o CRM e preparando uma resposta consultiva...', '')
+        .slice(0, 1200)
+        .trim()
+    }))
+    .filter(m => m.text);
+
+  const payload = {
+    question: String(question || '').slice(0, 4000),
+    leadId: opts.leadId || null,
+    imovelId: opts.imovelId || activePropertyId || null,
+    history
+  };
+
+  const { data, error } = await window.supabaseClient.functions.invoke('crm-ai-assistant', {
+    body: payload,
+    headers: {
+      Authorization: 'Bearer ' + accessToken
+    }
+  });
+
+  if(error){
+    throw new Error(error.message || 'Erro ao chamar a IA do CRM.');
+  }
+  if(!data){
+    throw new Error('A IA do CRM retornou uma resposta vazia.');
+  }
+  if(data.ok === false){
+    throw new Error(data.error || 'A IA do CRM retornou erro.');
+  }
+  if(!data.reply){
+    throw new Error('A IA do CRM respondeu sem o campo reply.');
+  }
+
+  return data.reply;
+}
+
+function buildAIContext(){
+  const totalVGV=db.imoveis.reduce((a,p)=>a+(Number(p.valor)||0),0);
+  const hot=db.clientes.filter(c=>c.interesse==='Alto');
+  const pendingProps=db.imoveis.filter(p=>CHECKS.some(([k])=>!p.checklist?.[k]));
+  const mapLead=c=>({nome:c.nome,telefone:c.tel||'',bairro:c.bairro||'',tipo:c.tipo||'',interesse:c.interesse||'',orcamentoMin:c.min||'',orcamentoMax:c.max||'',etapa:c.etapa||'',origem:c.origem||'',proximaAcao:c.proximaAcao||'',observacoes:c.obs||''});
+  const mapImovel=p=>({titulo:p.titulo,tipo:p.tipo||'',bairro:p.bairro||'',cidade:p.cidade||'',valor:p.valor||'',area:p.area||'',dormitorios:p.dormitorios||'',suites:p.suites||'',vagas:p.vagas||'',etapa:p.etapa||'',proprietario:p.prop||'',exclusividade:p.exclusividade||'',proximaAcao:p.proximaAcao||'',pendencias:CHECKS.filter(([k])=>!p.checklist?.[k]).map(([,label])=>label),observacoes:p.obs||''});
+  return {
+    empresa:db.settings||{},
+    resumo:{leads:db.clientes.length,imoveis:db.imoveis.length,propostas:db.propostas.length,vgv:totalVGV,leadsQuentes:hot.length,captacoesPendentes:pendingProps.length},
+    leadQuentes:hot.slice(0,8).map(mapLead),
+    leadsRecentes:db.clientes.slice(0,12).map(mapLead),
+    imoveisDestaque:db.imoveis.slice(0,12).map(mapImovel),
+    imovelAtivo:getActiveProp()?mapImovel(getActiveProp()):null,
+    propostas:db.propostas.slice(0,8),
+    atividadesRecentes:db.activities.slice(0,10)
+  };
+}
 function aiReply(text){const q=text.toLowerCase(); const leads=db.clientes.length, props=db.imoveis.length; const hot=db.clientes.filter(c=>c.interesse==='Alto'); const pendingProps=db.imoveis.filter(p=>CHECKS.some(([k])=>!p.checklist?.[k]));
   if(q.includes('match')||q.includes('sugerir')){return hot.length?`Imóveis sugeridos para leads qualificados:\n${hot.map(c=>{const best=db.imoveis.map(p=>({p,score:(p.tipo===c.tipo?30:0)+(p.bairro&&c.bairro&&p.bairro.toLowerCase().includes(c.bairro.toLowerCase())?35:0)+((Number(p.valor)||0)<=(Number(c.max)||Infinity)?25:0)})).sort((a,b)=>b.score-a.score)[0];return `• ${c.nome}: ${best?.p?.titulo||'sem imóvel ideal'} (${best?.score||0}% de aderência)`}).join('\n')}`:'Ainda não há leads de alto interesse para sugerir imóveis.'}
   if(q.includes('anúncio')||q.includes('anuncio')){const p=getActiveProp(); return p?`Sugestão de anúncio:\n${p.titulo}\nAlto padrão em ${p.bairro}. ${p.area||'-'} m², ${p.suites||p.dormitorios||'-'} suítes/dormitórios, ${p.vagas||'-'} vagas. Valor: ${money(p.valor)}.\nChamada: "Viva o melhor de Florianópolis com exclusividade e sofisticação."`:'Cadastre um imóvel primeiro.'}
