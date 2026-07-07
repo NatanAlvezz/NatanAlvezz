@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teste IA · Leads Imóveis</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <style>
+    :root{--bg:#050506;--panel:#111216;--txt:#f7f4ed;--mut:#a9a7a0;--gold:#d8b56d;--red:#ef6a6a;--green:#65d679;--line:rgba(255,255,255,.12)}
+    *{box-sizing:border-box;margin:0;padding:0}body{min-height:100vh;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at 50% -10%,rgba(216,181,109,.22),transparent 28%),linear-gradient(135deg,#030304,#090a0c 48%,#020202);color:var(--txt);display:grid;place-items:center;padding:22px}.card{width:min(900px,100%);border:1px solid rgba(216,181,109,.28);background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.02));border-radius:24px;box-shadow:0 28px 80px rgba(0,0,0,.48);overflow:hidden}.head{padding:24px 26px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px}.head img{width:72px;border-radius:14px}.head h1{font-size:24px}.head p{color:var(--mut);font-size:14px;margin-top:5px}.body{padding:24px 26px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}.box{border:1px solid var(--line);border-radius:16px;padding:14px;background:rgba(0,0,0,.18)}.box b{display:block;font-size:13px;color:var(--gold);margin-bottom:6px}.box span{font-size:13px;color:var(--mut);word-break:break-word}.actions{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.btn{border:1px solid rgba(216,181,109,.5);border-radius:13px;background:linear-gradient(135deg,#f1d796,#a4772a 58%,#6f4615);color:#171005;font-weight:900;padding:13px 16px;cursor:pointer}.btn.secondary{background:rgba(255,255,255,.04);color:#ffe9b5}.status{border:1px solid var(--line);background:rgba(0,0,0,.25);border-radius:16px;padding:16px;margin-top:14px;white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:13px;line-height:1.55;max-height:420px;overflow:auto}.ok{color:var(--green)}.err{color:var(--red)}.warn{color:#ffbd69}.small{color:var(--mut);font-size:13px;line-height:1.55;margin-top:12px}@media(max-width:720px){.grid{grid-template-columns:1fr}.head{align-items:flex-start}.head img{width:56px}}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <section class="head">
+      <img src="assets/leads-logo.jpeg" alt="Leads Imóveis" />
+      <div>
+        <h1>Teste da IA Avançada</h1>
+        <p>Verifica login, token, Edge Function, resposta JSON e contrato { ok, reply, meta }.</p>
+      </div>
+    </section>
+    <section class="body">
+      <div class="grid">
+        <div class="box"><b>Projeto Supabase</b><span>zyfbgydbwsvbaogbxzrd</span></div>
+        <div class="box"><b>Função</b><span>crm-ai-assistant</span></div>
+        <div class="box"><b>Status</b><span id="statusMini">Aguardando teste</span></div>
+      </div>
+      <div class="actions">
+        <button class="btn" onclick="testarIA()">Testar IA agora</button>
+        <button class="btn secondary" onclick="copiarDiagnostico()">Copiar diagnóstico</button>
+        <button class="btn secondary" onclick="location.href='index.html'">Voltar ao CRM</button>
+        <button class="btn secondary" onclick="location.href='login.html'">Ir para login</button>
+      </div>
+      <div id="resultado" class="status">Clique em “Testar IA agora”.
+
+Importante: você precisa estar logado no CRM no mesmo navegador.</div>
+      <p class="small">Esta página não mostra nem copia seu token/JWT. Ela só testa a função e mostra o erro técnico, se houver.</p>
+    </section>
+  </main>
+
+  <script>
+    let ultimoDiagnostico = '';
+    const out = document.getElementById('resultado');
+    const mini = document.getElementById('statusMini');
+    const FUNCTION_URL = 'https://zyfbgydbwsvbaogbxzrd.functions.supabase.co/crm-ai-assistant';
+
+    function log(msg, cls='') {
+      const line = String(msg);
+      ultimoDiagnostico += line + '\n';
+      out.innerHTML += (cls ? `<span class="${cls}">${escapeHtml(line)}</span>` : escapeHtml(line)) + '\n';
+      out.scrollTop = out.scrollHeight;
+    }
+    function resetLog(){ ultimoDiagnostico = ''; out.textContent = ''; }
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    async function testarIA(){
+      resetLog();
+      mini.textContent = 'Testando...';
+      log('🔎 Iniciando teste da IA Supabase Edge Function...');
+
+      try {
+        if (!window.supabaseClient) {
+          mini.textContent = 'Erro';
+          log('❌ window.supabaseClient não encontrado.', 'err');
+          log('Abra esta página dentro do mesmo site do CRM e confira se supabase-config.js existe.');
+          return;
+        }
+
+        const { data: sessionData, error: sessionError } = await window.supabaseClient.auth.getSession();
+        if (sessionError) {
+          mini.textContent = 'Erro na sessão';
+          log('❌ Erro ao obter sessão: ' + (sessionError.message || JSON.stringify(sessionError)), 'err');
+          return;
+        }
+
+        const token = sessionData?.session?.access_token;
+        const userEmail = sessionData?.session?.user?.email || 'e-mail não disponível';
+
+        if (!token) {
+          mini.textContent = 'Sem login';
+          log('❌ Token não encontrado. Faça login no CRM e volte para esta página.', 'err');
+          log('Dica: clique em “Ir para login”, entre no CRM e depois abra /teste-ia.html novamente.');
+          return;
+        }
+
+        log('✅ Usuário logado: ' + userEmail, 'ok');
+        log('✅ Token encontrado. O token foi usado apenas internamente e não será exibido.');
+
+        const payload = {
+          question: 'Quais são as prioridades de hoje para minha equipe de corretores?',
+          leadId: null,
+          imovelId: null,
+          history: []
+        };
+
+        log('📤 Chamando: ' + FUNCTION_URL);
+        log('📤 Payload: ' + JSON.stringify(payload));
+
+        const inicio = performance.now();
+        const res = await fetch(FUNCTION_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + token
+          },
+          body: JSON.stringify(payload)
+        });
+        const ms = Math.round(performance.now() - inicio);
+        const text = await res.text();
+
+        log('📌 HTTP Status: ' + res.status);
+        log('📌 Tempo: ' + ms + 'ms');
+        log('📌 Resposta bruta: ' + text);
+
+        let data;
+        try { data = JSON.parse(text); }
+        catch(e) {
+          mini.textContent = 'JSON inválido';
+          log('❌ A função não retornou JSON válido.', 'err');
+          return;
+        }
+
+        log('📦 JSON recebido: ' + JSON.stringify(data, null, 2));
+
+        if (data.ok === true && data.reply) {
+          mini.textContent = 'IA funcionando';
+          log('✅ IA funcionando!', 'ok');
+          log('🤖 Resposta da IA:', 'ok');
+          log(data.reply, 'ok');
+          if (data.meta) log('📌 Meta: ' + JSON.stringify(data.meta));
+        } else {
+          mini.textContent = 'Erro na função';
+          log('❌ A Edge Function respondeu com erro:', 'err');
+          log(data.error || 'Erro sem mensagem.', 'err');
+          sugerirCorrecao(data.error || text || res.status);
+        }
+      } catch (err) {
+        mini.textContent = 'Erro inesperado';
+        log('❌ Erro inesperado no teste: ' + (err.message || err), 'err');
+        sugerirCorrecao(err.message || String(err));
+      }
+    }
+
+    function sugerirCorrecao(errorText){
+      const e = String(errorText || '').toLowerCase();
+      log('\n🧭 Diagnóstico provável:', 'warn');
+      if (e.includes('not found') || e.includes('404')) log('A função crm-ai-assistant provavelmente não foi publicada ou o nome está diferente.', 'warn');
+      else if (e.includes('jwt') || e.includes('authorization') || e.includes('unauthorized') || e.includes('401')) log('Erro de autenticação. Faça logout/login no CRM e teste novamente.', 'warn');
+      else if (e.includes('openai') || e.includes('api_key') || e.includes('api key') || e.includes('OPENAI')) log('Falta configurar OPENAI_API_KEY nos Secrets da Edge Function.', 'warn');
+      else if (e.includes('crm_state') || e.includes('relation') || e.includes('database')) log('A função não conseguiu ler public.crm_state. Confira tabela, RLS e service role.', 'warn');
+      else if (e.includes('cors')) log('Erro de CORS. A Edge Function precisa responder OPTIONS e incluir headers CORS.', 'warn');
+      else log('Copie o diagnóstico e me mande aqui para eu identificar o ponto exato.', 'warn');
+    }
+
+    async function copiarDiagnostico(){
+      const texto = ultimoDiagnostico || out.textContent || 'Nenhum diagnóstico gerado.';
+      await navigator.clipboard.writeText(texto);
+      mini.textContent = 'Diagnóstico copiado';
+      alert('Diagnóstico copiado. Cole aqui no ChatGPT, sem token.');
+    }
+  </script>
+</body>
+</html>
