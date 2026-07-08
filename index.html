@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
   <script src="auth-guard.js"></script>
@@ -23,12 +24,11 @@
       --mut: #a9a7a0;
       --mut2: #77746c;
       --gold: #d8b56d;
-      --gold2: #a77a2a;
       --green: #65d679;
       --red: #ef6a6a;
       --orange: #ffbd69;
       --blue: #8fb8ff;
-      --shadow: 0 18px 55px rgba(0,0,0,.35);
+      --shadow: 0 12px 34px rgba(0,0,0,.32);
       --radius: 18px;
       --safe: env(safe-area-inset-bottom, 0px);
     }
@@ -48,25 +48,12 @@
     body {
       min-height: 100vh;
       background:
-        radial-gradient(circle at 20% -10%, rgba(216,181,109,.18), transparent 32%),
-        radial-gradient(circle at 110% 10%, rgba(255,255,255,.08), transparent 28%),
+        radial-gradient(circle at 20% -10%, rgba(216,181,109,.16), transparent 32%),
+        radial-gradient(circle at 110% 10%, rgba(255,255,255,.07), transparent 28%),
         linear-gradient(135deg, #050506, #090a0c 52%, #030303);
       color: var(--txt);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       overflow-x: hidden;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background-image:
-        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.012) 1px, transparent 1px);
-      background-size: 44px 44px;
-      mask-image: linear-gradient(to bottom, #000, transparent 78%);
-      z-index: -1;
     }
 
     button, input, select, textarea {
@@ -98,6 +85,11 @@
       color: #fff;
     }
 
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
     .app {
       display: grid;
       grid-template-columns: 252px minmax(0, 1fr) 350px;
@@ -126,12 +118,17 @@
       border-bottom: 1px solid rgba(216,181,109,.14);
     }
 
-    .brand img {
+    .brand-logo {
       width: 58px;
       height: 48px;
       object-fit: cover;
       border-radius: 10px;
       border: 1px solid rgba(216,181,109,.20);
+      background: linear-gradient(135deg, #1d1e22, #d8b56d);
+      display: grid;
+      place-items: center;
+      color: #090909;
+      font-weight: 900;
     }
 
     .brand b {
@@ -316,7 +313,7 @@
 
     .view.active {
       display: block;
-      animation: enter .22s ease;
+      animation: enter .20s ease;
     }
 
     @keyframes enter {
@@ -366,17 +363,12 @@
       padding: 11px 14px;
       font-weight: 800;
       font-size: 13px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 10px 22px rgba(0,0,0,.18);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 8px 18px rgba(0,0,0,.16);
       transition: .16s;
     }
 
-    .btn:hover {
-      transform: translateY(-1px);
-      border-color: rgba(216,181,109,.7);
-    }
-
     .btn:active {
-      transform: translateY(0);
+      transform: translateY(1px);
       opacity: .84;
     }
 
@@ -432,21 +424,10 @@
       border-radius: 16px;
       padding: 16px;
       background: linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.018));
-      box-shadow: 0 10px 28px rgba(0,0,0,.25);
+      box-shadow: 0 8px 22px rgba(0,0,0,.22);
       min-height: 92px;
       position: relative;
       overflow: hidden;
-    }
-
-    .kpi::after {
-      content: "";
-      position: absolute;
-      right: -45px;
-      top: -45px;
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      background: rgba(216,181,109,.08);
     }
 
     .kpi small {
@@ -498,15 +479,13 @@
       overflow: hidden;
     }
 
-    .item-card:hover,
-    .property-card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(216,181,109,.32);
-    }
-
     .pc-img {
-      height: 150px;
-      background: radial-gradient(circle at 70% 30%, rgba(216,181,109,.25), transparent 30%), linear-gradient(135deg, #2b2e34, #0c0d0f);
+      height: 156px;
+      background:
+        radial-gradient(circle at 70% 30%, rgba(216,181,109,.25), transparent 30%),
+        linear-gradient(135deg, #2b2e34, #0c0d0f);
+      background-size: cover;
+      background-position: center;
       position: relative;
     }
 
@@ -514,7 +493,21 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, transparent, rgba(0,0,0,.72));
+      background: linear-gradient(180deg, rgba(0,0,0,.02), rgba(0,0,0,.75));
+    }
+
+    .photo-count {
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      z-index: 2;
+      border-radius: 999px;
+      background: rgba(0,0,0,.58);
+      border: 1px solid rgba(255,255,255,.16);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 6px 9px;
     }
 
     .pc-body {
@@ -587,7 +580,7 @@
       background:
         radial-gradient(circle at 80% 10%, rgba(216,181,109,.17), transparent 34%),
         linear-gradient(135deg, rgba(216,181,109,.10), rgba(255,255,255,.025));
-      box-shadow: 0 18px 52px rgba(0,0,0,.28);
+      box-shadow: 0 14px 38px rgba(0,0,0,.25);
       overflow: hidden;
     }
 
@@ -647,12 +640,6 @@
       text-align: left;
       min-height: 96px;
       transition: .16s;
-    }
-
-    .central-action:hover {
-      transform: translateY(-1px);
-      border-color: rgba(216,181,109,.40);
-      background: rgba(216,181,109,.065);
     }
 
     .central-action b {
@@ -870,11 +857,6 @@
       font-size: 12px;
     }
 
-    .suggestion:hover {
-      border-color: rgba(216,181,109,.38);
-      background: rgba(216,181,109,.07);
-    }
-
     .chat-log {
       max-height: 310px;
       overflow-y: auto;
@@ -936,7 +918,7 @@
       text-align: center;
       border: 1px dashed rgba(255,255,255,.12);
       border-radius: 14px;
-      padding: 28px;
+      padding: 24px;
       background: rgba(255,255,255,.02);
     }
 
@@ -956,6 +938,8 @@
       transition: .23s;
       font-size: 13px;
       pointer-events: none;
+      max-width: 92vw;
+      text-align: center;
     }
 
     .toast.show {
@@ -966,7 +950,7 @@
     dialog {
       border: none;
       background: transparent;
-      width: min(740px, 94vw);
+      width: min(760px, 94vw);
       max-height: 90vh;
       color: var(--txt);
     }
@@ -998,12 +982,14 @@
       border-bottom: 0;
       justify-content: flex-end;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
     .modal-body {
       padding: 18px;
       max-height: 66vh;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .x {
@@ -1037,6 +1023,80 @@
       grid-column: 1 / -1;
     }
 
+    .photo-box {
+      border: 1px dashed rgba(216,181,109,.38);
+      background: rgba(216,181,109,.055);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      display: block;
+    }
+
+    .photo-box input {
+      display: none;
+    }
+
+    .photo-box b {
+      display: block;
+      color: #fff3cf;
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+
+    .photo-box small {
+      color: var(--mut);
+      font-size: 12px;
+    }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .photo-item {
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.035);
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .photo-img {
+      height: 96px;
+      background-size: cover;
+      background-position: center;
+      background-color: #15161a;
+    }
+
+    .cover-badge {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      z-index: 2;
+      background: rgba(216,181,109,.94);
+      color: #141006;
+      border-radius: 999px;
+      padding: 3px 7px;
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .photo-actions {
+      display: flex;
+      gap: 6px;
+      padding: 7px;
+    }
+
+    .photo-actions button {
+      flex: 1;
+      font-size: 10px !important;
+      padding: 6px !important;
+      border-radius: 8px !important;
+    }
+
     .mobile-ai-toggle,
     .mobile-nav {
       display: none;
@@ -1055,10 +1115,6 @@
 
       .brand {
         justify-content: center;
-      }
-
-      .brand img {
-        width: 58px;
       }
 
       .nav button {
@@ -1145,7 +1201,7 @@
       .kpi {
         min-height: 84px;
         padding: 13px;
-        box-shadow: 0 8px 22px rgba(0,0,0,.24);
+        box-shadow: 0 6px 16px rgba(0,0,0,.20);
       }
 
       .kpi strong {
@@ -1201,9 +1257,7 @@
       .item-card,
       .property-card,
       .ai-card {
-        box-shadow: 0 8px 22px rgba(0,0,0,.24);
-        content-visibility: auto;
-        contain-intrinsic-size: 280px;
+        box-shadow: 0 6px 18px rgba(0,0,0,.22);
       }
 
       .chat-log {
@@ -1270,8 +1324,6 @@
 
       .toast {
         bottom: calc(92px + var(--safe));
-        max-width: 92vw;
-        text-align: center;
       }
     }
 
@@ -1290,17 +1342,20 @@
         display: none;
       }
 
-      .item-card h3,
-      .pc-body h3 {
-        font-size: 15px;
-      }
-
       .actions .btn {
         flex: 1;
       }
 
       .modal-body {
         max-height: 62vh;
+      }
+
+      .photo-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .photo-img {
+        height: 116px;
       }
     }
   </style>
@@ -1310,7 +1365,7 @@
   <div class="app">
     <aside class="sidebar" id="sidebar">
       <div class="brand">
-        <img src="assets/leads-logo.jpeg" alt="Leads Imóveis" />
+        <div class="brand-logo">LA</div>
         <div>
           <b>LEADS</b>
           <small>IMÓVEIS</small>
@@ -1329,7 +1384,7 @@
       <div class="plan">
         <div class="crown">♛</div>
         <h3>Copiloto IA</h3>
-        <p>CRM gratuito inicial com leads, imóveis, tarefas, Supabase e IA consultiva.</p>
+        <p>CRM gratuito inicial com leads, imóveis, fotos, tarefas, Supabase e IA consultiva.</p>
         <button class="btn btn-ghost" onclick="switchView('config')">Gerenciar</button>
       </div>
     </aside>
@@ -1431,7 +1486,7 @@
             <div class="panel-head">
               <div>
                 <h2>Imóveis</h2>
-                <p>Catálogo profissional com informações e controle comercial.</p>
+                <p>Catálogo profissional com fotos, informações e controle comercial.</p>
               </div>
               <button class="btn" onclick="openImovelModal()">+ Novo imóvel</button>
             </div>
@@ -1492,13 +1547,13 @@
               <div class="toolbar">
                 <button class="btn" onclick="exportBackup()">Backup JSON</button>
                 <button class="btn btn-ghost" onclick="document.getElementById('importBackup').click()">Restaurar backup</button>
-                <button class="btn btn-ghost" onclick="saveDBToCloud()">Salvar no Supabase</button>
+                <button class="btn btn-ghost" onclick="saveDBToCloud(true)">Salvar no Supabase</button>
                 <button class="btn btn-danger" onclick="resetDemo()">Recriar exemplo</button>
                 <button class="btn btn-ghost" onclick="logout()">Sair</button>
                 <input id="importBackup" type="file" accept="application/json,.json" style="display:none" onchange="importBackup(event)" />
               </div>
               <p style="color:var(--mut);font-size:13px;line-height:1.5">
-                Versão gratuita inicial do Leads Imóveis CRM Copiloto IA. Esta versão usa HTML, JavaScript, LocalStorage, Supabase e Edge Function da IA.
+                Versão gratuita inicial do Leads Imóveis CRM Copiloto IA. As fotos ficam salvas neste navegador para não travar o Supabase. Dados principais vão para o Supabase sem as imagens pesadas.
               </p>
             </div>
           </div>
@@ -1570,8 +1625,10 @@
   <script>
     "use strict";
 
-    const STORAGE_KEY = "leads_imoveis_premium_ia_v5";
+    const STORAGE_KEY = "leads_imoveis_premium_ia_v6";
+    const OLD_KEYS = ["leads_imoveis_premium_ia_v5", "leads_imoveis_premium_ia_v4"];
     const CRM_STATE_ID = "leads-imoveis-main";
+    const EDGE_FUNCTION_URL = "https://zyfbgydbwsvbaogbxzrd.supabase.co/functions/v1/crm-ai-assistant";
 
     const STAGES_CLIENT = ["Novos leads", "Qualificação", "Apresentação", "Proposta", "Negociação", "Fechado"];
     const ORIGINS = ["Instagram", "Google Ads", "Indicação", "OLX", "Facebook", "Site", "WhatsApp", "Tráfego Pago", "Orgânico"];
@@ -1614,6 +1671,7 @@
             prop: "Proprietário Alto Padrão",
             tel: "48999999999",
             proximaAcao: "Finalizar vistoria, aprovar fotos e colher autorização",
+            photos: [],
             updated: now - 1000 * 60 * 60 * 4
           },
           {
@@ -1631,6 +1689,7 @@
             prop: "Maria Proprietária",
             tel: "48988887777",
             proximaAcao: "Impulsionar campanha e enviar para leads compatíveis",
+            photos: [],
             updated: now - 1000 * 60 * 60 * 24
           },
           {
@@ -1648,6 +1707,7 @@
             prop: "Investidor",
             tel: "48977776666",
             proximaAcao: "Produzir vídeo vertical e texto para campanha",
+            photos: [],
             updated: now - 1000 * 60 * 60 * 48
           }
         ],
@@ -1716,69 +1776,113 @@
     function loadDB() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) return JSON.parse(raw);
+        if (raw) return normalizeDB(JSON.parse(raw));
 
-        const oldRaw = localStorage.getItem("leads_imoveis_premium_ia_v4");
-        if (oldRaw) {
-          const old = JSON.parse(oldRaw);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(old));
-          return normalizeDB(old);
+        for (const key of OLD_KEYS) {
+          const oldRaw = localStorage.getItem(key);
+          if (oldRaw) {
+            const old = normalizeDB(JSON.parse(oldRaw));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(old));
+            return old;
+          }
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn("Erro ao carregar localStorage:", e);
+      }
 
       const data = seedData();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      safeLocalSave(data);
       return data;
     }
 
     function normalizeDB(data) {
-      data.settings = data.settings || seedData().settings;
+      const base = seedData();
+
+      data = data && typeof data === "object" ? data : base;
+      data.settings = data.settings || base.settings;
       data.imoveis = Array.isArray(data.imoveis) ? data.imoveis : [];
       data.clientes = Array.isArray(data.clientes) ? data.clientes : [];
       data.tarefas = Array.isArray(data.tarefas) ? data.tarefas : [];
       data.chat = Array.isArray(data.chat) ? data.chat : [];
+
+      data.imoveis.forEach(p => {
+        if (!Array.isArray(p.photos)) p.photos = [];
+        if (p.photos.length && !p.photos.some(f => f.cover)) p.photos[0].cover = true;
+      });
+
       return data;
     }
 
+    function safeLocalSave(data) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        return true;
+      } catch (e) {
+        console.error("LocalStorage cheio:", e);
+        toast("Memória cheia. Remova algumas fotos ou use imagens menores.");
+        return false;
+      }
+    }
+
+    function getCloudSafeDB() {
+      const copy = JSON.parse(JSON.stringify(db));
+
+      copy.imoveis = (copy.imoveis || []).map(p => ({
+        ...p,
+        photos: (p.photos || []).map(f => ({
+          id: f.id,
+          name: f.name,
+          cover: !!f.cover,
+          created: f.created || Date.now(),
+          localOnly: true
+        }))
+      }));
+
+      copy.chat = (copy.chat || []).slice(-12);
+
+      return copy;
+    }
+
     function saveDB() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+      safeLocalSave(db);
       if (cloudReady) scheduleCloudSave();
     }
 
     function scheduleCloudSave() {
       clearTimeout(saveTimer);
-      saveTimer = setTimeout(saveDBToCloud, 700);
+      saveTimer = setTimeout(() => saveDBToCloud(false), 800);
     }
 
-    async function saveDBToCloud() {
+    async function saveDBToCloud(showMessage = false) {
       if (!window.supabaseClient) {
-        toast("Supabase não configurado.");
+        if (showMessage) toast("Supabase não configurado.");
         return;
       }
 
       try {
         const { error } = await window.supabaseClient.from("crm_state").upsert({
           id: CRM_STATE_ID,
-          data: db,
+          data: getCloudSafeDB(),
           updated_by: cloudUserId,
           updated_at: new Date().toISOString()
         });
 
         if (error) {
           console.error(error);
-          toast("Erro ao salvar no Supabase.");
+          if (showMessage) toast("Erro ao salvar no Supabase.");
           return;
         }
 
-        toast("CRM salvo no Supabase.");
+        if (showMessage) toast("CRM salvo no Supabase.");
       } catch (e) {
         console.error(e);
-        toast("Falha ao sincronizar.");
+        if (showMessage) toast("Falha ao sincronizar.");
       }
     }
 
     async function initCloudSync() {
       const client = window.supabaseClient;
+
       if (!client) {
         console.warn("Supabase não configurado. Usando modo local.");
         return;
@@ -1811,12 +1915,26 @@
         }
 
         if (data?.data) {
-          db = normalizeDB(data.data);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+          const cloudData = normalizeDB(data.data);
+
+          const localPhotosMap = {};
+          (db.imoveis || []).forEach(p => {
+            localPhotosMap[p.id] = Array.isArray(p.photos) ? p.photos.filter(f => f.data) : [];
+          });
+
+          db = cloudData;
+
+          db.imoveis.forEach(p => {
+            const localPhotos = localPhotosMap[p.id] || [];
+            if (localPhotos.length) p.photos = localPhotos;
+            else p.photos = Array.isArray(p.photos) ? p.photos.filter(f => f.data) : [];
+          });
+
+          safeLocalSave(db);
         } else {
           await client.from("crm_state").upsert({
             id: CRM_STATE_ID,
-            data: db,
+            data: getCloudSafeDB(),
             updated_by: cloudUserId,
             updated_at: new Date().toISOString()
           });
@@ -1824,7 +1942,6 @@
 
         cloudReady = true;
         startRealtimeSync();
-        toast("CRM conectado ao Supabase.");
       } catch (e) {
         console.error(e);
         toast("Falha ao iniciar sincronização online.");
@@ -1835,7 +1952,7 @@
       const client = window.supabaseClient;
       if (!client || realtimeChannel) return;
 
-      realtimeChannel = client.channel("leads-imoveis-crm-sync-v5")
+      realtimeChannel = client.channel("leads-imoveis-crm-sync-v6")
         .on("postgres_changes", {
           event: "*",
           schema: "public",
@@ -1843,11 +1960,22 @@
           filter: `id=eq.${CRM_STATE_ID}`
         }, payload => {
           const next = payload.new?.data;
+
           if (!next) return;
           if (payload.new?.updated_by && payload.new.updated_by === cloudUserId) return;
 
+          const oldPhotos = {};
+          (db.imoveis || []).forEach(p => {
+            oldPhotos[p.id] = Array.isArray(p.photos) ? p.photos.filter(f => f.data) : [];
+          });
+
           db = normalizeDB(next);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+
+          db.imoveis.forEach(p => {
+            p.photos = oldPhotos[p.id] || [];
+          });
+
+          safeLocalSave(db);
           renderAll();
           renderChat();
           toast("Base atualizada pela equipe.");
@@ -1915,6 +2043,164 @@
       return db.clientes.slice().sort((a, b) => leadScore(b) - leadScore(a)).slice(0, 5);
     }
 
+    function getCoverPhoto(p) {
+      const photos = Array.isArray(p?.photos) ? p.photos.filter(f => f.data) : [];
+      return photos.find(f => f.cover) || photos[0] || null;
+    }
+
+    function photoStyle(p) {
+      const cover = getCoverPhoto(p);
+
+      if (cover?.data) {
+        return `background-image:url("${cover.data}")`;
+      }
+
+      return "";
+    }
+
+    function resizeImage(file, maxSize = 900, quality = 0.58) {
+      return new Promise((resolve, reject) => {
+        if (!file || !file.type || !file.type.startsWith("image/")) {
+          reject(new Error("Arquivo inválido."));
+          return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          const img = new Image();
+
+          img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height && width > maxSize) {
+              height = Math.round(height * maxSize / width);
+              width = maxSize;
+            } else if (height > maxSize) {
+              width = Math.round(width * maxSize / height);
+              height = maxSize;
+            }
+
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+
+            resolve(canvas.toDataURL("image/jpeg", quality));
+          };
+
+          img.onerror = () => reject(new Error("Erro ao carregar imagem."));
+          img.src = reader.result;
+        };
+
+        reader.onerror = () => reject(new Error("Erro ao ler imagem."));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function readSelectedPhotos(existingPhotos = []) {
+      const input = document.getElementById("p_fotos");
+      const files = Array.from(input?.files || []);
+      const photos = Array.isArray(existingPhotos) ? existingPhotos.filter(f => f.data) : [];
+
+      if (!files.length) return photos;
+
+      const remaining = Math.max(0, 4 - photos.length);
+      const limited = files.slice(0, remaining);
+
+      if (files.length > remaining) {
+        toast("Limite: 4 fotos por imóvel nesta versão leve.");
+      }
+
+      for (const file of limited) {
+        try {
+          const data = await resizeImage(file);
+
+          photos.push({
+            id: uid("foto"),
+            name: file.name || "foto-imovel.jpg",
+            data,
+            cover: photos.length === 0,
+            created: Date.now()
+          });
+        } catch (e) {
+          console.error(e);
+          toast("Uma foto não pôde ser carregada.");
+        }
+      }
+
+      if (photos.length && !photos.some(f => f.cover)) {
+        photos[0].cover = true;
+      }
+
+      return photos;
+    }
+
+    function renderPhotoGrid(p) {
+      const photos = Array.isArray(p?.photos) ? p.photos.filter(f => f.data) : [];
+
+      if (!photos.length) {
+        return `<div class="empty" style="margin-top:12px">Nenhuma foto adicionada ainda.</div>`;
+      }
+
+      return `
+        <div class="photo-grid">
+          ${photos.map(f => `
+            <div class="photo-item">
+              ${f.cover ? `<div class="cover-badge">CAPA</div>` : ""}
+              <div class="photo-img" style="background-image:url('${f.data}')"></div>
+              <div class="photo-actions">
+                <button class="btn btn-sm btn-ghost" type="button" onclick="setCoverPhoto('${p.id}', '${f.id}')">Capa</button>
+                <button class="btn btn-sm btn-danger" type="button" onclick="deletePhoto('${p.id}', '${f.id}')">Excluir</button>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function setCoverPhoto(propId, photoId) {
+      const p = db.imoveis.find(x => x.id === propId);
+      if (!p) return;
+
+      p.photos = Array.isArray(p.photos) ? p.photos : [];
+      p.photos.forEach(f => f.cover = f.id === photoId);
+
+      saveDB();
+      renderAll();
+
+      if (modal.open && currentEdit.id === propId) {
+        closeModal();
+        setTimeout(() => openImovelModal(propId), 80);
+      }
+
+      toast("Capa atualizada.");
+    }
+
+    function deletePhoto(propId, photoId) {
+      const p = db.imoveis.find(x => x.id === propId);
+      if (!p) return;
+
+      p.photos = (Array.isArray(p.photos) ? p.photos : []).filter(f => f.id !== photoId);
+
+      if (p.photos.length && !p.photos.some(f => f.cover)) {
+        p.photos[0].cover = true;
+      }
+
+      saveDB();
+      renderAll();
+
+      if (modal.open && currentEdit.id === propId) {
+        closeModal();
+        setTimeout(() => openImovelModal(propId), 80);
+      }
+
+      toast("Foto removida.");
+    }
+
     function renderAll() {
       renderCentral();
       renderKPIs();
@@ -1926,6 +2212,7 @@
       renderTasks();
       renderReports();
       renderChat();
+
       document.getElementById("notifDot").textContent = db.tarefas.length;
       document.getElementById("userNameTop").textContent = db.settings?.user || "Natan Alves";
       document.getElementById("aiHello").textContent = `${saudacao()}, ${db.settings?.user || "corretor"} 👋`;
@@ -1934,16 +2221,16 @@
     function renderCentral() {
       const el = document.getElementById("centralCorretor");
       const hot = getHotLeads();
-      const follow = db.clientes.slice().sort((a,b) => (a.updated || 0) - (b.updated || 0)).slice(0, 5);
       const pendingProps = db.imoveis.filter(p => !p.proximaAcao || p.etapa !== "Publicado");
       const totalVGV = db.imoveis.reduce((a, p) => a + (Number(p.valor) || 0), 0);
+      const noPhoto = db.imoveis.filter(p => !getCoverPhoto(p)).length;
 
       el.innerHTML = `
         <div class="central-head">
           <div>
             <small>Central do corretor</small>
             <h1>${saudacao()}, ${esc(db.settings?.user || "corretor")}. O que gera venda agora?</h1>
-            <p>Seu CRM está em modo copiloto: organize leads, follow-ups, captação, visitas e mensagens de WhatsApp em poucos toques.</p>
+            <p>CRM em modo copiloto: leads, follow-ups, imóveis, fotos, visitas e mensagens de WhatsApp em poucos toques.</p>
           </div>
           <span class="badge-online">IA grátis ativa</span>
         </div>
@@ -1961,8 +2248,8 @@
             <b>🏢</b><strong>Captação</strong><span>${pendingProps.length} imóveis para avançar</span>
           </button>
 
-          <button class="central-action" onclick="askAI('Vai chover hoje em Florianópolis? Melhor horário para visitas e fotos?')">
-            <b>☀️</b><strong>Clima</strong><span>Visitas, fotos e vídeos</span>
+          <button class="central-action" onclick="switchView('imoveis')">
+            <b>📸</b><strong>Fotos</strong><span>${noPhoto} imóveis sem foto</span>
           </button>
         </div>
 
@@ -1996,12 +2283,12 @@
 
             <div class="smart-row">
               <div class="smart-dot">⏱</div>
-              <div><b>${follow.length} follow-ups</b><span>Clientes para reativar</span></div>
+              <div><b>${db.clientes.length} leads</b><span>Clientes para acompanhar</span></div>
             </div>
 
             <div class="smart-row">
               <div class="smart-dot">📸</div>
-              <div><b>${pendingProps.length} imóveis</b><span>Captação, fotos ou anúncio pendente</span></div>
+              <div><b>${noPhoto} imóveis</b><span>Sem foto de capa</span></div>
             </div>
 
             <button class="btn btn-block" style="margin-top:10px" onclick="askAI('Crie um plano de 30 minutos para eu vender mais agora usando os dados do CRM.')">Organizar próximos 30 minutos</button>
@@ -2015,14 +2302,14 @@
       const leads = db.clientes.length;
       const hot = db.clientes.filter(c => leadScore(c) >= 70).length;
       const tasks = db.tarefas.length;
-      const vgv = db.imoveis.reduce((a, p) => a + (Number(p.valor) || 0), 0);
+      const photos = db.imoveis.reduce((a, p) => a + ((p.photos || []).filter(f => f.data).length), 0);
 
       const data = [
         ["♙", "Leads ativos", leads, "Acompanhar todos"],
         ["🔥", "Leads quentes", hot, "Prioridade agora"],
         ["⌂", "Imóveis", props, "Carteira ativa"],
-        ["☑", "Tarefas", tasks, "Follow-up"],
-        ["R$", "VGV", money(vgv), "Potencial"]
+        ["📸", "Fotos", photos, "Imagens salvas"],
+        ["☑", "Tarefas", tasks, "Follow-up"]
       ];
 
       const html = data.map(k => `
@@ -2050,11 +2337,13 @@
     function renderPriorities() {
       const el = document.getElementById("priorityList");
       const hot = getHotLeads();
+      const noPhoto = db.imoveis.filter(p => !getCoverPhoto(p)).length;
+
       const tasks = [
         `Responder ${hot.length} leads mais quentes.`,
         "Confirmar visitas de hoje e amanhã.",
         "Reativar leads parados com mensagem curta.",
-        "Criar anúncio para imóvel mais forte.",
+        `Adicionar fotos em ${noPhoto} imóveis sem capa.`,
         "Atualizar próximos contatos no CRM."
       ];
 
@@ -2134,9 +2423,16 @@
     }
 
     function propertyCard(p) {
+      const photos = Array.isArray(p.photos) ? p.photos.filter(f => f.data) : [];
+      const cover = getCoverPhoto(p);
+      const style = photoStyle(p);
+
       return `
         <div class="property-card">
-          <div class="pc-img"></div>
+          <div class="pc-img" style="${style}">
+            <span class="photo-count">${photos.length ? `📸 ${photos.length}` : "Sem foto"}</span>
+          </div>
+
           <div class="pc-body">
             <h3>${esc(p.titulo)}</h3>
             <p>${esc(p.bairro || "-")}, ${esc(p.cidade || "Florianópolis")}</p>
@@ -2146,6 +2442,7 @@
             <div>
               <span class="pill gold">${esc(p.tipo || "Imóvel")}</span>
               <span class="pill green">${esc(p.etapa || "Ativo")}</span>
+              ${cover ? `<span class="pill">Foto de capa</span>` : `<span class="pill red">Adicionar foto</span>`}
             </div>
 
             <div class="actions">
@@ -2236,6 +2533,8 @@
       document.querySelectorAll("#mobileNav button").forEach(b => b.classList.toggle("active", b.dataset.view === view));
 
       document.getElementById("sidebar").classList.remove("open");
+      document.getElementById("rightbar").classList.remove("open");
+
       renderAll();
     }
 
@@ -2283,7 +2582,7 @@
         <button class="btn" onclick="saveLead()">Salvar lead</button>
       `;
 
-      modal.showModal();
+      openModal();
     }
 
     function saveLead() {
@@ -2351,6 +2650,18 @@
           <div class="field"><label>Proprietário</label><input id="p_prop" value="${esc(p?.prop || "")}"></div>
           <div class="field"><label>Telefone proprietário</label><input id="p_tel" value="${esc(p?.tel || "")}"></div>
           <div class="field full"><label>Próxima ação</label><textarea id="p_acao">${esc(p?.proximaAcao || "")}</textarea></div>
+
+          <div class="field full">
+            <label>Fotos do imóvel</label>
+
+            <label class="photo-box">
+              <input id="p_fotos" type="file" accept="image/*" multiple>
+              <b>📸 Clique para adicionar fotos</b>
+              <small>Use até 4 fotos por imóvel. O CRM comprime automaticamente para não travar no celular.</small>
+            </label>
+
+            ${id ? renderPhotoGrid(p) : `<div class="empty" style="margin-top:12px">Escolha fotos e clique em salvar. Elas aparecerão no card do imóvel.</div>`}
+          </div>
         </div>
       `;
 
@@ -2360,13 +2671,16 @@
         <button class="btn" onclick="saveImovel()">Salvar imóvel</button>
       `;
 
-      modal.showModal();
+      openModal();
     }
 
-    function saveImovel() {
+    async function saveImovel() {
       const id = currentEdit.id || uid("imv");
+      const old = db.imoveis.find(x => x.id === id) || {};
+      const photos = await readSelectedPhotos(old.photos || []);
 
       const data = {
+        ...old,
         id,
         titulo: document.getElementById("p_titulo").value.trim(),
         tipo: document.getElementById("p_tipo").value,
@@ -2381,6 +2695,7 @@
         prop: document.getElementById("p_prop").value.trim(),
         tel: document.getElementById("p_tel").value.trim(),
         proximaAcao: document.getElementById("p_acao").value.trim(),
+        photos,
         updated: Date.now()
       };
 
@@ -2390,8 +2705,12 @@
       }
 
       const idx = db.imoveis.findIndex(x => x.id === id);
-      if (idx >= 0) db.imoveis[idx] = data;
-      else db.imoveis.unshift(data);
+
+      if (idx >= 0) {
+        db.imoveis[idx] = data;
+      } else {
+        db.imoveis.unshift(data);
+      }
 
       saveDB();
       closeModal();
@@ -2408,8 +2727,14 @@
       toast("Imóvel excluído.");
     }
 
+    function openModal() {
+      if (typeof modal.showModal === "function") modal.showModal();
+      else modal.setAttribute("open", "open");
+    }
+
     function closeModal() {
-      modal.close();
+      if (modal.open && typeof modal.close === "function") modal.close();
+      else modal.removeAttribute("open");
     }
 
     function globalSearch() {
@@ -2492,14 +2817,14 @@
 
         const payload = {
           question,
-          crm_state: db,
+          crm_state: getCloudSafeDB(),
           history: db.chat.slice(-10).map(m => ({
             role: m.role === "user" ? "user" : "assistant",
             content: m.content
           }))
         };
 
-        const res = await fetch("https://zyfbgydbwsvbaogbxzrd.functions.supabase.co/crm-ai-assistant", {
+        const res = await fetch(EDGE_FUNCTION_URL, {
           method: "POST",
           headers,
           body: JSON.stringify(payload)
@@ -2530,7 +2855,7 @@
 
         saveDB();
         renderChat();
-        toggleAI();
+        document.getElementById("rightbar").classList.add("open");
       } catch (e) {
         console.error(e);
 
@@ -2541,7 +2866,7 @@
 
         saveDB();
         renderChat();
-        toggleAI();
+        document.getElementById("rightbar").classList.add("open");
       }
     }
 
@@ -2582,8 +2907,6 @@ ${p.titulo}
 
 Imóvel exclusivo em ${p.bairro}, Florianópolis, com ${p.area || "-"} m², ${p.suites || p.dormitorios || "-"} suítes/dormitórios e ${p.vagas || "-"} vagas.
 
-Um imóvel pensado para quem busca conforto, sofisticação e localização estratégica.
-
 Valor: ${money(p.valor)}
 
 Entre em contato para receber mais detalhes ou agendar uma visita.`;
@@ -2591,474 +2914,7 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
 
       return "Resposta não está disponível no momento.";
     }
-<script>
-// ========================================================
-// MÓDULO DE FOTOS DOS IMÓVEIS — LEADS IMÓVEIS CRM V5
-// Cole este bloco antes de: async function logout()
-// ========================================================
 
-(function injectPhotoStyles(){
-  if (document.getElementById("crmPhotoStyles")) return;
-
-  const style = document.createElement("style");
-  style.id = "crmPhotoStyles";
-  style.textContent = `
-    .photo-upload-box{
-      border:1px dashed rgba(216,181,109,.38);
-      background:rgba(216,181,109,.055);
-      border-radius:16px;
-      padding:14px;
-      text-align:center;
-      cursor:pointer;
-      transition:.18s;
-    }
-
-    .photo-upload-box:hover{
-      border-color:rgba(216,181,109,.75);
-      background:rgba(216,181,109,.09);
-    }
-
-    .photo-upload-box b{
-      display:block;
-      font-size:13px;
-      color:#fff3cf;
-      margin-bottom:4px;
-    }
-
-    .photo-upload-box small{
-      color:var(--mut);
-      font-size:12px;
-    }
-
-    .photo-upload-box input{
-      display:none;
-    }
-
-    .crm-photo-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
-      gap:10px;
-      margin-top:12px;
-    }
-
-    .crm-photo-item{
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.035);
-      border-radius:14px;
-      overflow:hidden;
-      position:relative;
-    }
-
-    .crm-photo-img{
-      height:95px;
-      background-size:cover;
-      background-position:center;
-      background-color:#15161a;
-    }
-
-    .crm-photo-actions{
-      display:flex;
-      gap:6px;
-      padding:7px;
-    }
-
-    .crm-photo-actions button{
-      flex:1;
-      font-size:10px!important;
-      padding:6px!important;
-      border-radius:8px!important;
-    }
-
-    .crm-cover-badge{
-      position:absolute;
-      top:6px;
-      left:6px;
-      background:rgba(216,181,109,.92);
-      color:#141006;
-      border-radius:999px;
-      padding:3px 7px;
-      font-size:10px;
-      font-weight:900;
-      z-index:2;
-    }
-
-    .pc-img.has-photo{
-      background-size:cover!important;
-      background-position:center!important;
-    }
-
-    .pc-img.has-photo::after{
-      background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.78));
-    }
-
-    @media(max-width:620px){
-      .crm-photo-grid{
-        grid-template-columns:repeat(2,1fr);
-      }
-
-      .crm-photo-img{
-        height:120px;
-      }
-    }
-  `;
-  document.head.appendChild(style);
-})();
-
-function ensurePhotos(prop){
-  if (!prop) return [];
-  if (!Array.isArray(prop.photos)) prop.photos = [];
-  return prop.photos;
-}
-
-function getCoverPhoto(prop){
-  const photos = ensurePhotos(prop);
-  return photos.find(p => p.cover) || photos[0] || null;
-}
-
-function getPhotoBackground(prop){
-  const cover = getCoverPhoto(prop);
-
-  if (cover && cover.data) {
-    return `background-image:url('${String(cover.data).replace(/'/g, "%27")}')`;
-  }
-
-  return "background:radial-gradient(circle at 70% 30%, rgba(216,181,109,.25), transparent 30%), linear-gradient(135deg, #2b2e34, #0c0d0f);";
-}
-
-function resizeImageToDataURL(file, maxSize = 1400, quality = 0.72){
-  return new Promise((resolve, reject) => {
-    if (!file || !file.type || !file.type.startsWith("image/")) {
-      reject(new Error("Arquivo inválido."));
-      return;
-    }
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      const img = new Image();
-
-      img.onload = () => {
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height && width > maxSize) {
-          height = Math.round(height * maxSize / width);
-          width = maxSize;
-        } else if (height > maxSize) {
-          width = Math.round(width * maxSize / height);
-          height = maxSize;
-        }
-
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-
-        const dataUrl = canvas.toDataURL("image/jpeg", quality);
-        resolve(dataUrl);
-      };
-
-      img.onerror = () => reject(new Error("Não foi possível carregar a imagem."));
-      img.src = reader.result;
-    };
-
-    reader.onerror = () => reject(new Error("Erro ao ler arquivo."));
-    reader.readAsDataURL(file);
-  });
-}
-
-async function getPhotosFromInput(inputId, existingPhotos){
-  const input = document.getElementById(inputId);
-  const files = Array.from(input?.files || []);
-
-  if (!files.length) return existingPhotos || [];
-
-  const photos = Array.isArray(existingPhotos) ? [...existingPhotos] : [];
-
-  if (photos.length + files.length > 8) {
-    toast("Use no máximo 8 fotos por imóvel nesta versão grátis.");
-  }
-
-  const limitedFiles = files.slice(0, Math.max(0, 8 - photos.length));
-
-  for (const file of limitedFiles) {
-    try {
-      const data = await resizeImageToDataURL(file);
-
-      photos.push({
-        id: uid("foto"),
-        name: file.name || "foto-imovel.jpg",
-        data,
-        cover: photos.length === 0,
-        created: Date.now()
-      });
-    } catch (e) {
-      console.error(e);
-      toast("Uma foto não pôde ser carregada.");
-    }
-  }
-
-  if (photos.length && !photos.some(p => p.cover)) {
-    photos[0].cover = true;
-  }
-
-  return photos;
-}
-
-function renderPhotoPreview(prop){
-  const photos = ensurePhotos(prop);
-
-  if (!photos.length) {
-    return `
-      <div class="empty" style="margin-top:12px">
-        Nenhuma foto adicionada ainda. Escolha fotos do imóvel para aparecerem no card.
-      </div>
-    `;
-  }
-
-  return `
-    <div class="crm-photo-grid">
-      ${photos.map(photo => `
-        <div class="crm-photo-item">
-          ${photo.cover ? `<div class="crm-cover-badge">CAPA</div>` : ""}
-          <div class="crm-photo-img" style="background-image:url('${String(photo.data || "").replace(/'/g, "%27")}')"></div>
-          <div class="crm-photo-actions">
-            <button class="btn btn-sm btn-ghost" type="button" onclick="setCoverPhoto('${prop.id}','${photo.id}')">Capa</button>
-            <button class="btn btn-sm btn-danger" type="button" onclick="deletePropertyPhoto('${prop.id}','${photo.id}')">Excluir</button>
-          </div>
-        </div>
-      `).join("")}
-    </div>
-  `;
-}
-
-function setCoverPhoto(propId, photoId){
-  const prop = db.imoveis.find(p => p.id === propId);
-  if (!prop) return;
-
-  ensurePhotos(prop).forEach(p => p.cover = p.id === photoId);
-
-  saveDB();
-  renderAll();
-
-  if (modal.open && currentEdit.id === propId) {
-    closeModal();
-    setTimeout(() => openImovelModal(propId), 80);
-  }
-
-  toast("Foto de capa atualizada.");
-}
-
-function deletePropertyPhoto(propId, photoId){
-  const prop = db.imoveis.find(p => p.id === propId);
-  if (!prop) return;
-
-  prop.photos = ensurePhotos(prop).filter(p => p.id !== photoId);
-
-  if (prop.photos.length && !prop.photos.some(p => p.cover)) {
-    prop.photos[0].cover = true;
-  }
-
-  saveDB();
-  renderAll();
-
-  if (modal.open && currentEdit.id === propId) {
-    closeModal();
-    setTimeout(() => openImovelModal(propId), 80);
-  }
-
-  toast("Foto removida.");
-}
-
-function askAIForProperty(propId){
-  const p = db.imoveis.find(x => x.id === propId);
-  if (!p) return;
-
-  askAI(
-    `Crie um anúncio premium para este imóvel: ${p.titulo}, localizado em ${p.bairro}, ${p.cidade || "Florianópolis"}, valor ${money(p.valor)}, área ${p.area || "-"} m², ${p.suites || p.dormitorios || "-"} suítes/dormitórios e ${p.vagas || "-"} vagas.`
-  );
-}
-
-// Sobrescreve o card do imóvel para mostrar foto de capa
-function propertyCard(p) {
-  const cover = getCoverPhoto(p);
-  const photoClass = cover?.data ? "has-photo" : "";
-
-  return `
-    <div class="property-card">
-      <div class="pc-img ${photoClass}" style="${getPhotoBackground(p)}"></div>
-      <div class="pc-body">
-        <h3>${esc(p.titulo)}</h3>
-        <p>${esc(p.bairro || "-")}, ${esc(p.cidade || "Florianópolis")}</p>
-        <p>${esc(p.area || "-")} m² · ${esc(p.suites || p.dormitorios || "-")} suítes/dorm. · ${esc(p.vagas || "-")} vagas</p>
-        <p class="price">${money(p.valor)}</p>
-
-        <div>
-          <span class="pill gold">${esc(p.tipo || "Imóvel")}</span>
-          <span class="pill green">${esc(p.etapa || "Ativo")}</span>
-          ${cover?.data ? `<span class="pill">📸 ${ensurePhotos(p).length} foto(s)</span>` : `<span class="pill red">Sem foto</span>`}
-        </div>
-
-        <div class="actions">
-          <button class="btn btn-sm" onclick="askAIForProperty('${p.id}')">Anúncio IA</button>
-          <button class="btn btn-sm btn-ghost" onclick="openImovelModal('${p.id}')">Editar</button>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-// Sobrescreve o modal de imóvel adicionando upload de fotos
-function openImovelModal(id = null) {
-  currentEdit = { type: "imovel", id };
-  const p = id ? db.imoveis.find(x => x.id === id) : {};
-
-  document.getElementById("modalTitle").textContent = id ? "Editar imóvel" : "Novo imóvel";
-
-  document.getElementById("modalBody").innerHTML = `
-    <div class="form-grid">
-      <div class="field full">
-        <label>Título</label>
-        <input id="p_titulo" value="${esc(p?.titulo || "")}">
-      </div>
-
-      <div class="field">
-        <label>Tipo</label>
-        <select id="p_tipo">${TYPES.map(x => `<option ${p?.tipo === x ? "selected" : ""}>${esc(x)}</option>`).join("")}</select>
-      </div>
-
-      <div class="field">
-        <label>Bairro</label>
-        <input id="p_bairro" value="${esc(p?.bairro || "")}">
-      </div>
-
-      <div class="field">
-        <label>Cidade</label>
-        <input id="p_cidade" value="${esc(p?.cidade || "Florianópolis")}">
-      </div>
-
-      <div class="field">
-        <label>Valor</label>
-        <input id="p_valor" type="number" value="${esc(p?.valor || "")}">
-      </div>
-
-      <div class="field">
-        <label>Área m²</label>
-        <input id="p_area" type="number" value="${esc(p?.area || "")}">
-      </div>
-
-      <div class="field">
-        <label>Dormitórios</label>
-        <input id="p_dorm" type="number" value="${esc(p?.dormitorios || "")}">
-      </div>
-
-      <div class="field">
-        <label>Suítes</label>
-        <input id="p_suites" type="number" value="${esc(p?.suites || "")}">
-      </div>
-
-      <div class="field">
-        <label>Vagas</label>
-        <input id="p_vagas" type="number" value="${esc(p?.vagas || "")}">
-      </div>
-
-      <div class="field">
-        <label>Etapa</label>
-        <select id="p_etapa">${["Captação","Captado","Publicado","Vendido","Pausado"].map(x => `<option ${p?.etapa === x ? "selected" : ""}>${x}</option>`).join("")}</select>
-      </div>
-
-      <div class="field">
-        <label>Proprietário</label>
-        <input id="p_prop" value="${esc(p?.prop || "")}">
-      </div>
-
-      <div class="field">
-        <label>Telefone proprietário</label>
-        <input id="p_tel" value="${esc(p?.tel || "")}">
-      </div>
-
-      <div class="field full">
-        <label>Próxima ação</label>
-        <textarea id="p_acao">${esc(p?.proximaAcao || "")}</textarea>
-      </div>
-
-      <div class="field full">
-        <label>Fotos do imóvel</label>
-
-        <label class="photo-upload-box">
-          <input id="p_fotos" type="file" accept="image/*" multiple>
-          <b>📸 Clique para adicionar fotos</b>
-          <small>Use até 8 fotos por imóvel. Elas serão comprimidas para rodar melhor no celular.</small>
-        </label>
-
-        ${id ? renderPhotoPreview(p) : `
-          <div class="empty" style="margin-top:12px">
-            Após salvar, as fotos aparecerão no card do imóvel.
-          </div>
-        `}
-      </div>
-    </div>
-  `;
-
-  document.getElementById("modalFoot").innerHTML = `
-    ${id ? `<button class="btn btn-danger" onclick="deleteImovel('${id}')">Excluir</button>` : ""}
-    <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-    <button class="btn" onclick="saveImovel()">Salvar imóvel</button>
-  `;
-
-  modal.showModal();
-}
-
-// Sobrescreve o salvamento do imóvel para salvar fotos
-async function saveImovel() {
-  const id = currentEdit.id || uid("imv");
-  const old = db.imoveis.find(x => x.id === id) || {};
-
-  let photos = ensurePhotos(old);
-
-  photos = await getPhotosFromInput("p_fotos", photos);
-
-  const data = {
-    ...old,
-    id,
-    titulo: document.getElementById("p_titulo").value.trim(),
-    tipo: document.getElementById("p_tipo").value,
-    bairro: document.getElementById("p_bairro").value.trim(),
-    cidade: document.getElementById("p_cidade").value.trim(),
-    valor: Number(document.getElementById("p_valor").value || 0),
-    area: Number(document.getElementById("p_area").value || 0),
-    dormitorios: Number(document.getElementById("p_dorm").value || 0),
-    suites: Number(document.getElementById("p_suites").value || 0),
-    vagas: Number(document.getElementById("p_vagas").value || 0),
-    etapa: document.getElementById("p_etapa").value,
-    prop: document.getElementById("p_prop").value.trim(),
-    tel: document.getElementById("p_tel").value.trim(),
-    proximaAcao: document.getElementById("p_acao").value.trim(),
-    photos,
-    updated: Date.now()
-  };
-
-  if (!data.titulo) {
-    toast("Digite o título do imóvel.");
-    return;
-  }
-
-  const idx = db.imoveis.findIndex(x => x.id === id);
-
-  if (idx >= 0) {
-    db.imoveis[idx] = data;
-  } else {
-    db.imoveis.unshift(data);
-  }
-
-  saveDB();
-  closeModal();
-  renderAll();
-  toast("Imóvel salvo com fotos.");
-}
-</script>
     async function logout() {
       if (window.supabaseClient) {
         await window.supabaseClient.auth.signOut();
@@ -3146,4 +3002,4 @@ async function saveImovel() {
     window.addEventListener("load", init);
   </script>
 </body>
-</html>Commit changes
+</html>
