@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5289,6 +5290,404 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
   setInterval(updateClock, 1000);
   setTimeout(startClock, 600);
   setTimeout(startClock, 1800);
+})();
+</script>
+
+<script id="crmTeamIsolationPatch2026">
+(function(){
+  "use strict";
+
+  var ADMIN_EMAIL = "leadsimoveisoficial@gmail.com";
+  var PROFILE_TABLE = "user_profiles";
+  var STATE_TABLE = "crm_state";
+
+  function nowISO(){ return new Date().toISOString(); }
+  function lowerEmail(email){ return String(email || "").trim().toLowerCase(); }
+  function isAdminEmail(email){ return lowerEmail(email) === lowerEmail(ADMIN_EMAIL); }
+  function stateIdForUser(userId){ return "leads-imoveis-user-" + userId; }
+  function htmlSafe(value){
+    return String(value == null ? "" : value).replace(/[&<>"']/g, function(ch){
+      return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[ch];
+    });
+  }
+  function jsSafe(value){
+    return String(value == null ? "" : value).replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/\n/g, " ").replace(/\r/g, " ");
+  }
+
+  function emptyCRM(name, email, role){
+    var base = (typeof seedData === "function") ? normalizeDB(seedData()) : { settings: {}, imoveis: [], clientes: [], tarefas: [], chat: [] };
+    base.settings = base.settings || {};
+    base.settings.user = name || (email ? String(email).split("@")[0] : "Corretor");
+    base.settings.email = email || "";
+    base.settings.role = role || "corretor";
+    base.imoveis = [];
+    base.clientes = [];
+    base.tarefas = [];
+    base.chat = [];
+    return normalizeDB(base);
+  }
+
+  function applyIdentity(profile){
+    profile = profile || {};
+    var role = profile.role || (isAdminEmail(profile.email) ? "admin" : "corretor");
+    var name = profile.full_name || (profile.email ? String(profile.email).split("@")[0] : "Corretor");
+    var photo = profile.avatar_data || profile.avatar_url || "";
+
+    cloudUserProfile = profile;
+    cloudUserRole = role;
+    cloudUserEmail = profile.email || cloudUserEmail || "";
+
+    window.__LEADS_CURRENT_USER_ROLE__ = role;
+    window.__LEADS_CURRENT_USER_PROFILE__ = profile;
+
+    if (db && db.settings) {
+      db.settings.user = name;
+      db.settings.email = cloudUserEmail;
+      db.settings.role = role;
+    }
+
+    try {
+      if (cloudUserId) {
+        localStorage.setItem("leads_crm_profile_name_v1_" + cloudUserId, name);
+        if (photo) localStorage.setItem("leads_crm_profile_photo_v1_" + cloudUserId, photo);
+      }
+    } catch(e) {}
+
+    var topName = document.getElementById("userNameTop");
+    if (topName) topName.textContent = name;
+
+    var roleSpan = document.querySelector(".user span");
+    if (roleSpan) roleSpan.textContent = role === "admin" ? "Administrador" : "Corretor";
+
+    if (typeof applyUserProfile === "function") applyUserProfile();
+    if (typeof applyLogoAndAIName === "function") applyLogoAndAIName();
+  }
+
+  async function getOrCreateProfile(client, session){
+    var user = session.user;
+    var email = lowerEmail(user && user.email);
+    var defaultName = (user && user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || (email ? email.split("@")[0] : "Corretor");
+    var defaultRole = isAdminEmail(email) ? "admin" : "corretor";
+
+    var read = await client
+      .from(PROFILE_TABLE)
+      .select("id,email,full_name,avatar_data,avatar_url,role,approved,active,updated_at")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (read.error) throw read.error;
+
+    if (!read.data) {
+      var inserted = await client.from(PROFILE_TABLE).insert({
+        id: user.id,
+        email: email,
+        full_name: defaultName,
+        role: defaultRole,
+        approved: true,
+        active: true,
+        created_at: nowISO(),
+        updated_at: nowISO(),
+        last_login_at: nowISO()
+      }).select("id,email,full_name,avatar_data,avatar_url,role,approved,active,updated_at").maybeSingle();
+
+      if (inserted.error) {
+        console.warn("Perfil já existia ou não pôde ser criado:", inserted.error);
+      } else if (inserted.data) {
+        return inserted.data;
+      }
+
+      read = await client
+        .from(PROFILE_TABLE)
+        .select("id,email,full_name,avatar_data,avatar_url,role,approved,active,updated_at")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (read.error) throw read.error;
+    } else {
+      await client.from(PROFILE_TABLE).update({
+        email: email,
+        last_login_at: nowISO(),
+        updated_at: nowISO()
+      }).eq("id", user.id);
+    }
+
+    var profile = read.data || {
+      id: user.id,
+      email: email,
+      full_name: defaultName,
+      role: defaultRole,
+      approved: true,
+      active: true
+    };
+
+    if (isAdminEmail(email)) profile.role = "admin";
+    return profile;
+  }
+
+  async function loadStateForOwner(ownerId, ownerProfile, createIfMissing){
+    var client = window.supabaseClient;
+    if (!client || !ownerId) return false;
+
+    window.__LEADS_ACTIVE_OWNER_USER_ID__ = ownerId;
+    CRM_STATE_ID = stateIdForUser(ownerId);
+
+    var result = await client
+      .from(STATE_TABLE)
+      .select("id,user_id,data,updated_at,updated_by")
+      .eq("id", CRM_STATE_ID)
+      .maybeSingle();
+
+    if (result.error) throw result.error;
+
+    if (result.data && result.data.data) {
+      db = normalizeDB(result.data.data);
+      if (ownerProfile && db.settings) {
+        db.settings.user = ownerProfile.full_name || ownerProfile.email || db.settings.user || "Corretor";
+        db.settings.email = ownerProfile.email || db.settings.email || "";
+        db.settings.role = ownerProfile.role || db.settings.role || "corretor";
+      }
+      safeLocalSave(db);
+      return true;
+    }
+
+    if (!createIfMissing) return false;
+
+    db = emptyCRM(
+      ownerProfile && ownerProfile.full_name,
+      ownerProfile && ownerProfile.email,
+      ownerProfile && ownerProfile.role
+    );
+    safeLocalSave(db);
+
+    await client.from(STATE_TABLE).upsert({
+      id: CRM_STATE_ID,
+      user_id: ownerId,
+      data: getCloudSafeDB(),
+      updated_by: cloudUserId,
+      created_at: nowISO(),
+      updated_at: nowISO()
+    }, { onConflict: "id" });
+
+    return true;
+  }
+
+  window.initCloudSync = async function(){
+    var client = window.supabaseClient;
+    if (!client) {
+      console.warn("Supabase não configurado. Usando modo local.");
+      return;
+    }
+
+    try {
+      var sessionResult = await client.auth.getSession();
+      var session = sessionResult && sessionResult.data && sessionResult.data.session;
+      if (!session || !session.user) {
+        location.href = "login.html";
+        return;
+      }
+
+      cloudUserId = session.user.id;
+      cloudUserEmail = lowerEmail(session.user.email);
+      window.__LEADS_CURRENT_USER_ID__ = cloudUserId;
+      window.__LEADS_CURRENT_USER_EMAIL__ = cloudUserEmail;
+      window.__LEADS_ACTIVE_OWNER_USER_ID__ = cloudUserId;
+      CRM_STATE_ID = stateIdForUser(cloudUserId);
+
+      var profile = await getOrCreateProfile(client, session);
+      applyIdentity(profile);
+
+      if (profile.active === false || profile.approved === false) {
+        document.body.innerHTML = '<div style="min-height:100vh;display:grid;place-items:center;background:#050506;color:#f7f4ed;font-family:Arial;padding:24px;text-align:center"><div style="max-width:520px;border:1px solid rgba(216,181,109,.35);border-radius:22px;padding:28px;background:#101114"><h1>Acesso pendente</h1><p style="color:#bbb;line-height:1.5">Sua conta foi criada, mas precisa ser liberada pelo administrador da Leads Imóveis.</p><button onclick="logout()" style="margin-top:18px;padding:12px 16px;border-radius:12px;border:1px solid #d8b56d;background:#2a210f;color:#fff">Sair</button></div></div>';
+        return;
+      }
+
+      await loadStateForOwner(cloudUserId, profile, true);
+      cloudReady = true;
+      startRealtimeSync();
+    } catch(error) {
+      console.error(error);
+      toast("Falha ao carregar conta individual do corretor. Confira o SQL do Supabase.");
+    }
+  };
+
+  window.saveDBToCloud = async function(showMessage){
+    var client = window.supabaseClient;
+    if (!client || !cloudUserId) {
+      if (showMessage) toast("Supabase não configurado ou usuário sem login.");
+      return;
+    }
+
+    try {
+      var ownerId = window.__LEADS_ACTIVE_OWNER_USER_ID__ || cloudUserId;
+      var stateId = stateIdForUser(ownerId);
+      CRM_STATE_ID = stateId;
+
+      var result = await client.from(STATE_TABLE).upsert({
+        id: stateId,
+        user_id: ownerId,
+        data: getCloudSafeDB(),
+        updated_by: cloudUserId,
+        updated_at: nowISO()
+      }, { onConflict: "id" });
+
+      if (result.error) {
+        console.error(result.error);
+        if (showMessage) toast("Erro ao salvar no Supabase. Verifique as políticas RLS.");
+        return;
+      }
+
+      if (showMessage) toast("CRM salvo na conta correta.");
+    } catch(error) {
+      console.error(error);
+      if (showMessage) toast("Falha ao sincronizar conta individual.");
+    }
+  };
+
+  window.startRealtimeSync = function(){
+    var client = window.supabaseClient;
+    if (!client || !CRM_STATE_ID) return;
+
+    try {
+      if (realtimeChannel && client.removeChannel) client.removeChannel(realtimeChannel);
+    } catch(e) {}
+    realtimeChannel = null;
+
+    realtimeChannel = client.channel("leads-crm-sync-" + String(CRM_STATE_ID).replace(/[^a-z0-9_-]/gi, "-") + "-" + Date.now())
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: STATE_TABLE,
+        filter: "id=eq." + CRM_STATE_ID
+      }, function(payload){
+        var next = payload.new && payload.new.data;
+        if (!next) return;
+        if (payload.new && payload.new.updated_by && payload.new.updated_by === cloudUserId) return;
+
+        db = normalizeDB(next);
+        safeLocalSave(db);
+        if (typeof renderAll === "function") renderAll();
+        if (typeof renderChat === "function") renderChat();
+        toast("Base atualizada em tempo real.");
+      })
+      .subscribe();
+  };
+
+  window.openCorretorCRMBase = async function(ownerId, ownerName, ownerEmail, ownerRole){
+    if (window.__LEADS_CURRENT_USER_ROLE__ !== "admin") {
+      toast("Somente administrador pode abrir a base de outro corretor.");
+      return;
+    }
+    try {
+      var profile = { id: ownerId, full_name: ownerName || "Corretor", email: ownerEmail || "", role: ownerRole || "corretor" };
+      var ok = await loadStateForOwner(ownerId, profile, false);
+      if (!ok) {
+        toast("Esse corretor ainda não abriu o CRM pela primeira vez.");
+        return;
+      }
+      cloudReady = true;
+      startRealtimeSync();
+      renderAll();
+      if (typeof runFinalFix === "function") runFinalFix();
+      toast("Visualizando CRM de " + (ownerName || ownerEmail || "corretor") + ".");
+    } catch(error) {
+      console.error(error);
+      toast("Não foi possível abrir a base desse corretor.");
+    }
+  };
+
+  window.backToMyCRMBase = async function(){
+    try {
+      await loadStateForOwner(cloudUserId, cloudUserProfile, true);
+      cloudReady = true;
+      startRealtimeSync();
+      renderAll();
+      if (typeof runFinalFix === "function") runFinalFix();
+      toast("Você voltou para sua própria base.");
+    } catch(error) {
+      console.error(error);
+      toast("Não foi possível voltar para sua base.");
+    }
+  };
+
+  window.loadTeamStatusAdmin = async function(){
+    var box = document.getElementById("teamStatusBox");
+    if (!box) return;
+    if (!window.supabaseClient) {
+      box.innerHTML = "Supabase não configurado.";
+      return;
+    }
+    if (window.__LEADS_CURRENT_USER_ROLE__ !== "admin") {
+      box.innerHTML = "Somente administrador pode ver a equipe.";
+      return;
+    }
+
+    box.innerHTML = "Carregando equipe...";
+
+    try {
+      var profilesResult = await window.supabaseClient
+        .from(PROFILE_TABLE)
+        .select("id,email,full_name,role,approved,active,updated_at")
+        .order("updated_at", { ascending: false });
+
+      var statesResult = await window.supabaseClient
+        .from(STATE_TABLE)
+        .select("id,user_id,data,updated_at")
+        .order("updated_at", { ascending: false });
+
+      if (profilesResult.error) throw profilesResult.error;
+      if (statesResult.error) throw statesResult.error;
+
+      var profiles = profilesResult.data || [];
+      var states = statesResult.data || [];
+      var stateMap = {};
+      states.forEach(function(row){ stateMap[row.user_id] = row; });
+
+      if (!profiles.length) {
+        box.innerHTML = '<div class="empty">Nenhum corretor encontrado.</div>';
+        return;
+      }
+
+      box.innerHTML =
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">' +
+          '<button class="btn btn-sm btn-ghost" type="button" onclick="backToMyCRMBase()">Voltar para minha base</button>' +
+        '</div>' +
+        '<div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">' +
+        '<thead><tr>' +
+          '<th style="text-align:left;padding:8px;border-bottom:1px solid rgba(255,255,255,.12)">Corretor</th>' +
+          '<th style="text-align:left;padding:8px;border-bottom:1px solid rgba(255,255,255,.12)">Função</th>' +
+          '<th style="text-align:left;padding:8px;border-bottom:1px solid rgba(255,255,255,.12)">Leads</th>' +
+          '<th style="text-align:left;padding:8px;border-bottom:1px solid rgba(255,255,255,.12)">Imóveis</th>' +
+          '<th style="text-align:left;padding:8px;border-bottom:1px solid rgba(255,255,255,.12)">Atualizado</th>' +
+          '<th style="text-align:left;padding:8px;border-bottom:1px solid rgba(255,255,255,.12)">Ação</th>' +
+        '</tr></thead><tbody>' +
+        profiles.map(function(p){
+          var st = stateMap[p.id];
+          var data = st && st.data ? st.data : {};
+          var leads = Array.isArray(data.clientes) ? data.clientes.length : 0;
+          var imoveis = Array.isArray(data.imoveis) ? data.imoveis.length : 0;
+          var status = p.active === false ? "Bloqueado" : (p.approved ? "Aprovado" : "Pendente");
+          var opened = st ? "" : " disabled";
+          return '<tr>' +
+            '<td style="padding:8px;border-bottom:1px solid rgba(255,255,255,.08)"><b>' + htmlSafe(p.full_name || p.email || "Usuário") + '</b><br><small>' + htmlSafe(p.email || "") + ' · ' + status + '</small></td>' +
+            '<td style="padding:8px;border-bottom:1px solid rgba(255,255,255,.08)">' + htmlSafe(p.role || "corretor") + '</td>' +
+            '<td style="padding:8px;border-bottom:1px solid rgba(255,255,255,.08)">' + leads + '</td>' +
+            '<td style="padding:8px;border-bottom:1px solid rgba(255,255,255,.08)">' + imoveis + '</td>' +
+            '<td style="padding:8px;border-bottom:1px solid rgba(255,255,255,.08)">' + htmlSafe(st && st.updated_at ? new Date(st.updated_at).toLocaleString("pt-BR") : "Ainda não abriu") + '</td>' +
+            '<td style="padding:8px;border-bottom:1px solid rgba(255,255,255,.08)"><button class="btn btn-sm" type="button"' + opened + ' onclick="openCorretorCRMBase(\'' + jsSafe(p.id) + '\',\'' + jsSafe(p.full_name || "") + '\',\'' + jsSafe(p.email || "") + '\',\'' + jsSafe(p.role || "corretor") + '\')">Abrir CRM</button></td>' +
+          '</tr>';
+        }).join("") + '</tbody></table></div>';
+    } catch(error) {
+      console.error(error);
+      box.innerHTML = "Não foi possível carregar a equipe. Confirme se o SQL/RLS foi aplicado e se seu e-mail admin é " + htmlSafe(ADMIN_EMAIL) + ".";
+    }
+  };
+
+  var oldRenderAll = window.renderAll;
+  window.renderAll = function(){
+    if (typeof oldRenderAll === "function") oldRenderAll();
+    var roleSpan = document.querySelector(".user span");
+    if (roleSpan) roleSpan.textContent = window.__LEADS_CURRENT_USER_ROLE__ === "admin" ? "Administrador" : "Corretor";
+    if (typeof injectAdminTeamPanel === "function") injectAdminTeamPanel();
+  };
 })();
 </script>
 
