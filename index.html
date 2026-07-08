@@ -1553,7 +1553,7 @@
                 <input id="importBackup" type="file" accept="application/json,.json" style="display:none" onchange="importBackup(event)" />
               </div>
               <p style="color:var(--mut);font-size:13px;line-height:1.5">
-                Versão gratuita inicial do Leads Imóveis CRM Copiloto IA. As fotos ficam salvas neste navegador para não travar o Supabase. Dados principais vão para o Supabase sem as imagens pesadas.
+                Versão gratuita inicial do Leads Imóveis CRM com Agente IA de Corretor. As fotos dos imóveis ficam no Supabase Storage quando o bucket está ativo; o CRM mantém backup local leve no navegador.
               </p>
             </div>
           </div>
@@ -3001,289 +3001,934 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
 
     window.addEventListener("load", init);
   </script>
-<style>
-/* AJUSTES FINAIS LIMPOS — FOTOS ONLINE + IA MOBILE */
-@media (max-width:980px){
-  .rightbar{
-    position:fixed!important;top:0!important;right:-100%!important;width:100vw!important;
-    max-width:100vw!important;height:100dvh!important;z-index:99999!important;
-    padding:0!important;background:rgba(6,7,9,.98)!important;transition:right .22s ease!important;
-    overflow-y:auto!important;box-shadow:-18px 0 70px rgba(0,0,0,.55)!important
-  }
-  .rightbar.open{right:0!important}
-  body.ai-open{overflow:hidden!important}
-  .rightbar .ai-card{min-height:100dvh!important;border-radius:0!important;border-left:0!important;border-right:0!important}
-  .rightbar .ai-head{
-    position:sticky!important;top:0!important;z-index:100000!important;background:rgba(6,7,9,.97)!important;
-    backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important;
-    border-bottom:1px solid rgba(216,181,109,.25)!important;padding:14px!important
-  }
-  .ai-close-mobile{
-    display:inline-flex!important;align-items:center!important;justify-content:center!important;
-    border:1px solid rgba(216,181,109,.45)!important;
-    background:linear-gradient(135deg,rgba(216,181,109,.28),rgba(216,181,109,.08))!important;
-    color:#fff3cf!important;border-radius:14px!important;padding:9px 12px!important;
-    font-weight:900!important;font-size:13px!important;margin-left:auto!important;white-space:nowrap!important
-  }
-  .mobile-ai-toggle{
-    display:grid!important;position:fixed!important;right:16px!important;
-    bottom:calc(88px + env(safe-area-inset-bottom,0px))!important;z-index:99998!important;
-    min-width:118px!important;width:auto!important;height:52px!important;border-radius:999px!important;
-    border:1px solid rgba(216,181,109,.44)!important;background:radial-gradient(circle,rgba(216,181,109,.36),#090909)!important;
-    color:#fff0bd!important;box-shadow:0 10px 30px rgba(0,0,0,.42)!important;
-    font-weight:900!important;padding:0 16px!important;font-size:13px!important
-  }
-  body.ai-open .mobile-ai-toggle{display:none!important}
-  .chat-log{max-height:52dvh!important}
-  .chat-form{position:sticky!important;bottom:0!important;background:rgba(6,7,9,.98)!important;z-index:99999!important}
+<style id="crmMasterFinal2026Style">
+/* =========================================================
+   LEADS IMÓVEIS CRM — FIX MASTER FINAL 2026
+   Fotos com carrossel, IA com horário correto, temas completos,
+   perfil do corretor com foto e IA mobile minimizável.
+========================================================= */
+
+/* IA ONLINE limpo, sem quadrado/ícone quebrado */
+.ai-head {
+  gap: 10px !important;
 }
-.ai-orb{font-size:13px!important;text-align:center!important;line-height:1.12!important;padding:8px!important}
+
+.ai-head h2 {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.ai-head img,
+.ai-head svg,
+.online img,
+.online svg {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.online {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+  color: var(--green) !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  letter-spacing: .6px !important;
+}
+
+.online::before {
+  content: "" !important;
+  width: 7px !important;
+  height: 7px !important;
+  border-radius: 50% !important;
+  background: var(--green) !important;
+  box-shadow: 0 0 10px rgba(101,214,121,.75) !important;
+  display: inline-block !important;
+}
+
+.online::after {
+  content: none !important;
+  display: none !important;
+}
+
+.ai-orb {
+  font-size: 13px !important;
+  text-align: center !important;
+  line-height: 1.12 !important;
+  padding: 8px !important;
+}
+
+.ai-close-mobile {
+  display: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+}
+
+/* Logos e foto do corretor */
+.brand-logo-fixed,
+.avatar-logo-fixed,
+.avatar-photo-fixed {
+  background: rgba(0,0,0,.32) !important;
+  border: 1px solid rgba(var(--theme-rgb, 216,181,109), .42) !important;
+  overflow: hidden !important;
+  display: grid !important;
+  place-items: center !important;
+}
+
+.brand-logo-fixed {
+  width: 58px !important;
+  height: 58px !important;
+  border-radius: 50% !important;
+  padding: 5px !important;
+}
+
+.avatar-logo-fixed,
+.avatar-photo-fixed {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 50% !important;
+  padding: 3px !important;
+  flex: 0 0 auto !important;
+}
+
+.avatar-photo-fixed {
+  padding: 0 !important;
+}
+
+.crm-logo-img,
+.crm-profile-img,
+.crm-profile-preview-img {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+}
+
+.crm-logo-img {
+  object-fit: contain !important;
+}
+
+/* Galeria dos imóveis */
+.pc-img {
+  background-size: cover !important;
+  background-position: center !important;
+  position: relative !important;
+}
+
+.pc-gallery {
+  touch-action: pan-y !important;
+  user-select: none !important;
+  cursor: grab !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+.pc-gallery:active {
+  cursor: grabbing !important;
+}
+
+.pc-gallery.has-photo {
+  background-image: var(--photo-bg) !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+.photo-count {
+  z-index: 5 !important;
+}
+
+.gallery-nav {
+  position: absolute !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 6 !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  border: 1px solid rgba(255,255,255,.25) !important;
+  background: rgba(0,0,0,.62) !important;
+  color: #fff !important;
+  display: grid !important;
+  place-items: center !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  font-size: 22px !important;
+  box-shadow: 0 8px 20px rgba(0,0,0,.35) !important;
+}
+
+.gallery-nav.prev { left: 10px !important; }
+.gallery-nav.next { right: 10px !important; }
+
+.gallery-dots {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: 11px !important;
+  transform: translateX(-50%) !important;
+  z-index: 6 !important;
+  display: flex !important;
+  gap: 5px !important;
+  max-width: 70% !important;
+  overflow: hidden !important;
+}
+
+.gallery-dot {
+  width: 7px !important;
+  height: 7px !important;
+  border-radius: 50% !important;
+  border: 1px solid rgba(255,255,255,.55) !important;
+  background: rgba(255,255,255,.22) !important;
+}
+
+.gallery-dot.active {
+  background: var(--gold) !important;
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 10px rgba(var(--theme-rgb,216,181,109),.55) !important;
+}
+
+.gallery-hint {
+  position: absolute !important;
+  right: 10px !important;
+  bottom: 10px !important;
+  z-index: 6 !important;
+  border-radius: 999px !important;
+  background: rgba(0,0,0,.58) !important;
+  border: 1px solid rgba(255,255,255,.15) !important;
+  color: rgba(255,255,255,.88) !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  padding: 5px 8px !important;
+}
+
+.photo-grid {
+  scroll-behavior: smooth !important;
+}
+
+/* Painel de temas e perfil */
+.theme-panel,
+.profile-panel {
+  margin-top: 16px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.025);
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.theme-panel h3,
+.profile-panel h3 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  margin-bottom: 6px;
+}
+
+.theme-panel p,
+.profile-panel p {
+  color: var(--mut);
+  font-size: 12px;
+  line-height: 1.45;
+  margin-bottom: 12px;
+}
+
+.theme-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255,255,255,.13);
+  background: rgba(0,0,0,.22);
+  color: #fff;
+  border-radius: 14px;
+  padding: 10px;
+  font-size: 12px !important;
+  font-weight: 900;
+}
+
+.theme-option.active {
+  border-color: rgba(var(--theme-rgb), .65) !important;
+  box-shadow: 0 0 0 3px rgba(var(--theme-rgb), .10) !important;
+}
+
+.theme-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.30);
+  flex: 0 0 auto;
+}
+
+.profile-editor {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+}
+
+.profile-preview {
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  border: 1px solid rgba(var(--theme-rgb,216,181,109),.42);
+  background: rgba(0,0,0,.28);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: var(--gold);
+  font-weight: 900;
+}
+
+.profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.profile-file-input {
+  display: none !important;
+}
+
+/* Temas completos */
+:root[data-crm-theme="gold"] {
+  --gold: #d8b56d;
+  --theme-rgb: 216,181,109;
+  --theme-bg-a: #050506;
+  --theme-bg-b: #0d0a04;
+  --theme-bg-c: #020202;
+  --theme-panel-a: rgba(216,181,109,.075);
+  --theme-panel-b: rgba(255,255,255,.018);
+  --theme-dark: rgba(5,5,6,.98);
+  --theme-dark2: rgba(12,10,7,.96);
+  --theme-line: rgba(216,181,109,.20);
+}
+
+:root[data-crm-theme="blue"] {
+  --gold: #60a5fa;
+  --theme-rgb: 96,165,250;
+  --theme-bg-a: #020716;
+  --theme-bg-b: #071527;
+  --theme-bg-c: #02040b;
+  --theme-panel-a: rgba(96,165,250,.095);
+  --theme-panel-b: rgba(147,197,253,.020);
+  --theme-dark: rgba(3,8,20,.98);
+  --theme-dark2: rgba(6,17,32,.96);
+  --theme-line: rgba(96,165,250,.22);
+}
+
+:root[data-crm-theme="green"] {
+  --gold: #34d399;
+  --theme-rgb: 52,211,153;
+  --theme-bg-a: #02120c;
+  --theme-bg-b: #06251a;
+  --theme-bg-c: #010805;
+  --theme-panel-a: rgba(52,211,153,.090);
+  --theme-panel-b: rgba(167,243,208,.018);
+  --theme-dark: rgba(2,14,10,.98);
+  --theme-dark2: rgba(5,26,18,.96);
+  --theme-line: rgba(52,211,153,.22);
+}
+
+:root[data-crm-theme="purple"] {
+  --gold: #a78bfa;
+  --theme-rgb: 167,139,250;
+  --theme-bg-a: #0b0618;
+  --theme-bg-b: #1a0f32;
+  --theme-bg-c: #04020a;
+  --theme-panel-a: rgba(167,139,250,.095);
+  --theme-panel-b: rgba(221,214,254,.018);
+  --theme-dark: rgba(10,6,22,.98);
+  --theme-dark2: rgba(23,13,43,.96);
+  --theme-line: rgba(167,139,250,.22);
+}
+
+:root[data-crm-theme="rose"] {
+  --gold: #fb7185;
+  --theme-rgb: 251,113,133;
+  --theme-bg-a: #17050b;
+  --theme-bg-b: #32101a;
+  --theme-bg-c: #080206;
+  --theme-panel-a: rgba(251,113,133,.090);
+  --theme-panel-b: rgba(255,228,230,.018);
+  --theme-dark: rgba(20,5,11,.98);
+  --theme-dark2: rgba(41,12,21,.96);
+  --theme-line: rgba(251,113,133,.22);
+}
+
+:root[data-crm-theme="ice"] {
+  --gold: #67e8f9;
+  --theme-rgb: 103,232,249;
+  --theme-bg-a: #021014;
+  --theme-bg-b: #08242b;
+  --theme-bg-c: #01070a;
+  --theme-panel-a: rgba(103,232,249,.090);
+  --theme-panel-b: rgba(207,250,254,.018);
+  --theme-dark: rgba(2,14,18,.98);
+  --theme-dark2: rgba(6,27,34,.96);
+  --theme-line: rgba(103,232,249,.22);
+}
+
+:root[data-crm-theme] body {
+  background:
+    radial-gradient(circle at 18% -10%, rgba(var(--theme-rgb), .22), transparent 34%),
+    radial-gradient(circle at 108% 8%, rgba(var(--theme-rgb), .12), transparent 31%),
+    linear-gradient(135deg, var(--theme-bg-a), var(--theme-bg-b) 52%, var(--theme-bg-c)) !important;
+}
+
+:root[data-crm-theme] .sidebar,
+:root[data-crm-theme] .rightbar {
+  background: linear-gradient(180deg, var(--theme-dark2), var(--theme-dark)) !important;
+  border-color: var(--theme-line) !important;
+}
+
+:root[data-crm-theme] .topbar,
+:root[data-crm-theme] .mobile-nav,
+:root[data-crm-theme] .modal,
+:root[data-crm-theme] .chat-form,
+:root[data-crm-theme] .rightbar .ai-head {
+  background: linear-gradient(135deg, var(--theme-dark2), var(--theme-dark)) !important;
+  border-color: var(--theme-line) !important;
+}
+
+:root[data-crm-theme] .panel,
+:root[data-crm-theme] .item-card,
+:root[data-crm-theme] .property-card,
+:root[data-crm-theme] .kpi,
+:root[data-crm-theme] .smart-box,
+:root[data-crm-theme] .central-action,
+:root[data-crm-theme] .theme-panel,
+:root[data-crm-theme] .profile-panel,
+:root[data-crm-theme] .photo-item,
+:root[data-crm-theme] .photo-box {
+  background: linear-gradient(145deg, var(--theme-panel-a), var(--theme-panel-b)) !important;
+  border-color: rgba(var(--theme-rgb), .18) !important;
+}
+
+:root[data-crm-theme] .central,
+:root[data-crm-theme] .ai-card,
+:root[data-crm-theme] .plan {
+  background:
+    radial-gradient(circle at 80% 10%, rgba(var(--theme-rgb), .18), transparent 34%),
+    linear-gradient(145deg, rgba(var(--theme-rgb), .10), rgba(255,255,255,.018)) !important;
+  border-color: rgba(var(--theme-rgb), .34) !important;
+}
+
+:root[data-crm-theme] input,
+:root[data-crm-theme] select,
+:root[data-crm-theme] textarea,
+:root[data-crm-theme] .theme-option,
+:root[data-crm-theme] .suggestion,
+:root[data-crm-theme] .msg.ai {
+  background: rgba(var(--theme-rgb), .045) !important;
+  border-color: rgba(var(--theme-rgb), .16) !important;
+}
+
+:root[data-crm-theme] .msg.me,
+:root[data-crm-theme] .pill.gold,
+:root[data-crm-theme] .badge-online {
+  background: rgba(var(--theme-rgb), .13) !important;
+  border-color: rgba(var(--theme-rgb), .28) !important;
+  color: #fff6dc !important;
+}
+
+:root[data-crm-theme] .pc-img:not(.has-photo) {
+  background:
+    radial-gradient(circle at 70% 30%, rgba(var(--theme-rgb), .28), transparent 31%),
+    linear-gradient(135deg, var(--theme-bg-b), var(--theme-bg-c)) !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+:root[data-crm-theme] .btn,
+:root[data-crm-theme] .nav button.active,
+:root[data-crm-theme] .nav button:hover,
+:root[data-crm-theme] .mobile-nav button.active,
+:root[data-crm-theme] .mobile-ai-toggle,
+:root[data-crm-theme] .ai-close-mobile {
+  background: linear-gradient(135deg, rgba(var(--theme-rgb), .30), rgba(var(--theme-rgb), .08)) !important;
+  border-color: rgba(var(--theme-rgb), .46) !important;
+  color: #fff7df !important;
+}
+
+:root[data-crm-theme] .ai-orb {
+  border-color: rgba(var(--theme-rgb), .65) !important;
+  background: radial-gradient(circle, rgba(var(--theme-rgb), .26), var(--theme-bg-c)) !important;
+  box-shadow: 0 0 30px rgba(var(--theme-rgb), .32) !important;
+}
+
+:root[data-crm-theme] .theme-option.active {
+  background: linear-gradient(135deg, rgba(var(--theme-rgb), .24), rgba(var(--theme-rgb), .06)) !important;
+  border-color: rgba(var(--theme-rgb), .70) !important;
+}
+
+/* IA mobile como janela minimizável */
+@media (max-width: 980px) {
+  input, select, textarea, button {
+    font-size: 16px !important;
+  }
+
+  .rightbar {
+    position: fixed !important;
+    top: 0 !important;
+    right: -100% !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    z-index: 99999 !important;
+    padding: 0 !important;
+    background: linear-gradient(180deg, var(--theme-dark2, rgba(6,7,9,.97)), var(--theme-dark, rgba(6,7,9,.98))) !important;
+    transition: right .22s ease !important;
+    overflow-y: auto !important;
+    box-shadow: -18px 0 70px rgba(0,0,0,.55) !important;
+  }
+
+  .rightbar.open {
+    right: 0 !important;
+  }
+
+  body.ai-open {
+    overflow: hidden !important;
+  }
+
+  .rightbar .ai-card {
+    min-height: 100dvh !important;
+    border-radius: 0 !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+  }
+
+  .rightbar .ai-head {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100000 !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    padding: 14px !important;
+  }
+
+  .rightbar.open .ai-close-mobile {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1px solid rgba(var(--theme-rgb, 216,181,109), .45) !important;
+    background: linear-gradient(135deg, rgba(var(--theme-rgb, 216,181,109), .28), rgba(var(--theme-rgb, 216,181,109), .08)) !important;
+    color: #fff3cf !important;
+    border-radius: 14px !important;
+    padding: 9px 12px !important;
+    font-weight: 900 !important;
+    font-size: 13px !important;
+    white-space: nowrap !important;
+    margin-left: auto !important;
+  }
+
+  .mobile-ai-toggle {
+    display: grid !important;
+    position: fixed !important;
+    right: 16px !important;
+    bottom: calc(88px + env(safe-area-inset-bottom,0px)) !important;
+    z-index: 99998 !important;
+    min-width: 118px !important;
+    width: auto !important;
+    height: 52px !important;
+    border-radius: 999px !important;
+    color: #fff0bd !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,.42) !important;
+    font-weight: 900 !important;
+    padding: 0 16px !important;
+    font-size: 13px !important;
+  }
+
+  body.ai-open .mobile-ai-toggle {
+    display: none !important;
+  }
+
+  .chat-log {
+    max-height: 52dvh !important;
+  }
+
+  .chat-form {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 99999 !important;
+  }
+
+  .brand-logo-fixed {
+    width: 54px !important;
+    height: 54px !important;
+  }
+
+  .gallery-nav {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .gallery-hint {
+    display: block !important;
+  }
+
+  .photo-grid {
+    display: flex !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-bottom: 6px !important;
+  }
+
+  .photo-item {
+    min-width: 78vw !important;
+    scroll-snap-align: center !important;
+  }
+
+  .photo-img {
+    height: 210px !important;
+  }
+
+  .profile-editor {
+    grid-template-columns: 1fr !important;
+  }
+}
 </style>
 
-<script>
-/* FINAL LIMPO — mantém o CRM leve, fotos no Supabase Storage e IA com minimizar no celular */
-(function(){
+<script id="crmMasterFinal2026Script">
+(function crmMasterFinal2026() {
   "use strict";
 
   var PHOTO_BUCKET = "property-photos";
+  var LOGO_URL = "https://raw.githubusercontent.com/NatanAlvezz/NatanAlvezz/main/midia/logo-leads.png.jpeg?v=1200";
+  var THEME_KEY = "leads_crm_theme_v1";
+  var PROFILE_PHOTO_KEY = "leads_crm_profile_photo_v1";
+  var PROFILE_NAME_KEY = "leads_crm_profile_name_v1";
+
+  var THEMES = [
+    { id: "gold", name: "Dourado Luxo", color: "#d8b56d", meta: "#050506" },
+    { id: "blue", name: "Azul Prime", color: "#60a5fa", meta: "#020716" },
+    { id: "green", name: "Verde Elite", color: "#34d399", meta: "#02120c" },
+    { id: "purple", name: "Roxo Tech", color: "#a78bfa", meta: "#0b0618" },
+    { id: "rose", name: "Rose Premium", color: "#fb7185", meta: "#17050b" },
+    { id: "ice", name: "Ice Futuro", color: "#67e8f9", meta: "#021014" }
+  ];
+
   var originalRenderAll = window.renderAll;
 
-  function photoSrc(f){
-    return (f && (f.url || f.publicUrl || f.data)) || "";
+  function safeText(value) {
+    return String(value == null ? "" : value).replace(/[&<>"']/g, function(ch) {
+      return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch];
+    });
   }
 
-  function propPhotos(p){
-    if(!p) return [];
-    if(!Array.isArray(p.photos)) p.photos = [];
-    return p.photos;
+  function jsString(value) {
+    return String(value == null ? "" : value).replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/\n/g, " ").replace(/\r/g, " ");
   }
 
-  window.getCoverPhoto = function(p){
-    var photos = propPhotos(p).filter(function(f){ return !!photoSrc(f); });
-    return photos.find(function(f){ return f.cover; }) || photos[0] || null;
+  function cssUrl(value) {
+    return String(value || "").replace(/'/g, "%27").replace(/\)/g, "%29");
+  }
+
+  function photoSrc(photo) {
+    return (photo && (photo.url || photo.publicUrl || photo.data)) || "";
+  }
+
+  function propPhotos(prop) {
+    if (!prop) return [];
+    if (!Array.isArray(prop.photos)) prop.photos = [];
+    return prop.photos.filter(function(photo) { return !!photoSrc(photo); });
+  }
+
+  function bgVar(photo) {
+    var src = cssUrl(photoSrc(photo));
+    return src ? "url('" + src + "')" : "";
+  }
+
+  function getHourSP() {
+    try {
+      var parts = new Intl.DateTimeFormat("pt-BR", {
+        timeZone: "America/Sao_Paulo",
+        hour: "2-digit",
+        hour12: false
+      }).formatToParts(new Date());
+
+      var hour = Number((parts.find(function(p) { return p.type === "hour"; }) || {}).value || new Date().getHours());
+      if (hour === 24) hour = 0;
+      return hour;
+    } catch (error) {
+      return new Date().getHours();
+    }
+  }
+
+  function getTimeInfo() {
+    var now = new Date();
+    var hour = getHourSP();
+    var greeting = hour >= 5 && hour < 12 ? "Bom dia" : (hour >= 12 && hour < 18 ? "Boa tarde" : "Boa noite");
+    var formatted = "";
+
+    try {
+      formatted = new Intl.DateTimeFormat("pt-BR", {
+        timeZone: "America/Sao_Paulo",
+        weekday: "long",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).format(now);
+    } catch (error) {
+      formatted = now.toLocaleString("pt-BR");
+    }
+
+    return {
+      hour: hour,
+      greeting: greeting,
+      formatted: formatted,
+      timezone: "America/Sao_Paulo",
+      city: "Florianópolis/SC"
+    };
+  }
+
+  window.saudacao = function() {
+    return getTimeInfo().greeting;
   };
 
-  window.photoStyle = function(p){
-    var cover = window.getCoverPhoto(p);
-    var src = photoSrc(cover);
-    return src ? "background-image:url('" + String(src).replace(/'/g, "%27") + "')" : "";
+  window.getCRMTimeInfo = getTimeInfo;
+
+  window.getCoverPhoto = function(prop) {
+    var photos = propPhotos(prop);
+    return photos.find(function(photo) { return photo.cover; }) || photos[0] || null;
   };
 
-  function compressToBlob(file, maxSize, quality){
+  window.photoStyle = function(prop) {
+    var cover = window.getCoverPhoto(prop);
+    var bg = bgVar(cover);
+    return bg ? "--photo-bg:" + bg + ";background-image:" + bg + " !important;" : "";
+  };
+
+  function compressToBlob(file, maxSize, quality) {
     maxSize = maxSize || 1400;
-    quality = quality || .74;
+    quality = quality || 0.74;
 
-    return new Promise(function(resolve,reject){
-      if(!file || !file.type || !file.type.startsWith("image/")){
+    return new Promise(function(resolve, reject) {
+      if (!file || !file.type || !file.type.startsWith("image/")) {
         reject(new Error("Arquivo inválido."));
         return;
       }
 
       var reader = new FileReader();
 
-      reader.onload = function(){
+      reader.onload = function() {
         var img = new Image();
 
-        img.onload = function(){
-          var w = img.width;
-          var h = img.height;
+        img.onload = function() {
+          var width = img.width;
+          var height = img.height;
 
-          if(w > h && w > maxSize){
-            h = Math.round(h * maxSize / w);
-            w = maxSize;
-          } else if(h > maxSize){
-            w = Math.round(w * maxSize / h);
-            h = maxSize;
+          if (width > height && width > maxSize) {
+            height = Math.round(height * maxSize / width);
+            width = maxSize;
+          } else if (height > maxSize) {
+            width = Math.round(width * maxSize / height);
+            height = maxSize;
           }
 
           var canvas = document.createElement("canvas");
-          canvas.width = w;
-          canvas.height = h;
+          canvas.width = width;
+          canvas.height = height;
 
           var ctx = canvas.getContext("2d");
-          ctx.drawImage(img,0,0,w,h);
+          ctx.drawImage(img, 0, 0, width, height);
 
-          canvas.toBlob(function(blob){
-            if(blob) resolve(blob);
+          canvas.toBlob(function(blob) {
+            if (blob) resolve(blob);
             else reject(new Error("Erro ao comprimir imagem."));
           }, "image/jpeg", quality);
         };
 
-        img.onerror = function(){ reject(new Error("Erro ao carregar imagem.")); };
+        img.onerror = function() { reject(new Error("Erro ao carregar imagem.")); };
         img.src = reader.result;
       };
 
-      reader.onerror = function(){ reject(new Error("Erro ao ler imagem.")); };
+      reader.onerror = function() { reject(new Error("Erro ao ler imagem.")); };
       reader.readAsDataURL(file);
     });
   }
 
-  function fileToBase64(file){
-    return new Promise(function(resolve,reject){
-      compressToBlob(file,900,.58).then(function(blob){
+  function fileToBase64(file, maxSize, quality) {
+    return new Promise(function(resolve, reject) {
+      compressToBlob(file, maxSize || 900, quality || 0.58).then(function(blob) {
         var reader = new FileReader();
-        reader.onload = function(){ resolve(reader.result); };
-        reader.onerror = function(){ reject(new Error("Erro ao converter imagem.")); };
+        reader.onload = function() { resolve(reader.result); };
+        reader.onerror = function() { reject(new Error("Erro ao converter imagem.")); };
         reader.readAsDataURL(blob);
       }).catch(reject);
     });
   }
 
-  async function uploadPhoto(file, propId){
-    var id = typeof uid === "function" ? uid("foto") : ("foto_" + Date.now() + "_" + Math.floor(Math.random()*9999));
+  async function uploadPropertyPhoto(file, propId) {
+    var id = typeof uid === "function" ? uid("foto") : ("foto_" + Date.now() + "_" + Math.floor(Math.random() * 9999));
 
-    if(window.supabaseClient){
-      try{
-        var blob = await compressToBlob(file,1400,.74);
-        var path = propId + "/" + Date.now() + "-" + Math.floor(Math.random()*999999) + ".jpg";
+    if (window.supabaseClient) {
+      try {
+        var blob = await compressToBlob(file, 1400, 0.74);
+        var path = propId + "/" + Date.now() + "-" + Math.floor(Math.random() * 999999) + ".jpg";
 
         var up = await window.supabaseClient.storage.from(PHOTO_BUCKET).upload(path, blob, {
-          contentType:"image/jpeg",
-          upsert:false
+          contentType: "image/jpeg",
+          upsert: false
         });
 
-        if(up.error) throw up.error;
+        if (up.error) throw up.error;
 
         var pub = window.supabaseClient.storage.from(PHOTO_BUCKET).getPublicUrl(path);
 
         return {
-          id:id,
-          name:file.name || "foto-imovel.jpg",
-          url:pub.data.publicUrl,
-          path:path,
-          cover:false,
-          created:Date.now()
+          id: id,
+          name: file.name || "foto-imovel.jpg",
+          url: pub.data.publicUrl,
+          path: path,
+          cover: false,
+          created: Date.now()
         };
-      }catch(e){
-        console.error("Upload Storage falhou. Salvando local:", e);
+      } catch (error) {
+        console.error("Upload Storage falhou. Salvando local:", error);
       }
     }
 
-    var data = await fileToBase64(file);
+    var data = await fileToBase64(file, 900, 0.58);
 
     return {
-      id:id,
-      name:file.name || "foto-imovel.jpg",
-      data:data,
-      cover:false,
-      localOnly:true,
-      created:Date.now()
+      id: id,
+      name: file.name || "foto-imovel.jpg",
+      data: data,
+      cover: false,
+      localOnly: true,
+      created: Date.now()
     };
   }
 
-  async function readPhotosOnline(propId, existing){
+  async function readPhotosOnline(propId, existingPhotos) {
     var input = document.getElementById("p_fotos");
     var files = Array.from((input && input.files) || []);
-    var photos = Array.isArray(existing) ? existing.filter(function(f){ return !!photoSrc(f); }) : [];
+    var photos = Array.isArray(existingPhotos) ? existingPhotos.filter(function(photo) { return !!photoSrc(photo); }) : [];
 
-    if(!files.length) return photos;
+    if (!files.length) return photos;
 
     var limit = 12;
     var remaining = Math.max(0, limit - photos.length);
     var selected = files.slice(0, remaining);
 
-    if(files.length > remaining && typeof toast === "function"){
+    if (files.length > remaining && typeof toast === "function") {
       toast("Limite: 12 fotos por imóvel.");
     }
 
-    for(var i=0;i<selected.length;i++){
-      try{
-        photos.push(await uploadPhoto(selected[i], propId));
-      }catch(e){
-        console.error(e);
-        if(typeof toast === "function") toast("Uma foto não pôde ser carregada.");
+    for (var i = 0; i < selected.length; i++) {
+      try {
+        photos.push(await uploadPropertyPhoto(selected[i], propId));
+      } catch (error) {
+        console.error(error);
+        if (typeof toast === "function") toast("Uma foto não pôde ser carregada.");
       }
     }
 
-    if(photos.length && !photos.some(function(f){ return f.cover; })){
+    if (photos.length && !photos.some(function(photo) { return photo.cover; })) {
       photos[0].cover = true;
     }
 
     return photos;
   }
 
-  window.renderPhotoGrid = function(p){
-    var photos = propPhotos(p).filter(function(f){ return !!photoSrc(f); });
+  window.renderPhotoGrid = function(prop) {
+    var photos = propPhotos(prop);
 
-    if(!photos.length){
+    if (!photos.length) {
       return '<div class="empty" style="margin-top:12px">Nenhuma foto adicionada ainda.</div>';
     }
 
-    return '<div class="photo-grid">' + photos.map(function(f){
-      var src = photoSrc(f).replace(/'/g, "%27");
+    return '<div class="photo-grid">' + photos.map(function(photo) {
+      var src = cssUrl(photoSrc(photo));
       return '<div class="photo-item">' +
-        (f.cover ? '<div class="cover-badge">CAPA</div>' : '') +
+        (photo.cover ? '<div class="cover-badge">CAPA</div>' : '') +
         '<div class="photo-img" style="background-image:url(\'' + src + '\')"></div>' +
         '<div class="photo-actions">' +
-        '<button class="btn btn-sm btn-ghost" type="button" onclick="setCoverPhoto(\'' + p.id + '\', \'' + f.id + '\')">Capa</button>' +
-        '<button class="btn btn-sm btn-danger" type="button" onclick="deletePhoto(\'' + p.id + '\', \'' + f.id + '\')">Excluir</button>' +
-        '</div></div>';
+          '<button class="btn btn-sm btn-ghost" type="button" onclick="setCoverPhoto(\'' + jsString(prop.id) + '\',\'' + jsString(photo.id) + '\')">Capa</button>' +
+          '<button class="btn btn-sm btn-danger" type="button" onclick="deletePhoto(\'' + jsString(prop.id) + '\',\'' + jsString(photo.id) + '\')">Excluir</button>' +
+        '</div>' +
+      '</div>';
     }).join("") + '</div>';
   };
 
-  window.deletePhoto = async function(propId, photoId){
-    var p = db.imoveis.find(function(x){ return x.id === propId; });
-    if(!p) return;
+  window.setCoverPhoto = function(propId, photoId) {
+    var prop = db.imoveis.find(function(item) { return item.id === propId; });
+    if (!prop) return;
 
-    var photos = propPhotos(p);
-    var photo = photos.find(function(f){ return f.id === photoId; });
+    if (!Array.isArray(prop.photos)) prop.photos = [];
+    prop.photos.forEach(function(photo) { photo.cover = photo.id === photoId; });
 
-    if(photo && photo.path && window.supabaseClient){
-      try{
+    saveDB();
+    renderAll();
+
+    if (modal && modal.open && currentEdit && currentEdit.id === propId) {
+      closeModal();
+      setTimeout(function() { openImovelModal(propId); }, 80);
+    }
+
+    toast("Capa atualizada.");
+  };
+
+  window.deletePhoto = async function(propId, photoId) {
+    var prop = db.imoveis.find(function(item) { return item.id === propId; });
+    if (!prop) return;
+
+    var photos = Array.isArray(prop.photos) ? prop.photos : [];
+    var photo = photos.find(function(item) { return item.id === photoId; });
+
+    if (photo && photo.path && window.supabaseClient) {
+      try {
         await window.supabaseClient.storage.from(PHOTO_BUCKET).remove([photo.path]);
-      }catch(e){
-        console.warn("Não removeu do Storage:", e);
+      } catch (error) {
+        console.warn("Não removeu do Storage:", error);
       }
     }
 
-    p.photos = photos.filter(function(f){ return f.id !== photoId; });
+    prop.photos = photos.filter(function(item) { return item.id !== photoId; });
 
-    if(p.photos.length && !p.photos.some(function(f){ return f.cover; })){
-      p.photos[0].cover = true;
+    if (prop.photos.length && !prop.photos.some(function(item) { return item.cover; })) {
+      prop.photos[0].cover = true;
     }
 
     saveDB();
     renderAll();
 
-    if(modal && modal.open && currentEdit && currentEdit.id === propId){
+    if (modal && modal.open && currentEdit && currentEdit.id === propId) {
       closeModal();
-      setTimeout(function(){ openImovelModal(propId); },80);
+      setTimeout(function() { openImovelModal(propId); }, 80);
     }
 
     toast("Foto removida.");
   };
 
-  window.propertyCard = function(p){
-    var photos = propPhotos(p).filter(function(f){ return !!photoSrc(f); });
-    var cover = window.getCoverPhoto(p);
-    var style = window.photoStyle(p);
-
-    return '<div class="property-card">' +
-      '<div class="pc-img" style="' + style + '">' +
-      '<span class="photo-count">' + (photos.length ? ("📸 " + photos.length) : "Sem foto") + '</span>' +
-      '</div>' +
-      '<div class="pc-body">' +
-      '<h3>' + esc(p.titulo || "Imóvel sem título") + '</h3>' +
-      '<p>' + esc(p.bairro || "-") + ', ' + esc(p.cidade || "Florianópolis") + '</p>' +
-      '<p>' + esc(p.area || "-") + ' m² · ' + esc(p.suites || p.dormitorios || "-") + ' suítes/dorm. · ' + esc(p.vagas || "-") + ' vagas</p>' +
-      '<p class="price">' + money(p.valor) + '</p>' +
-      '<div>' +
-      '<span class="pill gold">' + esc(p.tipo || "Imóvel") + '</span>' +
-      '<span class="pill green">' + esc(p.etapa || "Ativo") + '</span>' +
-      (cover ? '<span class="pill">Foto online</span>' : '<span class="pill red">Adicionar foto</span>') +
-      '</div>' +
-      '<div class="actions">' +
-      '<button class="btn btn-sm" onclick="askAI(\'Crie um anúncio premium para este imóvel: ' + esc(p.titulo || "") + ' em ' + esc(p.bairro || "") + ', valor ' + money(p.valor) + '.\')">Anúncio IA</button>' +
-      '<button class="btn btn-sm btn-ghost" onclick="openImovelModal(\'' + p.id + '\')">Editar</button>' +
-      '</div></div></div>';
-  };
-
-  window.saveImovel = async function(){
+  window.saveImovel = async function() {
     var id = currentEdit.id || uid("imv");
-    var old = db.imoveis.find(function(x){ return x.id === id; }) || {};
+    var old = db.imoveis.find(function(item) { return item.id === id; }) || {};
     var saveButton = document.querySelector("#modalFoot .btn:not(.btn-ghost):last-child");
 
-    if(saveButton){
+    if (saveButton) {
       saveButton.disabled = true;
       saveButton.textContent = "Salvando fotos...";
     }
@@ -3291,36 +3936,36 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     var photos = await readPhotosOnline(id, old.photos || []);
 
     var data = Object.assign({}, old, {
-      id:id,
-      titulo:document.getElementById("p_titulo").value.trim(),
-      tipo:document.getElementById("p_tipo").value,
-      bairro:document.getElementById("p_bairro").value.trim(),
-      cidade:document.getElementById("p_cidade").value.trim(),
-      valor:Number(document.getElementById("p_valor").value || 0),
-      area:Number(document.getElementById("p_area").value || 0),
-      dormitorios:Number(document.getElementById("p_dorm").value || 0),
-      suites:Number(document.getElementById("p_suites").value || 0),
-      vagas:Number(document.getElementById("p_vagas").value || 0),
-      etapa:document.getElementById("p_etapa").value,
-      prop:document.getElementById("p_prop").value.trim(),
-      tel:document.getElementById("p_tel").value.trim(),
-      proximaAcao:document.getElementById("p_acao").value.trim(),
-      photos:photos,
-      updated:Date.now()
+      id: id,
+      titulo: document.getElementById("p_titulo").value.trim(),
+      tipo: document.getElementById("p_tipo").value,
+      bairro: document.getElementById("p_bairro").value.trim(),
+      cidade: document.getElementById("p_cidade").value.trim(),
+      valor: Number(document.getElementById("p_valor").value || 0),
+      area: Number(document.getElementById("p_area").value || 0),
+      dormitorios: Number(document.getElementById("p_dorm").value || 0),
+      suites: Number(document.getElementById("p_suites").value || 0),
+      vagas: Number(document.getElementById("p_vagas").value || 0),
+      etapa: document.getElementById("p_etapa").value,
+      prop: document.getElementById("p_prop").value.trim(),
+      tel: document.getElementById("p_tel").value.trim(),
+      proximaAcao: document.getElementById("p_acao").value.trim(),
+      photos: photos,
+      updated: Date.now()
     });
 
-    if(!data.titulo){
+    if (!data.titulo) {
       toast("Digite o título do imóvel.");
-      if(saveButton){
+      if (saveButton) {
         saveButton.disabled = false;
         saveButton.textContent = "Salvar imóvel";
       }
       return;
     }
 
-    var idx = db.imoveis.findIndex(function(x){ return x.id === id; });
+    var idx = db.imoveis.findIndex(function(item) { return item.id === id; });
 
-    if(idx >= 0) db.imoveis[idx] = data;
+    if (idx >= 0) db.imoveis[idx] = data;
     else db.imoveis.unshift(data);
 
     saveDB();
@@ -3329,127 +3974,133 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     toast("Imóvel salvo com fotos online.");
   };
 
-  window.getCloudSafeDB = function(){
+  window.getCloudSafeDB = function() {
     var copy = JSON.parse(JSON.stringify(db));
 
-    copy.imoveis = (copy.imoveis || []).map(function(p){
-      p.photos = (p.photos || [])
-        .filter(function(f){ return f.url || f.publicUrl; })
-        .map(function(f){
+    copy.imoveis = (copy.imoveis || []).map(function(prop) {
+      prop.photos = (prop.photos || [])
+        .filter(function(photo) { return photo.url || photo.publicUrl; })
+        .map(function(photo) {
           return {
-            id:f.id,
-            name:f.name,
-            url:f.url || f.publicUrl,
-            path:f.path || "",
-            cover:!!f.cover,
-            created:f.created || Date.now()
+            id: photo.id,
+            name: photo.name,
+            url: photo.url || photo.publicUrl,
+            path: photo.path || "",
+            cover: !!photo.cover,
+            created: photo.created || Date.now()
           };
         });
 
-      return p;
+      return prop;
     });
 
     copy.chat = (copy.chat || []).slice(-12);
+    copy.contexto_horario = getTimeInfo();
 
     return copy;
   };
 
-  window.initCloudSync = async function(){
+  window.initCloudSync = async function() {
     var client = window.supabaseClient;
 
-    if(!client){
+    if (!client) {
       console.warn("Supabase não configurado. Usando modo local.");
       return;
     }
 
-    try{
-      var sessionData = await client.auth.getSession();
-      var session = sessionData && sessionData.data && sessionData.data.session;
+    try {
+      var sessionResult = await client.auth.getSession();
+      var session = sessionResult && sessionResult.data && sessionResult.data.session;
 
-      if(!session) return;
+      if (!session) return;
 
-      cloudUserId = (session.user && session.user.id) || null;
+      cloudUserId = session.user && session.user.id || null;
 
       var email = session.user && session.user.email;
-
-      if(email){
-        var topName = document.getElementById("userNameTop");
-        if(topName) topName.textContent = email.split("@")[0];
-        db.settings.user = email.split("@")[0];
+      if (email) {
+        var storedName = localStorage.getItem(PROFILE_NAME_KEY);
+        var name = storedName || email.split("@")[0];
+        db.settings.user = name;
       }
 
-      var res = await client
+      var result = await client
         .from("crm_state")
         .select("data,updated_at,updated_by")
         .eq("id", CRM_STATE_ID)
         .maybeSingle();
 
-      if(res.error){
-        console.error(res.error);
+      if (result.error) {
+        console.error(result.error);
         toast("Não foi possível carregar a base online.");
         return;
       }
 
-      if(res.data && res.data.data){
+      if (result.data && result.data.data) {
         var localPhotoMap = {};
-        (db.imoveis || []).forEach(function(p){
-          localPhotoMap[p.id] = (p.photos || []).filter(function(f){ return !!photoSrc(f); });
+        (db.imoveis || []).forEach(function(prop) {
+          localPhotoMap[prop.id] = (prop.photos || []).filter(function(photo) { return !!photoSrc(photo); });
         });
 
-        db = normalizeDB(res.data.data);
+        db = normalizeDB(result.data.data);
 
-        db.imoveis.forEach(function(p){
-          var localPhotos = localPhotoMap[p.id] || [];
-          var cloudPhotos = (p.photos || []).filter(function(f){ return f.url || f.publicUrl; });
-          p.photos = cloudPhotos.length ? cloudPhotos : localPhotos;
+        db.imoveis.forEach(function(prop) {
+          var localPhotos = localPhotoMap[prop.id] || [];
+          var cloudPhotos = (prop.photos || []).filter(function(photo) { return photo.url || photo.publicUrl; });
+          prop.photos = cloudPhotos.length ? cloudPhotos : localPhotos;
         });
+
+        var savedName = localStorage.getItem(PROFILE_NAME_KEY);
+        if (savedName) db.settings.user = savedName;
 
         safeLocalSave(db);
-      }else{
+      } else {
         await client.from("crm_state").upsert({
-          id:CRM_STATE_ID,
-          data:getCloudSafeDB(),
-          updated_by:cloudUserId,
-          updated_at:new Date().toISOString()
+          id: CRM_STATE_ID,
+          data: getCloudSafeDB(),
+          updated_by: cloudUserId,
+          updated_at: new Date().toISOString()
         });
       }
 
       cloudReady = true;
       startRealtimeSync();
-    }catch(e){
-      console.error(e);
+    } catch (error) {
+      console.error(error);
       toast("Falha ao iniciar sincronização online.");
     }
   };
 
-  window.startRealtimeSync = function(){
+  window.startRealtimeSync = function() {
     var client = window.supabaseClient;
-    if(!client || realtimeChannel) return;
+    if (!client || realtimeChannel) return;
 
-    realtimeChannel = client.channel("leads-imoveis-crm-sync-v7")
+    realtimeChannel = client.channel("leads-imoveis-crm-sync-v8")
       .on("postgres_changes", {
-        event:"*",
-        schema:"public",
-        table:"crm_state",
-        filter:"id=eq." + CRM_STATE_ID
-      }, function(payload){
+        event: "*",
+        schema: "public",
+        table: "crm_state",
+        filter: "id=eq." + CRM_STATE_ID
+      }, function(payload) {
         var next = payload.new && payload.new.data;
 
-        if(!next) return;
-        if(payload.new && payload.new.updated_by && payload.new.updated_by === cloudUserId) return;
+        if (!next) return;
+        if (payload.new && payload.new.updated_by && payload.new.updated_by === cloudUserId) return;
 
         var localPhotoMap = {};
-        (db.imoveis || []).forEach(function(p){
-          localPhotoMap[p.id] = (p.photos || []).filter(function(f){ return !!photoSrc(f); });
+        (db.imoveis || []).forEach(function(prop) {
+          localPhotoMap[prop.id] = (prop.photos || []).filter(function(photo) { return !!photoSrc(photo); });
         });
 
         db = normalizeDB(next);
 
-        db.imoveis.forEach(function(p){
-          var localPhotos = localPhotoMap[p.id] || [];
-          var cloudPhotos = (p.photos || []).filter(function(f){ return f.url || f.publicUrl; });
-          p.photos = cloudPhotos.length ? cloudPhotos : localPhotos;
+        db.imoveis.forEach(function(prop) {
+          var localPhotos = localPhotoMap[prop.id] || [];
+          var cloudPhotos = (prop.photos || []).filter(function(photo) { return photo.url || photo.publicUrl; });
+          prop.photos = cloudPhotos.length ? cloudPhotos : localPhotos;
         });
+
+        var savedName = localStorage.getItem(PROFILE_NAME_KEY);
+        if (savedName) db.settings.user = savedName;
 
         safeLocalSave(db);
         renderAll();
@@ -3459,448 +4110,143 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
       .subscribe();
   };
 
-  function renameAI(){
-    var orb = document.querySelector(".ai-orb");
-    if(orb) orb.innerHTML = "Agente<br>IA";
+  function galleryDots(photos, activeIndex) {
+    if (photos.length <= 1) return "";
+    return '<div class="gallery-dots">' + photos.map(function(_, index) {
+      return '<span class="gallery-dot ' + (index === activeIndex ? 'active' : '') + '"></span>';
+    }).join("") + '</div>';
+  }
 
-    var title = document.querySelector(".ai-head h2");
-    if(title) title.textContent = "Agente IA de Corretor";
+  window.slidePropertyPhoto = function(propId, direction, trigger) {
+    var prop = (db.imoveis || []).find(function(item) { return item.id === propId; });
+    if (!prop) return;
 
-    var hello = document.getElementById("aiHello");
-    if(hello) hello.textContent = "Agente IA de Corretor 👋";
+    var photos = propPhotos(prop);
+    if (photos.length <= 1) return;
 
-    var floating = document.querySelector(".mobile-ai-toggle");
-    if(floating){
-      floating.textContent = "Agente IA";
-      floating.setAttribute("title","Agente IA de Corretor");
-      floating.setAttribute("aria-label","Abrir Agente IA de Corretor");
+    var gallery = trigger && trigger.closest ? trigger.closest(".pc-gallery") : null;
+    if (!gallery) {
+      document.querySelectorAll(".pc-gallery").forEach(function(item) {
+        if (item.dataset.propId === propId) gallery = item;
+      });
     }
+    if (!gallery) return;
 
-    document.querySelectorAll(".online").forEach(function(el){
-      el.textContent = "ONLINE ✦";
-    });
-  }
+    var current = Number(gallery.dataset.photoIndex || 0);
+    if (!Number.isFinite(current)) current = 0;
 
-  function getRightbar(){
-    return document.getElementById("rightbar");
-  }
+    var next = (current + direction + photos.length) % photos.length;
+    var bg = bgVar(photos[next]);
 
-  window.openAI = function(){
-    var rb = getRightbar();
-    if(!rb) return;
+    gallery.dataset.photoIndex = String(next);
+    gallery.style.setProperty("--photo-bg", bg);
+    gallery.style.setProperty("background-image", bg, "important");
+    gallery.classList.add("has-photo");
 
-    rb.classList.add("open");
-    document.body.classList.add("ai-open");
-    document.querySelectorAll("#mobileNav button").forEach(function(b){
-      b.classList.toggle("active", b.dataset.view === "ia");
-    });
-  };
+    var count = gallery.querySelector(".photo-count");
+    if (count) count.textContent = "Fotos " + (next + 1) + "/" + photos.length;
 
-  window.closeAI = function(){
-    var rb = getRightbar();
-    if(!rb) return;
-
-    rb.classList.remove("open");
-    document.body.classList.remove("ai-open");
-
-    var activeView = document.querySelector(".view.active");
-    var current = activeView && activeView.id ? activeView.id.replace("view-","") : "dashboard";
-
-    document.querySelectorAll("#mobileNav button").forEach(function(b){
-      b.classList.toggle("active", b.dataset.view === current);
+    gallery.querySelectorAll(".gallery-dot").forEach(function(dot, index) {
+      dot.classList.toggle("active", index === next);
     });
   };
 
-  window.toggleAI = function(){
-    var rb = getRightbar();
-    if(!rb) return;
+  window.propertyCard = function(prop) {
+    var photos = propPhotos(prop);
+    var cover = photos.find(function(photo) { return photo.cover; }) || photos[0] || null;
+    var bg = bgVar(cover);
+    var hasPhoto = !!bg;
+    var safeId = safeText(prop.id || "");
+    var jsId = jsString(prop.id || "");
+    var controls = "";
 
-    if(rb.classList.contains("open")) closeAI();
-    else openAI();
+    if (photos.length > 1) {
+      controls =
+        '<button class="gallery-nav prev" type="button" onclick="event.preventDefault();event.stopPropagation();slidePropertyPhoto(\'' + jsId + '\',-1,this)">‹</button>' +
+        '<button class="gallery-nav next" type="button" onclick="event.preventDefault();event.stopPropagation();slidePropertyPhoto(\'' + jsId + '\',1,this)">›</button>' +
+        '<span class="gallery-hint">arraste</span>' +
+        galleryDots(photos, 0);
+    }
+
+    return '' +
+      '<div class="property-card">' +
+        '<div class="pc-img pc-gallery ' + (hasPhoto ? 'has-photo' : '') + '" data-prop-id="' + safeId + '" data-photo-index="0" style="' + (hasPhoto ? '--photo-bg:' + bg + ';background-image:' + bg + ' !important;' : '') + '">' +
+          '<span class="photo-count">' + (photos.length ? ('Fotos 1/' + photos.length) : 'Sem foto') + '</span>' +
+          controls +
+        '</div>' +
+        '<div class="pc-body">' +
+          '<h3>' + safeText(prop.titulo || 'Imóvel sem título') + '</h3>' +
+          '<p>' + safeText(prop.bairro || '-') + ', ' + safeText(prop.cidade || 'Florianópolis') + '</p>' +
+          '<p>' + safeText(prop.area || '-') + ' m² · ' + safeText(prop.suites || prop.dormitorios || '-') + ' suítes/dorm. · ' + safeText(prop.vagas || '-') + ' vagas</p>' +
+          '<p class="price">' + money(prop.valor) + '</p>' +
+          '<div>' +
+            '<span class="pill gold">' + safeText(prop.tipo || 'Imóvel') + '</span>' +
+            '<span class="pill green">' + safeText(prop.etapa || 'Ativo') + '</span>' +
+            (photos.length ? '<span class="pill">Fotos online</span>' : '<span class="pill red">Adicionar foto</span>') +
+          '</div>' +
+          '<div class="actions">' +
+            '<button class="btn btn-sm" onclick="askAI(\'Crie um anúncio premium para este imóvel: ' + jsString(prop.titulo || '') + ' em ' + jsString(prop.bairro || '') + ', valor ' + jsString(money(prop.valor)) + '.\')">Anúncio IA</button>' +
+            '<button class="btn btn-sm btn-ghost" onclick="openImovelModal(\'' + jsId + '\')">Editar</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
   };
 
-  window.switchView = function(view){
-    if(view === "ia"){
-      toggleAI();
-      return;
-    }
+  function wirePhotoSwipe() {
+    document.querySelectorAll(".pc-gallery").forEach(function(gallery) {
+      if (gallery.dataset.swipeReady === "1") return;
+      gallery.dataset.swipeReady = "1";
 
-    document.querySelectorAll(".view").forEach(function(v){ v.classList.remove("active"); });
+      var startX = 0;
+      var startY = 0;
+      var isDown = false;
 
-    var el = document.getElementById("view-" + view);
-    if(el) el.classList.add("active");
+      gallery.addEventListener("pointerdown", function(event) {
+        if (event.target && event.target.closest && event.target.closest(".gallery-nav")) return;
+        startX = event.clientX;
+        startY = event.clientY;
+        isDown = true;
+      }, { passive: true });
 
-    document.querySelectorAll("#nav button").forEach(function(b){
-      b.classList.toggle("active", b.dataset.view === view);
-    });
+      gallery.addEventListener("pointerup", function(event) {
+        if (!isDown) return;
+        isDown = false;
 
-    document.querySelectorAll("#mobileNav button").forEach(function(b){
-      b.classList.toggle("active", b.dataset.view === view);
-    });
+        var dx = event.clientX - startX;
+        var dy = event.clientY - startY;
 
-    var sidebar = document.getElementById("sidebar");
-    if(sidebar) sidebar.classList.remove("open");
+        if (Math.abs(dx) < 38 || Math.abs(dx) < Math.abs(dy)) return;
 
-    closeAI();
+        slidePropertyPhoto(gallery.dataset.propId, dx < 0 ? 1 : -1, gallery);
+      }, { passive: true });
 
-    renderAll();
-  };
-
-  function injectCloseButton(){
-    var rb = getRightbar();
-    if(!rb) return;
-
-    var head = rb.querySelector(".ai-head");
-    if(!head) return;
-
-    if(document.getElementById("aiCloseMobileBtn")) return;
-
-    var btn = document.createElement("button");
-    btn.id = "aiCloseMobileBtn";
-    btn.type = "button";
-    btn.className = "ai-close-mobile";
-    btn.innerHTML = "← Voltar ao CRM";
-    btn.onclick = closeAI;
-
-    head.appendChild(btn);
-  }
-
-  function protectMobileIAClick(){
-    document.querySelectorAll("#mobileNav button").forEach(function(btn){
-      if(btn.dataset.view === "ia" && !btn.dataset.aiFixed){
-        btn.dataset.aiFixed = "1";
-        btn.addEventListener("click", function(e){
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          toggleAI();
-        }, true);
-      }
-    });
-
-    var floating = document.querySelector(".mobile-ai-toggle");
-    if(floating && !floating.dataset.aiFixed){
-      floating.dataset.aiFixed = "1";
-      floating.addEventListener("click", function(e){
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        toggleAI();
-      }, true);
-    }
-  }
-
-  window.renderAll = function(){
-    if(typeof originalRenderAll === "function") originalRenderAll();
-    renameAI();
-    injectCloseButton();
-    protectMobileIAClick();
-  };
-
-  function startFinalFix(){
-    renameAI();
-    injectCloseButton();
-    protectMobileIAClick();
-
-    if(window.innerWidth <= 980){
-      closeAI();
-    }
-  }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", startFinalFix);
-  }else{
-    startFinalFix();
-  }
-
-  setTimeout(startFinalFix,600);
-  setTimeout(startFinalFix,1500);
-})();
-</script>
-
-
-<!-- FIX UX FINAL CRM: LOGO, IA SEM QUADRO BRANCO, TEMAS E GALERIA COM ARRASTAR -->
-<style id="crmUXFinalFix">
-  /* Remove o botão branco no navegador/desktop. Ele só aparece no celular. */
-  .ai-close-mobile {
-    display: none !important;
-    appearance: none !important;
-    -webkit-appearance: none !important;
-  }
-
-  .brand-logo-fixed,
-  .avatar-logo-fixed {
-    background: rgba(0,0,0,.32) !important;
-    border: 1px solid rgba(216,181,109,.42) !important;
-    overflow: hidden !important;
-    display: grid !important;
-    place-items: center !important;
-  }
-
-  .brand-logo-fixed {
-    width: 58px !important;
-    height: 58px !important;
-    border-radius: 50% !important;
-    padding: 5px !important;
-  }
-
-  .avatar-logo-fixed {
-    width: 42px !important;
-    height: 42px !important;
-    border-radius: 50% !important;
-    padding: 4px !important;
-    flex: 0 0 auto !important;
-  }
-
-  .crm-logo-img {
-    width: 100% !important;
-    height: 100% !important;
-    max-width: 100% !important;
-    max-height: 100% !important;
-    object-fit: contain !important;
-    display: block !important;
-    border-radius: 50% !important;
-    background: transparent !important;
-  }
-
-  img.crm-logo-img:not([src]),
-  img.crm-logo-img[src=""] {
-    display: none !important;
-  }
-
-  .brand-logo img,
-  .avatar img,
-  .ai-orb img {
-    background-color: transparent !important;
-  }
-
-  .ai-head {
-    gap: 10px !important;
-  }
-
-  .ai-head h2 {
-    flex: 1 !important;
-    min-width: 0 !important;
-  }
-
-  .online {
-    white-space: nowrap !important;
-    flex: 0 0 auto !important;
-  }
-
-  /* Galeria no card do imóvel */
-  .pc-gallery {
-    touch-action: pan-y !important;
-    user-select: none !important;
-  }
-
-  .gallery-nav {
-    position: absolute !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    z-index: 4 !important;
-    width: 34px !important;
-    height: 34px !important;
-    border-radius: 50% !important;
-    border: 1px solid rgba(255,255,255,.25) !important;
-    background: rgba(0,0,0,.58) !important;
-    color: #fff !important;
-    display: grid !important;
-    place-items: center !important;
-    font-weight: 900 !important;
-    line-height: 1 !important;
-    font-size: 18px !important;
-    box-shadow: 0 8px 20px rgba(0,0,0,.35) !important;
-  }
-
-  .gallery-nav.prev { left: 10px !important; }
-  .gallery-nav.next { right: 10px !important; }
-
-  .gallery-hint {
-    position: absolute !important;
-    right: 10px !important;
-    bottom: 10px !important;
-    z-index: 4 !important;
-    border-radius: 999px !important;
-    background: rgba(0,0,0,.58) !important;
-    border: 1px solid rgba(255,255,255,.15) !important;
-    color: rgba(255,255,255,.88) !important;
-    font-size: 10px !important;
-    font-weight: 900 !important;
-    padding: 5px 8px !important;
-  }
-
-  /* Temas de cor do layout */
-  :root[data-crm-theme="gold"] { --gold: #d8b56d; --theme-rgb: 216,181,109; }
-  :root[data-crm-theme="blue"] { --gold: #60a5fa; --theme-rgb: 96,165,250; }
-  :root[data-crm-theme="green"] { --gold: #34d399; --theme-rgb: 52,211,153; }
-  :root[data-crm-theme="purple"] { --gold: #a78bfa; --theme-rgb: 167,139,250; }
-  :root[data-crm-theme="rose"] { --gold: #fb7185; --theme-rgb: 251,113,133; }
-  :root[data-crm-theme="ice"] { --gold: #67e8f9; --theme-rgb: 103,232,249; }
-
-  :root[data-crm-theme] .btn,
-  :root[data-crm-theme] .nav button.active,
-  :root[data-crm-theme] .nav button:hover,
-  :root[data-crm-theme] .mobile-nav button.active,
-  :root[data-crm-theme] .ai-orb,
-  :root[data-crm-theme] .mobile-ai-toggle,
-  :root[data-crm-theme] .ai-close-mobile {
-    border-color: rgba(var(--theme-rgb), .45) !important;
-  }
-
-  :root[data-crm-theme] .btn,
-  :root[data-crm-theme] .nav button.active,
-  :root[data-crm-theme] .nav button:hover,
-  :root[data-crm-theme] .mobile-nav button.active {
-    background: linear-gradient(135deg, rgba(var(--theme-rgb), .28), rgba(var(--theme-rgb), .08)) !important;
-  }
-
-  :root[data-crm-theme] .central,
-  :root[data-crm-theme] .ai-card,
-  :root[data-crm-theme] .plan {
-    border-color: rgba(var(--theme-rgb), .28) !important;
-  }
-
-  .theme-panel {
-    margin-top: 16px;
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(255,255,255,.025);
-    border-radius: 18px;
-    padding: 14px;
-  }
-
-  .theme-panel h3 {
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: .8px;
-    margin-bottom: 6px;
-  }
-
-  .theme-panel p {
-    color: var(--mut);
-    font-size: 12px;
-    line-height: 1.45;
-    margin-bottom: 12px;
-  }
-
-  .theme-options {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 8px;
-  }
-
-  .theme-option {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border: 1px solid rgba(255,255,255,.13);
-    background: rgba(0,0,0,.22);
-    color: #fff;
-    border-radius: 14px;
-    padding: 10px;
-    font-size: 12px !important;
-    font-weight: 900;
-  }
-
-  .theme-option.active {
-    border-color: rgba(var(--theme-rgb), .65) !important;
-    box-shadow: 0 0 0 3px rgba(var(--theme-rgb), .10) !important;
-  }
-
-  .theme-dot {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    border: 1px solid rgba(255,255,255,.30);
-    flex: 0 0 auto;
-  }
-
-  @media (max-width: 980px) {
-    .brand-logo-fixed {
-      width: 54px !important;
-      height: 54px !important;
-    }
-
-    .rightbar.open .ai-close-mobile {
-      display: inline-flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      border: 1px solid rgba(var(--theme-rgb, 216,181,109), .45) !important;
-      background: linear-gradient(135deg, rgba(var(--theme-rgb, 216,181,109), .28), rgba(var(--theme-rgb, 216,181,109), .08)) !important;
-      color: #fff3cf !important;
-      border-radius: 14px !important;
-      padding: 9px 12px !important;
-      font-weight: 900 !important;
-      font-size: 13px !important;
-      white-space: nowrap !important;
-      margin-left: auto !important;
-    }
-
-    .gallery-nav {
-      width: 38px !important;
-      height: 38px !important;
-    }
-
-    .gallery-hint {
-      display: block !important;
-    }
-
-    .photo-grid {
-      display: flex !important;
-      overflow-x: auto !important;
-      scroll-snap-type: x mandatory !important;
-      -webkit-overflow-scrolling: touch !important;
-      padding-bottom: 6px !important;
-    }
-
-    .photo-item {
-      min-width: 78vw !important;
-      scroll-snap-align: center !important;
-    }
-
-    .photo-img {
-      height: 210px !important;
-    }
-  }
-</style>
-
-<script id="crmUXFinalFixScript">
-(function crmUXFinalFix() {
-  "use strict";
-
-  var LOGO_URL = "https://raw.githubusercontent.com/NatanAlvezz/NatanAlvezz/main/midia/logo-leads.png.jpeg?v=900";
-  var THEME_KEY = "leads_crm_theme_v1";
-  var THEMES = [
-    { id: "gold", name: "Dourado Luxo", color: "#d8b56d" },
-    { id: "blue", name: "Azul Prime", color: "#60a5fa" },
-    { id: "green", name: "Verde Elite", color: "#34d399" },
-    { id: "purple", name: "Roxo Tech", color: "#a78bfa" },
-    { id: "rose", name: "Rose Premium", color: "#fb7185" },
-    { id: "ice", name: "Ice Futuro", color: "#67e8f9" }
-  ];
-
-  function safeText(value) {
-    return String(value == null ? "" : value).replace(/[&<>"']/g, function(ch) {
-      return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch];
+      gallery.addEventListener("pointercancel", function() {
+        isDown = false;
+      }, { passive: true });
     });
   }
 
-  function photoSrc(photo) {
-    return photo && (photo.url || photo.publicUrl || photo.data) || "";
-  }
+  function applyGalleryBackgrounds() {
+    document.querySelectorAll(".pc-gallery.has-photo").forEach(function(gallery) {
+      var propId = gallery.dataset.propId;
+      var prop = (db.imoveis || []).find(function(item) { return item.id === propId; });
+      if (!prop) return;
 
-  function propPhotos(prop) {
-    if (!prop) return [];
-    if (!Array.isArray(prop.photos)) prop.photos = [];
-    return prop.photos.filter(function(photo) { return !!photoSrc(photo); });
-  }
+      var photos = propPhotos(prop);
+      var index = Number(gallery.dataset.photoIndex || 0);
+      if (!Number.isFinite(index) || index >= photos.length) index = 0;
+      if (!photos[index]) return;
 
-  function bgForPhoto(photo) {
-    var src = photoSrc(photo).replace(/'/g, "%27");
-    return src ? "background-image:url('" + src + "')" : "";
+      var bg = bgVar(photos[index]);
+      gallery.style.setProperty("--photo-bg", bg);
+      gallery.style.setProperty("background-image", bg, "important");
+    });
   }
 
   function makeLogoBox(el, small) {
     if (!el) return;
 
+    el.classList.remove("avatar-photo-fixed");
     el.classList.add(small ? "avatar-logo-fixed" : "brand-logo-fixed");
     el.innerHTML = "";
 
@@ -3920,9 +4266,51 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     el.appendChild(img);
   }
 
+  function applyProfileAvatar() {
+    var avatar = document.querySelector(".avatar");
+    if (!avatar) return;
+
+    var photo = localStorage.getItem(PROFILE_PHOTO_KEY);
+
+    if (photo) {
+      avatar.classList.remove("avatar-logo-fixed");
+      avatar.classList.add("avatar-photo-fixed");
+      avatar.innerHTML = '<img class="crm-profile-img" src="' + photo + '" alt="Foto do corretor">';
+      return;
+    }
+
+    makeLogoBox(avatar, true);
+  }
+
+  function getDisplayName() {
+    return localStorage.getItem(PROFILE_NAME_KEY) || (db && db.settings && db.settings.user) || "Natan Alves";
+  }
+
+  function applyUserProfile() {
+    var name = getDisplayName();
+
+    if (db && db.settings) db.settings.user = name;
+
+    var topName = document.getElementById("userNameTop");
+    if (topName) topName.textContent = name;
+
+    var profileNameInput = document.getElementById("profileDisplayName");
+    if (profileNameInput && profileNameInput.value !== name) profileNameInput.value = name;
+
+    var preview = document.getElementById("profilePreview");
+    if (preview) {
+      var photo = localStorage.getItem(PROFILE_PHOTO_KEY);
+      preview.innerHTML = photo
+        ? '<img class="crm-profile-preview-img" src="' + photo + '" alt="Foto do corretor">'
+        : '<span>Foto</span>';
+    }
+
+    applyProfileAvatar();
+  }
+
   function applyLogoAndAIName() {
     makeLogoBox(document.querySelector(".brand-logo"), false);
-    makeLogoBox(document.querySelector(".avatar"), true);
+    applyProfileAvatar();
 
     var title = document.querySelector(".ai-head h2");
     if (title) title.textContent = "Agente IA de Corretor";
@@ -3938,16 +4326,24 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     }
 
     document.querySelectorAll(".online").forEach(function(el) {
-      el.textContent = "ONLINE ✦";
+      el.textContent = "ONLINE";
+      el.setAttribute("aria-label", "Agente IA online");
     });
+
+    var hello = document.getElementById("aiHello");
+    if (hello) hello.textContent = getTimeInfo().greeting + ", " + getDisplayName() + " 👋";
   }
 
   function applyTheme(themeId) {
-    var exists = THEMES.some(function(t) { return t.id === themeId; });
+    var exists = THEMES.some(function(theme) { return theme.id === themeId; });
     var selected = exists ? themeId : "gold";
+    var theme = THEMES.find(function(item) { return item.id === selected; }) || THEMES[0];
 
     document.documentElement.setAttribute("data-crm-theme", selected);
     localStorage.setItem(THEME_KEY, selected);
+
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", theme.meta || "#050506");
 
     document.querySelectorAll(".theme-option").forEach(function(btn) {
       btn.classList.toggle("active", btn.dataset.theme === selected);
@@ -3962,8 +4358,8 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     panel.id = "themePanelCRM";
     panel.className = "theme-panel";
     panel.innerHTML =
-      '<h3>Cores do layout</h3>' +
-      '<p>Cada corretor pode escolher uma cor para não enjoar do CRM. A escolha fica salva no navegador dele.</p>' +
+      '<h3>Temas completos do layout</h3>' +
+      '<p>Muda a cor principal, fundo, painéis escuros, menus, cards, botões e área da IA. Cada corretor escolhe a própria cor no navegador dele.</p>' +
       '<div class="theme-options">' +
       THEMES.map(function(theme) {
         return '<button type="button" class="theme-option" data-theme="' + theme.id + '">' +
@@ -3978,130 +4374,369 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     panel.querySelectorAll(".theme-option").forEach(function(btn) {
       btn.addEventListener("click", function() {
         applyTheme(btn.dataset.theme);
-        if (typeof toast === "function") toast("Cor do layout atualizada.");
+        if (typeof toast === "function") toast("Tema do layout atualizado.");
       });
     });
 
     applyTheme(localStorage.getItem(THEME_KEY) || "gold");
   }
 
-  function getCurrentIndex(gallery, photos) {
-    var index = Number(gallery && gallery.dataset.photoIndex || 0);
-    if (!Number.isFinite(index)) index = 0;
-    if (!photos.length) return 0;
-    return Math.max(0, Math.min(index, photos.length - 1));
-  }
+  function injectProfilePanel() {
+    var configBody = document.querySelector("#view-config .panel-body");
+    if (!configBody || document.getElementById("profilePanelCRM")) return;
 
-  window.slidePropertyPhoto = function(propId, direction, trigger) {
-    var prop = (window.db && db.imoveis || []).find(function(item) { return item.id === propId; });
-    if (!prop) return;
-
-    var photos = propPhotos(prop);
-    if (photos.length <= 1) return;
-
-    var gallery = trigger && trigger.closest ? trigger.closest(".pc-gallery") : null;
-    if (!gallery) gallery = document.querySelector('.pc-gallery[data-prop-id="' + CSS.escape(propId) + '"]');
-    if (!gallery) return;
-
-    var current = getCurrentIndex(gallery, photos);
-    var next = (current + direction + photos.length) % photos.length;
-
-    gallery.dataset.photoIndex = String(next);
-    gallery.style.backgroundImage = "url('" + photoSrc(photos[next]).replace(/'/g, "%27") + "')";
-
-    var count = gallery.querySelector(".photo-count");
-    if (count) count.textContent = "📸 " + (next + 1) + "/" + photos.length;
-  };
-
-  window.propertyCard = function(prop) {
-    var photos = propPhotos(prop);
-    var cover = photos.find(function(photo) { return photo.cover; }) || photos[0] || null;
-    var bg = cover
-      ? bgForPhoto(cover)
-      : "background:radial-gradient(circle at 70% 30%, rgba(216,181,109,.25), transparent 30%), linear-gradient(135deg, #2b2e34, #0c0d0f);";
-
-    var safeId = safeText(prop.id);
-    var photoControls = photos.length > 1
-      ? '<button class="gallery-nav prev" type="button" onclick="event.stopPropagation();slidePropertyPhoto(\'' + safeId + '\',-1,this)">‹</button>' +
-        '<button class="gallery-nav next" type="button" onclick="event.stopPropagation();slidePropertyPhoto(\'' + safeId + '\',1,this)">›</button>' +
-        '<span class="gallery-hint">arraste</span>'
-      : '';
-
-    return '' +
-      '<div class="property-card">' +
-        '<div class="pc-img pc-gallery" data-prop-id="' + safeId + '" data-photo-index="0" style="' + bg + '">' +
-          '<span class="photo-count">' + (photos.length ? ('📸 1/' + photos.length) : 'Sem foto') + '</span>' +
-          photoControls +
-        '</div>' +
-        '<div class="pc-body">' +
-          '<h3>' + safeText(prop.titulo || 'Imóvel sem título') + '</h3>' +
-          '<p>' + safeText(prop.bairro || '-') + ', ' + safeText(prop.cidade || 'Florianópolis') + '</p>' +
-          '<p>' + safeText(prop.area || '-') + ' m² · ' + safeText(prop.suites || prop.dormitorios || '-') + ' suítes/dorm. · ' + safeText(prop.vagas || '-') + ' vagas</p>' +
-          '<p class="price">' + money(prop.valor) + '</p>' +
-          '<div>' +
-            '<span class="pill gold">' + safeText(prop.tipo || 'Imóvel') + '</span>' +
-            '<span class="pill green">' + safeText(prop.etapa || 'Ativo') + '</span>' +
-            (photos.length ? '<span class="pill">Fotos online</span>' : '<span class="pill red">Adicionar foto</span>') +
-          '</div>' +
-          '<div class="actions">' +
-            '<button class="btn btn-sm" onclick="askAI(\'Crie um anúncio premium para este imóvel: ' + safeText(prop.titulo || '') + ' em ' + safeText(prop.bairro || '') + ', valor ' + money(prop.valor) + '.\')">Anúncio IA</button>' +
-            '<button class="btn btn-sm btn-ghost" onclick="openImovelModal(\'' + safeId + '\')">Editar</button>' +
+    var panel = document.createElement("div");
+    panel.id = "profilePanelCRM";
+    panel.className = "profile-panel";
+    panel.innerHTML =
+      '<h3>Perfil do corretor</h3>' +
+      '<p>Personalize o nome e a foto que aparecem no topo do CRM, ao lado de Administrador/Corretor.</p>' +
+      '<div class="profile-editor">' +
+        '<div class="profile-preview" id="profilePreview"><span>Foto</span></div>' +
+        '<div>' +
+          '<div class="field" style="margin-bottom:8px"><label>Nome exibido</label><input id="profileDisplayName" placeholder="Nome do corretor"></div>' +
+          '<input id="profilePhotoInput" class="profile-file-input" type="file" accept="image/*">' +
+          '<div class="profile-actions">' +
+            '<button class="btn btn-sm" type="button" id="btnSaveProfileName">Salvar nome</button>' +
+            '<button class="btn btn-sm btn-ghost" type="button" id="btnChooseProfilePhoto">Adicionar foto</button>' +
+            '<button class="btn btn-sm btn-danger" type="button" id="btnRemoveProfilePhoto">Remover foto</button>' +
           '</div>' +
         '</div>' +
       '</div>';
-  };
 
-  function wirePhotoSwipe() {
-    document.querySelectorAll(".pc-gallery").forEach(function(gallery) {
-      if (gallery.dataset.swipeReady === "1") return;
-      gallery.dataset.swipeReady = "1";
+    configBody.appendChild(panel);
 
-      var startX = 0;
-      var startY = 0;
+    var nameInput = document.getElementById("profileDisplayName");
+    var fileInput = document.getElementById("profilePhotoInput");
+    var saveName = document.getElementById("btnSaveProfileName");
+    var choosePhoto = document.getElementById("btnChooseProfilePhoto");
+    var removePhoto = document.getElementById("btnRemoveProfilePhoto");
 
-      gallery.addEventListener("touchstart", function(event) {
-        if (!event.touches || !event.touches[0]) return;
-        startX = event.touches[0].clientX;
-        startY = event.touches[0].clientY;
-      }, { passive: true });
+    if (nameInput) nameInput.value = getDisplayName();
 
-      gallery.addEventListener("touchend", function(event) {
-        if (!event.changedTouches || !event.changedTouches[0]) return;
+    if (saveName) {
+      saveName.addEventListener("click", function() {
+        var name = String(nameInput && nameInput.value || "").trim();
+        if (!name) {
+          toast("Digite o nome do corretor.");
+          return;
+        }
 
-        var dx = event.changedTouches[0].clientX - startX;
-        var dy = event.changedTouches[0].clientY - startY;
+        localStorage.setItem(PROFILE_NAME_KEY, name);
+        if (db && db.settings) db.settings.user = name;
+        saveDB();
+        applyUserProfile();
+        applyLogoAndAIName();
+        toast("Nome do corretor atualizado.");
+      });
+    }
 
-        if (Math.abs(dx) < 42 || Math.abs(dx) < Math.abs(dy)) return;
+    if (choosePhoto && fileInput) {
+      choosePhoto.addEventListener("click", function() { fileInput.click(); });
+    }
 
-        var propId = gallery.dataset.propId;
-        slidePropertyPhoto(propId, dx < 0 ? 1 : -1, gallery);
-      }, { passive: true });
-    });
+    if (fileInput) {
+      fileInput.addEventListener("change", async function(event) {
+        var file = event.target.files && event.target.files[0];
+        if (!file) return;
+
+        try {
+          var data = await fileToBase64(file, 600, 0.70);
+          localStorage.setItem(PROFILE_PHOTO_KEY, data);
+          applyUserProfile();
+          toast("Foto do corretor atualizada.");
+        } catch (error) {
+          console.error(error);
+          toast("Não foi possível carregar essa foto.");
+        }
+      });
+    }
+
+    if (removePhoto) {
+      removePhoto.addEventListener("click", function() {
+        localStorage.removeItem(PROFILE_PHOTO_KEY);
+        applyUserProfile();
+        toast("Foto removida.");
+      });
+    }
+
+    applyUserProfile();
   }
 
-  var oldRenderAll = window.renderAll;
-  window.renderAll = function() {
-    if (typeof oldRenderAll === "function") oldRenderAll();
-    applyLogoAndAIName();
-    injectThemePanel();
-    wirePhotoSwipe();
+  function getRightbar() {
+    return document.getElementById("rightbar");
+  }
+
+  window.openAI = function() {
+    var rightbar = getRightbar();
+    if (!rightbar) return;
+
+    rightbar.classList.add("open");
+    document.body.classList.add("ai-open");
+
+    document.querySelectorAll("#mobileNav button").forEach(function(btn) {
+      btn.classList.toggle("active", btn.dataset.view === "ia");
+    });
   };
 
-  function start() {
+  window.closeAI = function() {
+    var rightbar = getRightbar();
+    if (!rightbar) return;
+
+    rightbar.classList.remove("open");
+    document.body.classList.remove("ai-open");
+
+    var activeView = document.querySelector(".view.active");
+    var current = activeView && activeView.id ? activeView.id.replace("view-", "") : "dashboard";
+
+    document.querySelectorAll("#mobileNav button").forEach(function(btn) {
+      btn.classList.toggle("active", btn.dataset.view === current);
+    });
+  };
+
+  window.toggleAI = function() {
+    var rightbar = getRightbar();
+    if (!rightbar) return;
+
+    if (rightbar.classList.contains("open")) closeAI();
+    else openAI();
+  };
+
+  window.switchView = function(view) {
+    if (view === "ia") {
+      toggleAI();
+      return;
+    }
+
+    document.querySelectorAll(".view").forEach(function(item) { item.classList.remove("active"); });
+
+    var selected = document.getElementById("view-" + view);
+    if (selected) selected.classList.add("active");
+
+    document.querySelectorAll("#nav button").forEach(function(btn) {
+      btn.classList.toggle("active", btn.dataset.view === view);
+    });
+
+    document.querySelectorAll("#mobileNav button").forEach(function(btn) {
+      btn.classList.toggle("active", btn.dataset.view === view);
+    });
+
+    var sidebar = document.getElementById("sidebar");
+    if (sidebar) sidebar.classList.remove("open");
+
+    closeAI();
+    renderAll();
+  };
+
+  function injectCloseButton() {
+    var rightbar = getRightbar();
+    if (!rightbar) return;
+
+    var head = rightbar.querySelector(".ai-head");
+    if (!head || document.getElementById("aiCloseMobileBtn")) return;
+
+    var btn = document.createElement("button");
+    btn.id = "aiCloseMobileBtn";
+    btn.type = "button";
+    btn.className = "ai-close-mobile";
+    btn.innerHTML = "← Voltar ao CRM";
+    btn.addEventListener("click", closeAI);
+
+    head.appendChild(btn);
+  }
+
+  function protectMobileIAClick() {
+    document.querySelectorAll("#mobileNav button").forEach(function(btn) {
+      if (btn.dataset.view === "ia" && !btn.dataset.aiFixed) {
+        btn.dataset.aiFixed = "1";
+        btn.addEventListener("click", function(event) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          toggleAI();
+        }, true);
+      }
+    });
+
+    var floating = document.querySelector(".mobile-ai-toggle");
+    if (floating && !floating.dataset.aiFixed) {
+      floating.dataset.aiFixed = "1";
+      floating.addEventListener("click", function(event) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        toggleAI();
+      }, true);
+    }
+  }
+
+  function renderChatFinal() {
+    var log = document.getElementById("chatLog");
+    if (!log) return;
+
+    log.innerHTML = (db.chat || []).slice(-20).map(function(message) {
+      return '<div class="msg ' + (message.role === "user" ? "me" : "ai") + '">' + safeText(message.content) + '</div>';
+    }).join("");
+
+    if (!log.innerHTML) {
+      log.innerHTML = '<div class="msg ai">' + getTimeInfo().greeting + ', ' + safeText(getDisplayName()) + '. Estou pronta para te ajudar com leads, imóveis, follow-up, captação, WhatsApp e organização do dia.</div>';
+    }
+
+    log.scrollTop = log.scrollHeight;
+  }
+
+  window.renderChat = renderChatFinal;
+
+  window.askAI = async function(question) {
+    if (!question) return;
+
+    var timeInfo = getTimeInfo();
+    var visibleQuestion = String(question || "");
+    var questionForAI = "Contexto automático do CRM: agora em " + timeInfo.city + " são " + timeInfo.formatted + " no fuso " + timeInfo.timezone + ". Use a saudação correta: " + timeInfo.greeting + ".\n\nPergunta do corretor: " + visibleQuestion;
+
+    db.chat = db.chat || [];
+    db.chat.push({ role: "user", content: visibleQuestion });
+    db.chat.push({ role: "assistant", content: "Consultando IA..." });
+    saveDB();
+    renderChat();
+
+    var loadingIndex = db.chat.length - 1;
+
+    try {
+      var token = "";
+
+      if (window.supabaseClient && window.supabaseClient.auth && window.supabaseClient.auth.getSession) {
+        var sessionResult = await window.supabaseClient.auth.getSession();
+        token = sessionResult && sessionResult.data && sessionResult.data.session && sessionResult.data.session.access_token || "";
+      }
+
+      var headers = { "Content-Type": "application/json" };
+      if (token) headers.Authorization = "Bearer " + token;
+
+      var state = getCloudSafeDB();
+      state.contexto_horario = timeInfo;
+
+      var payload = {
+        question: questionForAI,
+        crm_state: state,
+        horario_local: timeInfo,
+        history: db.chat.slice(-10).map(function(message) {
+          return {
+            role: message.role === "user" ? "user" : "assistant",
+            content: message.content
+          };
+        })
+      };
+
+      var response = await fetch(EDGE_FUNCTION_URL, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(payload)
+      });
+
+      var data = null;
+
+      try {
+        data = await response.json();
+      } catch (error) {
+        data = null;
+      }
+
+      var answer = extrairRespostaIA(data);
+
+      if (!response.ok && !answer) {
+        answer = "Resposta não está disponível no momento.";
+      }
+
+      if (String(answer).includes("OPENAI_API_KEY") || String(answer).includes("OPENAI_MODEL")) {
+        answer = "Resposta não está disponível no momento.";
+      }
+
+      db.chat[loadingIndex] = {
+        role: "assistant",
+        content: answer
+      };
+
+      saveDB();
+      renderChat();
+      openAI();
+    } catch (error) {
+      console.error(error);
+
+      db.chat[loadingIndex] = {
+        role: "assistant",
+        content: localAI(visibleQuestion)
+      };
+
+      saveDB();
+      renderChat();
+      openAI();
+    }
+  };
+
+  window.localAI = function(question) {
+    var q = String(question || "").toLowerCase();
+    var timeInfo = getTimeInfo();
+    var hot = getHotLeads();
+
+    if (q.includes("hora") || q.includes("horário") || q.includes("horario") || q.includes("bom dia") || q.includes("boa tarde") || q.includes("boa noite")) {
+      return timeInfo.greeting + ". Agora em Florianópolis/SC é " + timeInfo.formatted + ". Vou usar essa saudação correta nas respostas.";
+    }
+
+    if (q.includes("prioridade") || q.includes("hoje") || q.includes("tarefas")) {
+      return timeInfo.greeting + ". Prioridades de hoje:\n1. Responder leads quentes: " + (hot.map(function(c) { return c.nome; }).join(", ") || "nenhum lead quente cadastrado") + ".\n2. Confirmar visitas e propostas em aberto.\n3. Reativar leads parados com uma mensagem curta.\n4. Revisar anúncios dos imóveis de maior valor.\n5. Registrar todas as ações no CRM.";
+    }
+
+    if (q.includes("whatsapp") || q.includes("mensagem")) {
+      return "Mensagem pronta para WhatsApp:\n\n" + timeInfo.greeting + ", tudo bem? Estou passando para entender se você ainda está buscando imóvel em Florianópolis. Tenho algumas opções que podem combinar com seu perfil. Você procura casa, apartamento ou cobertura?";
+    }
+
+    if (q.includes("captação") || q.includes("captacao")) {
+      return "Mensagem de captação:\n\n" + timeInfo.greeting + ", tudo bem? Trabalho com imóveis de alto padrão em Florianópolis e estou selecionando boas oportunidades para apresentar a compradores qualificados. Seu imóvel ainda está disponível para venda ou locação? Posso te explicar como funciona nosso processo de divulgação profissional.";
+    }
+
+    if (q.includes("anúncio") || q.includes("anuncio")) {
+      var prop = db.imoveis[0];
+
+      if (!prop) return "Cadastre um imóvel primeiro para eu criar o anúncio.";
+
+      return "Anúncio premium:\n\n" + prop.titulo + "\n\nImóvel exclusivo em " + prop.bairro + ", Florianópolis, com " + (prop.area || "-") + " m², " + (prop.suites || prop.dormitorios || "-") + " suítes/dormitórios e " + (prop.vagas || "-") + " vagas.\n\nValor: " + money(prop.valor) + "\n\nEntre em contato para receber mais detalhes ou agendar uma visita.";
+    }
+
+    return "Resposta não está disponível no momento.";
+  };
+
+  function runFinalFix() {
     applyTheme(localStorage.getItem(THEME_KEY) || "gold");
     applyLogoAndAIName();
+    applyUserProfile();
     injectThemePanel();
+    injectProfilePanel();
+    injectCloseButton();
+    protectMobileIAClick();
     wirePhotoSwipe();
+    applyGalleryBackgrounds();
+
+    if (window.innerWidth <= 980) {
+      var rightbar = getRightbar();
+      if (rightbar && !rightbar.classList.contains("open")) {
+        document.body.classList.remove("ai-open");
+      }
+    }
   }
+
+  window.renderAll = function() {
+    if (typeof originalRenderAll === "function") originalRenderAll();
+    runFinalFix();
+  };
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", start);
+    document.addEventListener("DOMContentLoaded", runFinalFix);
   } else {
-    start();
+    runFinalFix();
   }
 
-  setTimeout(start, 600);
-  setTimeout(start, 1600);
+  setTimeout(runFinalFix, 600);
+  setTimeout(runFinalFix, 1600);
+  setTimeout(runFinalFix, 3200);
 })();
 </script>
 
