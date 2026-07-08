@@ -1365,7 +1365,7 @@
   <div class="app">
     <aside class="sidebar" id="sidebar">
       <div class="brand">
-        <div class="brand-logo">LA</div>
+        <div class="brand-logo brand-logo-fixed"><img class="crm-logo-img" src="https://raw.githubusercontent.com/NatanAlvezz/NatanAlvezz/main/midia/logo-leads.png.jpeg?v=500" alt="Leads Imóveis" loading="eager"></div>
         <div>
           <b>LEADS</b>
           <small>IMÓVEIS</small>
@@ -1402,7 +1402,7 @@
           <button class="round" title="Notificações">♢<span class="dot" id="notifDot">0</span></button>
           <button class="round" title="Agenda" onclick="switchView('tarefas')">▣</button>
           <div class="user">
-            <div class="avatar">LA</div>
+            <div class="avatar avatar-logo-fixed"><img class="crm-logo-img" src="https://raw.githubusercontent.com/NatanAlvezz/NatanAlvezz/main/midia/logo-leads.png.jpeg?v=500" alt="Leads Imóveis" loading="eager"></div>
             <div>
               <b id="userNameTop">Natan Alves</b>
               <span>Administrador</span>
@@ -3615,5 +3615,120 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
   setTimeout(startFinalFix,1500);
 })();
 </script>
+
+
+<!-- FIX FINAL LOGO CRM + LIMPEZA DO QUADRO BRANCO -->
+<style id="logoWhiteFixFinal">
+  .brand-logo-fixed,
+  .avatar-logo-fixed {
+    background: rgba(0,0,0,.32) !important;
+    border: 1px solid rgba(216,181,109,.42) !important;
+    overflow: hidden !important;
+    display: grid !important;
+    place-items: center !important;
+  }
+
+  .brand-logo-fixed {
+    width: 58px !important;
+    height: 58px !important;
+    border-radius: 50% !important;
+    padding: 5px !important;
+    object-fit: contain !important;
+  }
+
+  .avatar-logo-fixed {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 50% !important;
+    padding: 4px !important;
+    flex: 0 0 auto !important;
+  }
+
+  .crm-logo-img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+    display: block !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+  }
+
+  img.crm-logo-img:not([src]),
+  img.crm-logo-img[src=""] {
+    display: none !important;
+  }
+
+  /* remove qualquer caixa branca acidental de imagem quebrada/controle nativo no layout */
+  .brand-logo img,
+  .avatar img,
+  .ai-orb img {
+    background-color: transparent !important;
+  }
+
+  @media (max-width: 980px) {
+    .brand-logo-fixed {
+      width: 54px !important;
+      height: 54px !important;
+    }
+  }
+</style>
+
+<script id="logoWhiteFixFinalScript">
+(function fixCRMLogoAndWhiteBox() {
+  var LOGO_URL = "https://raw.githubusercontent.com/NatanAlvezz/NatanAlvezz/main/midia/logo-leads.png.jpeg?v=500";
+
+  function makeLogoBox(el, small) {
+    if (!el) return;
+
+    el.classList.add(small ? "avatar-logo-fixed" : "brand-logo-fixed");
+    el.innerHTML = "";
+
+    var img = document.createElement("img");
+    img.className = "crm-logo-img";
+    img.alt = "Leads Imóveis";
+    img.src = LOGO_URL;
+    img.loading = "eager";
+
+    img.onerror = function() {
+      el.innerHTML = small ? "LA" : "LA";
+      el.style.color = "#d8b56d";
+      el.style.fontWeight = "900";
+      el.style.fontSize = small ? "12px" : "14px";
+    };
+
+    el.appendChild(img);
+  }
+
+  function applyFix() {
+    makeLogoBox(document.querySelector(".brand-logo"), false);
+    makeLogoBox(document.querySelector(".avatar"), true);
+
+    var title = document.querySelector(".ai-head h2");
+    if (title) title.textContent = "Agente IA de Corretor";
+
+    var orb = document.querySelector(".ai-orb");
+    if (orb) orb.innerHTML = "Agente<br>IA";
+
+    var mobile = document.querySelector(".mobile-ai-toggle");
+    if (mobile) mobile.textContent = "Agente IA";
+
+    document.querySelectorAll(".online").forEach(function(el) {
+      el.textContent = "ONLINE ✦";
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", applyFix);
+  } else {
+    applyFix();
+  }
+
+  setTimeout(applyFix, 700);
+  setTimeout(applyFix, 1800);
+})();
+</script>
+
 </body>
 </html>
