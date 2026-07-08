@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1361,6 +1360,35 @@
         height: 116px;
       }
     }
+
+    .captacao-meta {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(216,181,109,.20);
+      background: rgba(216,181,109,.07);
+      color: #ffe8ad !important;
+      font-size: 11px !important;
+      line-height: 1.35;
+    }
+
+    .captacao-meta b {
+      color: #fff4d2;
+    }
+
+    .sync-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(101,214,121,.28);
+      background: rgba(101,214,121,.08);
+      color: #d6ffdb;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
   </style>
 </head>
 
@@ -1628,7 +1656,7 @@
   <script>
     "use strict";
 
-    const STORAGE_KEY = "leads_imoveis_premium_ia_v6";
+    const STORAGE_KEY = "leads_imoveis_premium_ia_v7_estavel";
     const OLD_KEYS = ["leads_imoveis_premium_ia_v5", "leads_imoveis_premium_ia_v4"];
     let CRM_STATE_ID = "leads-imoveis-main";
     let cloudUserEmail = null;
@@ -5692,476 +5720,485 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
 })();
 </script>
 
-<script id="crmGlobalImoveisEquipeCaptacaoPatch2026">
+
+<script>
+/* =========================================================
+   LEADS IMÓVEIS — PATCH LIMPO V7
+   Imóveis globais da imobiliária + captação por corretor
+   - Todos os corretores ativos podem cadastrar e editar imóveis.
+   - Apenas admin exclui imóveis.
+   - Leads e tarefas continuam na base individual do corretor.
+   - Sem blocos antigos duplicados para evitar travamento.
+========================================================= */
 (function(){
   "use strict";
 
-  var STATE_TABLE = "crm_state";
   var GLOBAL_IMOVEIS_STATE_ID = "leads-imoveis-imoveis-global";
-  var GLOBAL_KEY = "leads_imoveis_global_imoveis_v2_captacao";
-  var globalImoveisRealtimeChannel = null;
+  var globalImoveisReady = false;
+  var globalImoveisChannel = null;
+  var savingGlobalImoveis = false;
 
-  function nowISO(){ return new Date().toISOString(); }
-  function lower(value){ return String(value || "").trim().toLowerCase(); }
-  function clone(value){ try { return JSON.parse(JSON.stringify(value || {})); } catch(e) { return {}; } }
+  function userId(){
+    return window.__LEADS_CURRENT_USER_ID__ || (typeof cloudUserId !== "undefined" ? cloudUserId : null) || "";
+  }
+
+  function userEmail(){
+    return window.__LEADS_CURRENT_USER_EMAIL__ || (typeof cloudUserEmail !== "undefined" ? cloudUserEmail : "") || "";
+  }
+
+  function userRole(){
+    return window.__LEADS_CURRENT_USER_ROLE__ || (typeof cloudUserRole !== "undefined" ? cloudUserRole : "corretor") || "corretor";
+  }
+
+  function userProfile(){
+    return window.__LEADS_CURRENT_USER_PROFILE__ || (typeof cloudUserProfile !== "undefined" ? cloudUserProfile : null) || null;
+  }
+
   function isAdmin(){
-    return window.__LEADS_CURRENT_USER_ROLE__ === "admin" || lower(window.__LEADS_CURRENT_USER_EMAIL__) === "leadsimoveisoficial@gmail.com";
+    return userRole() === "admin" || String(userEmail()).toLowerCase() === "leadsimoveisoficial@gmail.com";
   }
-  function canManageImoveis(){
-    return !!cloudUserId && !(window.__LEADS_CURRENT_USER_PROFILE__ && window.__LEADS_CURRENT_USER_PROFILE__.active === false);
-  }
+
   function currentUserName(){
-    var profile = window.__LEADS_CURRENT_USER_PROFILE__ || cloudUserProfile || {};
-    return profile.full_name || (db && db.settings && db.settings.user) || (window.__LEADS_CURRENT_USER_EMAIL__ ? String(window.__LEADS_CURRENT_USER_EMAIL__).split("@")[0] : "Corretor");
-  }
-  function currentUserEmail(){ return window.__LEADS_CURRENT_USER_EMAIL__ || cloudUserEmail || ""; }
-  function currentOwnerId(){ return window.__LEADS_ACTIVE_OWNER_USER_ID__ || cloudUserId; }
-  function moneySafe(v){ return (typeof money === "function") ? money(v) : String(v || "A consultar"); }
-  function htmlSafe(v){ return (typeof esc === "function") ? esc(v) : String(v || "").replace(/[&<>\"']/g, function(m){ return ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[m]; }); }
-  function jsSafe(v){
-    return String(v || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/\n/g, " ").replace(/\r/g, " ");
+    var p = userProfile();
+    if (p && p.full_name) return p.full_name;
+    if (db && db.settings && db.settings.user) return db.settings.user;
+    if (userEmail()) return String(userEmail()).split("@")[0];
+    return "Corretor";
   }
 
-  function safeUserState(){
-    var copy = (typeof getCloudSafeDB === "function") ? getCloudSafeDB() : clone(db);
-    copy.imoveis = [];
-    return copy;
+  function h(s){
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function(m){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m];
+    });
   }
 
-  function normalizeImovelCaptacao(p){
+  function j(s){
+    return String(s == null ? "" : s).replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/\n/g, " ").replace(/\r/g, " ");
+  }
+
+  function ensureArray(v){
+    return Array.isArray(v) ? v : [];
+  }
+
+  function cleanPhotosForCloud(photos){
+    // Mantém dados pequenos quando já existem, mas evita salvar objetos quebrados.
+    // Se quiser fotos 100% profissionais depois, o ideal é Supabase Storage.
+    return ensureArray(photos).slice(0, 4).map(function(f, idx){
+      return {
+        id: f.id || ("foto_" + Date.now() + "_" + idx),
+        name: f.name || "foto-imovel.jpg",
+        data: f.data || "",
+        cover: !!f.cover || idx === 0,
+        created: f.created || Date.now()
+      };
+    });
+  }
+
+  function normalizeImovel(p){
     p = p && typeof p === "object" ? p : {};
-    if (!p.captadorNome && p.captador) p.captadorNome = p.captador;
-    if (!p.captadorNome) p.captadorNome = "Administração";
-    if (!p.captadoEm) p.captadoEm = p.updated || Date.now();
-    if (!p.statusCaptacao) p.statusCaptacao = p.etapa || "Captado";
-    return p;
-  }
-
-  function normalizeGlobalList(list){
-    list = Array.isArray(list) ? list : [];
-    return list.map(function(p){ return normalizeImovelCaptacao(p); });
-  }
-
-  function safeGlobalState(){
+    var now = Date.now();
+    var nome = currentUserName();
+    var email = userEmail();
     return {
-      tipo_base: "imoveis_globais_com_captador_leads_imoveis",
-      atualizado_em: nowISO(),
-      imoveis: normalizeGlobalList(clone((db && db.imoveis) || []))
+      id: p.id || ("imv_" + now + "_" + Math.floor(Math.random() * 9999)),
+      titulo: p.titulo || "Imóvel captado",
+      tipo: p.tipo || "Casa",
+      bairro: p.bairro || "",
+      cidade: p.cidade || "Florianópolis",
+      valor: Number(p.valor || 0),
+      area: Number(p.area || 0),
+      dormitorios: Number(p.dormitorios || 0),
+      suites: Number(p.suites || 0),
+      vagas: Number(p.vagas || 0),
+      etapa: p.etapa || "Captado",
+      prop: p.prop || "",
+      tel: p.tel || "",
+      proximaAcao: p.proximaAcao || "",
+      photos: cleanPhotosForCloud(p.photos || []),
+      captadorId: p.captadorId || p.createdBy || userId() || "",
+      captadorNome: p.captadorNome || p.createdByName || nome,
+      captadorEmail: p.captadorEmail || p.createdByEmail || email,
+      ultimoEditorId: p.ultimoEditorId || userId() || "",
+      ultimoEditorNome: p.ultimoEditorNome || nome,
+      ultimoEditorEmail: p.ultimoEditorEmail || email,
+      created: p.created || p.created_at || now,
+      updated: p.updated || now
     };
   }
 
-  function localSaveGlobal(){
-    try { localStorage.setItem(GLOBAL_KEY, JSON.stringify(normalizeGlobalList((db && db.imoveis) || []))); } catch(e) {}
+  function normalizeGlobalImoveis(list){
+    return ensureArray(list).map(normalizeImovel);
   }
 
-  function localLoadGlobal(){
+  function globalPayload(){
+    return {
+      version: "global-imoveis-v7",
+      updatedAt: new Date().toISOString(),
+      updatedBy: userId(),
+      updatedByName: currentUserName(),
+      imoveis: normalizeGlobalImoveis(db.imoveis || [])
+    };
+  }
+
+  async function saveGlobalImoveis(showMessage){
+    if (savingGlobalImoveis) return;
+    var client = window.supabaseClient;
+    if (!client || !userId()) {
+      if (showMessage && typeof toast === "function") toast("Supabase/login ainda não carregou.");
+      return;
+    }
+
+    savingGlobalImoveis = true;
     try {
-      var raw = localStorage.getItem(GLOBAL_KEY) || localStorage.getItem("leads_imoveis_global_imoveis_v1");
-      var list = raw ? JSON.parse(raw) : [];
-      return normalizeGlobalList(Array.isArray(list) ? list : []);
-    } catch(e) { return []; }
-  }
+      var payload = {
+        id: GLOBAL_IMOVEIS_STATE_ID,
+        user_id: userId(),
+        data: globalPayload(),
+        updated_by: userId(),
+        updated_at: new Date().toISOString()
+      };
 
-  async function saveUserStateOnly(){
-    var client = window.supabaseClient;
-    var ownerId = currentOwnerId();
-    if (!client || !ownerId) return false;
-
-    var stateId = "leads-imoveis-user-" + ownerId;
-    CRM_STATE_ID = stateId;
-
-    var result = await client.from(STATE_TABLE).upsert({
-      id: stateId,
-      user_id: ownerId,
-      data: safeUserState(),
-      updated_by: cloudUserId,
-      updated_at: nowISO()
-    }, { onConflict: "id" });
-
-    if (result.error) throw result.error;
-    return true;
-  }
-
-  async function saveGlobalImoveisEquipe(showMessage){
-    var client = window.supabaseClient;
-    if (!client || !cloudUserId) {
-      if (showMessage && typeof toast === "function") toast("Faça login para salvar imóveis.");
-      return false;
+      var result = await client.from("crm_state").upsert(payload, { onConflict: "id" });
+      if (result.error) throw result.error;
+      globalImoveisReady = true;
+      if (showMessage && typeof toast === "function") toast("Imóveis salvos para toda a equipe.");
+    } catch(error) {
+      console.error("Erro ao salvar imóveis globais:", error);
+      if (typeof toast === "function") toast("Erro ao salvar imóveis globais. Rode o SQL no Supabase.");
+    } finally {
+      savingGlobalImoveis = false;
     }
-    if (!canManageImoveis()) {
-      if (showMessage && typeof toast === "function") toast("Seu usuário precisa estar ativo para editar imóveis.");
-      return false;
-    }
-
-    var result = await client.from(STATE_TABLE).upsert({
-      id: GLOBAL_IMOVEIS_STATE_ID,
-      user_id: cloudUserId,
-      data: safeGlobalState(),
-      updated_by: cloudUserId,
-      updated_at: nowISO()
-    }, { onConflict: "id" });
-
-    if (result.error) throw result.error;
-    localSaveGlobal();
-    if (showMessage && typeof toast === "function") toast("Carteira de imóveis salva para toda a equipe.");
-    return true;
   }
 
-  async function loadGlobalImoveisEquipe(createIfMissing){
+  async function loadGlobalImoveis(){
     var client = window.supabaseClient;
-    if (!client) return false;
+    if (!client || !userId()) return;
 
-    var result = await client
-      .from(STATE_TABLE)
-      .select("id,user_id,data,updated_at,updated_by")
-      .eq("id", GLOBAL_IMOVEIS_STATE_ID)
-      .maybeSingle();
+    try {
+      var result = await client
+        .from("crm_state")
+        .select("data,updated_at,updated_by")
+        .eq("id", GLOBAL_IMOVEIS_STATE_ID)
+        .maybeSingle();
 
-    if (result.error) throw result.error;
+      if (result.error) throw result.error;
 
-    if (result.data && result.data.data) {
-      var data = result.data.data || {};
-      var imoveis = normalizeGlobalList(Array.isArray(data.imoveis) ? data.imoveis : []);
-      if (!db || typeof db !== "object") db = (typeof normalizeDB === "function" ? normalizeDB({}) : { settings:{}, clientes:[], tarefas:[], chat:[], imoveis:[] });
-      db.imoveis = imoveis;
+      if (result.data && result.data.data && Array.isArray(result.data.data.imoveis)) {
+        db.imoveis = normalizeGlobalImoveis(result.data.data.imoveis);
+      } else {
+        // Primeira instalação: aproveita os imóveis existentes da base atual e cria a carteira global.
+        db.imoveis = normalizeGlobalImoveis(db.imoveis || []);
+        await saveGlobalImoveis(false);
+      }
+
+      globalImoveisReady = true;
       if (typeof safeLocalSave === "function") safeLocalSave(db);
-      localSaveGlobal();
-      return true;
+      if (typeof renderAll === "function") renderAll();
+      if (typeof renderChat === "function") renderChat();
+    } catch(error) {
+      console.error("Erro ao carregar imóveis globais:", error);
+      if (typeof toast === "function") toast("Não carregou imóveis globais. Confira o SQL no Supabase.");
     }
-
-    var local = localLoadGlobal();
-    if (!local.length && typeof seedData === "function") local = normalizeGlobalList((seedData().imoveis || []));
-    db.imoveis = local;
-    if (typeof safeLocalSave === "function") safeLocalSave(db);
-
-    if (createIfMissing && canManageImoveis()) {
-      await saveGlobalImoveisEquipe(false);
-      return true;
-    }
-    return false;
   }
 
-  function startGlobalImoveisRealtimeEquipe(){
+  function startGlobalRealtime(){
     var client = window.supabaseClient;
-    if (!client) return;
+    if (!client || globalImoveisChannel) return;
 
-    try { if (globalImoveisRealtimeChannel && client.removeChannel) client.removeChannel(globalImoveisRealtimeChannel); } catch(e) {}
-    globalImoveisRealtimeChannel = null;
-
-    globalImoveisRealtimeChannel = client.channel("leads-imoveis-global-imoveis-captacao-" + Date.now())
+    globalImoveisChannel = client.channel("leads-imoveis-global-imoveis-v7")
       .on("postgres_changes", {
         event: "*",
         schema: "public",
-        table: STATE_TABLE,
+        table: "crm_state",
         filter: "id=eq." + GLOBAL_IMOVEIS_STATE_ID
       }, function(payload){
-        var next = payload.new && payload.new.data;
-        if (!next) return;
-        db.imoveis = normalizeGlobalList(Array.isArray(next.imoveis) ? next.imoveis : []);
+        var data = payload && payload.new && payload.new.data;
+        if (!data || !Array.isArray(data.imoveis)) return;
+        if (payload.new.updated_by && payload.new.updated_by === userId()) return;
+        db.imoveis = normalizeGlobalImoveis(data.imoveis);
         if (typeof safeLocalSave === "function") safeLocalSave(db);
-        localSaveGlobal();
         if (typeof renderAll === "function") renderAll();
-        if (payload.new && payload.new.updated_by && payload.new.updated_by !== cloudUserId && typeof toast === "function") {
-          toast("Carteira de imóveis atualizada por outro corretor.");
-        }
+        if (typeof toast === "function") toast("Carteira de imóveis atualizada pela equipe.");
       })
       .subscribe();
   }
 
-  window.startRealtimeSync = function(){
-    var client = window.supabaseClient;
-    if (!client || !CRM_STATE_ID) return;
+  function captadorLine(p){
+    var nome = p.captadorNome || "Não informado";
+    var editou = p.ultimoEditorNome && p.ultimoEditorNome !== nome ? " · Editado por: " + p.ultimoEditorNome : "";
+    return '<p class="captacao-meta"><b>Captado por:</b> ' + h(nome) + h(editou) + '</p>';
+  }
 
-    try { if (realtimeChannel && client.removeChannel) client.removeChannel(realtimeChannel); } catch(e) {}
-    realtimeChannel = null;
+  function renderPropertyCardGlobal(p){
+    var photoCount = ensureArray(p.photos).filter(function(f){ return !!f.data; }).length;
+    var style = typeof photoStyle === "function" ? photoStyle(p) : "";
+    var deleteButton = isAdmin() ? '<button class="btn btn-sm btn-danger" onclick="deleteImovel(\'' + j(p.id) + '\')">Excluir</button>' : "";
 
-    realtimeChannel = client.channel("leads-crm-user-sync-" + String(CRM_STATE_ID).replace(/[^a-z0-9_-]/gi, "-") + "-" + Date.now())
-      .on("postgres_changes", {
-        event: "*",
-        schema: "public",
-        table: STATE_TABLE,
-        filter: "id=eq." + CRM_STATE_ID
-      }, function(payload){
-        var next = payload.new && payload.new.data;
-        if (!next) return;
-        if (payload.new && payload.new.updated_by && payload.new.updated_by === cloudUserId) return;
+    return '<div class="property-card">' +
+      '<div class="pc-img" style="' + h(style) + '">' +
+        '<span class="photo-count">📷 ' + photoCount + '/4</span>' +
+      '</div>' +
+      '<div class="pc-body">' +
+        '<h3>' + h(p.titulo) + '</h3>' +
+        '<p>' + h(p.tipo) + ' · ' + h(p.bairro) + ' · ' + h(p.cidade) + '</p>' +
+        '<p>' + (Number(p.area) || 0) + ' m² · ' + (Number(p.dormitorios) || 0) + ' dorm. · ' + (Number(p.suites) || 0) + ' suítes · ' + (Number(p.vagas) || 0) + ' vagas</p>' +
+        '<p class="price">' + (typeof money === "function" ? money(p.valor) : h(p.valor)) + '</p>' +
+        '<span class="pill gold">' + h(p.etapa || "Captado") + '</span>' +
+        captadorLine(p) +
+        '<p><b>Proprietário:</b> ' + h(p.prop || "Não informado") + '</p>' +
+        '<p><b>Próxima ação:</b> ' + h(p.proximaAcao || "Definir follow-up") + '</p>' +
+        '<div class="actions">' +
+          '<button class="btn btn-sm btn-ghost" onclick="openImovelModal(\'' + j(p.id) + '\')">Editar</button>' +
+          '<button class="btn btn-sm" onclick="askAI(\'Crie um anúncio premium para este imóvel: ' + j(p.titulo) + '\')">IA anúncio</button>' +
+          deleteButton +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
 
-        var globalImoveis = normalizeGlobalList(Array.isArray(db && db.imoveis) ? db.imoveis : []);
-        db = (typeof normalizeDB === "function") ? normalizeDB(next) : next;
-        db.imoveis = globalImoveis;
-        if (typeof safeLocalSave === "function") safeLocalSave(db);
-        if (typeof renderAll === "function") renderAll();
-        if (typeof renderChat === "function") renderChat();
-        if (typeof toast === "function") toast("Sua base de leads foi atualizada.");
-      })
-      .subscribe();
+  window.renderImoveis = function(){
+    var list = document.getElementById("propertyList");
+    if (!list) return;
 
-    startGlobalImoveisRealtimeEquipe();
+    var q = (document.getElementById("searchImoveis") && document.getElementById("searchImoveis").value || "").toLowerCase();
+    var type = document.getElementById("filterPropType") && document.getElementById("filterPropType").value || "";
+
+    var items = normalizeGlobalImoveis(db.imoveis || []).filter(function(p){
+      var text = [p.titulo, p.tipo, p.bairro, p.cidade, p.prop, p.captadorNome].join(" ").toLowerCase();
+      return (!q || text.indexOf(q) >= 0) && (!type || p.tipo === type);
+    });
+
+    list.innerHTML = items.length ? items.map(renderPropertyCardGlobal).join("") : '<div class="empty">Nenhum imóvel na carteira global ainda. Clique em + Novo imóvel captado.</div>';
   };
 
-  var oldInitCloudSync = window.initCloudSync;
-  window.initCloudSync = async function(){
-    if (typeof oldInitCloudSync === "function") await oldInitCloudSync();
-    await loadGlobalImoveisEquipe(true);
-    startGlobalImoveisRealtimeEquipe();
-    applyImoveisEquipeUI();
-  };
+  function renderFeaturedGlobal(){
+    var box = document.getElementById("featuredCards");
+    if (!box) return;
+    var items = normalizeGlobalImoveis(db.imoveis || []).slice(0, 3);
+    box.innerHTML = items.length ? items.map(renderPropertyCardGlobal).join("") : '<div class="empty">Nenhum imóvel em destaque ainda.</div>';
+  }
 
-  var oldOpenCorretorCRMBase = window.openCorretorCRMBase;
-  window.openCorretorCRMBase = async function(ownerId, ownerName, ownerEmail, ownerRole){
-    if (typeof oldOpenCorretorCRMBase === "function") await oldOpenCorretorCRMBase(ownerId, ownerName, ownerEmail, ownerRole);
-    await loadGlobalImoveisEquipe(true);
-    startGlobalImoveisRealtimeEquipe();
-    if (typeof renderAll === "function") renderAll();
-    applyImoveisEquipeUI();
-  };
-
-  var oldBackToMyCRMBase = window.backToMyCRMBase;
-  window.backToMyCRMBase = async function(){
-    if (typeof oldBackToMyCRMBase === "function") await oldBackToMyCRMBase();
-    await loadGlobalImoveisEquipe(true);
-    startGlobalImoveisRealtimeEquipe();
-    if (typeof renderAll === "function") renderAll();
-    applyImoveisEquipeUI();
-  };
-
-  window.saveDBToCloud = async function(showMessage){
-    try {
-      await saveUserStateOnly();
-      await saveGlobalImoveisEquipe(false);
-      if (showMessage && typeof toast === "function") toast("CRM salvo. Leads individuais e imóveis globais da equipe atualizados.");
-    } catch(error) {
-      console.error(error);
-      if (showMessage && typeof toast === "function") toast("Erro ao salvar. Rode o SQL de captação no Supabase.");
+  function renderReportsGlobal(){
+    if (typeof renderReports === "function") {
+      try { renderReports(); } catch(e) { console.warn(e); }
     }
-  };
-
-  window.propertyCard = function(p){
-    p = normalizeImovelCaptacao(p || {});
-    var photos = Array.isArray(p.photos) ? p.photos.filter(function(f){ return f && f.data; }) : [];
-    var cover = (typeof getCoverPhoto === "function") ? getCoverPhoto(p) : null;
-    var style = (typeof photoStyle === "function") ? photoStyle(p) : "";
-    var captador = p.captadorNome || "Não informado";
-    var editor = p.ultimoEditorNome || "";
-    var deleteBadge = isAdmin() ? '<button class="btn btn-sm btn-danger" onclick="deleteImovel(\'' + jsSafe(p.id) + '\')">Excluir</button>' : '';
-
-    return '' +
-      '<div class="property-card">' +
-        '<div class="pc-img" style="' + style + '">' +
-          '<span class="photo-count">' + (photos.length ? ('📸 ' + photos.length) : 'Sem foto') + '</span>' +
-        '</div>' +
-        '<div class="pc-body">' +
-          '<h3>' + htmlSafe(p.titulo || 'Imóvel sem título') + '</h3>' +
-          '<p>' + htmlSafe(p.bairro || '-') + ', ' + htmlSafe(p.cidade || 'Florianópolis') + '</p>' +
-          '<p>' + htmlSafe(p.area || '-') + ' m² · ' + htmlSafe(p.suites || p.dormitorios || '-') + ' suítes/dorm. · ' + htmlSafe(p.vagas || '-') + ' vagas</p>' +
-          '<p class="price">' + moneySafe(p.valor) + '</p>' +
-          '<div>' +
-            '<span class="pill gold">' + htmlSafe(p.tipo || 'Imóvel') + '</span>' +
-            '<span class="pill green">' + htmlSafe(p.etapa || 'Ativo') + '</span>' +
-            '<span class="pill">🎯 Captado por: ' + htmlSafe(captador) + '</span>' +
-            (editor ? '<span class="pill">Editado por: ' + htmlSafe(editor) + '</span>' : '') +
-            (cover ? '<span class="pill">Foto de capa</span>' : '<span class="pill red">Adicionar foto</span>') +
-          '</div>' +
-          '<div class="actions">' +
-            '<button class="btn btn-sm" onclick="askAI(\'Crie um anúncio premium para este imóvel: ' + jsSafe(p.titulo || '') + ' em ' + jsSafe(p.bairro || '') + ' no valor de ' + jsSafe(moneySafe(p.valor)) + '.\')">Anúncio IA</button>' +
-            '<button class="btn btn-sm btn-ghost" onclick="openImovelModal(\'' + jsSafe(p.id) + '\')">Editar</button>' +
-            deleteBadge +
-          '</div>' +
-        '</div>' +
-      '</div>';
-  };
+  }
 
   window.openImovelModal = function(id){
-    if (!canManageImoveis()) {
-      if (typeof toast === "function") toast("Seu usuário precisa estar ativo para cadastrar ou editar imóvel.");
+    var p = id ? (db.imoveis || []).find(function(x){ return x.id === id; }) : null;
+    if (id && !p) {
+      if (typeof toast === "function") toast("Imóvel não encontrado na carteira global.");
       return;
     }
+
+    var isEdit = !!p;
+    p = normalizeImovel(p || {
+      id: "",
+      titulo: "",
+      tipo: "Casa",
+      bairro: "",
+      cidade: (db.settings && db.settings.city) || "Florianópolis",
+      valor: "",
+      area: "",
+      dormitorios: "",
+      suites: "",
+      vagas: "",
+      etapa: "Captado",
+      prop: "",
+      tel: "",
+      proximaAcao: "",
+      photos: []
+    });
 
     currentEdit = { type: "imovel", id: id || null };
-    var p = id ? (db.imoveis || []).find(function(x){ return x.id === id; }) : {};
-    p = normalizeImovelCaptacao(p || {});
-    var captadorAtual = p.captadorNome || currentUserName();
-    var captadorEmailAtual = p.captadorEmail || currentUserEmail();
 
-    document.getElementById("modalTitle").textContent = id ? "Editar imóvel da carteira" : "Novo imóvel captado";
-
-    document.getElementById("modalBody").innerHTML = '' +
+    document.getElementById("modalTitle").textContent = isEdit ? "Editar imóvel da carteira global" : "Novo imóvel captado";
+    document.getElementById("modalBody").innerHTML =
       '<div class="form-grid">' +
-        '<div class="field full"><label>Título</label><input id="p_titulo" value="' + htmlSafe(p.titulo || '') + '"></div>' +
-        '<div class="field"><label>Tipo</label><select id="p_tipo">' + TYPES.map(function(x){ return '<option ' + (p.tipo === x ? 'selected' : '') + '>' + htmlSafe(x) + '</option>'; }).join('') + '</select></div>' +
-        '<div class="field"><label>Bairro</label><input id="p_bairro" value="' + htmlSafe(p.bairro || '') + '"></div>' +
-        '<div class="field"><label>Cidade</label><input id="p_cidade" value="' + htmlSafe(p.cidade || 'Florianópolis') + '"></div>' +
-        '<div class="field"><label>Valor</label><input id="p_valor" type="number" value="' + htmlSafe(p.valor || '') + '"></div>' +
-        '<div class="field"><label>Área m²</label><input id="p_area" type="number" value="' + htmlSafe(p.area || '') + '"></div>' +
-        '<div class="field"><label>Dormitórios</label><input id="p_dorm" type="number" value="' + htmlSafe(p.dormitorios || '') + '"></div>' +
-        '<div class="field"><label>Suítes</label><input id="p_suites" type="number" value="' + htmlSafe(p.suites || '') + '"></div>' +
-        '<div class="field"><label>Vagas</label><input id="p_vagas" type="number" value="' + htmlSafe(p.vagas || '') + '"></div>' +
-        '<div class="field"><label>Etapa</label><select id="p_etapa">' + ["Captação","Captado","Publicado","Reservado","Vendido","Pausado"].map(function(x){ return '<option ' + (p.etapa === x ? 'selected' : '') + '>' + x + '</option>'; }).join('') + '</select></div>' +
-        '<div class="field"><label>Captador do imóvel</label><input id="p_captador" value="' + htmlSafe(captadorAtual) + '" readonly style="opacity:.92"></div>' +
-        '<div class="field"><label>E-mail do captador</label><input id="p_captador_email" value="' + htmlSafe(captadorEmailAtual) + '" readonly style="opacity:.92"></div>' +
-        '<div class="field"><label>Proprietário</label><input id="p_prop" value="' + htmlSafe(p.prop || '') + '"></div>' +
-        '<div class="field"><label>Telefone proprietário</label><input id="p_tel" value="' + htmlSafe(p.tel || '') + '"></div>' +
-        '<div class="field full"><label>Próxima ação / observações</label><textarea id="p_acao">' + htmlSafe(p.proximaAcao || '') + '</textarea></div>' +
-        '<div class="field full">' +
-          '<label>Fotos do imóvel</label>' +
-          '<label class="photo-box">' +
-            '<input id="p_fotos" type="file" accept="image/*" multiple>' +
-            '<b>📸 Clique para adicionar fotos</b>' +
-            '<small>Use até 4 fotos por imóvel. O CRM comprime automaticamente para não travar no celular.</small>' +
-          '</label>' +
-          (id ? renderPhotoGrid(p) : '<div class="empty" style="margin-top:12px">Escolha fotos e clique em salvar. Elas aparecerão no card do imóvel.</div>') +
-        '</div>' +
+        field("Título", '<input id="p_titulo" value="' + h(p.titulo) + '" placeholder="Ex: Casa alto padrão em Jurerê" />', true) +
+        field("Tipo", selectHtml("p_tipo", TYPES || [], p.tipo)) +
+        field("Bairro", '<input id="p_bairro" value="' + h(p.bairro) + '" />') +
+        field("Cidade", '<input id="p_cidade" value="' + h(p.cidade) + '" />') +
+        field("Valor", '<input id="p_valor" type="number" value="' + h(p.valor || "") + '" />') +
+        field("Área m²", '<input id="p_area" type="number" value="' + h(p.area || "") + '" />') +
+        field("Dormitórios", '<input id="p_dorm" type="number" value="' + h(p.dormitorios || "") + '" />') +
+        field("Suítes", '<input id="p_suites" type="number" value="' + h(p.suites || "") + '" />') +
+        field("Vagas", '<input id="p_vagas" type="number" value="' + h(p.vagas || "") + '" />') +
+        field("Etapa", '<input id="p_etapa" value="' + h(p.etapa || "Captado") + '" />') +
+        field("Proprietário", '<input id="p_prop" value="' + h(p.prop || "") + '" />') +
+        field("Telefone proprietário", '<input id="p_tel" value="' + h(p.tel || "") + '" />') +
+        field("Próxima ação", '<textarea id="p_acao" rows="3">' + h(p.proximaAcao || "") + '</textarea>', true) +
+        '<div class="field full"><label>Captação</label><div class="captacao-meta"><b>Captado por:</b> ' + h(p.captadorNome || currentUserName()) + '<br><b>Última edição:</b> ' + h(p.ultimoEditorNome || currentUserName()) + '</div></div>' +
+        '<div class="field full"><label>Fotos do imóvel</label><label class="photo-box"><input id="p_fotos" type="file" accept="image/*" multiple /><b>Adicionar fotos</b><small>Até 4 fotos leves para não travar no celular.</small></label>' + (typeof renderPhotoGrid === "function" ? renderPhotoGrid(p) : "") + '</div>' +
       '</div>';
 
-    document.getElementById("modalFoot").innerHTML = '' +
-      (id && isAdmin() ? '<button class="btn btn-danger" onclick="deleteImovel(\'' + jsSafe(id) + '\')">Excluir</button>' : '') +
+    document.getElementById("modalFoot").innerHTML =
+      (isEdit && isAdmin() ? '<button class="btn btn-danger" onclick="deleteImovel(\'' + j(p.id) + '\')">Excluir</button>' : '') +
       '<button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>' +
-      '<button class="btn" onclick="saveImovel()">Salvar imóvel na carteira</button>';
+      '<button class="btn" onclick="saveImovelGlobal()">Salvar imóvel</button>';
 
-    if (typeof openModal === "function") openModal();
+    modal.showModal();
   };
 
-  window.saveImovel = async function(){
-    if (!canManageImoveis()) {
-      if (typeof toast === "function") toast("Seu usuário precisa estar ativo para salvar imóvel.");
-      return;
-    }
-
-    var id = currentEdit.id || uid("imv");
-    var old = (db.imoveis || []).find(function(x){ return x.id === id; }) || {};
-    var photos = await readSelectedPhotos(old.photos || []);
-    var isNew = !old.id;
-
-    var data = {
-      ...old,
-      id: id,
-      titulo: document.getElementById("p_titulo").value.trim(),
-      tipo: document.getElementById("p_tipo").value,
-      bairro: document.getElementById("p_bairro").value.trim(),
-      cidade: document.getElementById("p_cidade").value.trim(),
-      valor: Number(document.getElementById("p_valor").value || 0),
-      area: Number(document.getElementById("p_area").value || 0),
-      dormitorios: Number(document.getElementById("p_dorm").value || 0),
-      suites: Number(document.getElementById("p_suites").value || 0),
-      vagas: Number(document.getElementById("p_vagas").value || 0),
-      etapa: document.getElementById("p_etapa").value,
-      prop: document.getElementById("p_prop").value.trim(),
-      tel: document.getElementById("p_tel").value.trim(),
-      proximaAcao: document.getElementById("p_acao").value.trim(),
-      photos: photos,
-      captadorId: old.captadorId || cloudUserId || "",
-      captadorNome: old.captadorNome || currentUserName(),
-      captadorEmail: old.captadorEmail || currentUserEmail(),
-      captadoEm: old.captadoEm || Date.now(),
-      ultimoEditorId: cloudUserId || "",
-      ultimoEditorNome: currentUserName(),
-      ultimoEditorEmail: currentUserEmail(),
-      updated: Date.now()
-    };
-
-    if (!data.titulo) {
-      if (typeof toast === "function") toast("Digite o título do imóvel.");
-      return;
-    }
-
-    var idx = (db.imoveis || []).findIndex(function(x){ return x.id === id; });
-    if (idx >= 0) db.imoveis[idx] = data;
-    else db.imoveis.unshift(data);
-
-    if (typeof safeLocalSave === "function") safeLocalSave(db);
-
+  window.saveImovelGlobal = async function(){
     try {
-      await saveGlobalImoveisEquipe(false);
+      var id = currentEdit && currentEdit.id;
+      var existing = id ? (db.imoveis || []).find(function(x){ return x.id === id; }) : null;
+      var now = Date.now();
+      var existingPhotos = existing && Array.isArray(existing.photos) ? existing.photos : [];
+      var photos = typeof readSelectedPhotos === "function" ? await readSelectedPhotos(existingPhotos) : existingPhotos;
+
+      var imovel = normalizeImovel({
+        id: existing ? existing.id : ("imv_" + now + "_" + Math.floor(Math.random() * 9999)),
+        titulo: val("p_titulo"),
+        tipo: val("p_tipo"),
+        bairro: val("p_bairro"),
+        cidade: val("p_cidade"),
+        valor: Number(val("p_valor") || 0),
+        area: Number(val("p_area") || 0),
+        dormitorios: Number(val("p_dorm") || 0),
+        suites: Number(val("p_suites") || 0),
+        vagas: Number(val("p_vagas") || 0),
+        etapa: val("p_etapa") || "Captado",
+        prop: val("p_prop"),
+        tel: val("p_tel"),
+        proximaAcao: val("p_acao"),
+        photos: photos,
+        captadorId: existing && existing.captadorId ? existing.captadorId : userId(),
+        captadorNome: existing && existing.captadorNome ? existing.captadorNome : currentUserName(),
+        captadorEmail: existing && existing.captadorEmail ? existing.captadorEmail : userEmail(),
+        ultimoEditorId: userId(),
+        ultimoEditorNome: currentUserName(),
+        ultimoEditorEmail: userEmail(),
+        created: existing && existing.created ? existing.created : now,
+        updated: now
+      });
+
+      db.imoveis = ensureArray(db.imoveis);
+      if (existing) {
+        db.imoveis = db.imoveis.map(function(x){ return x.id === imovel.id ? imovel : x; });
+      } else {
+        db.imoveis.unshift(imovel);
+      }
+
+      if (typeof safeLocalSave === "function") safeLocalSave(db);
+      await saveGlobalImoveis(false);
       if (typeof closeModal === "function") closeModal();
       if (typeof renderAll === "function") renderAll();
-      if (typeof toast === "function") toast(isNew ? "Imóvel captado e liberado para toda a equipe." : "Imóvel atualizado para toda a equipe.");
+      if (typeof toast === "function") toast("Imóvel salvo para toda a equipe.");
     } catch(error) {
       console.error(error);
-      if (typeof toast === "function") toast("Não salvou no Supabase. Rode o SQL de captação e tente novamente.");
+      if (typeof toast === "function") toast("Erro ao salvar imóvel. Confira os campos e o Supabase.");
     }
   };
 
   window.deleteImovel = async function(id){
     if (!isAdmin()) {
-      if (typeof toast === "function") toast("Somente o administrador pode excluir imóvel da carteira.");
+      if (typeof toast === "function") toast("Somente admin pode excluir imóvel.");
       return;
     }
-    if (!confirm("Excluir este imóvel da carteira global?")) return;
-    db.imoveis = (db.imoveis || []).filter(function(x){ return x.id !== id; });
+    if (!confirm("Excluir este imóvel da carteira global da imobiliária?")) return;
+    db.imoveis = ensureArray(db.imoveis).filter(function(x){ return x.id !== id; });
     if (typeof safeLocalSave === "function") safeLocalSave(db);
-    try { await saveGlobalImoveisEquipe(false); } catch(error) { console.error(error); }
+    await saveGlobalImoveis(false);
     if (typeof closeModal === "function") closeModal();
     if (typeof renderAll === "function") renderAll();
     if (typeof toast === "function") toast("Imóvel excluído da carteira global.");
   };
 
   window.setCoverPhoto = async function(propId, photoId){
-    var p = (db.imoveis || []).find(function(x){ return x.id === propId; });
+    var p = ensureArray(db.imoveis).find(function(x){ return x.id === propId; });
     if (!p) return;
-    p.photos = Array.isArray(p.photos) ? p.photos : [];
+    p.photos = ensureArray(p.photos);
     p.photos.forEach(function(f){ f.cover = f.id === photoId; });
-    p.ultimoEditorId = cloudUserId || "";
+    p.ultimoEditorId = userId();
     p.ultimoEditorNome = currentUserName();
-    p.ultimoEditorEmail = currentUserEmail();
+    p.ultimoEditorEmail = userEmail();
     p.updated = Date.now();
     if (typeof safeLocalSave === "function") safeLocalSave(db);
-    try { await saveGlobalImoveisEquipe(false); } catch(error) { console.error(error); }
+    await saveGlobalImoveis(false);
     if (typeof renderAll === "function") renderAll();
-    if (modal.open && currentEdit.id === propId) { closeModal(); setTimeout(function(){ openImovelModal(propId); }, 80); }
-    if (typeof toast === "function") toast("Capa atualizada para toda a equipe.");
+    if (modal.open && currentEdit && currentEdit.id === propId) { closeModal(); setTimeout(function(){ openImovelModal(propId); }, 80); }
+    if (typeof toast === "function") toast("Capa atualizada.");
   };
 
   window.deletePhoto = async function(propId, photoId){
-    var p = (db.imoveis || []).find(function(x){ return x.id === propId; });
+    var p = ensureArray(db.imoveis).find(function(x){ return x.id === propId; });
     if (!p) return;
-    p.photos = (Array.isArray(p.photos) ? p.photos : []).filter(function(f){ return f.id !== photoId; });
+    p.photos = ensureArray(p.photos).filter(function(f){ return f.id !== photoId; });
     if (p.photos.length && !p.photos.some(function(f){ return f.cover; })) p.photos[0].cover = true;
-    p.ultimoEditorId = cloudUserId || "";
+    p.ultimoEditorId = userId();
     p.ultimoEditorNome = currentUserName();
-    p.ultimoEditorEmail = currentUserEmail();
+    p.ultimoEditorEmail = userEmail();
     p.updated = Date.now();
     if (typeof safeLocalSave === "function") safeLocalSave(db);
-    try { await saveGlobalImoveisEquipe(false); } catch(error) { console.error(error); }
+    await saveGlobalImoveis(false);
     if (typeof renderAll === "function") renderAll();
-    if (modal.open && currentEdit.id === propId) { closeModal(); setTimeout(function(){ openImovelModal(propId); }, 80); }
-    if (typeof toast === "function") toast("Foto removida da carteira global.");
+    if (modal.open && currentEdit && currentEdit.id === propId) { closeModal(); setTimeout(function(){ openImovelModal(propId); }, 80); }
+    if (typeof toast === "function") toast("Foto removida.");
   };
 
-  var oldQuickNew = window.quickNew;
-  window.quickNew = function(){
-    var active = document.querySelector(".view.active") && document.querySelector(".view.active").id || "";
-    if (active.indexOf("imoveis") >= 0) return openImovelModal();
-    return typeof oldQuickNew === "function" ? oldQuickNew() : undefined;
-  };
+  function val(id){
+    var el = document.getElementById(id);
+    return el ? el.value.trim() : "";
+  }
 
-  function applyImoveisEquipeUI(){
-    document.querySelectorAll('button[onclick="openImovelModal()"], button[onclick="openImovelModal() "]').forEach(function(btn){
+  function field(label, html, full){
+    return '<div class="field ' + (full ? "full" : "") + '"><label>' + h(label) + '</label>' + html + '</div>';
+  }
+
+  function selectHtml(id, options, selected){
+    return '<select id="' + h(id) + '">' + ensureArray(options).map(function(o){
+      return '<option value="' + h(o) + '" ' + (o === selected ? "selected" : "") + '>' + h(o) + '</option>';
+    }).join("") + '</select>';
+  }
+
+  function applyGlobalImoveisUI(){
+    document.querySelectorAll('button[onclick="openImovelModal()"]').forEach(function(btn){
       btn.style.display = "";
       btn.textContent = "+ Novo imóvel captado";
     });
 
-    var imoveisPanel = document.querySelector("#view-imoveis .panel-head p");
-    if (imoveisPanel) {
-      imoveisPanel.textContent = isAdmin()
-        ? "Carteira global. Admin e corretores podem cadastrar/editar imóveis; somente admin exclui. Todo imóvel mostra quem captou."
-        : "Carteira global da imobiliária. Você pode cadastrar imóvel captado e editar; somente admin exclui.";
+    var title = document.querySelector("#view-imoveis .panel-head h2");
+    if (title) title.textContent = "Imóveis globais / Captação da equipe";
+
+    var desc = document.querySelector("#view-imoveis .panel-head p");
+    if (desc) {
+      desc.innerHTML = 'Carteira única da imobiliária. <span class="sync-chip">Online para celular e computador</span><br>' +
+        (isAdmin()
+          ? 'Admin e corretores cadastram/editam. Somente admin exclui.'
+          : 'Você pode cadastrar imóvel captado e editar. Somente admin exclui.');
     }
 
-    var title = document.querySelector("#view-imoveis .panel-head h2");
-    if (title) title.textContent = "Imóveis da imobiliária / Captação da equipe";
-
-    document.body.classList.toggle("crm-admin", isAdmin());
-    document.body.classList.toggle("crm-corretor", !isAdmin());
+    var roleSpan = document.querySelector(".user span");
+    if (roleSpan) roleSpan.textContent = isAdmin() ? "Administrador" : "Corretor";
   }
+
+  var oldQuickNew = window.quickNew;
+  window.quickNew = function(){
+    var active = document.querySelector(".view.active");
+    if (active && active.id === "view-imoveis") return openImovelModal();
+    return typeof oldQuickNew === "function" ? oldQuickNew() : undefined;
+  };
 
   var oldRenderAll = window.renderAll;
   window.renderAll = function(){
     if (typeof oldRenderAll === "function") oldRenderAll();
-    applyImoveisEquipeUI();
+    try { renderFeaturedGlobal(); } catch(e) { console.warn(e); }
+    try { applyGlobalImoveisUI(); } catch(e) { console.warn(e); }
+  };
+
+  var oldInitCloudSync = window.initCloudSync;
+  window.initCloudSync = async function(){
+    if (typeof oldInitCloudSync === "function") await oldInitCloudSync.apply(this, arguments);
+    await loadGlobalImoveis();
+    startGlobalRealtime();
+    applyGlobalImoveisUI();
   };
 
   window.__LEADS_GLOBAL_IMOVEIS_ID__ = GLOBAL_IMOVEIS_STATE_ID;
-  window.__LEADS_SAVE_GLOBAL_IMOVEIS_EQUIPE__ = saveGlobalImoveisEquipe;
+  window.__LEADS_LOAD_GLOBAL_IMOVEIS__ = loadGlobalImoveis;
+  window.__LEADS_SAVE_GLOBAL_IMOVEIS__ = saveGlobalImoveis;
 })();
 </script>
 
