@@ -4740,5 +4740,371 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
 })();
 </script>
 
+
+<style id="crmClockHumanAIStyles">
+/* =====================================================
+   RELÓGIO CRM + IA HUMANIZADA PELO HORÁRIO
+===================================================== */
+.crm-clock {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 210px;
+  padding: 8px 12px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--gold) 38%, transparent);
+  background:
+    radial-gradient(circle at 15% 20%, color-mix(in srgb, var(--gold) 16%, transparent), transparent 38%),
+    rgba(255,255,255,.035);
+  box-shadow: 0 8px 22px rgba(0,0,0,.20);
+  white-space: nowrap;
+}
+
+.crm-clock-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+  color: var(--gold);
+  background: rgba(0,0,0,.24);
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.crm-clock-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.crm-clock-time {
+  font-size: 15px;
+  font-weight: 1000;
+  letter-spacing: .5px;
+  color: #fff7dc;
+}
+
+.crm-clock-sub {
+  font-size: 10px;
+  line-height: 1.15;
+  color: var(--mut);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.crm-clock-greeting {
+  color: var(--gold);
+  font-weight: 900;
+}
+
+@media (max-width: 980px) {
+  .crm-clock {
+    order: 2;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: calc(100vw - 132px);
+    padding: 7px 10px;
+    border-radius: 14px;
+  }
+
+  .crm-clock-mark {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+  }
+
+  .crm-clock-time {
+    font-size: 14px;
+  }
+
+  .crm-clock-sub {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 620px) {
+  .crm-clock {
+    width: 100%;
+    max-width: 100%;
+    order: 4;
+  }
+}
+</style>
+
+<script id="crmClockHumanAIScript">
+/* =====================================================
+   RELÓGIO CRM + SINCRONIA DA IA COM BOM DIA/TARDE/NOITE
+===================================================== */
+(function crmClockHumanAI() {
+  "use strict";
+
+  var TIMEZONE = "America/Sao_Paulo";
+  var CITY = "Florianópolis/SC";
+
+  function pad(n) {
+    return String(n).padStart(2, "0");
+  }
+
+  function getParts() {
+    var now = new Date();
+    var parts = {};
+
+    try {
+      var formatter = new Intl.DateTimeFormat("pt-BR", {
+        timeZone: TIMEZONE,
+        weekday: "long",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      });
+
+      formatter.formatToParts(now).forEach(function(part) {
+        if (part.type !== "literal") parts[part.type] = part.value;
+      });
+    } catch (error) {
+      parts.hour = pad(now.getHours());
+      parts.minute = pad(now.getMinutes());
+      parts.second = pad(now.getSeconds());
+      parts.day = pad(now.getDate());
+      parts.month = pad(now.getMonth() + 1);
+      parts.year = String(now.getFullYear());
+      parts.weekday = "hoje";
+    }
+
+    return parts;
+  }
+
+  function getCRMClockInfo() {
+    var p = getParts();
+    var hour = Number(p.hour || 0);
+    var greeting = "Boa noite";
+    var period = "noite";
+
+    if (hour >= 5 && hour < 12) {
+      greeting = "Bom dia";
+      period = "manhã";
+    } else if (hour >= 12 && hour < 18) {
+      greeting = "Boa tarde";
+      period = "tarde";
+    }
+
+    return {
+      hour: hour,
+      minute: Number(p.minute || 0),
+      second: Number(p.second || 0),
+      greeting: greeting,
+      period: period,
+      timezone: TIMEZONE,
+      city: CITY,
+      time: pad(p.hour || 0) + ":" + pad(p.minute || 0),
+      timeWithSeconds: pad(p.hour || 0) + ":" + pad(p.minute || 0) + ":" + pad(p.second || 0),
+      date: pad(p.day || 1) + "/" + pad(p.month || 1) + "/" + (p.year || ""),
+      weekday: String(p.weekday || "").replace(/^./, function(c) { return c.toUpperCase(); }),
+      formatted: (p.weekday || "Hoje") + ", " + pad(p.day || 1) + "/" + pad(p.month || 1) + "/" + (p.year || "") + " às " + pad(p.hour || 0) + ":" + pad(p.minute || 0)
+    };
+  }
+
+  function ensureClock() {
+    if (document.getElementById("crmClock")) return;
+
+    var topbar = document.querySelector(".topbar");
+    if (!topbar) return;
+
+    var clock = document.createElement("div");
+    clock.id = "crmClock";
+    clock.className = "crm-clock";
+    clock.setAttribute("aria-label", "Relógio oficial do CRM");
+    clock.innerHTML =
+      '<div class="crm-clock-mark">H</div>' +
+      '<div class="crm-clock-main">' +
+        '<div class="crm-clock-time" id="crmClockTime">--:--</div>' +
+        '<div class="crm-clock-sub"><span class="crm-clock-greeting" id="crmClockGreeting">--</span> · <span id="crmClockDate">--</span></div>' +
+      '</div>';
+
+    var actions = topbar.querySelector(".top-actions");
+    if (actions) topbar.insertBefore(clock, actions);
+    else topbar.appendChild(clock);
+  }
+
+  function updateClock() {
+    ensureClock();
+
+    var info = getCRMClockInfo();
+    var time = document.getElementById("crmClockTime");
+    var greeting = document.getElementById("crmClockGreeting");
+    var date = document.getElementById("crmClockDate");
+    var hello = document.getElementById("aiHello");
+
+    if (time) time.textContent = info.timeWithSeconds;
+    if (greeting) greeting.textContent = info.greeting;
+    if (date) date.textContent = info.weekday + " · " + info.date;
+
+    if (hello) {
+      var name = typeof getDisplayName === "function"
+        ? getDisplayName()
+        : ((window.db && db.settings && db.settings.user) || "corretor");
+
+      hello.textContent = info.greeting + ", " + name + " 👋";
+    }
+  }
+
+  function humanizeGreeting(answer, info) {
+    var text = String(answer || "").trim();
+    if (!text) return text;
+
+    text = text.replace(/^(bom dia|boa tarde|boa noite)[,!\.\s-]*/i, info.greeting + ", ");
+
+    return text;
+  }
+
+  window.getCRMClockInfo = getCRMClockInfo;
+  window.getCRMTimeInfo = getCRMClockInfo;
+  window.saudacao = function() {
+    return getCRMClockInfo().greeting;
+  };
+
+  window.renderChat = function() {
+    var log = document.getElementById("chatLog");
+    if (!log) return;
+
+    log.innerHTML = (db.chat || []).slice(-20).map(function(message) {
+      return '<div class="msg ' + (message.role === "user" ? "me" : "ai") + '">' + esc(message.content) + '</div>';
+    }).join("");
+
+    if (!log.innerHTML) {
+      var info = getCRMClockInfo();
+      var name = typeof getDisplayName === "function" ? getDisplayName() : (db.settings && db.settings.user || "corretor");
+      log.innerHTML = '<div class="msg ai">' + info.greeting + ', ' + esc(name) + '. Estou acompanhando o horário do CRM em ' + info.city + ' e pronta para ajudar com leads, imóveis, follow-up, captação e organização do dia.</div>';
+    }
+
+    log.scrollTop = log.scrollHeight;
+  };
+
+  window.askAI = async function(question) {
+    if (!question) return;
+
+    var info = getCRMClockInfo();
+    var visibleQuestion = String(question || "");
+    var questionForAI =
+      "Contexto obrigatório do relógio do CRM:\n" +
+      "- Cidade/fuso: " + info.city + " / " + info.timezone + "\n" +
+      "- Data e hora oficial do CRM: " + info.formatted + "\n" +
+      "- Saudação correta agora: " + info.greeting + "\n" +
+      "- Período do dia: " + info.period + "\n\n" +
+      "Instruções de atendimento:\n" +
+      "1. Responda de forma humanizada, natural, profissional e objetiva.\n" +
+      "2. Quando cumprimentar, use a saudação correta do relógio do CRM: " + info.greeting + ".\n" +
+      "3. Não use Bom dia se for tarde/noite, não use Boa tarde se for manhã/noite e não use Boa noite se for manhã/tarde.\n" +
+      "4. Fale como um Agente IA de Corretor de imóveis de alto padrão em Florianópolis.\n\n" +
+      "Pergunta do corretor: " + visibleQuestion;
+
+    db.chat = db.chat || [];
+    db.chat.push({ role: "user", content: visibleQuestion });
+    db.chat.push({ role: "assistant", content: "Consultando IA..." });
+    saveDB();
+    renderChat();
+
+    var loadingIndex = db.chat.length - 1;
+
+    try {
+      var token = "";
+
+      if (window.supabaseClient && window.supabaseClient.auth && window.supabaseClient.auth.getSession) {
+        var sessionResult = await window.supabaseClient.auth.getSession();
+        token = sessionResult && sessionResult.data && sessionResult.data.session && sessionResult.data.session.access_token || "";
+      }
+
+      var headers = { "Content-Type": "application/json" };
+      if (token) headers.Authorization = "Bearer " + token;
+
+      var state = getCloudSafeDB();
+      state.contexto_horario = info;
+      state.relogio_crm = info;
+
+      var payload = {
+        question: questionForAI,
+        crm_state: state,
+        horario_local: info,
+        relogio_crm: info,
+        history: db.chat.slice(-10).map(function(message) {
+          return {
+            role: message.role === "user" ? "user" : "assistant",
+            content: message.content
+          };
+        })
+      };
+
+      var response = await fetch(EDGE_FUNCTION_URL, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(payload)
+      });
+
+      var data = null;
+      try { data = await response.json(); } catch (error) { data = null; }
+
+      var answer = extrairRespostaIA(data);
+      if (!response.ok && !answer) answer = "Resposta não está disponível no momento.";
+      if (String(answer).includes("OPENAI_API_KEY") || String(answer).includes("OPENAI_MODEL")) answer = "Resposta não está disponível no momento.";
+
+      answer = humanizeGreeting(answer, info);
+
+      db.chat[loadingIndex] = { role: "assistant", content: answer };
+      saveDB();
+      renderChat();
+      if (typeof openAI === "function") openAI();
+    } catch (error) {
+      console.error(error);
+      db.chat[loadingIndex] = { role: "assistant", content: window.localAI ? window.localAI(visibleQuestion) : "Resposta não está disponível no momento." };
+      saveDB();
+      renderChat();
+      if (typeof openAI === "function") openAI();
+    }
+  };
+
+  var previousLocalAI = window.localAI;
+
+  window.localAI = function(question) {
+    var q = String(question || "").toLowerCase();
+    var info = getCRMClockInfo();
+
+    if (q.includes("hora") || q.includes("horário") || q.includes("horario") || q.includes("bom dia") || q.includes("boa tarde") || q.includes("boa noite")) {
+      return info.greeting + ". Agora no relógio do CRM em " + info.city + " são " + info.timeWithSeconds + ", " + info.weekday + ", " + info.date + ". Vou usar essa saudação nas próximas respostas.";
+    }
+
+    if (typeof previousLocalAI === "function") {
+      var answer = previousLocalAI(question);
+      return humanizeGreeting(answer, info);
+    }
+
+    return info.greeting + ". Estou pronta para ajudar com o CRM agora.";
+  };
+
+  function startClock() {
+    ensureClock();
+    updateClock();
+    if (typeof renderChat === "function") renderChat();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", startClock);
+  } else {
+    startClock();
+  }
+
+  setInterval(updateClock, 1000);
+  setTimeout(startClock, 600);
+  setTimeout(startClock, 1800);
+})();
+</script>
+
 </body>
 </html>
