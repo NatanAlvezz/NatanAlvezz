@@ -6650,5 +6650,438 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
 })();
 </script>
 
+
+
+<style id="leadsWeatherPremium2026Styles">
+/* =====================================================
+   CLIMA PREMIUM LEADS IMÓVEIS · FLORIANÓPOLIS/SC
+   Previsão original via Open-Meteo, sem chave de API
+===================================================== */
+.crm-weather {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 188px;
+  max-width: 230px;
+  padding: 8px 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(143,184,255,.28);
+  background:
+    radial-gradient(circle at 18% 16%, rgba(143,184,255,.20), transparent 34%),
+    radial-gradient(circle at 88% 0%, rgba(216,181,109,.16), transparent 34%),
+    linear-gradient(135deg, rgba(255,255,255,.060), rgba(255,255,255,.022));
+  box-shadow:
+    0 10px 28px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.10);
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: default;
+}
+
+.crm-weather::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(120deg, rgba(216,181,109,.20), transparent 34%, rgba(143,184,255,.18));
+  opacity: .65;
+  pointer-events: none;
+}
+
+.crm-weather::after {
+  content: "";
+  position: absolute;
+  width: 62px;
+  height: 62px;
+  right: -28px;
+  top: -28px;
+  border-radius: 50%;
+  background: rgba(143,184,255,.14);
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.crm-weather-icon {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 15px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.16);
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255,255,255,.24), transparent 36%),
+    rgba(0,0,0,.22);
+  color: #fff7dc;
+  box-shadow: 0 0 24px rgba(143,184,255,.18);
+}
+
+.crm-weather-icon svg {
+  width: 25px;
+  height: 25px;
+  display: block;
+}
+
+.crm-weather-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.crm-weather-temp {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  color: #f8fbff;
+  font-size: 15px;
+  font-weight: 1000;
+  letter-spacing: .2px;
+}
+
+.crm-weather-temp span {
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+}
+
+.crm-weather-sub {
+  max-width: 145px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--mut);
+  font-size: 10px;
+  line-height: 1.15;
+}
+
+.crm-weather strong {
+  color: #fff1bd;
+  font-weight: 900;
+}
+
+.crm-weather.loading .crm-weather-icon,
+.crm-weather.loading .crm-weather-temp,
+.crm-weather.loading .crm-weather-sub {
+  opacity: .70;
+}
+
+.crm-weather.pulse .crm-weather-icon {
+  animation: weatherPulseLeads 1.8s ease-in-out infinite;
+}
+
+@keyframes weatherPulseLeads {
+  0%, 100% { box-shadow: 0 0 18px rgba(143,184,255,.16); }
+  50% { box-shadow: 0 0 32px rgba(216,181,109,.25); }
+}
+
+@media (max-width: 1320px) {
+  .crm-weather {
+    min-width: 150px;
+    max-width: 170px;
+    padding: 8px 10px;
+  }
+
+  .crm-weather-sub {
+    max-width: 94px;
+  }
+
+  .crm-weather-temp span {
+    display: none;
+  }
+}
+
+@media (max-width: 1180px) and (min-width: 981px) {
+  .crm-weather {
+    min-width: 122px;
+    max-width: 138px;
+    gap: 8px;
+  }
+
+  .crm-weather-icon {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 13px;
+  }
+
+  .crm-weather-icon svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  .crm-weather-temp {
+    font-size: 14px;
+  }
+
+  .crm-weather-sub {
+    display: none;
+  }
+}
+
+@media (max-width: 980px) {
+  .crm-weather {
+    order: 2;
+    flex: 1 1 144px;
+    min-width: 142px;
+    max-width: none;
+    padding: 7px 10px;
+    border-radius: 15px;
+  }
+
+  .crm-weather-icon {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 13px;
+  }
+
+  .crm-weather-icon svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  .crm-weather-temp {
+    font-size: 14px;
+  }
+
+  .crm-weather-sub {
+    font-size: 9px;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 620px) {
+  .crm-weather {
+    width: 100%;
+    flex: 1 1 100%;
+    order: 5;
+  }
+}
+</style>
+
+<script id="leadsWeatherPremium2026Script">
+(function leadsWeatherPremium2026() {
+  "use strict";
+
+  var WEATHER_KEY = "leads_crm_weather_floripa_v1";
+  var WEATHER_CACHE_MS = 1000 * 60 * 25;
+  var WEATHER_CITY = "Florianópolis/SC";
+  var WEATHER_LAT = -27.5954;
+  var WEATHER_LON = -48.5480;
+  var WEATHER_TZ = "America/Sao_Paulo";
+  var weatherIntervalId = null;
+
+  function iconSunny() {
+    return '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="#FFD76A"/><path d="M12 2.8v2.3M12 18.9v2.3M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.8 12h2.3M18.9 12h2.3M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6" stroke="#FFF0B7" stroke-width="1.7" stroke-linecap="round"/></svg>';
+  }
+
+  function iconCloud() {
+    return '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7.5 18.4h9.2c2.1 0 3.8-1.5 3.8-3.4 0-1.8-1.5-3.2-3.4-3.4-.7-2.6-2.8-4.3-5.4-4.3-3 0-5.4 2.3-5.6 5.2-1.7.4-2.9 1.5-2.9 3 0 1.7 1.5 2.9 4.3 2.9Z" fill="rgba(255,255,255,.20)" stroke="#EAF7FF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 8.6c.9-1.5 2.5-2.5 4.3-2.5" stroke="#8FB8FF" stroke-width="1.4" stroke-linecap="round"/></svg>';
+  }
+
+  function iconRain() {
+    return '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7.2 15.8h9.5c1.9 0 3.4-1.3 3.4-3 0-1.6-1.3-2.9-3-3.1-.7-2.3-2.6-3.8-5-3.8-2.8 0-5 2.1-5.2 4.7-1.6.3-2.7 1.4-2.7 2.7 0 1.5 1.3 2.5 3 2.5Z" fill="rgba(143,184,255,.17)" stroke="#DFF4FF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 18.2l-1 2M12.3 18.2l-1 2M16.1 18.2l-1 2" stroke="#8FD3FF" stroke-width="1.7" stroke-linecap="round"/></svg>';
+  }
+
+  function iconStorm() {
+    return '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7.2 15.5h9.3c1.9 0 3.4-1.3 3.4-3 0-1.6-1.3-2.8-3-3.1-.7-2.2-2.5-3.7-4.9-3.7-2.7 0-4.9 2-5.1 4.6-1.5.3-2.6 1.3-2.6 2.6 0 1.5 1.3 2.6 2.9 2.6Z" fill="rgba(255,255,255,.16)" stroke="#EAF7FF" stroke-width="1.5" stroke-linecap="round"/><path d="M12.6 14.4 10 18h2.2l-.9 3.1 3.7-4.8h-2.4l1-1.9h-1Z" fill="#FFD76A" stroke="#FFF3B0" stroke-width=".5"/></svg>';
+  }
+
+  function mapWeather(code) {
+    code = Number(code);
+    if (code === 0) return { label: "Sol", icon: iconSunny() };
+    if ([1, 2, 3, 45, 48].indexOf(code) >= 0) return { label: "Nublado", icon: iconCloud() };
+    if ([95, 96, 99].indexOf(code) >= 0) return { label: "Temporal", icon: iconStorm() };
+    if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].indexOf(code) >= 0) return { label: "Chuva", icon: iconRain() };
+    return { label: "Clima", icon: iconCloud() };
+  }
+
+  function roundTemp(value) {
+    var n = Number(value);
+    return Number.isFinite(n) ? Math.round(n) : "--";
+  }
+
+  function ensureWeather() {
+    if (document.getElementById("crmWeather")) return;
+
+    var topbar = document.querySelector(".topbar");
+    if (!topbar) return;
+
+    var weather = document.createElement("div");
+    weather.id = "crmWeather";
+    weather.className = "crm-weather loading pulse";
+    weather.setAttribute("aria-label", "Previsão do tempo oficial do CRM em Florianópolis");
+    weather.setAttribute("role", "button");
+    weather.setAttribute("tabindex", "0");
+    weather.innerHTML =
+      '<div class="crm-weather-icon" id="crmWeatherIcon">' + iconCloud() + '</div>' +
+      '<div class="crm-weather-main">' +
+        '<div class="crm-weather-temp"><strong id="crmWeatherTemp">--°</strong><span>Clima</span></div>' +
+        '<div class="crm-weather-sub" id="crmWeatherSub">Carregando previsão...</div>' +
+      '</div>';
+
+    var clock = document.getElementById("crmClock");
+    var actions = topbar.querySelector(".top-actions");
+
+    if (clock && clock.parentNode === topbar) {
+      topbar.insertBefore(weather, clock.nextSibling);
+    } else if (actions) {
+      topbar.insertBefore(weather, actions);
+    } else {
+      topbar.appendChild(weather);
+    }
+
+    weather.addEventListener("click", function() {
+      var info = window.__LEADS_WEATHER__;
+      if (!info) return;
+      var msg = "Clima em " + WEATHER_CITY + ": " + info.temp + "°C, " + info.label + ". Sensação " + info.feels + "°C. Máx " + info.max + "° / mín " + info.min + "°. Chuva: " + info.rain + "%.";
+      if (typeof window.toast === "function") window.toast(msg);
+    });
+  }
+
+  function readCache() {
+    try {
+      var raw = localStorage.getItem(WEATHER_KEY);
+      if (!raw) return null;
+      var parsed = JSON.parse(raw);
+      if (!parsed || !parsed.savedAt || Date.now() - parsed.savedAt > WEATHER_CACHE_MS) return null;
+      return parsed;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function saveCache(data) {
+    try {
+      localStorage.setItem(WEATHER_KEY, JSON.stringify(data));
+    } catch (_) {}
+  }
+
+  function renderWeather(data, stale) {
+    ensureWeather();
+
+    var widget = document.getElementById("crmWeather");
+    var icon = document.getElementById("crmWeatherIcon");
+    var temp = document.getElementById("crmWeatherTemp");
+    var sub = document.getElementById("crmWeatherSub");
+
+    if (!widget || !data) return;
+
+    var mapped = mapWeather(data.code);
+    var info = {
+      city: WEATHER_CITY,
+      temp: roundTemp(data.temp),
+      feels: roundTemp(data.feels),
+      humidity: roundTemp(data.humidity),
+      wind: roundTemp(data.wind),
+      max: roundTemp(data.max),
+      min: roundTemp(data.min),
+      rain: roundTemp(data.rain),
+      code: data.code,
+      label: mapped.label,
+      updatedAt: data.updatedAt || new Date().toISOString(),
+      source: "Open-Meteo"
+    };
+
+    window.__LEADS_WEATHER__ = info;
+    window.getCRMWeatherInfo = function() { return info; };
+
+    if (icon) icon.innerHTML = mapped.icon;
+    if (temp) temp.textContent = info.temp + "°C";
+    if (sub) {
+      var freshness = stale ? "cache" : "agora";
+      sub.innerHTML = '<strong>' + mapped.label + '</strong> · ' + info.min + '°/' + info.max + '° · chuva ' + info.rain + '%';
+      sub.title = WEATHER_CITY + " · atualizado " + freshness + " · fonte Open-Meteo";
+    }
+
+    widget.classList.remove("loading", "pulse");
+    widget.title = "Previsão original em " + WEATHER_CITY + " · " + mapped.label + " · " + info.temp + "°C · fonte Open-Meteo";
+  }
+
+  function renderUnavailable() {
+    ensureWeather();
+    var widget = document.getElementById("crmWeather");
+    var icon = document.getElementById("crmWeatherIcon");
+    var temp = document.getElementById("crmWeatherTemp");
+    var sub = document.getElementById("crmWeatherSub");
+
+    if (icon) icon.innerHTML = iconCloud();
+    if (temp) temp.textContent = "--°C";
+    if (sub) sub.textContent = "Clima indisponível";
+    if (widget) {
+      widget.classList.remove("pulse");
+      widget.classList.add("loading");
+      widget.title = "Não foi possível carregar a previsão agora.";
+    }
+  }
+
+  async function fetchWeather() {
+    ensureWeather();
+
+    var cached = readCache();
+    if (cached) {
+      renderWeather(cached, true);
+      return;
+    }
+
+    var url = "https://api.open-meteo.com/v1/forecast" +
+      "?latitude=" + encodeURIComponent(WEATHER_LAT) +
+      "&longitude=" + encodeURIComponent(WEATHER_LON) +
+      "&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,is_day" +
+      "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" +
+      "&timezone=" + encodeURIComponent(WEATHER_TZ) +
+      "&forecast_days=2";
+
+    try {
+      var response = await fetch(url, { cache: "no-store" });
+      if (!response.ok) throw new Error("Weather HTTP " + response.status);
+      var json = await response.json();
+
+      var current = json.current || {};
+      var daily = json.daily || {};
+      var data = {
+        savedAt: Date.now(),
+        updatedAt: current.time || new Date().toISOString(),
+        temp: current.temperature_2m,
+        feels: current.apparent_temperature,
+        humidity: current.relative_humidity_2m,
+        wind: current.wind_speed_10m,
+        code: current.weather_code,
+        max: Array.isArray(daily.temperature_2m_max) ? daily.temperature_2m_max[0] : undefined,
+        min: Array.isArray(daily.temperature_2m_min) ? daily.temperature_2m_min[0] : undefined,
+        rain: Array.isArray(daily.precipitation_probability_max) ? daily.precipitation_probability_max[0] : 0,
+        dailyCode: Array.isArray(daily.weather_code) ? daily.weather_code[0] : current.weather_code
+      };
+
+      saveCache(data);
+      renderWeather(data, false);
+    } catch (error) {
+      console.warn("Falha ao carregar clima:", error);
+      var fallback = readCache();
+      if (fallback) renderWeather(fallback, true);
+      else renderUnavailable();
+    }
+  }
+
+  function bootWeather() {
+    ensureWeather();
+    fetchWeather();
+    if (!weatherIntervalId) {
+      weatherIntervalId = setInterval(fetchWeather, WEATHER_CACHE_MS);
+    }
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bootWeather);
+  else bootWeather();
+
+  setTimeout(bootWeather, 700);
+})();
+</script>
+
 </body>
 </html>
