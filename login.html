@@ -13,18 +13,13 @@
 
   <style>
     :root {
-      --bg: #050506;
-      --glass: rgba(8, 9, 12, .58);
-      --glass2: rgba(255, 255, 255, .055);
-      --line: rgba(255, 255, 255, .13);
       --gold: #d8b56d;
       --gold2: #fff0be;
       --txt: #f8f5ef;
       --mut: #b8b4aa;
       --red: #ef6a6a;
       --green: #65d679;
-      --shadow: 0 30px 100px rgba(0,0,0,.62);
-      --safe: env(safe-area-inset-bottom, 0px);
+      --bg-url: url("https://raw.githubusercontent.com/NatanAlvezz/NatanAlvezz/main/midia/bg-floripa.jpg.jpg?v=200");
     }
 
     * {
@@ -34,20 +29,15 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    html {
-      -webkit-text-size-adjust: 100%;
-    }
-
     body {
       min-height: 100vh;
       min-height: 100dvh;
       color: var(--txt);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      overflow-x: hidden;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
       background:
-        linear-gradient(90deg, rgba(2,3,6,.62), rgba(2,3,6,.72)),
-        radial-gradient(circle at 20% 20%, rgba(216,181,109,.22), transparent 34%),
-        url("midia/bg-floripa.jpg.jpg") center center / cover no-repeat fixed;
+        linear-gradient(90deg, rgba(0,0,0,.30) 0%, rgba(0,0,0,.18) 42%, rgba(0,0,0,.78) 100%),
+        var(--bg-url) center center / cover no-repeat fixed;
+      overflow-x: hidden;
     }
 
     body::before {
@@ -55,216 +45,143 @@
       position: fixed;
       inset: 0;
       background:
-        linear-gradient(to bottom, rgba(0,0,0,.18), rgba(0,0,0,.72)),
-        radial-gradient(circle at 78% 18%, rgba(216,181,109,.16), transparent 28%);
-      z-index: -2;
-    }
-
-    body::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
-      background-size: 46px 46px;
-      mask-image: linear-gradient(to bottom, #000, transparent 82%);
+        radial-gradient(circle at 18% 18%, rgba(216,181,109,.18), transparent 28%),
+        radial-gradient(circle at 82% 22%, rgba(255,255,255,.08), transparent 22%);
       pointer-events: none;
-      z-index: -1;
-    }
-
-    button, input {
-      font: inherit;
-    }
-
-    button {
-      cursor: pointer;
-      border: 0;
+      z-index: 0;
     }
 
     .page {
+      position: relative;
+      z-index: 1;
       min-height: 100vh;
       min-height: 100dvh;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 470px;
-      gap: 38px;
+      grid-template-columns: minmax(240px, 360px) minmax(360px, 430px);
       align-items: center;
-      padding: 42px 7vw;
-      position: relative;
-    }
-
-    .page::before {
-      content: "";
-      position: absolute;
-      left: 3vw;
-      top: 4vh;
-      width: 210px;
-      height: 210px;
-      border-left: 1px solid rgba(216,181,109,.30);
-      border-top: 1px solid rgba(216,181,109,.30);
-      border-radius: 34px 0 0 0;
-      opacity: .9;
+      justify-content: space-between;
+      gap: clamp(50px, 14vw, 260px);
+      padding: 34px 5vw;
     }
 
     .brand-side {
-      position: relative;
-      z-index: 2;
-      min-height: 620px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 20px 0;
+      max-width: 360px;
     }
 
-    .logo-wrap {
-      width: min(560px, 92%);
+    .logo-circle {
+      width: 245px;
+      height: 245px;
+      border-radius: 50%;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       padding: 18px;
-      border-radius: 32px;
-      background: radial-gradient(circle at 50% 42%, rgba(255,255,255,.10), transparent 45%);
-      filter: drop-shadow(0 25px 52px rgba(0,0,0,.65));
+      background: rgba(0,0,0,.34);
+      border: 1px solid rgba(216,181,109,.48);
+      box-shadow: 0 24px 60px rgba(0,0,0,.70);
+      overflow: hidden;
+      margin-bottom: 22px;
     }
 
-    .logo-main {
+    .logo-circle img {
       width: 100%;
-      max-width: 520px;
-      height: auto;
+      height: 100%;
       object-fit: contain;
-      border-radius: 26px;
-      mix-blend-mode: screen;
+      border-radius: 50%;
+      display: block;
+      filter: brightness(1.18) contrast(1.08);
     }
 
-    .brand-copy {
-      margin-top: 18px;
-      max-width: 670px;
-      border-top: 1px solid rgba(216,181,109,.22);
-      padding-top: 22px;
-    }
-
-    .brand-copy .badge {
+    .badge {
       display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border: 1px solid rgba(216,181,109,.35);
-      background: rgba(216,181,109,.10);
+      border: 1px solid rgba(216,181,109,.38);
+      background: rgba(216,181,109,.11);
       color: #ffedc2;
       border-radius: 999px;
       padding: 8px 12px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 900;
-      letter-spacing: .5px;
       text-transform: uppercase;
-      margin-bottom: 18px;
+      letter-spacing: .6px;
+      margin-bottom: 14px;
     }
 
-    .brand-copy h1 {
-      font-size: clamp(34px, 4.8vw, 70px);
-      line-height: .95;
-      letter-spacing: -2px;
-      max-width: 720px;
-      text-shadow: 0 12px 34px rgba(0,0,0,.58);
+    h1 {
+      font-size: clamp(28px, 3vw, 44px);
+      line-height: 1.02;
+      letter-spacing: -1px;
+      text-shadow: 0 14px 34px rgba(0,0,0,.65);
+      margin-bottom: 14px;
     }
 
-    .brand-copy p {
-      margin-top: 18px;
+    .brand-side p {
       color: var(--mut);
-      font-size: 16px;
-      line-height: 1.55;
-      max-width: 620px;
+      font-size: 14px;
+      line-height: 1.5;
     }
 
     .security-row {
       display: flex;
-      gap: 14px;
       flex-wrap: wrap;
-      margin-top: 34px;
+      gap: 8px;
+      margin-top: 22px;
     }
 
     .security-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      border: 1px solid rgba(255,255,255,.11);
-      background: rgba(0,0,0,.24);
+      padding: 9px 11px;
       border-radius: 999px;
+      background: rgba(0,0,0,.28);
+      border: 1px solid rgba(255,255,255,.12);
       color: #e9e2d4;
-      font-size: 13px;
-      backdrop-filter: blur(8px);
+      font-size: 12px;
     }
 
     .security-item b {
       color: var(--gold);
-      font-size: 16px;
     }
 
     .login-card {
-      position: relative;
-      z-index: 3;
       width: 100%;
-      border: 1px solid rgba(216,181,109,.38);
+      max-width: 430px;
+      border: 1px solid rgba(216,181,109,.42);
       background:
-        radial-gradient(circle at 50% 0, rgba(216,181,109,.17), transparent 42%),
-        linear-gradient(145deg, rgba(12,13,17,.74), rgba(5,6,8,.66));
+        radial-gradient(circle at 50% 0, rgba(216,181,109,.18), transparent 42%),
+        linear-gradient(145deg, rgba(10,11,15,.84), rgba(4,5,7,.76));
       backdrop-filter: blur(22px);
       -webkit-backdrop-filter: blur(22px);
       border-radius: 30px;
-      box-shadow: var(--shadow);
-      padding: 34px;
-      overflow: hidden;
-    }
-
-    .login-card::before {
-      content: "";
-      position: absolute;
-      left: 14%;
-      right: 14%;
-      top: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--gold2), transparent);
-      opacity: .95;
-    }
-
-    .login-card::after {
-      content: "";
-      position: absolute;
-      right: -90px;
-      top: -90px;
-      width: 200px;
-      height: 200px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(216,181,109,.22), transparent 68%);
-      pointer-events: none;
+      box-shadow: 0 30px 100px rgba(0,0,0,.65);
+      padding: 32px;
     }
 
     .mini-logo {
       width: 82px;
       height: 82px;
+      border-radius: 50%;
       margin: 0 auto 16px;
-      border-radius: 24px;
-      display: grid;
-      place-items: center;
-      border: 1px solid rgba(216,181,109,.42);
-      background: rgba(0,0,0,.22);
-      box-shadow: 0 14px 44px rgba(0,0,0,.38);
+      padding: 8px;
+      background: rgba(0,0,0,.36);
+      border: 1px solid rgba(216,181,109,.50);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0,0,0,.45);
     }
 
     .mini-logo img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
-      filter: brightness(1.12) contrast(1.05);
+      object-fit: contain;
+      border-radius: 50%;
     }
 
     .login-card h2 {
       text-align: center;
-      font-size: 28px;
+      font-size: 27px;
       line-height: 1.08;
       letter-spacing: -1px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .gold-line {
@@ -272,20 +189,6 @@
       height: 1px;
       margin: 15px auto;
       background: linear-gradient(90deg, transparent, var(--gold), transparent);
-      position: relative;
-    }
-
-    .gold-line::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: -3px;
-      width: 7px;
-      height: 7px;
-      transform: translateX(-50%);
-      border-radius: 50%;
-      background: var(--gold);
-      box-shadow: 0 0 18px rgba(216,181,109,.85);
     }
 
     .sub {
@@ -299,7 +202,7 @@
     .tabs {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      background: rgba(0,0,0,.28);
+      background: rgba(0,0,0,.30);
       border: 1px solid rgba(255,255,255,.10);
       border-radius: 17px;
       padding: 5px;
@@ -307,19 +210,18 @@
     }
 
     .tabs button {
+      border: 0;
       background: transparent;
       color: var(--mut);
       border-radius: 13px;
       padding: 11px;
       font-weight: 900;
-      font-size: 13px;
-      transition: .16s;
+      cursor: pointer;
     }
 
     .tabs button.active {
-      background: linear-gradient(135deg, rgba(216,181,109,.34), rgba(216,181,109,.10));
+      background: linear-gradient(135deg, rgba(216,181,109,.36), rgba(216,181,109,.10));
       color: #fff2cb;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.09);
     }
 
     .msg {
@@ -377,22 +279,20 @@
       top: 50%;
       transform: translateY(-50%);
       color: var(--gold);
-      opacity: .95;
-      font-size: 18px;
+      font-size: 17px;
       pointer-events: none;
     }
 
     input {
       width: 100%;
       border: 1px solid rgba(255,255,255,.15);
-      background: rgba(0,0,0,.25);
+      background: rgba(0,0,0,.28);
       color: var(--txt);
       border-radius: 15px;
       padding: 15px 46px;
       outline: none;
+      font: inherit;
       font-size: 15px;
-      transition: .15s;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
     }
 
     input::placeholder {
@@ -412,8 +312,10 @@
       width: 34px;
       height: 34px;
       border-radius: 10px;
+      border: 0;
       background: transparent;
       color: rgba(255,255,255,.70);
+      cursor: pointer;
     }
 
     .row {
@@ -431,7 +333,6 @@
       align-items: center;
       gap: 8px;
       cursor: pointer;
-      user-select: none;
     }
 
     .remember input {
@@ -442,10 +343,12 @@
     }
 
     .link {
-      color: var(--gold);
+      border: 0;
       background: transparent;
+      color: var(--gold);
       font-weight: 700;
       font-size: 13px;
+      cursor: pointer;
     }
 
     .btn {
@@ -453,13 +356,13 @@
       min-height: 52px;
       border-radius: 15px;
       font-weight: 1000;
-      letter-spacing: 1.7px;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
-      transition: .16s;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
+      cursor: pointer;
     }
 
     .btn:disabled {
@@ -467,22 +370,17 @@
       cursor: wait;
     }
 
-    .btn:active {
-      transform: translateY(1px);
-      opacity: .86;
-    }
-
     .btn-gold {
       border: 1px solid rgba(255,226,169,.72);
       background: linear-gradient(135deg, #f0cd82, #c99843 52%, #ffd98c);
       color: #171005;
-      box-shadow: 0 16px 36px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.45);
+      box-shadow: 0 16px 36px rgba(0,0,0,.34);
     }
 
     .btn-outline {
       margin-top: 12px;
       border: 1px solid rgba(216,181,109,.40);
-      background: rgba(0,0,0,.18);
+      background: rgba(0,0,0,.20);
       color: #ffdf9a;
     }
 
@@ -504,141 +402,97 @@
 
     .footer {
       position: absolute;
-      left: 7vw;
-      right: 7vw;
-      bottom: 18px;
-      color: rgba(255,255,255,.42);
+      left: 5vw;
+      right: 5vw;
+      bottom: 16px;
+      text-align: center;
+      color: rgba(255,255,255,.45);
       font-size: 12px;
-      display: flex;
-      justify-content: center;
-      gap: 18px;
-      align-items: center;
-      pointer-events: none;
-    }
-
-    .footer::before,
-    .footer::after {
-      content: "";
-      height: 1px;
-      flex: 1;
-      max-width: 320px;
-      background: linear-gradient(90deg, transparent, rgba(216,181,109,.30));
-    }
-
-    .footer::after {
-      background: linear-gradient(90deg, rgba(216,181,109,.30), transparent);
     }
 
     @media (max-width: 980px) {
       body {
-        background-attachment: scroll;
+        background:
+          linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.82)),
+          var(--bg-url) center center / cover no-repeat scroll;
       }
 
       .page {
         grid-template-columns: 1fr;
-        gap: 22px;
+        justify-content: center;
+        gap: 18px;
         padding: 18px;
-        padding-bottom: calc(28px + var(--safe));
-      }
-
-      .page::before {
-        display: none;
       }
 
       .brand-side {
-        min-height: auto;
-        padding: 16px 0 0;
-        align-items: center;
+        max-width: 100%;
         text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       }
 
-      .logo-wrap {
-        width: min(330px, 88vw);
-        padding: 6px;
-      }
-
-      .logo-main {
-        max-width: 320px;
-      }
-
-      .brand-copy {
-        margin-top: 8px;
-        padding-top: 12px;
-        border-top: 0;
-      }
-
-      .brand-copy .badge {
+      .logo-circle {
+        width: 205px;
+        height: 205px;
         margin-bottom: 12px;
-        font-size: 10px;
       }
 
-      .brand-copy h1 {
-        font-size: 28px;
-        letter-spacing: -1px;
+      h1 {
+        font-size: 25px;
       }
 
-      .brand-copy p {
+      .brand-side p {
         font-size: 13px;
-        margin-top: 10px;
       }
 
       .security-row {
         justify-content: center;
-        margin-top: 16px;
-        gap: 8px;
-      }
-
-      .security-item {
-        padding: 9px 10px;
-        font-size: 11px;
+        margin-top: 14px;
       }
 
       .login-card {
-        padding: 22px;
+        max-width: 100%;
+        padding: 22px 18px;
         border-radius: 24px;
       }
 
       .mini-logo {
-        width: 64px;
-        height: 64px;
-        border-radius: 18px;
+        width: 72px;
+        height: 72px;
       }
 
       .login-card h2 {
         font-size: 23px;
       }
 
-      input, button {
+      input,
+      button {
         font-size: 16px;
       }
 
       .footer {
         position: static;
-        margin: 10px 0 0;
-        font-size: 11px;
-      }
-
-      .footer::before,
-      .footer::after {
-        display: none;
+        margin-top: 8px;
       }
     }
 
     @media (max-width: 520px) {
-      .brand-copy h1 {
-        font-size: 24px;
-      }
-
-      .brand-copy p {
-        display: none;
-      }
-
       .security-row {
         display: none;
       }
 
-      .login-card {
-        padding: 20px 16px;
+      .brand-side p {
+        display: none;
+      }
+
+      .logo-circle {
+        width: 175px;
+        height: 175px;
+      }
+
+      h1 {
+        font-size: 22px;
       }
 
       .row {
@@ -647,39 +501,41 @@
         gap: 8px;
       }
     }
-  /* =========================================    LOGOS REDONDAS ========================================= */  .logo-wrap {   width: 260px !important;   height: 260px !important;   border-radius: 50% !important;   overflow: hidden !important;   padding: 16px !important;   display: flex !important;   align-items: center !important;   justify-content: center !important;   background: rgba(0,0,0,.30) !important;   border: 1px solid rgba(216,181,109,.40) !important;   box-shadow: 0 20px 50px rgba(0,0,0,.65) !important; }  .logo-main {   width: 88% !important;   height: 88% !important;   object-fit: contain !important;   border-radius: 50% !important;   display: block !important;   mix-blend-mode: normal !important; }  .mini-logo {   width: 84px !important;   height: 84px !important;   border-radius: 50% !important;   overflow: hidden !important;   padding: 8px !important;   display: flex !important;   align-items: center !important;   justify-content: center !important;   background: rgba(0,0,0,.32) !important;   border: 1px solid rgba(216,181,109,.45) !important;   box-shadow: 0 12px 30px rgba(0,0,0,.40) !important; }  .mini-logo img {   width: 100% !important;   height: 100% !important;   object-fit: contain !important;   border-radius: 50% !important;   display: block !important; }  @media (max-width: 980px) {   .logo-wrap {     width: 210px !important;     height: 210px !important;   }    .mini-logo {     width: 74px !important;     height: 74px !important;   } }
+  </style>
 </head>
 
 <body>
   <main class="page">
     <section class="brand-side">
-      <div class="logo-wrap">
-        <img class="logo-main" src="midia/WhatsApp%20Image%202026-07-03%20at%20116.20.22.jpeg" alt="Leads Imóveis" />
+      <div class="logo-circle">
+        <img src="https://raw.githubusercontent.com/NatanAlvezz/NatanAlvezz/main/midia/logo-leads.png.jpeg?v=200" alt="Leads Imóveis" />
       </div>
 
-      <div class="brand-copy">
-        <div class="badge">CRM exclusivo para corretores aprovados</div>
-        <h1>Venda com foco, presença e inteligência.</h1>
-        <p>
-          Uma central imobiliária premium para organizar leads, imóveis, fotos,
-          follow-up, captação e conversas com apoio de IA.
-        </p>
+      <div class="badge">CRM exclusivo para corretores aprovados</div>
 
-        <div class="security-row">
-          <div class="security-item"><b>◈</b> Plataforma segura</div>
-          <div class="security-item"><b>⌁</b> Dados protegidos</div>
-          <div class="security-item"><b>☁</b> Acesso 24/7</div>
-        </div>
+      <h1>Venda com foco, presença e inteligência.</h1>
+
+      <p>
+        Uma central imobiliária premium para organizar leads, imóveis, fotos,
+        follow-up, captação e conversas com apoio de IA.
+      </p>
+
+      <div class="security-row">
+        <div class="security-item"><b>◈</b> Plataforma segura</div>
+        <div class="security-item"><b>⌁</b> Dados protegidos</div>
+        <div class="security-item"><b>☁</b> Acesso 24/7</div>
       </div>
     </section>
 
     <section class="login-card">
       <div class="mini-logo">
-        <img src="midia/logo-leads.png" alt="Leads Imóveis" />
+        <img src="https://raw.githubusercontent.com/NatanAlvezz/NatanAlvezz/main/midia/logo-leads.png.jpeg?v=200" alt="Leads Imóveis" />
       </div>
 
       <h2>Bem-vindo ao<br />CRM Leads Imóveis</h2>
+
       <div class="gold-line"></div>
+
       <p class="sub">
         Acesso exclusivo para corretores aprovados.
         Entre com suas credenciais para continuar.
@@ -972,5 +828,5 @@
       showMessage("Enviamos um link de recuperação para seu e-mail.", "ok");
     }
   </script>
-<style> /* =====================================================    CORREÇÃO FINAL — FUNDO + LOGO + MAIS PONTE APARECENDO ===================================================== */  body {   background:     linear-gradient(90deg,       rgba(2,3,6,.18) 0%,       rgba(2,3,6,.30) 45%,       rgba(2,3,6,.78) 100%     ),     url("https://raw.githubusercontent.com/NatanAlvezz/NatanAlvezz/main/midia/bg-floripa.jpg.jpg?v=10")     center center / cover no-repeat fixed !important; }  body::before {   background:     linear-gradient(to bottom, rgba(0,0,0,.02), rgba(0,0,0,.46)) !important; }  .page {   grid-template-columns: minmax(220px, 330px) minmax(360px, 430px) !important;   justify-content: space-between !important;   gap: clamp(50px, 14vw, 260px) !important;   padding: 34px 5vw !important; }  .brand-side {   max-width: 330px !important;   min-height: auto !important;   justify-content: center !important;   align-items: flex-start !important; }  .logo-wrap {   width: min(260px, 80vw) !important;   padding: 0 !important;   background: transparent !important;   filter: drop-shadow(0 22px 44px rgba(0,0,0,.80)) !important; }  .logo-main {   width: 100% !important;   max-width: 260px !important;   height: auto !important;   object-fit: contain !important;   border-radius: 0 !important;   mix-blend-mode: normal !important;   display: block !important;   filter: brightness(1.18) contrast(1.10) drop-shadow(0 18px 34px rgba(0,0,0,.72)) !important; }  .brand-copy {   max-width: 330px !important;   margin-top: 12px !important;   padding-top: 12px !important; }  .brand-copy h1 {   font-size: clamp(25px, 2.7vw, 38px) !important;   line-height: 1.02 !important;   max-width: 330px !important; }  .brand-copy p {   font-size: 13px !important;   max-width: 320px !important; }  .security-row {   margin-top: 18px !important;   gap: 8px !important; }  .security-item {   padding: 8px 10px !important;   font-size: 11px !important; }  .login-card {   max-width: 430px !important;   margin-left: auto !important;   background:     radial-gradient(circle at 50% 0, rgba(216,181,109,.18), transparent 42%),     linear-gradient(145deg, rgba(10,11,15,.82), rgba(4,5,7,.74)) !important; }  .mini-logo {   width: 76px !important;   height: 76px !important;   padding: 7px !important;   background: rgba(0,0,0,.36) !important;   border: 1px solid rgba(216,181,109,.48) !important; }  .mini-logo img {   width: 100% !important;   height: 100% !important;   object-fit: contain !important;   border-radius: 0 !important;   mix-blend-mode: normal !important;   display: block !important; }  @media (max-width: 980px) {   body {     background:       linear-gradient(to bottom, rgba(2,3,6,.32), rgba(2,3,6,.82)),       url("https://raw.githubusercontent.com/NatanAlvezz/NatanAlvezz/main/midia/bg-floripa.jpg.jpg?v=10")       center center / cover no-repeat scroll !important;   }    .page {     grid-template-columns: 1fr !important;     padding: 18px !important;     gap: 18px !important;   }    .brand-side {     max-width: 100% !important;     align-items: center !important;     text-align: center !important;   }    .logo-wrap {     justify-content: center !important;     width: min(220px, 72vw) !important;   }    .logo-main {     max-width: 220px !important;   }    .brand-copy {     max-width: 100% !important;     text-align: center !important;   }    .brand-copy h1 {     max-width: 100% !important;     font-size: 24px !important;   }    .brand-copy p {     max-width: 100% !important;   }    .login-card {     max-width: 100% !important;     margin-left: 0 !important;   } } </style>  <script> (function corrigirImagensLogin() {   const LOGO_URL = "https://raw.githubusercontent.com/NatanAlvezz/NatanAlvezz/main/midia/logo-leads.png.jpeg?v=10";    function aplicarLogo() {     document.querySelectorAll("img").forEach(function(img) {       const alt = (img.getAttribute("alt") || "").toLowerCase();       const cls = img.className || "";        if (alt.includes("leads") || cls.includes("logo-main") || img.closest(".mini-logo")) {         img.src = LOGO_URL;         img.style.display = "block";         img.style.objectFit = "contain";       }     });   }    if (document.readyState === "loading") {     document.addEventListener("DOMContentLoaded", aplicarLogo);   } else {     aplicarLogo();   } })(); </script>
+</body>
 </html>
