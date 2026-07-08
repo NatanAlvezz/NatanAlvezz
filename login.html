@@ -2,180 +2,612 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#050506" />
-  <title>Login · Leads Imóveis CRM</title>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#050506" />
+
+  <title>Entrar · Leads Imóveis CRM</title>
+
   <style>
-    :root{
-      --bg:#050506;--bg2:#090a0c;--panel:#0d0e10;--panel2:#141416;
-      --txt:#f7f4ed;--mut:#aaa6a0;--gold:#d8b56d;--gold2:#a77a2a;--gold3:#fff0be;
-      --line:rgba(255,255,255,.12);--lineGold:rgba(216,181,109,.32);
-      --shadow:0 28px 90px rgba(0,0,0,.58);
+    :root {
+      --bg:#050506;
+      --panel:#0d0e10;
+      --line:rgba(255,255,255,.12);
+      --gold:#d8b56d;
+      --gold2:#fff0be;
+      --txt:#f7f4ed;
+      --mut:#a9a7a0;
+      --red:#ef6a6a;
+      --green:#65d679;
+      --safe:env(safe-area-inset-bottom,0px);
     }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{
+
+    * {
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    body {
       min-height:100vh;
-      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-      color:var(--txt);
+      display:grid;
+      place-items:center;
+      padding:24px;
+      padding-bottom:calc(24px + var(--safe));
       background:
-        radial-gradient(circle at 50% -10%,rgba(216,181,109,.22),transparent 28%),
-        radial-gradient(circle at 92% 18%,rgba(216,181,109,.10),transparent 22%),
-        linear-gradient(135deg,#030304,#090a0c 48%,#020202);
+        radial-gradient(circle at 20% 0%, rgba(216,181,109,.22), transparent 34%),
+        radial-gradient(circle at 100% 20%, rgba(255,255,255,.10), transparent 30%),
+        linear-gradient(135deg,#050506,#090a0c 52%,#030303);
+      color:var(--txt);
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       overflow-x:hidden;
     }
-    body:before{
-      content:"";position:fixed;inset:0;pointer-events:none;opacity:.8;
+
+    body::before {
+      content:"";
+      position:fixed;
+      inset:0;
       background-image:
-        linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
-        linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px);
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
       background-size:46px 46px;
-      mask-image:linear-gradient(to bottom,#000,transparent 82%);
+      mask-image:linear-gradient(to bottom,#000,transparent 80%);
+      pointer-events:none;
+      z-index:-1;
     }
-    .splash{
-      position:fixed;inset:0;z-index:50;display:grid;place-items:center;
-      background:radial-gradient(circle at center,rgba(216,181,109,.10),transparent 34%),#030304;
-      animation:splashOut .9s ease 1.25s forwards;
+
+    .shell {
+      width:min(1080px,100%);
+      display:grid;
+      grid-template-columns:1fr 420px;
+      gap:24px;
+      align-items:stretch;
     }
-    .splash img{
-      width:min(380px,78vw);border-radius:18px;filter:drop-shadow(0 22px 44px rgba(216,181,109,.18));
-      animation:logoIn .9s ease forwards;
+
+    .hero,
+    .card {
+      border:1px solid var(--line);
+      border-radius:28px;
+      background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.018));
+      box-shadow:0 28px 90px rgba(0,0,0,.45);
+      overflow:hidden;
     }
-    .splash .shine{position:absolute;bottom:18%;width:260px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);box-shadow:0 0 22px var(--gold)}
-    @keyframes logoIn{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
-    @keyframes splashOut{to{opacity:0;visibility:hidden;pointer-events:none}}
-    .page{min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) minmax(410px,520px);position:relative;isolation:isolate}
-    .page:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(0,0,0,.30),rgba(0,0,0,.04) 46%,rgba(0,0,0,.56))}
-    .hero{padding:48px clamp(24px,5vw,80px);display:flex;flex-direction:column;justify-content:space-between;min-height:100vh;position:relative;overflow:hidden}
-    .hero:before{
-      content:"";position:absolute;right:-10%;bottom:-8%;width:62vw;height:62vw;border:1px solid rgba(216,181,109,.18);border-radius:50%;opacity:.72;
-      box-shadow:inset 0 0 90px rgba(216,181,109,.05);
+
+    .hero {
+      padding:34px;
+      min-height:620px;
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
     }
-    .hero:after{
-      content:"";position:absolute;right:-3%;bottom:4%;width:min(520px,52vw);height:min(360px,38vw);border:1px solid rgba(216,181,109,.12);border-radius:26px;
-      background:linear-gradient(135deg,rgba(216,181,109,.09),rgba(255,255,255,.03)),linear-gradient(180deg,transparent,rgba(0,0,0,.55));
-      clip-path:polygon(12% 34%,100% 0,100% 100%,0 100%,0 52%);
-      opacity:.42;
+
+    .hero::after {
+      content:"";
+      position:absolute;
+      right:-140px;
+      top:-140px;
+      width:360px;
+      height:360px;
+      border-radius:50%;
+      background:radial-gradient(circle,rgba(216,181,109,.22),transparent 62%);
     }
-    .brandBlock{position:relative;z-index:2;max-width:560px;text-align:left}
-    .brandLogo{width:min(430px,82vw);border-radius:22px;display:block;box-shadow:0 26px 90px rgba(0,0,0,.44);border:1px solid rgba(216,181,109,.14)}
-    .brandBlock h1{font-size:clamp(34px,4.2vw,68px);line-height:.96;margin:30px 0 16px;letter-spacing:-2px}
-    .brandBlock p{max-width:520px;color:#d4d0c8;font-size:16px;line-height:1.7}
-    .goldLine{width:190px;height:1px;background:linear-gradient(90deg,var(--gold),transparent);margin:22px 0;box-shadow:0 0 18px rgba(216,181,109,.55)}
-    .stats{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,minmax(120px,1fr));gap:14px;max-width:720px}
-    .stat{border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.035);backdrop-filter:blur(14px);border-radius:18px;padding:16px;box-shadow:0 16px 40px rgba(0,0,0,.20)}
-    .stat b{display:block;color:var(--gold3);font-size:13px;margin-bottom:6px}.stat span{color:var(--mut);font-size:12px;line-height:1.35}
-    .loginSide{min-height:100vh;display:grid;place-items:center;padding:28px;background:linear-gradient(180deg,rgba(0,0,0,.36),rgba(0,0,0,.72));border-left:1px solid rgba(216,181,109,.12)}
-    .card{
-      width:min(460px,100%);border:1px solid var(--lineGold);border-radius:28px;
-      background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.022));
-      box-shadow:var(--shadow);padding:30px;backdrop-filter:blur(20px);position:relative;overflow:hidden;
+
+    .brand {
+      display:flex;
+      align-items:center;
+      gap:14px;
+      position:relative;
+      z-index:1;
     }
-    .card:before{content:"";position:absolute;left:50%;top:0;transform:translateX(-50%);width:68%;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);box-shadow:0 0 18px rgba(216,181,109,.8)}
-    .miniBrand{text-align:center;margin-bottom:22px}.miniBrand img{width:190px;border-radius:14px;filter:drop-shadow(0 14px 28px rgba(0,0,0,.55))}.miniBrand small{display:block;margin-top:10px;color:var(--gold);letter-spacing:3px;font-size:10px;text-transform:uppercase}
-    h2{font-size:25px;text-align:center;margin-bottom:7px}.subtitle{color:var(--mut);text-align:center;font-size:13px;line-height:1.5;margin-bottom:24px}
-    label{display:block;font-size:11px;color:#d9d2c6;font-weight:800;letter-spacing:.7px;text-transform:uppercase;margin:14px 0 7px}
-    .inputWrap{position:relative}.inputWrap span{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--gold);font-size:16px;opacity:.88}.inputWrap button{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;padding:0;background:transparent;border:0;color:var(--mut);box-shadow:none}
-    input{width:100%;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.34);color:var(--txt);padding:14px 46px;outline:none;transition:.18s}
-    input:focus{border-color:rgba(216,181,109,.62);box-shadow:0 0 0 4px rgba(216,181,109,.10)}
-    .options{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0 18px;color:var(--mut);font-size:12px}.remember{display:flex;align-items:center;gap:8px}.remember input{width:16px;height:16px;padding:0;accent-color:var(--gold)}.linkBtn{border:0;background:transparent;color:var(--gold);padding:0;font-size:12px;box-shadow:none;white-space:nowrap}.row{display:grid;gap:11px;margin-top:12px}
-    button{border:1px solid rgba(216,181,109,.52);border-radius:14px;background:linear-gradient(135deg,#f1d796,#a4772a 58%,#6f4615);color:#171005;font-weight:900;padding:14px 15px;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.32),0 16px 30px rgba(0,0,0,.23);transition:.18s}
-    button:hover{transform:translateY(-1px);filter:brightness(1.05)}button:active{transform:translateY(0)}button.secondary{background:rgba(255,255,255,.035);border-color:rgba(216,181,109,.38);color:#ffe9b5;box-shadow:none}
-    .divider{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:12px;margin:16px 0 5px}.divider:before,.divider:after{content:"";height:1px;flex:1;background:rgba(255,255,255,.11)}
-    .msg{margin-top:15px;color:var(--gold3);font-size:13px;min-height:20px;white-space:pre-wrap;text-align:center}.hint{margin-top:18px;border-top:1px solid var(--line);padding-top:14px;font-size:12px;color:var(--mut);line-height:1.45;text-align:center}
-    @media(max-width:980px){.page{display:block}.hero{min-height:auto;padding:28px 20px 0;text-align:center}.brandBlock{text-align:center;margin:auto}.brandLogo{margin:auto;width:min(300px,82vw)}.brandBlock h1{font-size:32px;margin-top:20px}.goldLine{margin:18px auto}.stats{display:none}.loginSide{min-height:auto;padding:22px 16px 40px;border-left:0}.card{padding:24px}.miniBrand img{width:158px}}
+
+    .logo {
+      width:68px;
+      height:68px;
+      border-radius:22px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(135deg,#d8b56d,#fff0be);
+      color:#070707;
+      font-weight:1000;
+      letter-spacing:-1px;
+      box-shadow:0 14px 40px rgba(216,181,109,.22);
+    }
+
+    .brand b {
+      display:block;
+      letter-spacing:2px;
+      font-size:18px;
+    }
+
+    .brand span {
+      display:block;
+      color:var(--mut);
+      font-size:12px;
+      letter-spacing:2px;
+      margin-top:3px;
+    }
+
+    .hero-main {
+      position:relative;
+      z-index:1;
+      max-width:620px;
+    }
+
+    .badge {
+      display:inline-flex;
+      border:1px solid rgba(216,181,109,.34);
+      background:rgba(216,181,109,.11);
+      color:#ffecc0;
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:12px;
+      font-weight:900;
+      margin-bottom:18px;
+    }
+
+    h1 {
+      font-size:clamp(34px,5vw,62px);
+      line-height:.98;
+      letter-spacing:-2px;
+      margin-bottom:18px;
+    }
+
+    .hero-main p {
+      color:var(--mut);
+      font-size:16px;
+      line-height:1.55;
+      max-width:590px;
+    }
+
+    .hero-grid {
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
+      margin-top:28px;
+    }
+
+    .mini {
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.18);
+      border-radius:18px;
+      padding:14px;
+    }
+
+    .mini b {
+      display:block;
+      color:#fff3d2;
+      font-size:13px;
+      margin-bottom:5px;
+    }
+
+    .mini span {
+      color:var(--mut);
+      font-size:12px;
+      line-height:1.35;
+    }
+
+    .quote {
+      position:relative;
+      z-index:1;
+      border:1px solid rgba(216,181,109,.22);
+      background:rgba(216,181,109,.07);
+      border-radius:22px;
+      padding:18px;
+      color:#fff5dd;
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    .card {
+      padding:28px;
+      background:
+        radial-gradient(circle at 50% 0,rgba(216,181,109,.14),transparent 45%),
+        linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.02));
+    }
+
+    .orb {
+      width:78px;
+      height:78px;
+      margin:0 auto 18px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      border:1px solid rgba(216,181,109,.66);
+      background:radial-gradient(circle,#2c2311,#090909);
+      box-shadow:0 0 35px rgba(216,181,109,.35);
+      color:#fff0c8;
+      font-family:Georgia,serif;
+      font-size:22px;
+    }
+
+    .card h2 {
+      text-align:center;
+      font-size:24px;
+      margin-bottom:8px;
+    }
+
+    .card .sub {
+      text-align:center;
+      color:var(--mut);
+      font-size:13px;
+      line-height:1.45;
+      margin-bottom:22px;
+    }
+
+    .tabs {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      background:rgba(0,0,0,.25);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;
+      padding:5px;
+      margin-bottom:18px;
+    }
+
+    .tabs button {
+      border:0;
+      background:transparent;
+      color:var(--mut);
+      border-radius:12px;
+      padding:11px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .tabs button.active {
+      background:linear-gradient(135deg,rgba(216,181,109,.30),rgba(216,181,109,.10));
+      color:#fff1ca;
+    }
+
+    .field {
+      margin-bottom:12px;
+    }
+
+    .field label {
+      display:block;
+      color:var(--mut);
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.7px;
+      font-weight:900;
+      margin-bottom:7px;
+    }
+
+    input {
+      width:100%;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.25);
+      color:var(--txt);
+      border-radius:15px;
+      padding:14px;
+      outline:none;
+      font:inherit;
+    }
+
+    input:focus {
+      border-color:rgba(216,181,109,.58);
+      box-shadow:0 0 0 3px rgba(216,181,109,.10);
+    }
+
+    .btn {
+      width:100%;
+      border:1px solid rgba(216,181,109,.50);
+      background:linear-gradient(135deg,rgba(216,181,109,.34),rgba(111,74,19,.26));
+      color:#fff4d9;
+      border-radius:15px;
+      padding:14px;
+      font-weight:1000;
+      cursor:pointer;
+      margin-top:8px;
+      box-shadow:0 14px 30px rgba(0,0,0,.22);
+    }
+
+    .btn:active {
+      transform:translateY(1px);
+      opacity:.88;
+    }
+
+    .help {
+      margin-top:14px;
+      color:var(--mut);
+      font-size:12px;
+      line-height:1.45;
+      text-align:center;
+    }
+
+    .msg {
+      display:none;
+      margin:14px 0;
+      border-radius:14px;
+      padding:12px;
+      font-size:13px;
+      line-height:1.45;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.045);
+    }
+
+    .msg.show {
+      display:block;
+    }
+
+    .msg.error {
+      color:#ffd8d8;
+      border-color:rgba(239,106,106,.35);
+      background:rgba(239,106,106,.10);
+    }
+
+    .msg.ok {
+      color:#dcffdf;
+      border-color:rgba(101,214,121,.35);
+      background:rgba(101,214,121,.10);
+    }
+
+    .msg.warn {
+      color:#fff0c0;
+      border-color:rgba(216,181,109,.35);
+      background:rgba(216,181,109,.10);
+    }
+
+    @media(max-width:900px) {
+      body {
+        padding:14px;
+      }
+
+      .shell {
+        grid-template-columns:1fr;
+      }
+
+      .hero {
+        min-height:auto;
+        padding:24px;
+      }
+
+      .hero-grid {
+        grid-template-columns:1fr;
+      }
+
+      .quote {
+        margin-top:26px;
+      }
+    }
   </style>
 </head>
+
 <body>
-  <div class="splash" aria-hidden="true"><img src="assets/leads-logo.jpeg" alt="Leads Imóveis"><div class="shine"></div></div>
-  <main class="page">
+  <div class="shell">
     <section class="hero">
-      <div class="brandBlock">
-        <img class="brandLogo" src="assets/leads-logo.jpeg" alt="Leads Imóveis" />
-        <h1>CRM premium para imóveis de alto padrão.</h1>
-        <div class="goldLine"></div>
-        <p>Controle leads, captações, imóveis, propostas e tarefas em uma operação moderna, segura e conectada ao Supabase.</p>
+      <div class="brand">
+        <div class="logo">LA</div>
+        <div>
+          <b>LEADS IMÓVEIS</b>
+          <span>CRM COPILOTO IA</span>
+        </div>
       </div>
-      <div class="stats">
-        <div class="stat"><b>Gestão Inteligente</b><span>Mais controle para você e seus corretores.</span></div>
-        <div class="stat"><b>Equipe Conectada</b><span>Dados online para todos trabalharem na mesma base.</span></div>
-        <div class="stat"><b>Alto Padrão</b><span>Interface sofisticada para operação imobiliária premium.</span></div>
+
+      <div class="hero-main">
+        <div class="badge">Entrada exclusiva para corretores aprovados</div>
+        <h1>Venda com foco, clareza e inteligência.</h1>
+        <p>
+          Um CRM futurista para corretores de imóveis com IA consultiva, organização do dia,
+          mensagens prontas, leads quentes, imóveis, fotos e apoio humano para manter a equipe em ação.
+        </p>
+
+        <div class="hero-grid">
+          <div class="mini">
+            <b>IA parceira</b>
+            <span>Ajuda com foco, atendimento, follow-up e motivação diária.</span>
+          </div>
+          <div class="mini">
+            <b>Acesso protegido</b>
+            <span>Somente usuários aprovados pelo administrador entram no CRM.</span>
+          </div>
+          <div class="mini">
+            <b>Mobile primeiro</b>
+            <span>Feito para corretor usar no celular, na rua e nas visitas.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="quote">
+        “Bom dia, corretor. Antes de vender imóveis, vamos organizar sua mente, seu foco e sua próxima ação.”
       </div>
     </section>
 
-    <section class="loginSide">
-      <div class="card">
-        <div class="miniBrand"><img src="assets/leads-logo.jpeg" alt="Leads Imóveis"><small>Conectando sonhos. Realizando histórias.</small></div>
-        <h2>Bem-vindo de volta</h2>
-        <p class="subtitle">Acesse sua conta para entrar no CRM operacional da Leads Imóveis.</p>
-        <form id="loginForm">
-          <label for="email">E-mail</label>
-          <div class="inputWrap"><span>♙</span><input id="email" type="email" autocomplete="email" required placeholder="seuemail@dominio.com" /></div>
-          <label for="password">Senha</label>
-          <div class="inputWrap"><span>▣</span><input id="password" type="password" autocomplete="current-password" required placeholder="mínimo 6 caracteres" /><button type="button" onclick="togglePassword()" aria-label="Mostrar senha">◉</button></div>
-          <div class="options"><label class="remember"><input id="remember" type="checkbox"> Lembrar-me</label><button class="linkBtn" type="button" onclick="forgotPassword()">Esqueceu sua senha?</button></div>
-          <div class="row"><button type="submit">Entrar no CRM →</button></div>
-          <div class="divider">ou</div>
-          <div class="row"><button class="secondary" type="button" onclick="signup()">Criar usuário autorizado</button></div>
-          <div class="msg" id="msg"></div>
-        </form>
-        <div class="hint">Depois de logar, todos os corretores autenticados verão a mesma base do CRM em tempo real.</div>
+    <section class="card">
+      <div class="orb">LAI</div>
+      <h2>Entrar no CRM</h2>
+      <p class="sub">
+        Use seu login de corretor. Novos acessos precisam ser aprovados pelo administrador.
+      </p>
+
+      <div class="tabs">
+        <button id="tabLogin" class="active" onclick="setMode('login')">Entrar</button>
+        <button id="tabSignup" onclick="setMode('signup')">Solicitar acesso</button>
       </div>
+
+      <div id="message" class="msg"></div>
+
+      <form onsubmit="handleAuth(event)">
+        <div class="field" id="nameField" style="display:none">
+          <label>Nome completo</label>
+          <input id="fullName" autocomplete="name" placeholder="Nome do corretor" />
+        </div>
+
+        <div class="field">
+          <label>E-mail</label>
+          <input id="email" type="email" autocomplete="email" placeholder="seuemail@exemplo.com" required />
+        </div>
+
+        <div class="field">
+          <label>Senha</label>
+          <input id="password" type="password" autocomplete="current-password" placeholder="Digite sua senha" required />
+        </div>
+
+        <button class="btn" id="submitBtn" type="submit">Entrar agora</button>
+      </form>
+
+      <p class="help">
+        Se você acabou de solicitar acesso, aguarde aprovação do administrador.
+      </p>
     </section>
-  </main>
+  </div>
+
   <script>
-    const client = window.supabaseClient;
-    const msg = document.getElementById('msg');
-    const emailInput = document.getElementById('email');
-    const savedEmail = localStorage.getItem('leads_login_email');
-    if (savedEmail) { emailInput.value = savedEmail; document.getElementById('remember').checked = true; }
+    "use strict";
 
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      msg.textContent = 'Entrando...';
-      const email = emailInput.value.trim();
-      const password = document.getElementById('password').value;
-      const { error } = await client.auth.signInWithPassword({ email, password });
-      if (error) { msg.textContent = 'Erro: ' + traduzErro(error.message); return; }
-      if (document.getElementById('remember').checked) localStorage.setItem('leads_login_email', email);
-      else localStorage.removeItem('leads_login_email');
-      location.href = 'index.html';
+    let mode = "login";
+
+    const params = new URLSearchParams(location.search);
+    const reason = params.get("reason");
+
+    window.addEventListener("load", async () => {
+      if (reason === "pending") showMessage("Seu acesso foi solicitado. Aguarde aprovação do administrador.", "warn");
+      if (reason === "inactive") showMessage("Seu usuário está inativo. Fale com o administrador.", "error");
+      if (reason === "login") showMessage("Entre novamente para acessar o CRM.", "warn");
+      if (reason === "profile") showMessage("Não foi possível validar seu perfil. Fale com o administrador.", "error");
+
+      const client = await waitSupabaseClient();
+
+      if (client) {
+        const { data } = await client.auth.getSession();
+
+        if (data?.session) {
+          const ok = await checkApproved(data.session.user.id);
+
+          if (ok) location.href = "index.html";
+        }
+      }
     });
 
-    async function signup() {
-      msg.textContent = 'Criando usuário...';
-      const email = emailInput.value.trim();
-      const password = document.getElementById('password').value;
-      if (!email || !password) { msg.textContent = 'Informe e-mail e senha para criar o usuário.'; return; }
-      const { error } = await client.auth.signUp({ email, password });
-      if (error) { msg.textContent = 'Erro: ' + traduzErro(error.message); return; }
-      msg.textContent = 'Usuário criado. Se o Supabase pedir confirmação, confirme o e-mail. Depois clique em Entrar.';
+    function setMode(next) {
+      mode = next;
+
+      document.getElementById("tabLogin").classList.toggle("active", mode === "login");
+      document.getElementById("tabSignup").classList.toggle("active", mode === "signup");
+      document.getElementById("nameField").style.display = mode === "signup" ? "block" : "none";
+      document.getElementById("submitBtn").textContent = mode === "signup" ? "Solicitar acesso" : "Entrar agora";
+
+      clearMessage();
     }
 
-    async function forgotPassword(){
-      const email = emailInput.value.trim();
-      if(!email){ msg.textContent='Digite seu e-mail para recuperar a senha.'; return; }
-      const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/login.html' });
-      msg.textContent = error ? 'Erro: ' + traduzErro(error.message) : 'Enviamos o link de recuperação para seu e-mail.';
+    async function waitSupabaseClient() {
+      for (let i = 0; i < 40; i++) {
+        if (window.supabaseClient) return window.supabaseClient;
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
+      showMessage("Supabase não carregou. Verifique o arquivo supabase-config.js.", "error");
+      return null;
     }
 
-    function togglePassword(){
-      const input = document.getElementById('password');
-      input.type = input.type === 'password' ? 'text' : 'password';
+    function showMessage(text, type = "ok") {
+      const el = document.getElementById("message");
+      el.textContent = text;
+      el.className = "msg show " + type;
     }
 
-    function traduzErro(text){
-      return String(text||'')
-        .replace('Invalid login credentials','E-mail ou senha incorretos')
-        .replace('Email not confirmed','E-mail ainda não confirmado')
-        .replace('Password should be at least 6 characters','A senha precisa ter pelo menos 6 caracteres');
+    function clearMessage() {
+      const el = document.getElementById("message");
+      el.textContent = "";
+      el.className = "msg";
     }
 
-    (async()=>{
-      const {data} = await client.auth.getSession();
-      if(data.session) location.href='index.html';
-    })();
+    async function checkApproved(userId) {
+      const client = await waitSupabaseClient();
+      if (!client) return false;
+
+      const { data: profile } = await client
+        .from("user_profiles")
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle();
+
+      return !!(profile && profile.approved && profile.active);
+    }
+
+    async function handleAuth(event) {
+      event.preventDefault();
+
+      const client = await waitSupabaseClient();
+      if (!client) return;
+
+      const email = document.getElementById("email").value.trim().toLowerCase();
+      const password = document.getElementById("password").value;
+      const fullName = document.getElementById("fullName").value.trim();
+
+      document.getElementById("submitBtn").disabled = true;
+
+      try {
+        if (mode === "signup") {
+          if (!fullName) {
+            showMessage("Digite o nome do corretor.", "error");
+            return;
+          }
+
+          const { data, error } = await client.auth.signUp({
+            email,
+            password,
+            options: {
+              data: {
+                full_name: fullName
+              }
+            }
+          });
+
+          if (error) {
+            showMessage(error.message || "Erro ao solicitar acesso.", "error");
+            return;
+          }
+
+          if (data?.user) {
+            await client.from("user_profiles").upsert({
+              id: data.user.id,
+              email,
+              full_name: fullName,
+              role: email === "leadsimoveisoficial@gmail.com" ? "admin" : "corretor",
+              approved: email === "leadsimoveisoficial@gmail.com",
+              active: true
+            });
+          }
+
+          await client.auth.signOut();
+
+          showMessage("Acesso solicitado. Agora o administrador precisa aprovar este corretor.", "warn");
+          setMode("login");
+          return;
+        }
+
+        const { data, error } = await client.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) {
+          showMessage("Login ou senha incorretos.", "error");
+          return;
+        }
+
+        const approved = await checkApproved(data.user.id);
+
+        if (!approved) {
+          await client.auth.signOut();
+          showMessage("Seu acesso ainda não foi aprovado pelo administrador.", "warn");
+          return;
+        }
+
+        location.href = "index.html";
+      } catch (e) {
+        console.error(e);
+        showMessage("Erro inesperado. Tente novamente.", "error");
+      } finally {
+        document.getElementById("submitBtn").disabled = false;
+      }
+    }
   </script>
 </body>
 </html>
