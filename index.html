@@ -3617,8 +3617,15 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
 </script>
 
 
-<!-- FIX FINAL LOGO CRM + LIMPEZA DO QUADRO BRANCO -->
-<style id="logoWhiteFixFinal">
+<!-- FIX UX FINAL CRM: LOGO, IA SEM QUADRO BRANCO, TEMAS E GALERIA COM ARRASTAR -->
+<style id="crmUXFinalFix">
+  /* Remove o botão branco no navegador/desktop. Ele só aparece no celular. */
+  .ai-close-mobile {
+    display: none !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+  }
+
   .brand-logo-fixed,
   .avatar-logo-fixed {
     background: rgba(0,0,0,.32) !important;
@@ -3633,7 +3640,6 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     height: 58px !important;
     border-radius: 50% !important;
     padding: 5px !important;
-    object-fit: contain !important;
   }
 
   .avatar-logo-fixed {
@@ -3660,11 +3666,151 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     display: none !important;
   }
 
-  /* remove qualquer caixa branca acidental de imagem quebrada/controle nativo no layout */
   .brand-logo img,
   .avatar img,
   .ai-orb img {
     background-color: transparent !important;
+  }
+
+  .ai-head {
+    gap: 10px !important;
+  }
+
+  .ai-head h2 {
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+
+  .online {
+    white-space: nowrap !important;
+    flex: 0 0 auto !important;
+  }
+
+  /* Galeria no card do imóvel */
+  .pc-gallery {
+    touch-action: pan-y !important;
+    user-select: none !important;
+  }
+
+  .gallery-nav {
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 4 !important;
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 50% !important;
+    border: 1px solid rgba(255,255,255,.25) !important;
+    background: rgba(0,0,0,.58) !important;
+    color: #fff !important;
+    display: grid !important;
+    place-items: center !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    font-size: 18px !important;
+    box-shadow: 0 8px 20px rgba(0,0,0,.35) !important;
+  }
+
+  .gallery-nav.prev { left: 10px !important; }
+  .gallery-nav.next { right: 10px !important; }
+
+  .gallery-hint {
+    position: absolute !important;
+    right: 10px !important;
+    bottom: 10px !important;
+    z-index: 4 !important;
+    border-radius: 999px !important;
+    background: rgba(0,0,0,.58) !important;
+    border: 1px solid rgba(255,255,255,.15) !important;
+    color: rgba(255,255,255,.88) !important;
+    font-size: 10px !important;
+    font-weight: 900 !important;
+    padding: 5px 8px !important;
+  }
+
+  /* Temas de cor do layout */
+  :root[data-crm-theme="gold"] { --gold: #d8b56d; --theme-rgb: 216,181,109; }
+  :root[data-crm-theme="blue"] { --gold: #60a5fa; --theme-rgb: 96,165,250; }
+  :root[data-crm-theme="green"] { --gold: #34d399; --theme-rgb: 52,211,153; }
+  :root[data-crm-theme="purple"] { --gold: #a78bfa; --theme-rgb: 167,139,250; }
+  :root[data-crm-theme="rose"] { --gold: #fb7185; --theme-rgb: 251,113,133; }
+  :root[data-crm-theme="ice"] { --gold: #67e8f9; --theme-rgb: 103,232,249; }
+
+  :root[data-crm-theme] .btn,
+  :root[data-crm-theme] .nav button.active,
+  :root[data-crm-theme] .nav button:hover,
+  :root[data-crm-theme] .mobile-nav button.active,
+  :root[data-crm-theme] .ai-orb,
+  :root[data-crm-theme] .mobile-ai-toggle,
+  :root[data-crm-theme] .ai-close-mobile {
+    border-color: rgba(var(--theme-rgb), .45) !important;
+  }
+
+  :root[data-crm-theme] .btn,
+  :root[data-crm-theme] .nav button.active,
+  :root[data-crm-theme] .nav button:hover,
+  :root[data-crm-theme] .mobile-nav button.active {
+    background: linear-gradient(135deg, rgba(var(--theme-rgb), .28), rgba(var(--theme-rgb), .08)) !important;
+  }
+
+  :root[data-crm-theme] .central,
+  :root[data-crm-theme] .ai-card,
+  :root[data-crm-theme] .plan {
+    border-color: rgba(var(--theme-rgb), .28) !important;
+  }
+
+  .theme-panel {
+    margin-top: 16px;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.025);
+    border-radius: 18px;
+    padding: 14px;
+  }
+
+  .theme-panel h3 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    margin-bottom: 6px;
+  }
+
+  .theme-panel p {
+    color: var(--mut);
+    font-size: 12px;
+    line-height: 1.45;
+    margin-bottom: 12px;
+  }
+
+  .theme-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+  }
+
+  .theme-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(255,255,255,.13);
+    background: rgba(0,0,0,.22);
+    color: #fff;
+    border-radius: 14px;
+    padding: 10px;
+    font-size: 12px !important;
+    font-weight: 900;
+  }
+
+  .theme-option.active {
+    border-color: rgba(var(--theme-rgb), .65) !important;
+    box-shadow: 0 0 0 3px rgba(var(--theme-rgb), .10) !important;
+  }
+
+  .theme-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.30);
+    flex: 0 0 auto;
   }
 
   @media (max-width: 980px) {
@@ -3672,12 +3818,85 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
       width: 54px !important;
       height: 54px !important;
     }
+
+    .rightbar.open .ai-close-mobile {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      border: 1px solid rgba(var(--theme-rgb, 216,181,109), .45) !important;
+      background: linear-gradient(135deg, rgba(var(--theme-rgb, 216,181,109), .28), rgba(var(--theme-rgb, 216,181,109), .08)) !important;
+      color: #fff3cf !important;
+      border-radius: 14px !important;
+      padding: 9px 12px !important;
+      font-weight: 900 !important;
+      font-size: 13px !important;
+      white-space: nowrap !important;
+      margin-left: auto !important;
+    }
+
+    .gallery-nav {
+      width: 38px !important;
+      height: 38px !important;
+    }
+
+    .gallery-hint {
+      display: block !important;
+    }
+
+    .photo-grid {
+      display: flex !important;
+      overflow-x: auto !important;
+      scroll-snap-type: x mandatory !important;
+      -webkit-overflow-scrolling: touch !important;
+      padding-bottom: 6px !important;
+    }
+
+    .photo-item {
+      min-width: 78vw !important;
+      scroll-snap-align: center !important;
+    }
+
+    .photo-img {
+      height: 210px !important;
+    }
   }
 </style>
 
-<script id="logoWhiteFixFinalScript">
-(function fixCRMLogoAndWhiteBox() {
-  var LOGO_URL = "https://raw.githubusercontent.com/NatanAlvezz/NatanAlvezz/main/midia/logo-leads.png.jpeg?v=500";
+<script id="crmUXFinalFixScript">
+(function crmUXFinalFix() {
+  "use strict";
+
+  var LOGO_URL = "https://raw.githubusercontent.com/NatanAlvezz/NatanAlvezz/main/midia/logo-leads.png.jpeg?v=900";
+  var THEME_KEY = "leads_crm_theme_v1";
+  var THEMES = [
+    { id: "gold", name: "Dourado Luxo", color: "#d8b56d" },
+    { id: "blue", name: "Azul Prime", color: "#60a5fa" },
+    { id: "green", name: "Verde Elite", color: "#34d399" },
+    { id: "purple", name: "Roxo Tech", color: "#a78bfa" },
+    { id: "rose", name: "Rose Premium", color: "#fb7185" },
+    { id: "ice", name: "Ice Futuro", color: "#67e8f9" }
+  ];
+
+  function safeText(value) {
+    return String(value == null ? "" : value).replace(/[&<>"']/g, function(ch) {
+      return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch];
+    });
+  }
+
+  function photoSrc(photo) {
+    return photo && (photo.url || photo.publicUrl || photo.data) || "";
+  }
+
+  function propPhotos(prop) {
+    if (!prop) return [];
+    if (!Array.isArray(prop.photos)) prop.photos = [];
+    return prop.photos.filter(function(photo) { return !!photoSrc(photo); });
+  }
+
+  function bgForPhoto(photo) {
+    var src = photoSrc(photo).replace(/'/g, "%27");
+    return src ? "background-image:url('" + src + "')" : "";
+  }
 
   function makeLogoBox(el, small) {
     if (!el) return;
@@ -3692,7 +3911,7 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     img.loading = "eager";
 
     img.onerror = function() {
-      el.innerHTML = small ? "LA" : "LA";
+      el.innerHTML = "LA";
       el.style.color = "#d8b56d";
       el.style.fontWeight = "900";
       el.style.fontSize = small ? "12px" : "14px";
@@ -3701,7 +3920,7 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     el.appendChild(img);
   }
 
-  function applyFix() {
+  function applyLogoAndAIName() {
     makeLogoBox(document.querySelector(".brand-logo"), false);
     makeLogoBox(document.querySelector(".avatar"), true);
 
@@ -3712,21 +3931,177 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     if (orb) orb.innerHTML = "Agente<br>IA";
 
     var mobile = document.querySelector(".mobile-ai-toggle");
-    if (mobile) mobile.textContent = "Agente IA";
+    if (mobile) {
+      mobile.textContent = "Agente IA";
+      mobile.setAttribute("aria-label", "Abrir Agente IA de Corretor");
+      mobile.setAttribute("title", "Agente IA de Corretor");
+    }
 
     document.querySelectorAll(".online").forEach(function(el) {
       el.textContent = "ONLINE ✦";
     });
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", applyFix);
-  } else {
-    applyFix();
+  function applyTheme(themeId) {
+    var exists = THEMES.some(function(t) { return t.id === themeId; });
+    var selected = exists ? themeId : "gold";
+
+    document.documentElement.setAttribute("data-crm-theme", selected);
+    localStorage.setItem(THEME_KEY, selected);
+
+    document.querySelectorAll(".theme-option").forEach(function(btn) {
+      btn.classList.toggle("active", btn.dataset.theme === selected);
+    });
   }
 
-  setTimeout(applyFix, 700);
-  setTimeout(applyFix, 1800);
+  function injectThemePanel() {
+    var configBody = document.querySelector("#view-config .panel-body");
+    if (!configBody || document.getElementById("themePanelCRM")) return;
+
+    var panel = document.createElement("div");
+    panel.id = "themePanelCRM";
+    panel.className = "theme-panel";
+    panel.innerHTML =
+      '<h3>Cores do layout</h3>' +
+      '<p>Cada corretor pode escolher uma cor para não enjoar do CRM. A escolha fica salva no navegador dele.</p>' +
+      '<div class="theme-options">' +
+      THEMES.map(function(theme) {
+        return '<button type="button" class="theme-option" data-theme="' + theme.id + '">' +
+          '<span class="theme-dot" style="background:' + theme.color + '"></span>' +
+          '<span>' + theme.name + '</span>' +
+        '</button>';
+      }).join("") +
+      '</div>';
+
+    configBody.appendChild(panel);
+
+    panel.querySelectorAll(".theme-option").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        applyTheme(btn.dataset.theme);
+        if (typeof toast === "function") toast("Cor do layout atualizada.");
+      });
+    });
+
+    applyTheme(localStorage.getItem(THEME_KEY) || "gold");
+  }
+
+  function getCurrentIndex(gallery, photos) {
+    var index = Number(gallery && gallery.dataset.photoIndex || 0);
+    if (!Number.isFinite(index)) index = 0;
+    if (!photos.length) return 0;
+    return Math.max(0, Math.min(index, photos.length - 1));
+  }
+
+  window.slidePropertyPhoto = function(propId, direction, trigger) {
+    var prop = (window.db && db.imoveis || []).find(function(item) { return item.id === propId; });
+    if (!prop) return;
+
+    var photos = propPhotos(prop);
+    if (photos.length <= 1) return;
+
+    var gallery = trigger && trigger.closest ? trigger.closest(".pc-gallery") : null;
+    if (!gallery) gallery = document.querySelector('.pc-gallery[data-prop-id="' + CSS.escape(propId) + '"]');
+    if (!gallery) return;
+
+    var current = getCurrentIndex(gallery, photos);
+    var next = (current + direction + photos.length) % photos.length;
+
+    gallery.dataset.photoIndex = String(next);
+    gallery.style.backgroundImage = "url('" + photoSrc(photos[next]).replace(/'/g, "%27") + "')";
+
+    var count = gallery.querySelector(".photo-count");
+    if (count) count.textContent = "📸 " + (next + 1) + "/" + photos.length;
+  };
+
+  window.propertyCard = function(prop) {
+    var photos = propPhotos(prop);
+    var cover = photos.find(function(photo) { return photo.cover; }) || photos[0] || null;
+    var bg = cover
+      ? bgForPhoto(cover)
+      : "background:radial-gradient(circle at 70% 30%, rgba(216,181,109,.25), transparent 30%), linear-gradient(135deg, #2b2e34, #0c0d0f);";
+
+    var safeId = safeText(prop.id);
+    var photoControls = photos.length > 1
+      ? '<button class="gallery-nav prev" type="button" onclick="event.stopPropagation();slidePropertyPhoto(\'' + safeId + '\',-1,this)">‹</button>' +
+        '<button class="gallery-nav next" type="button" onclick="event.stopPropagation();slidePropertyPhoto(\'' + safeId + '\',1,this)">›</button>' +
+        '<span class="gallery-hint">arraste</span>'
+      : '';
+
+    return '' +
+      '<div class="property-card">' +
+        '<div class="pc-img pc-gallery" data-prop-id="' + safeId + '" data-photo-index="0" style="' + bg + '">' +
+          '<span class="photo-count">' + (photos.length ? ('📸 1/' + photos.length) : 'Sem foto') + '</span>' +
+          photoControls +
+        '</div>' +
+        '<div class="pc-body">' +
+          '<h3>' + safeText(prop.titulo || 'Imóvel sem título') + '</h3>' +
+          '<p>' + safeText(prop.bairro || '-') + ', ' + safeText(prop.cidade || 'Florianópolis') + '</p>' +
+          '<p>' + safeText(prop.area || '-') + ' m² · ' + safeText(prop.suites || prop.dormitorios || '-') + ' suítes/dorm. · ' + safeText(prop.vagas || '-') + ' vagas</p>' +
+          '<p class="price">' + money(prop.valor) + '</p>' +
+          '<div>' +
+            '<span class="pill gold">' + safeText(prop.tipo || 'Imóvel') + '</span>' +
+            '<span class="pill green">' + safeText(prop.etapa || 'Ativo') + '</span>' +
+            (photos.length ? '<span class="pill">Fotos online</span>' : '<span class="pill red">Adicionar foto</span>') +
+          '</div>' +
+          '<div class="actions">' +
+            '<button class="btn btn-sm" onclick="askAI(\'Crie um anúncio premium para este imóvel: ' + safeText(prop.titulo || '') + ' em ' + safeText(prop.bairro || '') + ', valor ' + money(prop.valor) + '.\')">Anúncio IA</button>' +
+            '<button class="btn btn-sm btn-ghost" onclick="openImovelModal(\'' + safeId + '\')">Editar</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  };
+
+  function wirePhotoSwipe() {
+    document.querySelectorAll(".pc-gallery").forEach(function(gallery) {
+      if (gallery.dataset.swipeReady === "1") return;
+      gallery.dataset.swipeReady = "1";
+
+      var startX = 0;
+      var startY = 0;
+
+      gallery.addEventListener("touchstart", function(event) {
+        if (!event.touches || !event.touches[0]) return;
+        startX = event.touches[0].clientX;
+        startY = event.touches[0].clientY;
+      }, { passive: true });
+
+      gallery.addEventListener("touchend", function(event) {
+        if (!event.changedTouches || !event.changedTouches[0]) return;
+
+        var dx = event.changedTouches[0].clientX - startX;
+        var dy = event.changedTouches[0].clientY - startY;
+
+        if (Math.abs(dx) < 42 || Math.abs(dx) < Math.abs(dy)) return;
+
+        var propId = gallery.dataset.propId;
+        slidePropertyPhoto(propId, dx < 0 ? 1 : -1, gallery);
+      }, { passive: true });
+    });
+  }
+
+  var oldRenderAll = window.renderAll;
+  window.renderAll = function() {
+    if (typeof oldRenderAll === "function") oldRenderAll();
+    applyLogoAndAIName();
+    injectThemePanel();
+    wirePhotoSwipe();
+  };
+
+  function start() {
+    applyTheme(localStorage.getItem(THEME_KEY) || "gold");
+    applyLogoAndAIName();
+    injectThemePanel();
+    wirePhotoSwipe();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", start);
+  } else {
+    start();
+  }
+
+  setTimeout(start, 600);
+  setTimeout(start, 1600);
 })();
 </script>
 
