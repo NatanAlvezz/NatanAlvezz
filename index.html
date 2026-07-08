@@ -7893,5 +7893,382 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
   })();
 </script>
 
+
+<!-- PATCH FINAL 2026 — Frases IA do login + comandos gratuitos do Copiloto CRM. -->
+<style id="leadsCopilotFrasesAutomacaoFinal2026CSS">
+  .central-head h1 {
+    max-width: 780px !important;
+    line-height: 1.12 !important;
+  }
+
+  .central-head p.copilot-hero-phrase {
+    max-width: 760px !important;
+    color: rgba(235,248,255,.82) !important;
+    font-weight: 620 !important;
+    letter-spacing: -.01em !important;
+  }
+
+  .central-head p.copilot-hero-phrase::before {
+    content: "✦";
+    color: var(--gold, #d8b56d);
+    margin-right: 8px;
+    text-shadow: 0 0 14px rgba(216,181,109,.45);
+  }
+
+  .copilot-login-chip {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    width: fit-content !important;
+    margin-top: 10px !important;
+    padding: 7px 10px !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(125,211,252,.20) !important;
+    background: linear-gradient(135deg, rgba(125,211,252,.10), rgba(216,181,109,.07)) !important;
+    color: rgba(245,248,255,.78) !important;
+    font-size: 11px !important;
+    font-weight: 850 !important;
+    letter-spacing: .06em !important;
+    text-transform: uppercase !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 10px 24px rgba(0,0,0,.16) !important;
+  }
+
+  .copilot-login-chip::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #65d679;
+    box-shadow: 0 0 14px rgba(101,214,121,.75);
+  }
+
+  @media (max-width: 980px) {
+    .central-head h1 {
+      font-size: 20px !important;
+      line-height: 1.18 !important;
+    }
+
+    .central-head p.copilot-hero-phrase {
+      font-size: 13px !important;
+      line-height: 1.45 !important;
+    }
+  }
+</style>
+
+<script id="leadsCopilotFrasesAutomacaoFinal2026JS">
+(function () {
+  "use strict";
+
+  var frasesCopiloto = [
+    {
+      titulo: "Comece pelo lead que está mais perto de fechar.",
+      subtitulo: "Priorize follow-up, imóvel certo e mensagem objetiva. Venda nasce de velocidade com estratégia."
+    },
+    {
+      titulo: "Hoje é dia de transformar contato parado em visita marcada.",
+      subtitulo: "A IA organiza leads, imóveis, fotos e WhatsApp para você agir com precisão em poucos toques."
+    },
+    {
+      titulo: "Uma boa captação hoje pode virar a comissão do mês.",
+      subtitulo: "Use o CRM para mapear proprietários, melhorar fotos e acelerar anúncios de alto padrão."
+    },
+    {
+      titulo: "O corretor que responde primeiro domina a negociação.",
+      subtitulo: "Abra os leads quentes, envie mensagens profissionais e mantenha o funil sempre vivo."
+    },
+    {
+      titulo: "Foco total no que gera proposta, visita e fechamento.",
+      subtitulo: "O copiloto cruza leads, imóveis e tarefas para cortar distração e aumentar resultado."
+    },
+    {
+      titulo: "Sua carteira precisa parecer tão premium quanto os imóveis que você vende.",
+      subtitulo: "Organize fotos, captação e atendimento para entregar experiência de imobiliária de luxo."
+    },
+    {
+      titulo: "Cada lead merece o imóvel certo e uma abordagem certeira.",
+      subtitulo: "Peça para a IA criar mensagens, argumentos e próximos passos com base no seu CRM."
+    },
+    {
+      titulo: "A operação fica leve quando o próximo passo está claro.",
+      subtitulo: "Use prioridades, tarefas e follow-ups para não deixar nenhuma oportunidade esfriar."
+    },
+    {
+      titulo: "Venda alto padrão exige presença, velocidade e detalhes impecáveis.",
+      subtitulo: "Fotos, descrição, atendimento e WhatsApp precisam trabalhar juntos todos os dias."
+    },
+    {
+      titulo: "O melhor corretor não guarda tudo na cabeça: ele opera com sistema.",
+      subtitulo: "Deixe o CRM lembrar, organizar e sugerir ações enquanto você fecha negócios."
+    }
+  ];
+
+  function textoSeguro(valor) {
+    if (typeof esc === "function") return esc(valor);
+    return String(valor == null ? "" : valor).replace(/[&<>\"']/g, function (ch) {
+      return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" })[ch];
+    });
+  }
+
+  function nomeCorretor() {
+    try {
+      if (typeof getDisplayName === "function") return getDisplayName();
+      if (window.db && db.settings && db.settings.user) return db.settings.user;
+    } catch (_) {}
+    return "corretor";
+  }
+
+  function identidadeCorretor() {
+    try {
+      return String(window.cloudUserId || window.__LEADS_CURRENT_USER_ID__ || window.cloudUserEmail || window.__LEADS_CURRENT_USER_EMAIL__ || nomeCorretor() || "corretor").trim();
+    } catch (_) {
+      return String(nomeCorretor() || "corretor").trim();
+    }
+  }
+
+  function obterFraseDoLogin(forcarNova) {
+    var identidade = identidadeCorretor() || "corretor";
+    var chaveSessao = "leads_copilot_frase_login_v2_" + identidade;
+    var chaveContador = "leads_copilot_frase_contador_v2_" + identidade;
+
+    if (!forcarNova && window.__LEADS_COPILOT_PHRASE__ && window.__LEADS_COPILOT_PHRASE_ID__ === identidade) {
+      return window.__LEADS_COPILOT_PHRASE__;
+    }
+
+    try {
+      if (!forcarNova) {
+        var salva = sessionStorage.getItem(chaveSessao);
+        if (salva) {
+          var fraseSalva = JSON.parse(salva);
+          window.__LEADS_COPILOT_PHRASE__ = fraseSalva;
+          window.__LEADS_COPILOT_PHRASE_ID__ = identidade;
+          return fraseSalva;
+        }
+      }
+    } catch (_) {}
+
+    var contador = 0;
+    try { contador = Number(localStorage.getItem(chaveContador) || 0); } catch (_) { contador = 0; }
+    contador += 1;
+
+    var base = identidade.split("").reduce(function (acc, ch) { return acc + ch.charCodeAt(0); }, 0);
+    var indice = Math.abs(base + contador + new Date().getDate()) % frasesCopiloto.length;
+    var frase = frasesCopiloto[indice];
+
+    try {
+      localStorage.setItem(chaveContador, String(contador));
+      sessionStorage.setItem(chaveSessao, JSON.stringify(frase));
+    } catch (_) {}
+
+    window.__LEADS_COPILOT_PHRASE__ = frase;
+    window.__LEADS_COPILOT_PHRASE_ID__ = identidade;
+    return frase;
+  }
+
+  function aplicarFraseCopiloto() {
+    var central = document.getElementById("centralCorretor");
+    if (!central) return;
+
+    var h1 = central.querySelector(".central-head h1");
+    var p = central.querySelector(".central-head p");
+    var small = central.querySelector(".central-head small");
+    if (!h1 || !p) return;
+
+    var saud = typeof saudacao === "function" ? saudacao() : "Olá";
+    var frase = obterFraseDoLogin(false);
+
+    h1.textContent = saud + ", " + nomeCorretor() + ". " + frase.titulo;
+    p.textContent = frase.subtitulo;
+    p.classList.add("copilot-hero-phrase");
+
+    if (small) small.textContent = "Central do corretor · Copiloto IA";
+
+    var chip = central.querySelector(".copilot-login-chip");
+    if (!chip && p.parentElement) {
+      chip = document.createElement("span");
+      chip.className = "copilot-login-chip";
+      p.parentElement.appendChild(chip);
+    }
+
+    if (chip) chip.textContent = "frase inteligente do login";
+  }
+
+  window.atualizarFraseCopiloto = function () {
+    obterFraseDoLogin(true);
+    aplicarFraseCopiloto();
+    if (typeof toast === "function") toast("Nova frase do Copiloto IA aplicada.");
+  };
+
+  var renderCentralAnterior = window.renderCentral;
+  window.renderCentral = function () {
+    if (typeof renderCentralAnterior === "function") renderCentralAnterior.apply(this, arguments);
+    aplicarFraseCopiloto();
+  };
+
+  function abrirPainelIA() {
+    try {
+      if (typeof openAI === "function") openAI();
+      else {
+        var rb = document.getElementById("rightbar");
+        if (rb) rb.classList.add("open");
+      }
+    } catch (_) {}
+  }
+
+  function registrarRespostaLocal(pergunta, resposta) {
+    try {
+      db.chat = db.chat || [];
+      db.chat.push({ role: "user", content: String(pergunta || "") });
+      db.chat.push({ role: "assistant", content: String(resposta || "Comando executado.") });
+      if (typeof saveDB === "function") saveDB();
+      if (typeof renderChat === "function") renderChat();
+      abrirPainelIA();
+    } catch (_) {}
+  }
+
+  function preencherLeadSePossivel(pergunta) {
+    var q = String(pergunta || "");
+    setTimeout(function () {
+      try {
+        var nome = "";
+        var tel = "";
+        var bairro = "";
+        var tipo = "";
+
+        var nomeMatch = q.match(/(?:nome|lead|cliente)\s+([A-Za-zÀ-ÿ\s]{3,}?)(?:\s+(?:telefone|tel|whats|whatsapp|celular|bairro|procura|quer|orçamento|orcamento)|$)/i);
+        var telMatch = q.match(/(?:telefone|tel|whats|whatsapp|celular)\s*[:\-]?\s*([0-9\s()+\-.]{8,})/i);
+        var bairroMatch = q.match(/bairro\s*[:\-]?\s*([A-Za-zÀ-ÿ\s]{3,})(?:\s+(?:telefone|tel|whats|whatsapp|tipo|orçamento|orcamento)|$)/i);
+        var tipoMatch = q.match(/(?:tipo|procura|quer)\s*[:\-]?\s*(casa em condomínio|casa|apartamento|cobertura|terreno|sobrado|sala comercial)/i);
+
+        if (nomeMatch) nome = nomeMatch[1].trim();
+        if (telMatch) tel = telMatch[1].trim();
+        if (bairroMatch) bairro = bairroMatch[1].trim();
+        if (tipoMatch) tipo = tipoMatch[1].trim();
+
+        if (nome && document.getElementById("m_nome")) document.getElementById("m_nome").value = nome;
+        if (tel && document.getElementById("m_tel")) document.getElementById("m_tel").value = tel;
+        if (bairro && document.getElementById("m_bairro")) document.getElementById("m_bairro").value = bairro;
+        if (tipo && document.getElementById("m_tipo")) {
+          Array.from(document.getElementById("m_tipo").options).forEach(function (opt) {
+            if (opt.text.toLowerCase() === tipo.toLowerCase()) opt.selected = true;
+          });
+        }
+      } catch (_) {}
+    }, 180);
+  }
+
+  function encontrarLeadPorTexto(texto) {
+    var q = String(texto || "").toLowerCase();
+    var leads = (window.db && Array.isArray(db.clientes)) ? db.clientes : [];
+    var melhor = null;
+
+    leads.forEach(function (lead) {
+      var nome = String(lead.nome || "").toLowerCase();
+      if (nome && q.includes(nome)) melhor = lead;
+    });
+
+    return melhor;
+  }
+
+  function executarComandoGratuito(pergunta) {
+    var qOriginal = String(pergunta || "").trim();
+    var q = qOriginal.toLowerCase();
+    if (!q) return false;
+
+    var querAbrir = /(abrir|abre|mostrar|mostra|ver|ir para|vai para|entrar em|listar)/.test(q);
+    var querNovo = /(novo|nova|cadastrar|cadastre|adicionar|adicione|criar|crie)/.test(q);
+
+    if (/(salvar|salva|nuvem|supabase|sincronizar|sincroniza)/.test(q) && !/(mensagem|texto|copy|whatsapp)/.test(q)) {
+      if (typeof saveDBToCloud === "function") saveDBToCloud(true);
+      registrarRespostaLocal(qOriginal, "Pronto. Acionei o salvamento automático na nuvem e mantive uma cópia local de segurança no navegador.");
+      return true;
+    }
+
+    if (querNovo && /(lead|cliente|comprador|contato)/.test(q)) {
+      if (typeof openLeadModal === "function") {
+        openLeadModal();
+        preencherLeadSePossivel(qOriginal);
+      }
+      registrarRespostaLocal(qOriginal, "Abri o cadastro de lead. Preencha os dados, revise e toque em Salvar lead. Se você mandou nome, telefone ou bairro na frase, tentei preencher automaticamente.");
+      return true;
+    }
+
+    if (querNovo && /(im[oó]vel|imoveis|imóveis|propriedade|casa|apartamento|cobertura|terreno)/.test(q)) {
+      if (typeof openImovelModal === "function") openImovelModal();
+      registrarRespostaLocal(qOriginal, "Abri o cadastro de imóvel. Revise os dados, adicione fotos e toque em Salvar imóvel para entrar na carteira.");
+      return true;
+    }
+
+    if (querAbrir && /(lead|cliente|comprador|contato)/.test(q)) {
+      if (typeof switchView === "function") switchView("leads");
+      registrarRespostaLocal(qOriginal, "Abri a área de Leads para você trabalhar os contatos e follow-ups.");
+      return true;
+    }
+
+    if (querAbrir && /(im[oó]vel|imoveis|imóveis|carteira|propriedade|fotos)/.test(q)) {
+      if (typeof switchView === "function") switchView("imoveis");
+      registrarRespostaLocal(qOriginal, "Abri a carteira de imóveis. Você pode revisar fotos, descrição, captação e próximos passos.");
+      return true;
+    }
+
+    if (querAbrir && /(tarefa|tarefas|follow up|follow-up|agenda|visita|visitas)/.test(q)) {
+      if (typeof switchView === "function") switchView("tarefas");
+      registrarRespostaLocal(qOriginal, "Abri Tarefas e follow-up para organizar as próximas ações comerciais.");
+      return true;
+    }
+
+    if (querAbrir && /(relat[oó]rio|relatorios|relatórios|números|numeros|resultado)/.test(q)) {
+      if (typeof switchView === "function") switchView("relatorios");
+      registrarRespostaLocal(qOriginal, "Abri Relatórios para acompanhar origem dos leads, carteira e operação.");
+      return true;
+    }
+
+    if (querAbrir && /(config|configuraç|configurac|ajuste|ajustes)/.test(q)) {
+      if (typeof switchView === "function") switchView("config");
+      registrarRespostaLocal(qOriginal, "Abri Configurações. Mantive o modo limpo, com foco no salvamento em nuvem.");
+      return true;
+    }
+
+    if (/(trocar frase|nova frase|mudar frase|frase nova|motivacional)/.test(q)) {
+      if (typeof window.atualizarFraseCopiloto === "function") window.atualizarFraseCopiloto();
+      registrarRespostaLocal(qOriginal, "Atualizei a frase motivadora da Central do Corretor para esta sessão.");
+      return true;
+    }
+
+    if (/(whatsapp|zap)/.test(q) && /(abrir|chamar|manda|mandar|enviar)/.test(q)) {
+      var lead = encontrarLeadPorTexto(qOriginal);
+      if (lead && typeof whatsLead === "function") {
+        whatsLead(lead.id);
+        registrarRespostaLocal(qOriginal, "Abri o WhatsApp do lead " + (lead.nome || "selecionado") + ".");
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  var askAIAnterior = window.askAI;
+  window.askAI = async function (pergunta) {
+    if (executarComandoGratuito(pergunta)) return;
+    if (typeof askAIAnterior === "function") return askAIAnterior.apply(this, arguments);
+  };
+
+  function iniciarPatch() {
+    try { aplicarFraseCopiloto(); } catch (_) {}
+    try {
+      var input = document.getElementById("chatInput");
+      if (input) input.placeholder = "Peça para a IA: abrir leads, novo lead, salvar na nuvem, criar mensagem...";
+    } catch (_) {}
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", iniciarPatch);
+  else iniciarPatch();
+
+  window.addEventListener("load", function () {
+    setTimeout(iniciarPatch, 400);
+    setTimeout(iniciarPatch, 1600);
+  });
+})();
+</script>
+
 </body>
 </html>
