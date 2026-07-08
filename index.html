@@ -1569,20 +1569,33 @@
             <div class="panel-head">
               <div>
                 <h2>Configurações e dados</h2>
-                <p>Backup, restauração e sincronização.</p>
+                <p>Nuvem, segurança e sincronização automática.</p>
               </div>
             </div>
             <div class="panel-body">
-              <div class="toolbar">
-                <button class="btn" onclick="exportBackup()">Backup JSON</button>
-                <button class="btn btn-ghost" onclick="document.getElementById('importBackup').click()">Restaurar backup</button>
-                <button class="btn btn-ghost" onclick="saveDBToCloud(true)">Salvar no Supabase</button>
-                <button class="btn btn-danger" onclick="resetDemo()">Recriar exemplo</button>
-                <button class="btn btn-ghost" onclick="logout()">Sair</button>
-                <input id="importBackup" type="file" accept="application/json,.json" style="display:none" onchange="importBackup(event)" />
+              <div class="cloud-save-suite">
+                <div class="cloud-save-card">
+                  <div class="cloud-save-orb" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M7.5 18.4h9.2c2.1 0 3.8-1.5 3.8-3.4 0-1.8-1.5-3.2-3.4-3.4-.7-2.6-2.8-4.3-5.4-4.3-3 0-5.4 2.3-5.6 5.2-1.7.4-2.9 1.5-2.9 3 0 1.7 1.5 2.9 4.3 2.9Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M12 11.2v4.5M9.9 13.4l2.1-2.2 2.1 2.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div class="cloud-save-copy">
+                    <h3>Salvamento automático em nuvem</h3>
+                    <p>O CRM salva localmente e sincroniza no Supabase automaticamente. Ao sair da página, trocar de aba ou fechar o navegador, o sistema tenta enviar a última versão para a nuvem.</p>
+                    <div class="cloud-save-status" id="cloudSaveStatus">Inicializando sincronização segura...</div>
+                  </div>
+                </div>
+
+                <div class="cloud-save-actions">
+                  <button class="btn" onclick="forceCloudSaveFromConfig()">Salvar agora na nuvem</button>
+                  <button class="btn btn-ghost" onclick="logout()">Sair com segurança</button>
+                </div>
               </div>
-              <p style="color:var(--mut);font-size:13px;line-height:1.5">
-                Versão gratuita inicial do Leads Imóveis CRM com Agente IA de Corretor. As fotos dos imóveis ficam no Supabase Storage quando o bucket está ativo; o CRM mantém backup local leve no navegador.
+
+              <p class="cloud-save-note">
+                Operação final para corretores: leads, imóveis, fotos, tarefas, IA e dados comerciais continuam ativos. A opção JSON foi removida da tela para evitar confusão; o padrão agora é salvamento automático em nuvem.
               </p>
             </div>
           </div>
@@ -7080,6 +7093,665 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
   else bootWeather();
 
   setTimeout(bootWeather, 700);
+})();
+</script>
+
+
+<!-- PATCH FINAL OPERAÇÃO 2026 — NUVEM AUTOMÁTICA + IA COMPACTA + TOPO SIMÉTRICO -->
+<style id="leadsOperacaoFinal2026Styles">
+  /* =====================================================
+     OPERAÇÃO FINAL LEADS IMÓVEIS
+     - Remove confusão de JSON na tela
+     - Compacta IA lateral
+     - Alinha relógio, clima, busca e usuário
+     - Mantém Supabase, login, IA, fotos e cadastros
+  ===================================================== */
+
+  .app {
+    grid-template-columns: 252px minmax(0, 1fr) 304px !important;
+  }
+
+  .topbar {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 10px !important;
+    min-height: 72px !important;
+    padding: 12px 16px !important;
+  }
+
+  .search {
+    flex: 1 1 280px !important;
+    min-width: 210px !important;
+    max-width: 460px !important;
+  }
+
+  .brand-logo,
+  .brand-logo-fixed,
+  .avatar-logo-fixed {
+    overflow: hidden !important;
+  }
+
+  .crm-logo-img {
+    filter: contrast(1.12) saturate(1.08) brightness(1.04) !important;
+    image-rendering: auto !important;
+    transform: translateZ(0) scale(1.045) !important;
+  }
+
+  .search input {
+    height: 46px !important;
+  }
+
+  .crm-clock,
+  .crm-weather {
+    flex: 0 0 auto !important;
+  }
+
+  .crm-clock {
+    min-width: 146px !important;
+    max-width: 168px !important;
+    padding: 7px 10px !important;
+    gap: 8px !important;
+    border-radius: 15px !important;
+  }
+
+  .crm-clock-mark {
+    width: 31px !important;
+    height: 31px !important;
+    font-size: 0 !important;
+    position: relative !important;
+  }
+
+  .crm-clock-mark::before {
+    content: "";
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1.8px solid currentColor;
+    position: absolute;
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 13px rgba(216,181,109,.22);
+  }
+
+  .crm-clock-mark::after {
+    content: "";
+    width: 6px;
+    height: 7px;
+    border-left: 1.8px solid currentColor;
+    border-bottom: 1.8px solid currentColor;
+    position: absolute;
+    left: 50%;
+    top: 48%;
+    transform: translate(-8%, -70%);
+    border-radius: 0 0 0 2px;
+  }
+
+  .crm-clock-time {
+    font-size: 13.5px !important;
+    letter-spacing: .35px !important;
+  }
+
+  .crm-clock-sub {
+    max-width: 110px !important;
+    white-space: nowrap !important;
+    font-size: 9px !important;
+  }
+
+  .crm-weather {
+    min-width: 142px !important;
+    max-width: 162px !important;
+    padding: 7px 10px !important;
+    gap: 8px !important;
+    border-radius: 15px !important;
+  }
+
+  .crm-weather-icon {
+    width: 31px !important;
+    height: 31px !important;
+    min-width: 31px !important;
+    border-radius: 13px !important;
+  }
+
+  .crm-weather-icon svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .crm-weather-temp {
+    font-size: 13.5px !important;
+    gap: 4px !important;
+  }
+
+  .crm-weather-temp span {
+    display: none !important;
+  }
+
+  .crm-weather-sub {
+    max-width: 88px !important;
+    font-size: 9px !important;
+    line-height: 1.1 !important;
+  }
+
+  .top-actions {
+    flex: 0 0 auto !important;
+    margin-left: 0 !important;
+    gap: 7px !important;
+  }
+
+  .top-actions .round {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+  }
+
+  .topbar .user {
+    padding-left: 4px !important;
+    border-left: 0 !important;
+    gap: 0 !important;
+  }
+
+  .topbar .user > div:not(.avatar) {
+    display: none !important;
+  }
+
+  .topbar .avatar,
+  .topbar .avatar-logo-fixed {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    border-radius: 50% !important;
+    overflow: hidden !important;
+    box-shadow: 0 0 22px rgba(216,181,109,.16) !important;
+  }
+
+  /* Aba lateral da IA menor, mais leve e mais simétrica no navegador. */
+  .rightbar {
+    width: auto !important;
+    padding: 14px 10px !important;
+  }
+
+  .rightbar .ai-card {
+    border-radius: 16px !important;
+  }
+
+  .rightbar .ai-head {
+    padding: 12px 13px !important;
+  }
+
+  .rightbar .ai-head h2 {
+    font-size: 12px !important;
+    letter-spacing: .8px !important;
+  }
+
+  .rightbar .ai-hero {
+    padding: 12px 12px !important;
+  }
+
+  .rightbar .ai-orb {
+    width: 50px !important;
+    height: 50px !important;
+    margin-bottom: 9px !important;
+    font-size: 15px !important;
+  }
+
+  .rightbar .ai-hero h3 {
+    font-size: 13px !important;
+  }
+
+  .rightbar .ai-hero p {
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+  }
+
+  .rightbar .ai-section {
+    padding: 11px 12px !important;
+  }
+
+  .rightbar .suggestion {
+    padding: 8px 9px !important;
+    border-radius: 10px !important;
+    font-size: 11px !important;
+    gap: 7px !important;
+  }
+
+  .rightbar .chat-log {
+    max-height: 238px !important;
+    padding: 10px 12px !important;
+  }
+
+  .rightbar .chat-form {
+    padding: 10px 12px !important;
+  }
+
+  .rightbar .quick {
+    padding: 0 12px 12px !important;
+  }
+
+  /* Configuração premium de nuvem. */
+  .cloud-save-suite {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 14px;
+    align-items: stretch;
+  }
+
+  .cloud-save-card {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    min-height: 116px;
+    padding: 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(125,211,252,.20);
+    background:
+      radial-gradient(circle at 14% 10%, rgba(125,211,252,.16), transparent 32%),
+      radial-gradient(circle at 86% 0%, rgba(216,181,109,.14), transparent 35%),
+      linear-gradient(135deg, rgba(255,255,255,.055), rgba(255,255,255,.018));
+    box-shadow: 0 14px 34px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.08);
+  }
+
+  .cloud-save-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,.055), transparent);
+    transform: translateX(-110%);
+    animation: cloudSweepLeads 5.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes cloudSweepLeads {
+    0%, 42% { transform: translateX(-110%); }
+    65%, 100% { transform: translateX(110%); }
+  }
+
+  .cloud-save-orb {
+    width: 58px;
+    height: 58px;
+    min-width: 58px;
+    border-radius: 20px;
+    display: grid;
+    place-items: center;
+    color: #fff1bd;
+    border: 1px solid rgba(216,181,109,.48);
+    background:
+      radial-gradient(circle at 34% 22%, rgba(255,255,255,.20), transparent 34%),
+      radial-gradient(circle, rgba(216,181,109,.20), rgba(5,14,24,.92) 70%);
+    box-shadow: 0 0 28px rgba(216,181,109,.16);
+  }
+
+  .cloud-save-orb svg {
+    width: 31px;
+    height: 31px;
+  }
+
+  .cloud-save-copy h3 {
+    margin: 0 0 6px;
+    color: #fff5d8;
+    font-size: 15px;
+    letter-spacing: -.2px;
+  }
+
+  .cloud-save-copy p {
+    margin: 0;
+    color: var(--mut);
+    font-size: 12.5px;
+    line-height: 1.45;
+  }
+
+  .cloud-save-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 10px;
+    padding: 6px 9px;
+    border-radius: 999px;
+    border: 1px solid rgba(101,214,121,.24);
+    background: rgba(101,214,121,.08);
+    color: #d8ffdc;
+    font-size: 11px;
+    font-weight: 900;
+  }
+
+  .cloud-save-status::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #65d679;
+    box-shadow: 0 0 12px rgba(101,214,121,.55);
+  }
+
+  .cloud-save-status.saving {
+    border-color: rgba(216,181,109,.30);
+    background: rgba(216,181,109,.09);
+    color: #fff0c8;
+  }
+
+  .cloud-save-status.saving::before {
+    background: var(--gold);
+    box-shadow: 0 0 12px rgba(216,181,109,.55);
+  }
+
+  .cloud-save-status.offline {
+    border-color: rgba(239,106,106,.34);
+    background: rgba(239,106,106,.10);
+    color: #ffd8d8;
+  }
+
+  .cloud-save-status.offline::before {
+    background: var(--red);
+    box-shadow: 0 0 12px rgba(239,106,106,.50);
+  }
+
+  .cloud-save-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 200px;
+  }
+
+  .cloud-save-actions .btn {
+    width: 100%;
+    min-height: 45px;
+    white-space: nowrap;
+  }
+
+  .cloud-save-note {
+    margin-top: 14px;
+    color: var(--mut);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 1180px) and (min-width: 981px) {
+    .app {
+      grid-template-columns: 88px minmax(0, 1fr) 292px !important;
+    }
+
+    .search {
+      max-width: 360px !important;
+    }
+
+    .crm-clock {
+      min-width: 124px !important;
+      max-width: 135px !important;
+    }
+
+    .crm-clock-sub,
+    .crm-weather-sub {
+      display: none !important;
+    }
+
+    .crm-weather {
+      min-width: 104px !important;
+      max-width: 112px !important;
+    }
+  }
+
+  @media (max-width: 980px) {
+    .app {
+      display: block !important;
+    }
+
+    .topbar {
+      flex-wrap: wrap !important;
+      gap: 9px !important;
+    }
+
+    .search {
+      order: 1 !important;
+      flex: 1 1 100% !important;
+      max-width: 100% !important;
+    }
+
+    .crm-clock {
+      order: 2 !important;
+      flex: 1 1 calc(50% - 5px) !important;
+      min-width: 0 !important;
+      max-width: none !important;
+    }
+
+    .crm-weather {
+      order: 3 !important;
+      flex: 1 1 calc(50% - 5px) !important;
+      min-width: 0 !important;
+      max-width: none !important;
+    }
+
+    .top-actions {
+      order: 4 !important;
+      width: 100% !important;
+      justify-content: flex-end !important;
+    }
+
+    .rightbar {
+      width: min(320px, 100vw) !important;
+      padding: 12px 10px !important;
+    }
+
+    .rightbar.open {
+      right: 0 !important;
+    }
+
+    .cloud-save-suite {
+      grid-template-columns: 1fr;
+    }
+
+    .cloud-save-actions {
+      min-width: 0;
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+
+    .cloud-save-actions .btn {
+      flex: 1 1 180px;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .crm-clock,
+    .crm-weather {
+      flex-basis: 100% !important;
+    }
+
+    .top-actions .round:nth-child(2) {
+      display: grid !important;
+    }
+
+    .cloud-save-card {
+      align-items: flex-start;
+      padding: 15px;
+    }
+
+    .cloud-save-orb {
+      width: 50px;
+      height: 50px;
+      min-width: 50px;
+      border-radius: 18px;
+    }
+  }
+</style>
+
+<script id="leadsOperacaoFinal2026Script">
+(function leadsOperacaoFinal2026() {
+  "use strict";
+
+  var lastCloudSaveAt = 0;
+  var savingNow = false;
+  var autoDirty = true;
+  var AUTO_SAVE_INTERVAL_MS = 17000;
+
+  function pad(n) {
+    return String(n).padStart(2, "0");
+  }
+
+  function timeStamp() {
+    var d = new Date();
+    return pad(d.getHours()) + ":" + pad(d.getMinutes());
+  }
+
+  function getStatusEl() {
+    return document.getElementById("cloudSaveStatus");
+  }
+
+  function setCloudStatus(text, mode) {
+    var el = getStatusEl();
+    if (!el) return;
+    el.textContent = text;
+    el.classList.remove("saving", "offline");
+    if (mode) el.classList.add(mode);
+  }
+
+  function isCloudReadySafe() {
+    try {
+      return !!(typeof cloudReady !== "undefined" && cloudReady && typeof saveDBToCloud === "function");
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function saveLocalImmediately() {
+    try {
+      if (typeof safeLocalSave === "function" && typeof db !== "undefined") safeLocalSave(db);
+      else if (typeof saveDB === "function") saveDB();
+    } catch (e) {
+      console.warn("Falha ao salvar localmente antes de sair:", e);
+    }
+  }
+
+  async function saveToCloud(showToast) {
+    if (savingNow) return;
+
+    saveLocalImmediately();
+
+    if (!navigator.onLine) {
+      setCloudStatus("Sem internet: salvo localmente, sincroniza quando voltar", "offline");
+      autoDirty = true;
+      return;
+    }
+
+    if (!isCloudReadySafe()) {
+      setCloudStatus("Nuvem carregando: salvo localmente", "saving");
+      autoDirty = true;
+      return;
+    }
+
+    try {
+      savingNow = true;
+      setCloudStatus("Sincronizando com a nuvem...", "saving");
+      await saveDBToCloud(!!showToast);
+      lastCloudSaveAt = Date.now();
+      autoDirty = false;
+      setCloudStatus("Salvo automaticamente na nuvem às " + timeStamp(), "");
+    } catch (e) {
+      console.warn("Falha no salvamento automático em nuvem:", e);
+      autoDirty = true;
+      setCloudStatus("Falha na nuvem: salvo localmente", "offline");
+      if (showToast && typeof toast === "function") toast("Falha ao salvar na nuvem. Dados salvos localmente.");
+    } finally {
+      savingNow = false;
+    }
+  }
+
+  window.forceCloudSaveFromConfig = function forceCloudSaveFromConfig() {
+    saveToCloud(true);
+  };
+
+  function wrapSaveDBOnce() {
+    if (window.__leadsOperacaoFinalSaveWrapped || typeof window.saveDB !== "function") return;
+    window.__leadsOperacaoFinalSaveWrapped = true;
+
+    var originalSaveDB = window.saveDB;
+    window.saveDB = function saveDBWrappedOperacaoFinal() {
+      var result = originalSaveDB.apply(this, arguments);
+      autoDirty = true;
+      setCloudStatus("Alteração detectada: salvando automaticamente...", "saving");
+      setTimeout(function () { saveToCloud(false); }, 1200);
+      return result;
+    };
+  }
+
+  function hideJsonBackupIfStillRendered() {
+    document.querySelectorAll("button").forEach(function (btn) {
+      var text = (btn.textContent || "").toLowerCase();
+      if (text.includes("backup json") || text.includes("restaurar backup") || text.includes("recriar exemplo")) {
+        btn.style.display = "none";
+        btn.setAttribute("aria-hidden", "true");
+      }
+    });
+
+    var importInput = document.getElementById("importBackup");
+    if (importInput) importInput.remove();
+  }
+
+  function polishTopbarUser() {
+    var topName = document.getElementById("userNameTop");
+    var user = document.querySelector(".topbar .user");
+    if (!user) return;
+
+    var label = topName ? topName.textContent.trim() : "Corretor";
+    user.title = label ? (label + " · Perfil") : "Perfil do corretor";
+    user.setAttribute("aria-label", user.title);
+  }
+
+  function compactAI() {
+    var rightbar = document.getElementById("rightbar");
+    if (!rightbar) return;
+    rightbar.setAttribute("aria-label", "Aba compacta da IA Consultiva");
+  }
+
+  function syncStatusBoot() {
+    if (isCloudReadySafe()) {
+      setCloudStatus("Nuvem ativa: salvamento automático ligado", "");
+      saveToCloud(false);
+    } else {
+      setCloudStatus("Aguardando Supabase carregar com segurança...", "saving");
+      setTimeout(syncStatusBoot, 1800);
+    }
+  }
+
+  function bindExitAutosave() {
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) saveToCloud(false);
+    });
+
+    window.addEventListener("pagehide", function () {
+      saveToCloud(false);
+    });
+
+    window.addEventListener("beforeunload", function () {
+      saveLocalImmediately();
+      if (autoDirty) saveToCloud(false);
+    });
+
+    window.addEventListener("online", function () {
+      setCloudStatus("Internet voltou: sincronizando...", "saving");
+      saveToCloud(false);
+    });
+  }
+
+  function boot() {
+    wrapSaveDBOnce();
+    hideJsonBackupIfStillRendered();
+    polishTopbarUser();
+    compactAI();
+    bindExitAutosave();
+    syncStatusBoot();
+
+    setInterval(function () {
+      if (autoDirty || Date.now() - lastCloudSaveAt > 60000) saveToCloud(false);
+    }, AUTO_SAVE_INTERVAL_MS);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
+
+  setTimeout(boot, 1200);
+  setTimeout(boot, 3200);
 })();
 </script>
 
