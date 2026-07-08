@@ -13,421 +13,681 @@
 
   <style>
     :root {
-      --bg:#050506;
-      --panel:#0d0e10;
-      --line:rgba(255,255,255,.12);
-      --gold:#d8b56d;
-      --gold2:#fff0be;
-      --txt:#f7f4ed;
-      --mut:#a9a7a0;
-      --red:#ef6a6a;
-      --green:#65d679;
-      --safe:env(safe-area-inset-bottom,0px);
+      --bg: #050506;
+      --glass: rgba(8, 9, 12, .58);
+      --glass2: rgba(255, 255, 255, .055);
+      --line: rgba(255, 255, 255, .13);
+      --gold: #d8b56d;
+      --gold2: #fff0be;
+      --txt: #f8f5ef;
+      --mut: #b8b4aa;
+      --red: #ef6a6a;
+      --green: #65d679;
+      --shadow: 0 30px 100px rgba(0,0,0,.62);
+      --safe: env(safe-area-inset-bottom, 0px);
     }
 
     * {
-      box-sizing:border-box;
-      margin:0;
-      padding:0;
-      -webkit-tap-highlight-color:transparent;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
     }
 
     body {
-      min-height:100vh;
-      display:grid;
-      place-items:center;
-      padding:24px;
-      padding-bottom:calc(24px + var(--safe));
+      min-height: 100vh;
+      min-height: 100dvh;
+      color: var(--txt);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      overflow-x: hidden;
       background:
-        radial-gradient(circle at 20% 0%, rgba(216,181,109,.22), transparent 34%),
-        radial-gradient(circle at 100% 20%, rgba(255,255,255,.10), transparent 30%),
-        linear-gradient(135deg,#050506,#090a0c 52%,#030303);
-      color:var(--txt);
-      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      overflow-x:hidden;
+        linear-gradient(90deg, rgba(2,3,6,.62), rgba(2,3,6,.72)),
+        radial-gradient(circle at 20% 20%, rgba(216,181,109,.22), transparent 34%),
+        url("midia/bg-floripa.jpg") center center / cover no-repeat fixed;
     }
 
     body::before {
-      content:"";
-      position:fixed;
-      inset:0;
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(to bottom, rgba(0,0,0,.18), rgba(0,0,0,.72)),
+        radial-gradient(circle at 78% 18%, rgba(216,181,109,.16), transparent 28%);
+      z-index: -2;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
       background-image:
         linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
-      background-size:46px 46px;
-      mask-image:linear-gradient(to bottom,#000,transparent 80%);
-      pointer-events:none;
-      z-index:-1;
+      background-size: 46px 46px;
+      mask-image: linear-gradient(to bottom, #000, transparent 82%);
+      pointer-events: none;
+      z-index: -1;
     }
 
-    .shell {
-      width:min(1080px,100%);
-      display:grid;
-      grid-template-columns:1fr 420px;
-      gap:24px;
-      align-items:stretch;
+    button, input {
+      font: inherit;
     }
 
-    .hero,
-    .card {
-      border:1px solid var(--line);
-      border-radius:28px;
-      background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.018));
-      box-shadow:0 28px 90px rgba(0,0,0,.45);
-      overflow:hidden;
+    button {
+      cursor: pointer;
+      border: 0;
     }
 
-    .hero {
-      padding:34px;
-      min-height:620px;
-      position:relative;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
+    .page {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 470px;
+      gap: 38px;
+      align-items: center;
+      padding: 42px 7vw;
+      position: relative;
     }
 
-    .hero::after {
-      content:"";
-      position:absolute;
-      right:-140px;
-      top:-140px;
-      width:360px;
-      height:360px;
-      border-radius:50%;
-      background:radial-gradient(circle,rgba(216,181,109,.22),transparent 62%);
+    .page::before {
+      content: "";
+      position: absolute;
+      left: 3vw;
+      top: 4vh;
+      width: 210px;
+      height: 210px;
+      border-left: 1px solid rgba(216,181,109,.30);
+      border-top: 1px solid rgba(216,181,109,.30);
+      border-radius: 34px 0 0 0;
+      opacity: .9;
     }
 
-    .brand {
-      display:flex;
-      align-items:center;
-      gap:14px;
-      position:relative;
-      z-index:1;
+    .brand-side {
+      position: relative;
+      z-index: 2;
+      min-height: 620px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 20px 0;
     }
 
-    .logo {
-      width:68px;
-      height:68px;
-      border-radius:22px;
-      display:grid;
-      place-items:center;
-      background:linear-gradient(135deg,#d8b56d,#fff0be);
-      color:#070707;
-      font-weight:1000;
-      letter-spacing:-1px;
-      box-shadow:0 14px 40px rgba(216,181,109,.22);
+    .logo-wrap {
+      width: min(560px, 92%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 18px;
+      border-radius: 32px;
+      background: radial-gradient(circle at 50% 42%, rgba(255,255,255,.10), transparent 45%);
+      filter: drop-shadow(0 25px 52px rgba(0,0,0,.65));
     }
 
-    .brand b {
-      display:block;
-      letter-spacing:2px;
-      font-size:18px;
+    .logo-main {
+      width: 100%;
+      max-width: 520px;
+      height: auto;
+      object-fit: contain;
+      border-radius: 26px;
+      mix-blend-mode: screen;
     }
 
-    .brand span {
-      display:block;
-      color:var(--mut);
-      font-size:12px;
-      letter-spacing:2px;
-      margin-top:3px;
+    .brand-copy {
+      margin-top: 18px;
+      max-width: 670px;
+      border-top: 1px solid rgba(216,181,109,.22);
+      padding-top: 22px;
     }
 
-    .hero-main {
-      position:relative;
-      z-index:1;
-      max-width:620px;
+    .brand-copy .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(216,181,109,.35);
+      background: rgba(216,181,109,.10);
+      color: #ffedc2;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      margin-bottom: 18px;
     }
 
-    .badge {
-      display:inline-flex;
-      border:1px solid rgba(216,181,109,.34);
-      background:rgba(216,181,109,.11);
-      color:#ffecc0;
-      border-radius:999px;
-      padding:8px 12px;
-      font-size:12px;
-      font-weight:900;
-      margin-bottom:18px;
+    .brand-copy h1 {
+      font-size: clamp(34px, 4.8vw, 70px);
+      line-height: .95;
+      letter-spacing: -2px;
+      max-width: 720px;
+      text-shadow: 0 12px 34px rgba(0,0,0,.58);
     }
 
-    h1 {
-      font-size:clamp(34px,5vw,62px);
-      line-height:.98;
-      letter-spacing:-2px;
-      margin-bottom:18px;
+    .brand-copy p {
+      margin-top: 18px;
+      color: var(--mut);
+      font-size: 16px;
+      line-height: 1.55;
+      max-width: 620px;
     }
 
-    .hero-main p {
-      color:var(--mut);
-      font-size:16px;
-      line-height:1.55;
-      max-width:590px;
+    .security-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 34px;
     }
 
-    .hero-grid {
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:10px;
-      margin-top:28px;
+    .security-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255,255,255,.11);
+      background: rgba(0,0,0,.24);
+      border-radius: 999px;
+      color: #e9e2d4;
+      font-size: 13px;
+      backdrop-filter: blur(8px);
     }
 
-    .mini {
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.18);
-      border-radius:18px;
-      padding:14px;
+    .security-item b {
+      color: var(--gold);
+      font-size: 16px;
     }
 
-    .mini b {
-      display:block;
-      color:#fff3d2;
-      font-size:13px;
-      margin-bottom:5px;
-    }
-
-    .mini span {
-      color:var(--mut);
-      font-size:12px;
-      line-height:1.35;
-    }
-
-    .quote {
-      position:relative;
-      z-index:1;
-      border:1px solid rgba(216,181,109,.22);
-      background:rgba(216,181,109,.07);
-      border-radius:22px;
-      padding:18px;
-      color:#fff5dd;
-      font-size:14px;
-      line-height:1.45;
-    }
-
-    .card {
-      padding:28px;
+    .login-card {
+      position: relative;
+      z-index: 3;
+      width: 100%;
+      border: 1px solid rgba(216,181,109,.38);
       background:
-        radial-gradient(circle at 50% 0,rgba(216,181,109,.14),transparent 45%),
-        linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.02));
+        radial-gradient(circle at 50% 0, rgba(216,181,109,.17), transparent 42%),
+        linear-gradient(145deg, rgba(12,13,17,.74), rgba(5,6,8,.66));
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+      padding: 34px;
+      overflow: hidden;
     }
 
-    .orb {
-      width:78px;
-      height:78px;
-      margin:0 auto 18px;
-      border-radius:50%;
-      display:grid;
-      place-items:center;
-      border:1px solid rgba(216,181,109,.66);
-      background:radial-gradient(circle,#2c2311,#090909);
-      box-shadow:0 0 35px rgba(216,181,109,.35);
-      color:#fff0c8;
-      font-family:Georgia,serif;
-      font-size:22px;
+    .login-card::before {
+      content: "";
+      position: absolute;
+      left: 14%;
+      right: 14%;
+      top: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold2), transparent);
+      opacity: .95;
     }
 
-    .card h2 {
-      text-align:center;
-      font-size:24px;
-      margin-bottom:8px;
+    .login-card::after {
+      content: "";
+      position: absolute;
+      right: -90px;
+      top: -90px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(216,181,109,.22), transparent 68%);
+      pointer-events: none;
     }
 
-    .card .sub {
-      text-align:center;
-      color:var(--mut);
-      font-size:13px;
-      line-height:1.45;
-      margin-bottom:22px;
+    .mini-logo {
+      width: 82px;
+      height: 82px;
+      margin: 0 auto 16px;
+      border-radius: 24px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(216,181,109,.42);
+      background: rgba(0,0,0,.22);
+      box-shadow: 0 14px 44px rgba(0,0,0,.38);
+      overflow: hidden;
+    }
+
+    .mini-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(1.12) contrast(1.05);
+    }
+
+    .login-card h2 {
+      text-align: center;
+      font-size: 28px;
+      line-height: 1.08;
+      letter-spacing: -1px;
+      margin-bottom: 10px;
+    }
+
+    .gold-line {
+      width: 92px;
+      height: 1px;
+      margin: 15px auto;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      position: relative;
+    }
+
+    .gold-line::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: -3px;
+      width: 7px;
+      height: 7px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 18px rgba(216,181,109,.85);
+    }
+
+    .sub {
+      text-align: center;
+      color: var(--mut);
+      font-size: 14px;
+      line-height: 1.45;
+      margin-bottom: 20px;
     }
 
     .tabs {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      background:rgba(0,0,0,.25);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:16px;
-      padding:5px;
-      margin-bottom:18px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: rgba(0,0,0,.28);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 17px;
+      padding: 5px;
+      margin-bottom: 18px;
     }
 
     .tabs button {
-      border:0;
-      background:transparent;
-      color:var(--mut);
-      border-radius:12px;
-      padding:11px;
-      font-weight:900;
-      cursor:pointer;
+      background: transparent;
+      color: var(--mut);
+      border-radius: 13px;
+      padding: 11px;
+      font-weight: 900;
+      font-size: 13px;
+      transition: .16s;
     }
 
     .tabs button.active {
-      background:linear-gradient(135deg,rgba(216,181,109,.30),rgba(216,181,109,.10));
-      color:#fff1ca;
-    }
-
-    .field {
-      margin-bottom:12px;
-    }
-
-    .field label {
-      display:block;
-      color:var(--mut);
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:.7px;
-      font-weight:900;
-      margin-bottom:7px;
-    }
-
-    input {
-      width:100%;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.25);
-      color:var(--txt);
-      border-radius:15px;
-      padding:14px;
-      outline:none;
-      font:inherit;
-    }
-
-    input:focus {
-      border-color:rgba(216,181,109,.58);
-      box-shadow:0 0 0 3px rgba(216,181,109,.10);
-    }
-
-    .btn {
-      width:100%;
-      border:1px solid rgba(216,181,109,.50);
-      background:linear-gradient(135deg,rgba(216,181,109,.34),rgba(111,74,19,.26));
-      color:#fff4d9;
-      border-radius:15px;
-      padding:14px;
-      font-weight:1000;
-      cursor:pointer;
-      margin-top:8px;
-      box-shadow:0 14px 30px rgba(0,0,0,.22);
-    }
-
-    .btn:active {
-      transform:translateY(1px);
-      opacity:.88;
-    }
-
-    .help {
-      margin-top:14px;
-      color:var(--mut);
-      font-size:12px;
-      line-height:1.45;
-      text-align:center;
+      background: linear-gradient(135deg, rgba(216,181,109,.34), rgba(216,181,109,.10));
+      color: #fff2cb;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.09);
     }
 
     .msg {
-      display:none;
-      margin:14px 0;
-      border-radius:14px;
-      padding:12px;
-      font-size:13px;
-      line-height:1.45;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.045);
+      display: none;
+      margin: 12px 0 16px;
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.45;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.045);
     }
 
     .msg.show {
-      display:block;
+      display: block;
     }
 
     .msg.error {
-      color:#ffd8d8;
-      border-color:rgba(239,106,106,.35);
-      background:rgba(239,106,106,.10);
+      color: #ffd6d6;
+      border-color: rgba(239,106,106,.36);
+      background: rgba(239,106,106,.10);
     }
 
     .msg.ok {
-      color:#dcffdf;
-      border-color:rgba(101,214,121,.35);
-      background:rgba(101,214,121,.10);
+      color: #dfffe2;
+      border-color: rgba(101,214,121,.36);
+      background: rgba(101,214,121,.10);
     }
 
     .msg.warn {
-      color:#fff0c0;
-      border-color:rgba(216,181,109,.35);
-      background:rgba(216,181,109,.10);
+      color: #fff0c0;
+      border-color: rgba(216,181,109,.36);
+      background: rgba(216,181,109,.10);
     }
 
-    @media(max-width:900px) {
+    .field {
+      margin-bottom: 14px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 900;
+      color: #eee6d8;
+      margin-bottom: 8px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gold);
+      opacity: .95;
+      font-size: 18px;
+      pointer-events: none;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.15);
+      background: rgba(0,0,0,.25);
+      color: var(--txt);
+      border-radius: 15px;
+      padding: 15px 46px;
+      outline: none;
+      font-size: 15px;
+      transition: .15s;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+    }
+
+    input::placeholder {
+      color: rgba(255,255,255,.38);
+    }
+
+    input:focus {
+      border-color: rgba(216,181,109,.58);
+      box-shadow: 0 0 0 3px rgba(216,181,109,.10);
+    }
+
+    .eye {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: transparent;
+      color: rgba(255,255,255,.70);
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin: 8px 0 16px;
+      font-size: 13px;
+      color: var(--mut);
+    }
+
+    .remember {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .remember input {
+      width: 18px;
+      height: 18px;
+      padding: 0;
+      accent-color: var(--gold);
+    }
+
+    .link {
+      color: var(--gold);
+      background: transparent;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .btn {
+      width: 100%;
+      min-height: 52px;
+      border-radius: 15px;
+      font-weight: 1000;
+      letter-spacing: 1.7px;
+      text-transform: uppercase;
+      transition: .16s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn:disabled {
+      opacity: .55;
+      cursor: wait;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+      opacity: .86;
+    }
+
+    .btn-gold {
+      border: 1px solid rgba(255,226,169,.72);
+      background: linear-gradient(135deg, #f0cd82, #c99843 52%, #ffd98c);
+      color: #171005;
+      box-shadow: 0 16px 36px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.45);
+    }
+
+    .btn-outline {
+      margin-top: 12px;
+      border: 1px solid rgba(216,181,109,.40);
+      background: rgba(0,0,0,.18);
+      color: #ffdf9a;
+    }
+
+    .safe-note {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255,255,255,.09);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--mut);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .safe-note b {
+      color: var(--gold);
+    }
+
+    .footer {
+      position: absolute;
+      left: 7vw;
+      right: 7vw;
+      bottom: 18px;
+      color: rgba(255,255,255,.42);
+      font-size: 12px;
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .footer::before,
+    .footer::after {
+      content: "";
+      height: 1px;
+      flex: 1;
+      max-width: 320px;
+      background: linear-gradient(90deg, transparent, rgba(216,181,109,.30));
+    }
+
+    .footer::after {
+      background: linear-gradient(90deg, rgba(216,181,109,.30), transparent);
+    }
+
+    @media (max-width: 980px) {
       body {
-        padding:14px;
+        background-attachment: scroll;
       }
 
-      .shell {
-        grid-template-columns:1fr;
+      .page {
+        grid-template-columns: 1fr;
+        gap: 22px;
+        padding: 18px;
+        padding-bottom: calc(28px + var(--safe));
       }
 
-      .hero {
-        min-height:auto;
-        padding:24px;
+      .page::before {
+        display: none;
       }
 
-      .hero-grid {
-        grid-template-columns:1fr;
+      .brand-side {
+        min-height: auto;
+        padding: 16px 0 0;
+        align-items: center;
+        text-align: center;
       }
 
-      .quote {
-        margin-top:26px;
+      .logo-wrap {
+        width: min(330px, 88vw);
+        padding: 6px;
+      }
+
+      .logo-main {
+        max-width: 320px;
+      }
+
+      .brand-copy {
+        margin-top: 8px;
+        padding-top: 12px;
+        border-top: 0;
+      }
+
+      .brand-copy .badge {
+        margin-bottom: 12px;
+        font-size: 10px;
+      }
+
+      .brand-copy h1 {
+        font-size: 28px;
+        letter-spacing: -1px;
+      }
+
+      .brand-copy p {
+        font-size: 13px;
+        margin-top: 10px;
+      }
+
+      .security-row {
+        justify-content: center;
+        margin-top: 16px;
+        gap: 8px;
+      }
+
+      .security-item {
+        padding: 9px 10px;
+        font-size: 11px;
+      }
+
+      .login-card {
+        padding: 22px;
+        border-radius: 24px;
+      }
+
+      .mini-logo {
+        width: 64px;
+        height: 64px;
+        border-radius: 18px;
+      }
+
+      .login-card h2 {
+        font-size: 23px;
+      }
+
+      input, button {
+        font-size: 16px;
+      }
+
+      .footer {
+        position: static;
+        margin: 10px 0 0;
+        font-size: 11px;
+      }
+
+      .footer::before,
+      .footer::after {
+        display: none;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .brand-copy h1 {
+        font-size: 24px;
+      }
+
+      .brand-copy p {
+        display: none;
+      }
+
+      .security-row {
+        display: none;
+      }
+
+      .login-card {
+        padding: 20px 16px;
+      }
+
+      .row {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
       }
     }
   </style>
 </head>
 
 <body>
-  <div class="shell">
-    <section class="hero">
-      <div class="brand">
-        <div class="logo">LA</div>
-        <div>
-          <b>LEADS IMÓVEIS</b>
-          <span>CRM COPILOTO IA</span>
-        </div>
+  <main class="page">
+    <section class="brand-side">
+      <div class="logo-wrap">
+        <img class="logo-main" src="midia/logo-leads.png" alt="Leads Imóveis" />
       </div>
 
-      <div class="hero-main">
-        <div class="badge">Entrada exclusiva para corretores aprovados</div>
-        <h1>Venda com foco, clareza e inteligência.</h1>
+      <div class="brand-copy">
+        <div class="badge">CRM exclusivo para corretores aprovados</div>
+        <h1>Venda com foco, presença e inteligência.</h1>
         <p>
-          Um CRM futurista para corretores de imóveis com IA consultiva, organização do dia,
-          mensagens prontas, leads quentes, imóveis, fotos e apoio humano para manter a equipe em ação.
+          Uma central imobiliária premium para organizar leads, imóveis, fotos,
+          follow-up, captação e conversas com apoio de IA.
         </p>
 
-        <div class="hero-grid">
-          <div class="mini">
-            <b>IA parceira</b>
-            <span>Ajuda com foco, atendimento, follow-up e motivação diária.</span>
-          </div>
-          <div class="mini">
-            <b>Acesso protegido</b>
-            <span>Somente usuários aprovados pelo administrador entram no CRM.</span>
-          </div>
-          <div class="mini">
-            <b>Mobile primeiro</b>
-            <span>Feito para corretor usar no celular, na rua e nas visitas.</span>
-          </div>
+        <div class="security-row">
+          <div class="security-item"><b>◈</b> Plataforma segura</div>
+          <div class="security-item"><b>⌁</b> Dados protegidos</div>
+          <div class="security-item"><b>☁</b> Acesso 24/7</div>
         </div>
-      </div>
-
-      <div class="quote">
-        “Bom dia, corretor. Antes de vender imóveis, vamos organizar sua mente, seu foco e sua próxima ação.”
       </div>
     </section>
 
-    <section class="card">
-      <div class="orb">LAI</div>
-      <h2>Entrar no CRM</h2>
+    <section class="login-card">
+      <div class="mini-logo">
+        <img src="midia/logo-leads.png" alt="Leads Imóveis" />
+      </div>
+
+      <h2>Bem-vindo ao<br />CRM Leads Imóveis</h2>
+      <div class="gold-line"></div>
       <p class="sub">
-        Use seu login de corretor. Novos acessos precisam ser aprovados pelo administrador.
+        Acesso exclusivo para corretores aprovados.
+        Entre com suas credenciais para continuar.
       </p>
 
       <div class="tabs">
-        <button id="tabLogin" class="active" onclick="setMode('login')">Entrar</button>
-        <button id="tabSignup" onclick="setMode('signup')">Solicitar acesso</button>
+        <button id="tabLogin" class="active" type="button" onclick="setMode('login')">Entrar</button>
+        <button id="tabSignup" type="button" onclick="setMode('signup')">Solicitar acesso</button>
       </div>
 
       <div id="message" class="msg"></div>
@@ -435,33 +695,64 @@
       <form onsubmit="handleAuth(event)">
         <div class="field" id="nameField" style="display:none">
           <label>Nome completo</label>
-          <input id="fullName" autocomplete="name" placeholder="Nome do corretor" />
+          <div class="input-wrap">
+            <span class="input-icon">♙</span>
+            <input id="fullName" autocomplete="name" placeholder="Nome do corretor" />
+          </div>
         </div>
 
         <div class="field">
           <label>E-mail</label>
-          <input id="email" type="email" autocomplete="email" placeholder="seuemail@exemplo.com" required />
+          <div class="input-wrap">
+            <span class="input-icon">✉</span>
+            <input id="email" type="email" autocomplete="email" placeholder="seu@email.com" required />
+          </div>
         </div>
 
         <div class="field">
           <label>Senha</label>
-          <input id="password" type="password" autocomplete="current-password" placeholder="Digite sua senha" required />
+          <div class="input-wrap">
+            <span class="input-icon">⌕</span>
+            <input id="password" type="password" autocomplete="current-password" placeholder="Digite sua senha" required />
+            <button class="eye" type="button" onclick="togglePassword()">◉</button>
+          </div>
         </div>
 
-        <button class="btn" id="submitBtn" type="submit">Entrar agora</button>
+        <div class="row">
+          <label class="remember">
+            <input id="rememberMe" type="checkbox" checked />
+            Lembrar-me
+          </label>
+
+          <button class="link" type="button" onclick="resetPassword()">Esqueci minha senha</button>
+        </div>
+
+        <button class="btn btn-gold" id="submitBtn" type="submit">
+          ENTRAR →
+        </button>
+
+        <button class="btn btn-outline" type="button" onclick="setMode('signup')">
+          SOLICITAR ACESSO ♙+
+        </button>
       </form>
 
-      <p class="help">
-        Se você acabou de solicitar acesso, aguarde aprovação do administrador.
-      </p>
+      <div class="safe-note">
+        <span>🛡</span>
+        <span>Sistema protegido com <b>acesso aprovado</b> pelo administrador.</span>
+      </div>
     </section>
-  </div>
+
+    <div class="footer">
+      © 2026 Leads Imóveis. Todos os direitos reservados.
+    </div>
+  </main>
 
   <script>
     "use strict";
 
     let mode = "login";
 
+    const ADMIN_EMAIL = "leadsimoveisoficial@gmail.com";
     const params = new URLSearchParams(location.search);
     const reason = params.get("reason");
 
@@ -470,8 +761,12 @@
       if (reason === "inactive") showMessage("Seu usuário está inativo. Fale com o administrador.", "error");
       if (reason === "login") showMessage("Entre novamente para acessar o CRM.", "warn");
       if (reason === "profile") showMessage("Não foi possível validar seu perfil. Fale com o administrador.", "error");
+      if (reason === "supabase") showMessage("Supabase não carregou corretamente. Verifique o arquivo supabase-config.js.", "error");
 
-      const client = await waitSupabaseClient();
+      const savedEmail = localStorage.getItem("leads_login_email");
+      if (savedEmail) document.getElementById("email").value = savedEmail;
+
+      const client = await waitSupabaseClient(false);
 
       if (client) {
         const { data } = await client.auth.getSession();
@@ -490,18 +785,20 @@
       document.getElementById("tabLogin").classList.toggle("active", mode === "login");
       document.getElementById("tabSignup").classList.toggle("active", mode === "signup");
       document.getElementById("nameField").style.display = mode === "signup" ? "block" : "none";
-      document.getElementById("submitBtn").textContent = mode === "signup" ? "Solicitar acesso" : "Entrar agora";
+
+      const btn = document.getElementById("submitBtn");
+      btn.innerHTML = mode === "signup" ? "SOLICITAR ACESSO →" : "ENTRAR →";
 
       clearMessage();
     }
 
-    async function waitSupabaseClient() {
-      for (let i = 0; i < 40; i++) {
+    async function waitSupabaseClient(showError = true) {
+      for (let i = 0; i < 50; i++) {
         if (window.supabaseClient) return window.supabaseClient;
         await new Promise(resolve => setTimeout(resolve, 100));
       }
 
-      showMessage("Supabase não carregou. Verifique o arquivo supabase-config.js.", "error");
+      if (showError) showMessage("Supabase não carregou. Verifique o arquivo supabase-config.js.", "error");
       return null;
     }
 
@@ -517,15 +814,25 @@
       el.className = "msg";
     }
 
+    function togglePassword() {
+      const input = document.getElementById("password");
+      input.type = input.type === "password" ? "text" : "password";
+    }
+
     async function checkApproved(userId) {
       const client = await waitSupabaseClient();
       if (!client) return false;
 
-      const { data: profile } = await client
+      const { data: profile, error } = await client
         .from("user_profiles")
         .select("*")
         .eq("id", userId)
         .maybeSingle();
+
+      if (error) {
+        console.error(error);
+        return false;
+      }
 
       return !!(profile && profile.approved && profile.active);
     }
@@ -539,13 +846,22 @@
       const email = document.getElementById("email").value.trim().toLowerCase();
       const password = document.getElementById("password").value;
       const fullName = document.getElementById("fullName").value.trim();
+      const submitBtn = document.getElementById("submitBtn");
 
-      document.getElementById("submitBtn").disabled = true;
+      clearMessage();
+      submitBtn.disabled = true;
+      submitBtn.textContent = mode === "signup" ? "Solicitando..." : "Entrando...";
 
       try {
+        if (document.getElementById("rememberMe").checked) {
+          localStorage.setItem("leads_login_email", email);
+        } else {
+          localStorage.removeItem("leads_login_email");
+        }
+
         if (mode === "signup") {
           if (!fullName) {
-            showMessage("Digite o nome do corretor.", "error");
+            showMessage("Digite o nome completo do corretor.", "error");
             return;
           }
 
@@ -565,19 +881,23 @@
           }
 
           if (data?.user) {
-            await client.from("user_profiles").upsert({
-              id: data.user.id,
-              email,
-              full_name: fullName,
-              role: email === "leadsimoveisoficial@gmail.com" ? "admin" : "corretor",
-              approved: email === "leadsimoveisoficial@gmail.com",
-              active: true
-            });
+            try {
+              await client.from("user_profiles").upsert({
+                id: data.user.id,
+                email,
+                full_name: fullName,
+                role: email === ADMIN_EMAIL ? "admin" : "corretor",
+                approved: email === ADMIN_EMAIL,
+                active: true
+              });
+            } catch (e) {
+              console.warn("Perfil será criado pelo trigger ou manualmente.", e);
+            }
           }
 
           await client.auth.signOut();
 
-          showMessage("Acesso solicitado. Agora o administrador precisa aprovar este corretor.", "warn");
+          showMessage("Acesso solicitado. Agora o administrador precisa aprovar este corretor no Supabase.", "warn");
           setMode("login");
           return;
         }
@@ -592,7 +912,24 @@
           return;
         }
 
-        const approved = await checkApproved(data.user.id);
+        let approved = await checkApproved(data.user.id);
+
+        if (!approved && email === ADMIN_EMAIL) {
+          try {
+            await client.from("user_profiles").upsert({
+              id: data.user.id,
+              email,
+              full_name: data.user.user_metadata?.full_name || "Administrador",
+              role: "admin",
+              approved: true,
+              active: true
+            });
+
+            approved = true;
+          } catch (e) {
+            console.warn(e);
+          }
+        }
 
         if (!approved) {
           await client.auth.signOut();
@@ -605,8 +942,34 @@
         console.error(e);
         showMessage("Erro inesperado. Tente novamente.", "error");
       } finally {
-        document.getElementById("submitBtn").disabled = false;
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = mode === "signup" ? "SOLICITAR ACESSO →" : "ENTRAR →";
       }
+    }
+
+    async function resetPassword() {
+      const client = await waitSupabaseClient();
+      if (!client) return;
+
+      const email = document.getElementById("email").value.trim().toLowerCase();
+
+      if (!email) {
+        showMessage("Digite seu e-mail para recuperar a senha.", "warn");
+        return;
+      }
+
+      const redirectTo = location.origin + "/login.html";
+
+      const { error } = await client.auth.resetPasswordForEmail(email, {
+        redirectTo
+      });
+
+      if (error) {
+        showMessage("Não foi possível enviar recuperação agora.", "error");
+        return;
+      }
+
+      showMessage("Enviamos um link de recuperação para seu e-mail.", "ok");
     }
   </script>
 </body>
