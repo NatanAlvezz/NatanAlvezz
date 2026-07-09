@@ -8546,5 +8546,698 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
 })();
 </script>
 
+
+<!-- PATCH TI SÊNIOR 2026-07 · Salvamento real dos imóveis dos corretores no Supabase -->
+<script id="leadsCrmPropertiesCloudPatch2026">
+(function () {
+  "use strict";
+
+  var PATCH_ID = "leads-crm-properties-cloud-v1";
+  if (window.__LEADS_CRM_PROPERTIES_PATCH__) return;
+  window.__LEADS_CRM_PROPERTIES_PATCH__ = PATCH_ID;
+
+  var PROPS_TABLE = "crm_properties";
+  var PENDING_KEY = "leads_imoveis_pending_properties_v1";
+  var LOAD_DONE = false;
+  var BOOT_TRIES = 0;
+
+  function hasFn(name) {
+    return typeof window[name] === "function" || typeof globalThis[name] === "function";
+  }
+
+  function callToast(msg) {
+    try {
+      if (typeof toast === "function") toast(msg);
+      else console.log("[Leads CRM]", msg);
+    } catch (_) {
+      console.log("[Leads CRM]", msg);
+    }
+  }
+
+  function nowISO() {
+    return new Date().toISOString();
+  }
+
+  function nowTS() {
+    return Date.now();
+  }
+
+  function currentUserId() {
+    try {
+      if (typeof cloudUserId !== "undefined" && cloudUserId) return cloudUserId;
+    } catch (_) {}
+    try {
+      if (window.__LEADS_CURRENT_USER_ID__) return window.__LEADS_CURRENT_USER_ID__;
+    } catch (_) {}
+    return null;
+  }
+
+  function currentUserEmail() {
+    try {
+      if (typeof cloudUserEmail !== "undefined" && cloudUserEmail) return cloudUserEmail;
+    } catch (_) {}
+    try {
+      if (window.__LEADS_CURRENT_USER_EMAIL__) return window.__LEADS_CURRENT_USER_EMAIL__;
+    } catch (_) {}
+    try {
+      return (db && db.settings && db.settings.email) || "";
+    } catch (_) {
+      return "";
+    }
+  }
+
+  function currentUserRole() {
+    try {
+      if (typeof cloudUserRole !== "undefined" && cloudUserRole) return cloudUserRole;
+    } catch (_) {}
+    try {
+      if (window.__LEADS_CURRENT_USER_ROLE__) return window.__LEADS_CURRENT_USER_ROLE__;
+    } catch (_) {}
+    return currentUserEmail() === "leadsimoveisoficial@gmail.com" ? "admin" : "corretor";
+  }
+
+  function currentUserName() {
+    try {
+      if (typeof cloudUserProfile !== "undefined" && cloudUserProfile && cloudUserProfile.full_name) return cloudUserProfile.full_name;
+    } catch (_) {}
+    try {
+      if (window.__LEADS_CURRENT_USER_PROFILE__ && window.__LEADS_CURRENT_USER_PROFILE__.full_name) return window.__LEADS_CURRENT_USER_PROFILE__.full_name;
+    } catch (_) {}
+    try {
+      var top = document.getElementById("userNameTop");
+      if (top && top.textContent.trim()) return top.textContent.trim();
+    } catch (_) {}
+    try {
+      if (db && db.settings && db.settings.user) return db.settings.user;
+    } catch (_) {}
+    return currentUserEmail() ? currentUserEmail().split("@")[0] : "Corretor";
+  }
+
+  function isAdmin() {
+    return currentUserRole() === "admin" || currentUserEmail() === "leadsimoveisoficial@gmail.com";
+  }
+
+  function localDB() {
+    try {
+      if (typeof db !== "undefined" && db) return db;
+    } catch (_) {}
+    return null;
+  }
+
+  function safeLocalSaveAfterPatch() {
+    try {
+      if (typeof safeLocalSave === "function" && typeof db !== "undefined") safeLocalSave(db);
+      else if (typeof STORAGE_KEY !== "undefined" && typeof db !== "undefined") localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+    } catch (e) {
+      console.warn("Falha ao salvar backup local após patch:", e);
+    }
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, function (m) {
+      return {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      }[m];
+    });
+  }
+
+  function toNumber(value) {
+    var n = Number(value || 0);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function readValue(id) {
+    var el = document.getElementById(id);
+    return el ? String(el.value || "").trim() : "";
+  }
+
+  function readNumber(id) {
+    return toNumber(readValue(id));
+  }
+
+  function propPhotosSafe(prop) {
+    var photos = Array.isArray(prop && prop.photos) ? prop.photos : [];
+    return photos.slice(0, 8).map(function (f, index) {
+      return {
+        id: f.id || ("foto_" + index + "_" + Date.now()),
+        name: f.name || ("foto-" + (index + 1) + ".jpg"),
+        data: f.data || "",
+        cover: !!f.cover,
+        created: f.created || Date.now()
+      };
+    });
+  }
+
+  function coverImage(prop) {
+    var photos = propPhotosSafe(prop);
+    var cover = photos.find(function (f) { return f.cover && f.data; }) || photos.find(function (f) { return f.data; });
+    return cover ? cover.data : "";
+  }
+
+  function normalizePropFromRow(row) {
+    var data = row.data || {};
+    var photos = Array.isArray(row.photos) ? row.photos : (Array.isArray(data.photos) ? data.photos : []);
+
+    return {
+      id: row.id || data.id,
+      titulo: row.title || data.titulo || "Imóvel Leads Imóveis",
+      tipo: row.type || data.tipo || "Imóvel",
+      bairro: row.neighborhood || data.bairro || "",
+      cidade: row.city || data.cidade || "Florianópolis",
+      valor: Number(row.price || data.valor || 0),
+      area: Number(row.area || data.area || 0),
+      dormitorios: Number(row.bedrooms || data.dormitorios || 0),
+      suites: Number(row.suites || data.suites || 0),
+      vagas: Number(row.parking || data.vagas || 0),
+      etapa: row.status || data.etapa || "Captação",
+      prop: data.prop || data.proprietario || "",
+      tel: data.tel || data.telefone_proprietario || "",
+      proximaAcao: row.description || data.proximaAcao || data.descricao || "",
+      photos: photos,
+      created: data.created || (row.created_at ? new Date(row.created_at).getTime() : Date.now()),
+      updated: data.updated || (row.updated_at ? new Date(row.updated_at).getTime() : Date.now()),
+      owner_id: row.owner_id || data.owner_id || "",
+      owner_email: row.owner_email || data.owner_email || "",
+      owner_name: row.owner_name || data.owner_name || "",
+      captado_por: row.captured_by_name || data.captado_por || data.captador_nome || "",
+      captador_id: row.captured_by_id || data.captador_id || "",
+      captador_email: row.captured_by_email || data.captador_email || "",
+      public_site: !!(row.is_public || data.public_site),
+      sync_status: "synced"
+    };
+  }
+
+  function normalizePropForSupabase(prop) {
+    var uid = currentUserId();
+    var email = currentUserEmail();
+    var name = currentUserName();
+
+    var createdAt = prop.created_at || prop.createdAt || prop.created || Date.now();
+    var updatedAt = Date.now();
+    var capturedName = prop.captado_por || prop.captador_nome || prop.captured_by_name || name;
+
+    return {
+      id: String(prop.id),
+      owner_id: prop.owner_id || uid,
+      owner_email: prop.owner_email || email,
+      owner_name: prop.owner_name || name,
+      captured_by_id: prop.captador_id || prop.captured_by_id || uid,
+      captured_by_email: prop.captador_email || prop.captured_by_email || email,
+      captured_by_name: capturedName,
+      title: prop.titulo || prop.title || "Imóvel Leads Imóveis",
+      type: prop.tipo || prop.type || "Imóvel",
+      neighborhood: prop.bairro || prop.neighborhood || "",
+      city: prop.cidade || prop.city || "Florianópolis",
+      price: Number(prop.valor || prop.price || 0),
+      area: Number(prop.area || 0),
+      bedrooms: Number(prop.dormitorios || prop.bedrooms || 0),
+      suites: Number(prop.suites || 0),
+      parking: Number(prop.vagas || prop.parking || 0),
+      status: prop.etapa || prop.status || "Captação",
+      description: prop.proximaAcao || prop.description || "",
+      photos: propPhotosSafe(prop),
+      cover_image: coverImage(prop),
+      is_public: !!(prop.public_site || prop.etapa === "Publicado"),
+      data: {
+        id: String(prop.id),
+        titulo: prop.titulo || "",
+        tipo: prop.tipo || "",
+        bairro: prop.bairro || "",
+        cidade: prop.cidade || "",
+        valor: Number(prop.valor || 0),
+        area: Number(prop.area || 0),
+        dormitorios: Number(prop.dormitorios || 0),
+        suites: Number(prop.suites || 0),
+        vagas: Number(prop.vagas || 0),
+        etapa: prop.etapa || "",
+        prop: prop.prop || "",
+        tel: prop.tel || "",
+        proximaAcao: prop.proximaAcao || "",
+        created: createdAt,
+        updated: updatedAt,
+        owner_id: prop.owner_id || uid,
+        owner_email: prop.owner_email || email,
+        owner_name: prop.owner_name || name,
+        captado_por: capturedName,
+        captador_id: prop.captador_id || uid,
+        captador_email: prop.captador_email || email,
+        public_site: !!(prop.public_site || prop.etapa === "Publicado")
+      },
+      created_at: prop.created_at || new Date(createdAt).toISOString(),
+      updated_at: nowISO()
+    };
+  }
+
+  function getPending() {
+    try {
+      return JSON.parse(localStorage.getItem(PENDING_KEY) || "[]");
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function setPending(items) {
+    try {
+      localStorage.setItem(PENDING_KEY, JSON.stringify(items || []));
+    } catch (_) {}
+  }
+
+  function queuePending(op, propId, payload) {
+    var pending = getPending();
+    pending.push({
+      op: op,
+      id: propId,
+      payload: payload || null,
+      at: Date.now()
+    });
+    setPending(pending.slice(-80));
+  }
+
+  async function upsertPropertySupabase(prop, silent) {
+    var client = window.supabaseClient;
+    if (!client) {
+      queuePending("upsert", prop.id, normalizePropForSupabase(prop));
+      if (!silent) callToast("Imóvel salvo localmente. Nuvem ainda não carregou.");
+      return false;
+    }
+
+    var payload = normalizePropForSupabase(prop);
+
+    try {
+      var result = await client
+        .from(PROPS_TABLE)
+        .upsert(payload, { onConflict: "id" })
+        .select("id")
+        .single();
+
+      if (result.error) {
+        console.warn("Erro ao salvar imóvel na tabela " + PROPS_TABLE + ":", result.error);
+        queuePending("upsert", prop.id, payload);
+        if (!silent) callToast("Imóvel salvo localmente. Rode o SQL se ainda não criou a tabela.");
+        return false;
+      }
+
+      prop.sync_status = "synced";
+      return true;
+    } catch (e) {
+      console.warn("Falha na nuvem ao salvar imóvel:", e);
+      queuePending("upsert", prop.id, payload);
+      if (!silent) callToast("Sem conexão. Imóvel salvo localmente e ficará pendente.");
+      return false;
+    }
+  }
+
+  async function deletePropertySupabase(id, silent) {
+    var client = window.supabaseClient;
+    if (!client) {
+      queuePending("delete", id, null);
+      return false;
+    }
+
+    try {
+      var result = await client.from(PROPS_TABLE).delete().eq("id", String(id));
+
+      if (result.error) {
+        console.warn("Erro ao excluir imóvel na nuvem:", result.error);
+        queuePending("delete", id, null);
+        if (!silent) callToast("Excluído localmente. Exclusão na nuvem ficou pendente.");
+        return false;
+      }
+
+      return true;
+    } catch (e) {
+      console.warn("Falha ao excluir na nuvem:", e);
+      queuePending("delete", id, null);
+      return false;
+    }
+  }
+
+  async function flushPendingProperties() {
+    var pending = getPending();
+    if (!pending.length || !window.supabaseClient) return;
+
+    var remaining = [];
+
+    for (var i = 0; i < pending.length; i++) {
+      var item = pending[i];
+
+      try {
+        if (item.op === "upsert" && item.payload) {
+          var up = await window.supabaseClient.from(PROPS_TABLE).upsert(item.payload, { onConflict: "id" });
+          if (up.error) remaining.push(item);
+        } else if (item.op === "delete" && item.id) {
+          var del = await window.supabaseClient.from(PROPS_TABLE).delete().eq("id", String(item.id));
+          if (del.error) remaining.push(item);
+        }
+      } catch (_) {
+        remaining.push(item);
+      }
+    }
+
+    setPending(remaining);
+
+    if (pending.length && !remaining.length) {
+      callToast("Pendências de imóveis sincronizadas.");
+    }
+  }
+
+  async function syncLocalPropertiesToSupabase() {
+    var database = localDB();
+    if (!database || !Array.isArray(database.imoveis) || !database.imoveis.length || !window.supabaseClient) return;
+
+    for (var i = 0; i < database.imoveis.length; i++) {
+      var prop = database.imoveis[i];
+      if (!prop || !prop.id) continue;
+
+      if (!prop.owner_id) prop.owner_id = currentUserId();
+      if (!prop.owner_email) prop.owner_email = currentUserEmail();
+      if (!prop.owner_name) prop.owner_name = currentUserName();
+      if (!prop.captado_por) prop.captado_por = prop.owner_name || currentUserName();
+      if (!prop.captador_id) prop.captador_id = currentUserId();
+      if (!prop.captador_email) prop.captador_email = currentUserEmail();
+      if (!prop.created) prop.created = prop.updated || Date.now();
+
+      await upsertPropertySupabase(prop, true);
+    }
+  }
+
+  async function loadPropertiesFromSupabase() {
+    if (LOAD_DONE || !window.supabaseClient) return;
+    var database = localDB();
+    if (!database) return;
+
+    try {
+      await flushPendingProperties();
+      await syncLocalPropertiesToSupabase();
+
+      var result = await window.supabaseClient
+        .from(PROPS_TABLE)
+        .select("*")
+        .order("updated_at", { ascending: false })
+        .limit(500);
+
+      if (result.error) {
+        console.warn("Tabela de imóveis ainda não pronta:", result.error);
+        callToast("Imóveis em modo local. Rode o SQL da tabela crm_properties.");
+        return;
+      }
+
+      var rows = result.data || [];
+      if (rows.length) {
+        var localById = {};
+        (database.imoveis || []).forEach(function (p) {
+          localById[p.id] = p;
+        });
+
+        database.imoveis = rows.map(function (row) {
+          var mapped = normalizePropFromRow(row);
+          var old = localById[mapped.id] || {};
+          if ((!mapped.photos || !mapped.photos.some(function (f) { return f.data; })) && Array.isArray(old.photos) && old.photos.length) {
+            mapped.photos = old.photos;
+          }
+          return mapped;
+        });
+
+        safeLocalSaveAfterPatch();
+        if (typeof renderAll === "function") renderAll();
+      }
+
+      LOAD_DONE = true;
+    } catch (e) {
+      console.warn("Erro ao carregar imóveis por corretor:", e);
+    }
+  }
+
+  function enhanceImovelModalWithCaptacao() {
+    try {
+      var propInput = document.getElementById("p_prop");
+      if (!propInput || document.getElementById("p_captado_por")) return;
+
+      var id = (typeof currentEdit !== "undefined" && currentEdit && currentEdit.id) ? currentEdit.id : null;
+      var database = localDB();
+      var old = id && database ? (database.imoveis || []).find(function (p) { return p.id === id; }) : null;
+      var value = (old && (old.captado_por || old.captador_nome || old.owner_name)) || currentUserName();
+
+      var wrapper = document.createElement("div");
+      wrapper.className = "field";
+      wrapper.innerHTML = '<label>Captado por</label><input id="p_captado_por" value="' + escapeHtml(value) + '" placeholder="Nome do corretor que captou">';
+
+      var field = propInput.closest ? propInput.closest(".field") : null;
+      if (field && field.parentNode) field.parentNode.insertBefore(wrapper, field.nextSibling);
+    } catch (e) {
+      console.warn("Não foi possível inserir campo Captado por:", e);
+    }
+  }
+
+  function patchOpenImovelModal() {
+    if (window.__LEADS_OPEN_IMOVEL_PATCHED__) return;
+    if (typeof openImovelModal !== "function") return;
+
+    window.__LEADS_OPEN_IMOVEL_PATCHED__ = true;
+    var originalOpen = openImovelModal;
+
+    openImovelModal = function openImovelModalPatched(id) {
+      var result = originalOpen.apply(this, arguments);
+      setTimeout(enhanceImovelModalWithCaptacao, 30);
+      setTimeout(enhanceImovelModalWithCaptacao, 160);
+      return result;
+    };
+  }
+
+  function patchPropertyCard() {
+    if (window.__LEADS_PROPERTY_CARD_PATCHED__) return;
+    if (typeof propertyCard !== "function") return;
+
+    window.__LEADS_PROPERTY_CARD_PATCHED__ = true;
+    var originalCard = propertyCard;
+
+    propertyCard = function propertyCardPatched(p) {
+      var html = originalCard.apply(this, arguments);
+      var captador = p.captado_por || p.captador_nome || p.owner_name || "";
+      var owner = p.owner_name || p.owner_email || "";
+
+      if (!captador && !owner) return html;
+
+      var meta = '<p class="captacao-meta">' +
+        (captador ? '<b>Captado por:</b> ' + escapeHtml(captador) : '') +
+        (captador && owner ? '<br>' : '') +
+        (owner ? '<b>Responsável:</b> ' + escapeHtml(owner) : '') +
+        '</p>';
+
+      return html.replace('<div class="actions">', meta + '<div class="actions">');
+    };
+  }
+
+  function patchSaveImovel() {
+    if (window.__LEADS_SAVE_IMOVEL_PATCHED__) return;
+    if (typeof readSelectedPhotos !== "function") return;
+
+    window.__LEADS_SAVE_IMOVEL_PATCHED__ = true;
+
+    saveImovel = async function saveImovelPatched() {
+      try {
+        var id = (typeof currentEdit !== "undefined" && currentEdit && currentEdit.id) ? currentEdit.id : (typeof uid === "function" ? uid("imv") : ("imv_" + Date.now()));
+        var database = localDB();
+
+        if (!database) {
+          callToast("Base local não carregou.");
+          return;
+        }
+
+        database.imoveis = Array.isArray(database.imoveis) ? database.imoveis : [];
+
+        var old = database.imoveis.find(function (x) { return x.id === id; }) || {};
+        var photos = await readSelectedPhotos(old.photos || []);
+
+        var title = readValue("p_titulo");
+
+        if (!title) {
+          callToast("Digite o título do imóvel.");
+          return;
+        }
+
+        var userId = currentUserId();
+        var userEmail = currentUserEmail();
+        var userName = currentUserName();
+
+        var data = Object.assign({}, old, {
+          id: id,
+          titulo: title,
+          tipo: readValue("p_tipo"),
+          bairro: readValue("p_bairro"),
+          cidade: readValue("p_cidade") || "Florianópolis",
+          valor: readNumber("p_valor"),
+          area: readNumber("p_area"),
+          dormitorios: readNumber("p_dorm"),
+          suites: readNumber("p_suites"),
+          vagas: readNumber("p_vagas"),
+          etapa: readValue("p_etapa") || "Captação",
+          prop: readValue("p_prop"),
+          tel: readValue("p_tel"),
+          proximaAcao: readValue("p_acao"),
+          photos: photos,
+          created: old.created || Date.now(),
+          updated: Date.now(),
+          owner_id: old.owner_id || userId,
+          owner_email: old.owner_email || userEmail,
+          owner_name: old.owner_name || userName,
+          captado_por: readValue("p_captado_por") || old.captado_por || userName,
+          captador_id: old.captador_id || userId,
+          captador_email: old.captador_email || userEmail,
+          public_site: old.public_site || readValue("p_etapa") === "Publicado",
+          sync_status: "saving"
+        });
+
+        var idx = database.imoveis.findIndex(function (x) { return x.id === id; });
+
+        if (idx >= 0) database.imoveis[idx] = data;
+        else database.imoveis.unshift(data);
+
+        safeLocalSaveAfterPatch();
+
+        var synced = await upsertPropertySupabase(data, false);
+        data.sync_status = synced ? "synced" : "pending";
+
+        if (typeof saveDB === "function") saveDB();
+        if (typeof closeModal === "function") closeModal();
+        if (typeof renderAll === "function") renderAll();
+
+        callToast(synced ? "Imóvel salvo no CRM e na nuvem." : "Imóvel salvo localmente. Sincronização pendente.");
+      } catch (e) {
+        console.error("Erro ao salvar imóvel:", e);
+        callToast("Erro ao salvar imóvel. Revise os campos e tente novamente.");
+      }
+    };
+  }
+
+  function patchDeleteImovel() {
+    if (window.__LEADS_DELETE_IMOVEL_PATCHED__) return;
+    window.__LEADS_DELETE_IMOVEL_PATCHED__ = true;
+
+    deleteImovel = function deleteImovelPatched(id) {
+      if (!confirm("Excluir este imóvel?")) return;
+
+      var database = localDB();
+      if (!database) return;
+
+      database.imoveis = (database.imoveis || []).filter(function (x) { return x.id !== id; });
+
+      safeLocalSaveAfterPatch();
+      deletePropertySupabase(id, true);
+
+      if (typeof saveDB === "function") saveDB();
+      if (typeof closeModal === "function") closeModal();
+      if (typeof renderAll === "function") renderAll();
+
+      callToast("Imóvel excluído.");
+    };
+  }
+
+  function addCloudSyncButtons() {
+    try {
+      var area = document.querySelector(".cloud-save-actions");
+      if (!area || document.getElementById("btnSyncPropertiesSenior")) return;
+
+      var btn = document.createElement("button");
+      btn.className = "btn btn-ghost";
+      btn.id = "btnSyncPropertiesSenior";
+      btn.type = "button";
+      btn.textContent = "Sincronizar imóveis";
+      btn.onclick = async function () {
+        await flushPendingProperties();
+        await syncLocalPropertiesToSupabase();
+        LOAD_DONE = false;
+        await loadPropertiesFromSupabase();
+        callToast("Imóveis sincronizados.");
+      };
+
+      area.appendChild(btn);
+    } catch (_) {}
+  }
+
+  function patchRenderAllForButtons() {
+    if (window.__LEADS_RENDER_ALL_PROPERTIES_PATCHED__) return;
+    if (typeof renderAll !== "function") return;
+
+    window.__LEADS_RENDER_ALL_PROPERTIES_PATCHED__ = true;
+    var originalRenderAll = renderAll;
+
+    renderAll = function renderAllPatched() {
+      var result = originalRenderAll.apply(this, arguments);
+      setTimeout(addCloudSyncButtons, 40);
+      return result;
+    };
+  }
+
+  function bindAutoSaveEvents() {
+    if (window.__LEADS_PROPERTIES_EVENTS_BOUND__) return;
+    window.__LEADS_PROPERTIES_EVENTS_BOUND__ = true;
+
+    window.addEventListener("online", function () {
+      flushPendingProperties();
+      syncLocalPropertiesToSupabase();
+    });
+
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) {
+        flushPendingProperties();
+        syncLocalPropertiesToSupabase();
+      }
+    });
+
+    window.addEventListener("pagehide", function () {
+      flushPendingProperties();
+      syncLocalPropertiesToSupabase();
+    });
+  }
+
+  function bootPatch() {
+    BOOT_TRIES++;
+
+    patchOpenImovelModal();
+    patchSaveImovel();
+    patchDeleteImovel();
+    patchPropertyCard();
+    patchRenderAllForButtons();
+    addCloudSyncButtons();
+    bindAutoSaveEvents();
+
+    if (typeof renderAll === "function") {
+      try { renderAll(); } catch (_) {}
+    }
+
+    if (window.supabaseClient && currentUserId()) {
+      loadPropertiesFromSupabase();
+    } else if (BOOT_TRIES < 30) {
+      setTimeout(bootPatch, 800);
+    }
+  }
+
+  window.leadsCrmPropertiesSync = {
+    flushPendingProperties: flushPendingProperties,
+    syncLocalPropertiesToSupabase: syncLocalPropertiesToSupabase,
+    loadPropertiesFromSupabase: function () {
+      LOAD_DONE = false;
+      return loadPropertiesFromSupabase();
+    },
+    upsertPropertySupabase: upsertPropertySupabase
+  };
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bootPatch);
+  else bootPatch();
+
+  window.addEventListener("load", function () {
+    setTimeout(bootPatch, 600);
+    setTimeout(bootPatch, 1800);
+    setTimeout(bootPatch, 4200);
+  });
+})();
+</script>
+
+
 </body>
 </html>
