@@ -1666,7 +1666,7 @@
   <script>
     "use strict";
 
-    const STORAGE_KEY = "leads_imoveis_premium_ia_v7_estavel";
+    const STORAGE_KEY = "leads_imoveis_premium_ia_v105_leve_estavel";
     const OLD_KEYS = ["leads_imoveis_premium_ia_v5", "leads_imoveis_premium_ia_v4"];
     let CRM_STATE_ID = "leads-imoveis-main";
     let cloudUserEmail = null;
@@ -9030,14 +9030,17 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
 
 
 <!-- PATCH V10.2 · Correção definitiva da galeria mobile: usa IMG real + até 10 fotos -->
-<style id="leadsCrmFotosV102Styles">
-  .pc-gallery-v102{
+<!-- PATCH V10.5 ESTÁVEL · anti-travamento + galeria simples para mobile/desktop -->
+<style id="leadsCrmGaleriaV105AntiTravamento">
+  .pc-gallery-lite{
     position:relative!important;
     overflow:hidden!important;
+    min-height:210px!important;
+    background:#111318!important;
     touch-action:pan-y!important;
-    background:#14161a!important;
+    contain:layout paint!important;
   }
-  .pc-gallery-v102 .gallery-img-v102{
+  .pc-gallery-lite img{
     position:absolute!important;
     inset:0!important;
     width:100%!important;
@@ -9047,437 +9050,410 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     z-index:1!important;
     user-select:none!important;
     -webkit-user-drag:none!important;
+    transform:translateZ(0)!important;
   }
-  .pc-gallery-v102::after{
+  .pc-gallery-lite::after{
     content:""!important;
     position:absolute!important;
     inset:0!important;
     z-index:2!important;
-    background:linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.74))!important;
+    background:linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.72))!important;
     pointer-events:none!important;
   }
-  .pc-gallery-v102 .photo-count{
-    position:absolute!important;
+  .pc-gallery-lite .photo-count{
     z-index:9!important;
     left:10px!important;
     top:10px!important;
   }
-  .gallery-nav-v102{
+  .gal-lite-btn{
     position:absolute!important;
     top:50%!important;
     transform:translateY(-50%)!important;
-    z-index:10!important;
-    width:44px!important;
-    height:50px!important;
-    border-radius:17px!important;
-    border:1px solid rgba(255,255,255,.28)!important;
-    background:rgba(0,0,0,.58)!important;
+    z-index:12!important;
+    width:46px!important;
+    height:54px!important;
+    border-radius:18px!important;
+    border:1px solid rgba(255,255,255,.30)!important;
+    background:rgba(0,0,0,.62)!important;
     color:#fff!important;
-    font-size:34px!important;
+    font-size:36px!important;
     line-height:1!important;
     display:grid!important;
     place-items:center!important;
-    backdrop-filter:blur(10px)!important;
-    box-shadow:0 10px 28px rgba(0,0,0,.30)!important;
+    box-shadow:0 12px 28px rgba(0,0,0,.36)!important;
   }
-  .gallery-nav-v102.prev{left:10px!important}
-  .gallery-nav-v102.next{right:10px!important}
-  .gallery-dots-v102{
+  .gal-lite-btn.prev{left:9px!important}
+  .gal-lite-btn.next{right:9px!important}
+  .gal-lite-dots{
     position:absolute!important;
     left:50%!important;
-    bottom:12px!important;
+    bottom:13px!important;
     transform:translateX(-50%)!important;
-    z-index:10!important;
+    z-index:12!important;
     display:flex!important;
     gap:6px!important;
-    max-width:72%!important;
+    max-width:76%!important;
     overflow:hidden!important;
+    pointer-events:none!important;
   }
-  .gallery-dot-v102{
+  .gal-lite-dot{
     width:8px!important;
     height:8px!important;
     min-width:8px!important;
     border-radius:999px!important;
-    background:rgba(255,255,255,.42)!important;
+    background:rgba(255,255,255,.40)!important;
   }
-  .gallery-dot-v102.active{
-    background:#8fd3ff!important;
-    box-shadow:0 0 16px rgba(143,211,255,.78)!important;
+  .gal-lite-dot.active{
+    background:#d8b56d!important;
+    box-shadow:0 0 14px rgba(216,181,109,.78)!important;
   }
-  .gallery-hint-v102{
+  .gal-lite-hint{
     position:absolute!important;
-    right:11px!important;
-    bottom:38px!important;
-    z-index:10!important;
+    right:12px!important;
+    bottom:34px!important;
+    z-index:12!important;
     border-radius:999px!important;
-    padding:4px 7px!important;
-    background:rgba(0,0,0,.46)!important;
-    color:#dff4ff!important;
-    border:1px solid rgba(143,211,255,.28)!important;
+    padding:4px 8px!important;
+    background:rgba(0,0,0,.50)!important;
+    color:#ffecc2!important;
+    border:1px solid rgba(216,181,109,.25)!important;
     font-size:10px!important;
     pointer-events:none!important;
   }
-  .gallery-thumbs-v102{
-    display:flex!important;
-    gap:8px!important;
-    padding:9px 13px 0!important;
-    overflow-x:auto!important;
-    -webkit-overflow-scrolling:touch!important;
-    scrollbar-width:none!important;
-  }
-  .gallery-thumbs-v102::-webkit-scrollbar{display:none!important}
-  .gallery-thumb-v102{
-    flex:0 0 50px!important;
-    width:50px!important;
-    height:42px!important;
-    border-radius:12px!important;
-    border:2px solid rgba(255,255,255,.14)!important;
-    background:#15161a!important;
-    padding:0!important;
-    overflow:hidden!important;
-    opacity:.82!important;
-  }
-  .gallery-thumb-v102 img{
-    width:100%!important;
-    height:100%!important;
-    object-fit:cover!important;
-    display:block!important;
-  }
-  .gallery-thumb-v102.active{
-    opacity:1!important;
-    border-color:#8fd3ff!important;
-    box-shadow:0 0 0 3px rgba(143,211,255,.13)!important;
-  }
-  .photo-limit-v102{
-    display:inline-flex!important;
+  .crm-v104-meta{
     margin-top:8px!important;
-    border:1px solid rgba(143,211,255,.24)!important;
-    background:rgba(143,211,255,.08)!important;
-    color:#dff4ff!important;
-    border-radius:999px!important;
-    padding:6px 9px!important;
+    padding:8px 10px!important;
+    border-radius:12px!important;
+    border:1px solid rgba(216,181,109,.20)!important;
+    background:rgba(216,181,109,.07)!important;
+    color:#ffe8ad!important;
     font-size:11px!important;
-    font-weight:850!important;
+    line-height:1.35!important;
   }
+  .photo-grid-v104{
+    display:grid!important;
+    grid-template-columns:repeat(auto-fill,minmax(118px,1fr))!important;
+    gap:10px!important;
+    margin-top:12px!important;
+  }
+  .photo-item-v104{
+    border:1px solid rgba(255,255,255,.10)!important;
+    background:rgba(255,255,255,.035)!important;
+    border-radius:14px!important;
+    overflow:hidden!important;
+    position:relative!important;
+  }
+  .photo-img-v104{
+    height:104px!important;
+    background-size:cover!important;
+    background-position:center!important;
+    background-color:#15161a!important;
+  }
+  .photo-actions-v104{display:grid!important;grid-template-columns:1fr 1fr!important;gap:6px!important;padding:7px!important}
+  .photo-actions-v104 button{font-size:10px!important;padding:7px!important;border-radius:8px!important}
+  .cover-badge-v104{position:absolute!important;top:6px!important;left:6px!important;z-index:2!important;background:#d8b56d!important;color:#151007!important;border-radius:999px!important;padding:3px 7px!important;font-size:10px!important;font-weight:900!important}
   @media(max-width:620px){
-    .pc-gallery-v102{
-      min-height:230px!important;
-    }
-    .gallery-nav-v102{
-      width:48px!important;
-      height:54px!important;
-      font-size:38px!important;
-    }
-    .gallery-thumb-v102{
-      flex-basis:56px!important;
-      width:56px!important;
-      height:48px!important;
-    }
+    .pc-gallery-lite{min-height:235px!important}
+    .gal-lite-btn{width:50px!important;height:58px!important;font-size:40px!important}
+    .property-card{transform:translateZ(0)!important}
+    .photo-grid-v104{grid-template-columns:repeat(2,1fr)!important}
+    .photo-img-v104{height:116px!important}
   }
 </style>
 
-<script id="leadsCrmFotosV102JS">
+<script id="leadsCrmGaleriaV105AntiTravamento">
 (function(){
   "use strict";
 
   var MAX_FOTOS = 10;
 
-  function arr(v){ return Array.isArray(v) ? v : []; }
-  function str(v){ return String(v == null ? "" : v); }
-  function escHtml(v){
-    return str(v).replace(/[&<>"']/g,function(ch){
+  function A(v){ return Array.isArray(v) ? v : []; }
+  function S(v){ return String(v == null ? "" : v); }
+  function H(v){
+    return S(v).replace(/[&<>"']/g, function(ch){
       return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch];
     });
   }
-  function photoSrc(f){
-    return f && (f.data || f.url || f.publicUrl || f.cover_image || "");
+  function getDB(){
+    try{ if(typeof db !== "undefined" && db) return db; }catch(_e){}
+    return window.db || { imoveis:[], clientes:[], tarefas:[], settings:{} };
   }
-  function photosOf(p){
-    return arr(p && p.photos).filter(function(f){ return !!photoSrc(f); }).slice(0, MAX_FOTOS);
-  }
-  function moneyValue(v){
-    if(typeof money === "function") return money(v);
+  function srcFoto(f){ return f && (f.data || f.url || f.publicUrl || f.cover_image || ""); }
+  function fotos(p){ return A(p && p.photos).filter(function(f){ return !!srcFoto(f); }).slice(0, MAX_FOTOS); }
+  function dinheiro(v){
+    try{ if(typeof money === "function") return money(v); }catch(_e){}
     var n = Number(v) || 0;
-    return n ? n.toLocaleString("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0}) : "A consultar";
+    return n ? n.toLocaleString("pt-BR", {style:"currency", currency:"BRL", maximumFractionDigits:0}) : "A consultar";
   }
-  function isAdminSafe(){
-    try { return typeof isAdmin === "function" && isAdmin(); } catch(_) { return false; }
+  function toastLite(msg){ try{ if(typeof toast === "function") toast(msg); }catch(_e){} }
+  function uidLite(i){
+    try{ if(typeof uid === "function") return uid("foto"); }catch(_e){}
+    return "foto_" + Date.now() + "_" + i + "_" + Math.floor(Math.random()*9999);
   }
-  function toastSafeV102(msg){
-    try { if(typeof toast === "function") toast(msg); } catch(_) {}
+  function isAdminLite(){
+    try{ if(typeof isAdmin === "function") return !!isAdmin(); }catch(_e){}
+    var email = "";
+    try{ email = S(window.__LEADS_CURRENT_USER_EMAIL__ || cloudUserEmail || ""); }catch(_e){}
+    return email.toLowerCase() === "leadsimoveisoficial@gmail.com";
+  }
+  function callGlobal(name){
+    try{ if(typeof window[name] === "function") window[name](); }catch(e){ console.warn("Falha em " + name, e); }
+  }
+
+  async function compactarImagemLite(file){
+    if(!file || !file.type || !file.type.startsWith("image/")) throw new Error("Arquivo inválido.");
+
+    return new Promise(function(resolve, reject){
+      var reader = new FileReader();
+      reader.onload = function(){
+        var img = new Image();
+        img.onload = function(){
+          var w = img.naturalWidth || img.width || 1;
+          var h = img.naturalHeight || img.height || 1;
+          var max = 620;
+          if(w > h && w > max){ h = Math.round(h * max / w); w = max; }
+          else if(h >= w && h > max){ w = Math.round(w * max / h); h = max; }
+          var canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          var ctx = canvas.getContext("2d", { alpha:false });
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL("image/jpeg", 0.38));
+        };
+        img.onerror = function(){ reject(new Error("Erro ao carregar imagem.")); };
+        img.src = reader.result;
+      };
+      reader.onerror = function(){ reject(new Error("Erro ao ler imagem.")); };
+      reader.readAsDataURL(file);
+    });
   }
 
   window.readSelectedPhotos = async function(existingPhotos){
     var input = document.getElementById("p_fotos");
     var files = input && input.files ? Array.from(input.files) : [];
-    var photos = arr(existingPhotos).filter(function(f){ return !!photoSrc(f); }).slice(0, MAX_FOTOS);
+    var atuais = A(existingPhotos).filter(function(f){ return !!srcFoto(f); }).slice(0, MAX_FOTOS);
 
     if(!files.length){
-      if(photos.length && !photos.some(function(f){ return !!f.cover; })) photos[0].cover = true;
-      return photos.slice(0, MAX_FOTOS);
+      if(atuais.length && !atuais.some(function(f){ return !!f.cover; })) atuais[0].cover = true;
+      return atuais;
     }
 
-    var remaining = Math.max(0, MAX_FOTOS - photos.length);
-    var limited = files.slice(0, remaining);
+    var restante = Math.max(0, MAX_FOTOS - atuais.length);
+    var lista = files.slice(0, restante);
+    if(files.length > restante) toastLite("Limite: 10 fotos por imóvel. As extras foram ignoradas.");
 
-    if(files.length > remaining){
-      toastSafeV102("Limite: " + MAX_FOTOS + " fotos por imóvel. As extras foram ignoradas.");
-    }
-
-    for(var i=0;i<limited.length;i++){
-      var file = limited[i];
+    for(var i=0; i<lista.length; i++){
       try{
-        var data = "";
-        if(typeof resizeImage === "function"){
-          data = await resizeImage(file, 720, 0.48);
-        } else {
-          data = await new Promise(function(resolve,reject){
-            var reader = new FileReader();
-            reader.onload = function(){ resolve(reader.result); };
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          });
-        }
-        photos.push({
-          id: (typeof uid === "function" ? uid("foto") : ("foto_" + Date.now() + "_" + i)),
-          name: file.name || "foto-imovel.jpg",
-          data: data,
-          cover: photos.length === 0,
+        atuais.push({
+          id: uidLite(i),
+          name: lista[i].name || "foto-imovel.jpg",
+          data: await compactarImagemLite(lista[i]),
+          cover: atuais.length === 0,
           created: Date.now()
         });
       }catch(e){
-        console.error("Erro foto:", e);
-        toastSafeV102("Uma foto não pôde ser carregada.");
+        console.error("Erro ao compactar foto:", e);
+        toastLite("Uma foto não pôde ser carregada.");
       }
     }
 
-    if(photos.length && !photos.some(function(f){ return !!f.cover; })) photos[0].cover = true;
-    return photos.slice(0, MAX_FOTOS);
+    if(atuais.length && !atuais.some(function(f){ return !!f.cover; })) atuais[0].cover = true;
+    return atuais.slice(0, MAX_FOTOS);
   };
 
-  function setGalleryPhoto(gallery, index){
+  window.renderPhotoGrid = function(p){
+    var lista = fotos(p);
+    if(!lista.length) return '<div class="empty" style="margin-top:12px">Nenhuma foto adicionada ainda.</div>';
+    return '<div class="photo-grid-v104">' + lista.map(function(f){
+      return '<div class="photo-item-v104">' +
+        (f.cover ? '<div class="cover-badge-v104">CAPA</div>' : '') +
+        '<div class="photo-img-v104" style="background-image:url(\'' + H(srcFoto(f)) + '\')"></div>' +
+        '<div class="photo-actions-v104">' +
+          '<button class="btn btn-sm btn-ghost" type="button" onclick="setCoverPhoto(\'' + H(p.id) + '\',\'' + H(f.id) + '\')">Capa</button>' +
+          '<button class="btn btn-sm btn-danger" type="button" onclick="deletePhoto(\'' + H(p.id) + '\',\'' + H(f.id) + '\')">Excluir</button>' +
+        '</div>' +
+      '</div>';
+    }).join("") + '</div>';
+  };
+
+  function dots(total, ativo){
+    if(total <= 1) return "";
+    var html = '<div class="gal-lite-dots">';
+    for(var i=0; i<total; i++) html += '<span class="gal-lite-dot ' + (i === ativo ? "active" : "") + '"></span>';
+    return html + '</div>';
+  }
+
+  window.__LEADS_SET_PHOTO_LITE__ = function(gallery, index){
     if(!gallery) return;
     var propId = gallery.getAttribute("data-prop-id");
-    var prop = arr(window.db && db.imoveis).find(function(x){ return String(x.id) === String(propId); });
+    var banco = getDB();
+    var prop = A(banco.imoveis).find(function(x){ return S(x.id) === S(propId); });
     if(!prop) return;
+    var lista = fotos(prop);
+    if(!lista.length) return;
 
-    var photos = photosOf(prop);
-    if(!photos.length) return;
-
-    index = (Number(index) + photos.length) % photos.length;
-    gallery.dataset.photoIndex = String(index);
-
-    var src = photoSrc(photos[index]);
-    var img = gallery.querySelector(".gallery-img-v102");
+    index = (Number(index) + lista.length) % lista.length;
+    gallery.setAttribute("data-photo-index", S(index));
+    var img = gallery.querySelector("img");
+    var src = srcFoto(lista[index]);
     if(img && src) img.src = src;
-
     var count = gallery.querySelector(".photo-count");
-    if(count) count.textContent = "Fotos " + (index + 1) + "/" + photos.length;
-
-    var card = gallery.closest(".property-card") || gallery.parentElement;
-    if(card){
-      card.querySelectorAll(".gallery-dot-v102").forEach(function(dot,idx){
-        dot.classList.toggle("active", idx === index);
-      });
-      card.querySelectorAll(".gallery-thumb-v102").forEach(function(thumb,idx){
-        thumb.classList.toggle("active", idx === index);
-      });
-    }
-  }
-
-  function cardByTarget(target){
-    return target && target.closest ? target.closest(".property-card") : null;
-  }
-
-  function galleryInCard(card){
-    return card ? card.querySelector(".pc-gallery-v102") : null;
-  }
-
-  window.slidePropertyPhoto = function(propId, dir, trigger){
-    var gallery = galleryInCard(cardByTarget(trigger));
-    if(!gallery){
-      gallery = document.querySelector('.pc-gallery-v102[data-prop-id="' + String(propId).replace(/"/g,'\\"') + '"]');
-    }
-    if(!gallery) return;
-
-    var current = Number(gallery.dataset.photoIndex || 0);
-    if(!Number.isFinite(current)) current = 0;
-    setGalleryPhoto(gallery, current + Number(dir || 1));
+    if(count) count.textContent = "Fotos " + (index + 1) + "/" + lista.length;
+    gallery.querySelectorAll(".gal-lite-dot").forEach(function(d, i){ d.classList.toggle("active", i === index); });
   };
 
-  function renderDots(photos){
-    if(photos.length <= 1) return "";
-    return '<div class="gallery-dots-v102">' + photos.map(function(_,idx){
-      return '<span class="gallery-dot-v102 ' + (idx === 0 ? "active" : "") + '"></span>';
-    }).join("") + '</div>';
-  }
-
-  function renderThumbs(photos, propId){
-    if(photos.length <= 1) return "";
-    return '<div class="gallery-thumbs-v102">' + photos.map(function(f,idx){
-      return '<button type="button" class="gallery-thumb-v102 ' + (idx === 0 ? "active" : "") + '" data-index="' + idx + '" aria-label="Ver foto ' + (idx+1) + '">' +
-        '<img src="' + escHtml(photoSrc(f)) + '" alt="Foto ' + (idx+1) + '">' +
-      '</button>';
-    }).join("") + '</div>';
-  }
-
-  window.propertyCard = function(p){
+  function cardImovel(p){
     p = p || {};
-    var photos = photosOf(p);
-    var cover = photos.find(function(f){ return !!f.cover; }) || photos[0] || null;
-    var firstSrc = photoSrc(cover);
-    var controls = photos.length > 1
-      ? '<button class="gallery-nav-v102 prev" data-gallery-action="prev" type="button">‹</button>' +
-        '<button class="gallery-nav-v102 next" data-gallery-action="next" type="button">›</button>' +
-        '<span class="gallery-hint-v102">arraste</span>' + renderDots(photos)
+    var lista = fotos(p);
+    var capa = lista.find(function(f){ return !!f.cover; }) || lista[0] || null;
+    var first = srcFoto(capa);
+    var controles = lista.length > 1
+      ? '<button class="gal-lite-btn prev" type="button" data-dir="-1">‹</button>' +
+        '<button class="gal-lite-btn next" type="button" data-dir="1">›</button>' +
+        '<span class="gal-lite-hint">arraste</span>' + dots(lista.length, 0)
       : "";
-    var deleteButton = isAdminSafe() ? '<button class="btn btn-sm btn-danger crm-delete-v102" data-id="' + escHtml(p.id) + '">Excluir</button>' : "";
+    var excluir = isAdminLite() ? '<button class="btn btn-sm btn-danger crm-delete-lite" data-id="' + H(p.id) + '">Excluir</button>' : "";
 
-    return '<div class="property-card" data-card-prop-id="' + escHtml(p.id) + '">' +
-      '<div class="pc-img pc-gallery-v102" data-prop-id="' + escHtml(p.id) + '" data-photo-index="0">' +
-        (firstSrc ? '<img class="gallery-img-v102" src="' + escHtml(firstSrc) + '" alt="Foto do imóvel">' : '') +
-        '<span class="photo-count">' + (photos.length ? 'Fotos 1/' + photos.length : 'Sem foto') + '</span>' + controls +
+    return '<div class="property-card" data-card-prop-id="' + H(p.id) + '">' +
+      '<div class="pc-img pc-gallery-lite" data-prop-id="' + H(p.id) + '" data-photo-index="0">' +
+        (first ? '<img src="' + H(first) + '" alt="Foto do imóvel" loading="lazy" decoding="async">' : '') +
+        '<span class="photo-count">' + (lista.length ? 'Fotos 1/' + lista.length : 'Sem foto') + '</span>' + controles +
       '</div>' +
-      renderThumbs(photos, p.id) +
       '<div class="pc-body">' +
-        '<h3>' + escHtml(p.titulo || p.title || "Imóvel captado") + '</h3>' +
-        '<p>' + escHtml(p.finalidade || "Venda") + ' · ' + escHtml(p.tipo || "Imóvel") + ' · ' + escHtml(p.bairro || "-") + '</p>' +
+        '<h3>' + H(p.titulo || p.title || "Imóvel captado") + '</h3>' +
+        '<p>' + H(p.finalidade || "Venda") + ' · ' + H(p.tipo || "Imóvel") + ' · ' + H(p.bairro || "-") + '</p>' +
         '<p>' + (Number(p.area)||0) + ' m² · ' + (Number(p.dormitorios)||0) + ' dorm. · ' + (Number(p.suites)||0) + ' suítes · ' + (Number(p.vagas)||0) + ' vagas</p>' +
-        '<p class="price">' + moneyValue(p.valor || p.price || 0) + '</p>' +
-        '<span class="pill gold">' + escHtml(p.etapa || "Captação") + '</span> <span class="pill green">' + (p.publicarSite ? 'No site' : 'Interno') + '</span>' +
-        '<p class="crm-final-meta"><b>Captado por:</b> ' + escHtml(p.captadorNome || "Corretor") + '<br><b>Origem:</b> ' + escHtml(p.origemCaptacao || "-") + '</p>' +
-        '<p><b>Proprietário:</b> ' + escHtml(p.prop || "Não informado") + '</p>' +
-        '<p><b>Próxima ação:</b> ' + escHtml(p.proximaAcao || "Definir atendimento") + '</p>' +
+        '<p class="price">' + dinheiro(p.valor || p.price || 0) + '</p>' +
+        '<span class="pill gold">' + H(p.etapa || "Captação") + '</span> <span class="pill green">' + (p.publicarSite ? "No site" : "Interno") + '</span>' +
+        '<p class="crm-v104-meta"><b>Captado por:</b> ' + H(p.captadorNome || "Corretor") + '<br><b>Origem:</b> ' + H(p.origemCaptacao || "-") + '</p>' +
+        '<p><b>Proprietário:</b> ' + H(p.prop || "Não informado") + '</p>' +
+        '<p><b>Próxima ação:</b> ' + H(p.proximaAcao || "Definir atendimento") + '</p>' +
         '<div class="actions">' +
-          '<button class="btn btn-sm btn-ghost crm-edit-v102" data-id="' + escHtml(p.id) + '">Editar</button>' +
-          '<button class="btn btn-sm crm-ai-v102" data-title="' + escHtml(p.titulo || "imóvel") + '" data-bairro="' + escHtml(p.bairro || "Florianópolis") + '">IA anúncio</button>' +
-          deleteButton +
+          '<button class="btn btn-sm btn-ghost crm-edit-lite" data-id="' + H(p.id) + '">Editar</button>' +
+          '<button class="btn btn-sm crm-ai-lite" data-title="' + H(p.titulo || "imóvel") + '" data-bairro="' + H(p.bairro || "Florianópolis") + '">IA anúncio</button>' +
+          excluir +
         '</div>' +
       '</div>' +
     '</div>';
-  };
+  }
 
-  function wireGallery(){
-    document.querySelectorAll(".pc-gallery-v102").forEach(function(gallery){
-      if(gallery.dataset.wiredV102 === "1") return;
-      gallery.dataset.wiredV102 = "1";
-      var sx = 0, sy = 0, down = false;
+  window.propertyCard = cardImovel;
 
+  function wireLite(){
+    document.querySelectorAll(".pc-gallery-lite").forEach(function(gallery){
+      if(gallery.getAttribute("data-wired-lite") === "1") return;
+      gallery.setAttribute("data-wired-lite", "1");
+      var sx = 0, sy = 0, ativo = false;
       gallery.addEventListener("pointerdown", function(e){
-        if(e.target.closest && e.target.closest(".gallery-nav-v102")) return;
-        sx = e.clientX;
-        sy = e.clientY;
-        down = true;
-      }, {passive:true});
-
+        if(e.target && e.target.closest && e.target.closest(".gal-lite-btn")) return;
+        sx = e.clientX; sy = e.clientY; ativo = true;
+      }, { passive:true });
       gallery.addEventListener("pointerup", function(e){
-        if(!down) return;
-        down = false;
+        if(!ativo) return;
+        ativo = false;
         var dx = e.clientX - sx;
         var dy = e.clientY - sy;
-        if(Math.abs(dx) > 26 && Math.abs(dx) > Math.abs(dy)){
-          var current = Number(gallery.dataset.photoIndex || 0);
-          setGalleryPhoto(gallery, current + (dx < 0 ? 1 : -1));
+        if(Math.abs(dx) > 24 && Math.abs(dx) > Math.abs(dy)){
+          var atual = Number(gallery.getAttribute("data-photo-index") || 0);
+          window.__LEADS_SET_PHOTO_LITE__(gallery, atual + (dx < 0 ? 1 : -1));
         }
-      }, {passive:true});
-
-      gallery.addEventListener("pointercancel", function(){ down = false; }, {passive:true});
+      }, { passive:true });
+      gallery.addEventListener("pointercancel", function(){ ativo = false; }, { passive:true });
     });
   }
 
-  document.addEventListener("click", function(e){
-    var prev = e.target.closest && e.target.closest(".gallery-nav-v102.prev");
-    var next = e.target.closest && e.target.closest(".gallery-nav-v102.next");
-    if(prev || next){
-      e.preventDefault();
-      e.stopPropagation();
-      var gallery = galleryInCard(cardByTarget(prev || next));
-      if(!gallery) return;
-      var current = Number(gallery.dataset.photoIndex || 0);
-      setGalleryPhoto(gallery, current + (next ? 1 : -1));
-      return;
-    }
-
-    var thumb = e.target.closest && e.target.closest(".gallery-thumb-v102");
-    if(thumb){
-      e.preventDefault();
-      e.stopPropagation();
-      var card = cardByTarget(thumb);
-      var gallery = galleryInCard(card);
-      var index = Number(thumb.dataset.index || 0);
-      setGalleryPhoto(gallery, index);
-      return;
-    }
-
-    var edit = e.target.closest && e.target.closest(".crm-edit-v102");
-    if(edit){
-      e.preventDefault();
-      if(typeof openImovelModal === "function") openImovelModal(edit.dataset.id);
-      return;
-    }
-
-    var del = e.target.closest && e.target.closest(".crm-delete-v102");
-    if(del){
-      e.preventDefault();
-      if(typeof deleteImovel === "function") deleteImovel(del.dataset.id);
-      return;
-    }
-
-    var ai = e.target.closest && e.target.closest(".crm-ai-v102");
-    if(ai){
-      e.preventDefault();
-      if(typeof askAI === "function") askAI("Crie um anúncio premium para este imóvel: " + (ai.dataset.title || "imóvel") + " em " + (ai.dataset.bairro || "Florianópolis") + ".");
-    }
-  }, true);
+  window.renderImoveis = function(){
+    var el = document.getElementById("propertyList");
+    if(!el) return;
+    var banco = getDB();
+    var lista = A(banco.imoveis).slice();
+    var qEl = document.getElementById("searchImoveis");
+    var tEl = document.getElementById("filterPropType");
+    var q = qEl ? S(qEl.value).toLowerCase().trim() : "";
+    var tipo = tEl ? S(tEl.value) : "";
+    if(q) lista = lista.filter(function(p){ return JSON.stringify(p).toLowerCase().indexOf(q) >= 0; });
+    if(tipo) lista = lista.filter(function(p){ return S(p.tipo) === tipo; });
+    el.innerHTML = lista.length ? lista.map(cardImovel).join("") : '<div class="empty">Nenhum imóvel encontrado.</div>';
+    wireLite();
+  };
 
   window.renderFeatured = function(){
     var el = document.getElementById("featuredCards");
     if(!el) return;
-    var list = arr(window.db && db.imoveis).slice(0,3);
-    el.innerHTML = list.length ? list.map(window.propertyCard).join("") : '<div class="empty">Nenhum imóvel cadastrado.</div>';
-    wireGallery();
+    var banco = getDB();
+    var lista = A(banco.imoveis).slice(0, 3);
+    el.innerHTML = lista.length ? lista.map(cardImovel).join("") : '<div class="empty">Nenhum imóvel cadastrado.</div>';
+    wireLite();
   };
 
-  var renderImoveisBase = window.renderImoveis;
-  window.renderImoveis = function(){
-    if(typeof renderImoveisBase === "function") renderImoveisBase.apply(this, arguments);
-    wireGallery();
-  };
-
-  var renderAllBase = window.renderAll;
   window.renderAll = function(){
-    if(typeof renderAllBase === "function") renderAllBase.apply(this, arguments);
-    wireGallery();
+    callGlobal("renderCentral");
+    callGlobal("renderKPIs");
+    callGlobal("renderHotLeads");
+    callGlobal("renderPriorities");
+    window.renderFeatured();
+    callGlobal("renderLeads");
+    window.renderImoveis();
+    callGlobal("renderTasks");
+    callGlobal("renderReports");
+    callGlobal("renderChat");
+    try{
+      var banco = getDB();
+      var notif = document.getElementById("notifDot");
+      if(notif) notif.textContent = A(banco.tarefas).length;
+      var top = document.getElementById("userNameTop");
+      if(top) top.textContent = (banco.settings && banco.settings.user) || "Natan Alves";
+      var hello = document.getElementById("aiHello");
+      if(hello){
+        var sdc = typeof saudacao === "function" ? saudacao() : "Olá";
+        hello.textContent = sdc + ", " + ((banco.settings && banco.settings.user) || "corretor") + " 👋";
+      }
+    }catch(e){ console.warn(e); }
+    wireLite();
   };
 
-  function fixModalText(){
-    document.querySelectorAll(".photo-box small").forEach(function(el){
-      if(/foto/i.test(el.textContent)){
-        el.textContent = "Até 10 fotos leves. Depois de salvar, use setas, arraste ou toque nas miniaturas.";
-      }
-    });
-    if(document.querySelector(".photo-box") && !document.querySelector(".photo-limit-v102")){
-      var chip = document.createElement("span");
-      chip.className = "photo-limit-v102";
-      chip.textContent = "Limite atualizado: 10 fotos por imóvel";
-      var box = document.querySelector(".photo-box");
-      if(box && box.parentElement) box.parentElement.insertBefore(chip, box.nextSibling);
+  document.addEventListener("click", function(e){
+    var btn = e.target.closest && e.target.closest(".gal-lite-btn");
+    if(btn){
+      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+      var gallery = btn.closest(".pc-gallery-lite");
+      var atual = Number(gallery && gallery.getAttribute("data-photo-index") || 0);
+      window.__LEADS_SET_PHOTO_LITE__(gallery, atual + Number(btn.getAttribute("data-dir") || 1));
+      return;
     }
+    var edit = e.target.closest && e.target.closest(".crm-edit-lite");
+    if(edit){ e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); if(typeof openImovelModal === "function") openImovelModal(edit.getAttribute("data-id")); return; }
+    var del = e.target.closest && e.target.closest(".crm-delete-lite");
+    if(del){ e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); if(typeof deleteImovel === "function") deleteImovel(del.getAttribute("data-id")); return; }
+    var ai = e.target.closest && e.target.closest(".crm-ai-lite");
+    if(ai){ e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); if(typeof askAI === "function") askAI("Crie um anúncio premium para este imóvel: " + (ai.getAttribute("data-title") || "imóvel") + " em " + (ai.getAttribute("data-bairro") || "Florianópolis") + "."); }
+  }, true);
+
+  function boot(){
+    try{
+      if(typeof populateFilters === "function") populateFilters();
+      window.renderAll();
+      setTimeout(function(){ try{ window.renderAll(); }catch(_e){} }, 600);
+    }catch(e){ console.error("Erro no patch V10.5:", e); }
   }
 
-  var openImovelModalBase = window.openImovelModal;
-  window.openImovelModal = function(){
-    var result = openImovelModalBase && openImovelModalBase.apply(this, arguments);
-    setTimeout(fixModalText, 120);
-    return result;
-  };
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
+  window.addEventListener("load", function(){ setTimeout(boot, 500); });
+})();
+</script>
 
-  setTimeout(function(){
+
+<script id="leadsCrmV105CacheTool">
+(function(){
+  window.limparCachePesadoFotosV105 = function(){
     try{
-      if(typeof renderAll === "function") renderAll();
-      else if(typeof renderImoveis === "function") renderImoveis();
-    }catch(e){ console.warn("Galeria V10.2:", e); }
-  }, 700);
+      localStorage.removeItem("leads_imoveis_premium_ia_v7_estavel");
+      localStorage.removeItem("leads_imoveis_premium_ia_v5");
+      localStorage.removeItem("leads_imoveis_premium_ia_v4");
+      if(typeof toast === "function") toast("Cache antigo limpo. Recarregue a página.");
+    }catch(e){ console.error(e); }
+  };
 })();
 </script>
 
