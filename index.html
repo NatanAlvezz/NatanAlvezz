@@ -1351,6 +1351,207 @@
       }
     }
 
+
+
+    /* FINALIZAÇÃO MASTER: nova imagem 4K + logo LEADS IMÓVEIS vetorizada/flutuante */
+    :root{
+      --bottom-bg-image:url("leads-praia-hero-final.png?v=20260709-final");
+      --hero-brand-image:url("leads-praia-hero-final.png?v=20260709-final");
+    }
+
+    /* Mantém o fundo original do topo, mas usa a nova imagem tratada nas partes inferiores */
+    .surface{
+      background:
+        linear-gradient(180deg,rgba(7,20,34,.92),rgba(7,20,34,.74)),
+        var(--bottom-bg-image) center center/cover no-repeat fixed!important;
+    }
+
+    footer{
+      background:
+        linear-gradient(180deg,rgba(7,20,34,.78),rgba(7,20,34,.96) 58%,rgba(5,12,20,.99) 100%),
+        var(--bottom-bg-image) center bottom/cover no-repeat!important;
+    }
+
+    /* Remove qualquer assinatura antiga */
+    .hero-wordmark{
+      display:none!important;
+    }
+
+    /* Nova assinatura em formato vetorizado, baseada na logo enviada */
+    .hero-logo-mark{
+      position:relative!important;
+      display:inline-flex!important;
+      flex-direction:column!important;
+      align-items:center!important;
+      justify-content:center!important;
+      gap:10px!important;
+      margin:-4px 0 16px!important;
+      padding:18px 28px 16px!important;
+      border-radius:30px!important;
+      color:#f8fdff!important;
+      background:linear-gradient(135deg,rgba(255,255,255,.10),rgba(223,248,255,.035))!important;
+      border:1px solid rgba(255,255,255,.22)!important;
+      box-shadow:
+        0 26px 78px rgba(0,0,0,.30),
+        inset 0 1px 0 rgba(255,255,255,.20),
+        0 0 42px rgba(116,213,255,.10)!important;
+      backdrop-filter:blur(15px) saturate(132%)!important;
+      -webkit-backdrop-filter:blur(15px) saturate(132%)!important;
+      animation:leadsLogoFloat 7.8s ease-in-out infinite!important;
+      transform-origin:center!important;
+    }
+
+    .hero-logo-mark::before{
+      content:"";
+      position:absolute;
+      inset:-1px;
+      border-radius:inherit;
+      pointer-events:none;
+      background:
+        linear-gradient(120deg,transparent 0%,rgba(255,255,255,.16) 44%,transparent 72%),
+        radial-gradient(circle at 50% 0%,rgba(189,239,255,.18),transparent 56%);
+      opacity:.80;
+      mix-blend-mode:screen;
+    }
+
+    .hero-logo-mark strong{
+      position:relative;
+      z-index:2;
+      display:block;
+      font-family:"Times New Roman", Georgia, serif!important;
+      font-size:clamp(40px,6.2vw,84px)!important;
+      line-height:.82!important;
+      font-weight:400!important;
+      letter-spacing:.28em!important;
+      color:#ffffff!important;
+      text-transform:uppercase!important;
+      text-rendering:geometricPrecision!important;
+      -webkit-font-smoothing:antialiased!important;
+      -moz-osx-font-smoothing:grayscale!important;
+      text-shadow:
+        0 2px 0 rgba(255,255,255,.20),
+        0 16px 36px rgba(0,0,0,.58),
+        0 0 22px rgba(223,248,255,.16)!important;
+      filter:drop-shadow(0 6px 10px rgba(0,0,0,.22))!important;
+    }
+
+    .hero-logo-mark span{
+      position:relative;
+      z-index:2;
+      display:flex!important;
+      align-items:center!important;
+      justify-content:center!important;
+      gap:18px!important;
+      width:100%!important;
+      margin-top:2px!important;
+    }
+
+    .hero-logo-mark span i{
+      display:block!important;
+      width:96px!important;
+      max-width:17vw!important;
+      height:1px!important;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.86),transparent)!important;
+      box-shadow:0 0 18px rgba(223,248,255,.30)!important;
+    }
+
+    .hero-logo-mark span b{
+      display:block!important;
+      font-size:clamp(13px,1.35vw,20px)!important;
+      line-height:1!important;
+      font-weight:500!important;
+      letter-spacing:.62em!important;
+      color:rgba(255,255,255,.94)!important;
+      text-transform:uppercase!important;
+      text-shadow:0 9px 22px rgba(0,0,0,.48),0 0 16px rgba(223,248,255,.14)!important;
+    }
+
+    @keyframes leadsLogoFloat{
+      0%,100%{transform:translate3d(0,0,0) scale(1);}
+      50%{transform:translate3d(0,-12px,0) scale(1.012);}
+    }
+
+    /* Fundo inferior mais cinematográfico usando a nova imagem */
+    #bairros.surface,
+    #tipos.surface,
+    #imoveis.surface{
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.08),
+        inset 0 140px 180px rgba(7,20,34,.16),
+        inset 0 -110px 160px rgba(7,20,34,.18)!important;
+    }
+
+    .surface::before{
+      background:
+        radial-gradient(circle at 16% 10%,rgba(189,239,255,.30),transparent 32%),
+        radial-gradient(circle at 84% 18%,rgba(255,255,255,.15),transparent 31%),
+        linear-gradient(180deg,rgba(7,20,34,.06),rgba(7,20,34,.24) 28%,rgba(7,20,34,.58) 70%,rgba(7,20,34,.84) 100%)!important;
+    }
+
+    .step-btn,
+    .card{
+      background:rgba(255,255,255,.91)!important;
+      border:1px solid rgba(223,248,255,.58)!important;
+      box-shadow:0 28px 86px rgba(0,0,0,.23), inset 0 1px 0 rgba(255,255,255,.46), 0 0 26px rgba(116,213,255,.08)!important;
+      backdrop-filter:blur(16px) saturate(138%)!important;
+      -webkit-backdrop-filter:blur(16px) saturate(138%)!important;
+    }
+
+    @media (max-width:980px){
+      .surface{
+        background:
+          linear-gradient(180deg,rgba(7,20,34,.92),rgba(7,20,34,.78)),
+          var(--bottom-bg-image) center center/cover no-repeat!important;
+      }
+      .hero-logo-mark{
+        margin:0 auto 16px!important;
+        padding:16px 22px 15px!important;
+        border-radius:28px!important;
+      }
+      .hero-logo-mark strong{
+        font-size:clamp(36px,9.6vw,62px)!important;
+        letter-spacing:.20em!important;
+      }
+      .hero-logo-mark span{
+        gap:12px!important;
+      }
+      .hero-logo-mark span i{
+        width:66px!important;
+      }
+      .hero-logo-mark span b{
+        font-size:12px!important;
+        letter-spacing:.46em!important;
+      }
+    }
+
+    @media (max-width:620px){
+      .surface{
+        background:
+          linear-gradient(180deg,rgba(7,20,34,.94),rgba(7,20,34,.82)),
+          var(--bottom-bg-image) center top/cover no-repeat!important;
+      }
+      .hero-logo-mark{
+        width:auto!important;
+        max-width:94vw!important;
+        padding:14px 17px 13px!important;
+        border-radius:24px!important;
+      }
+      .hero-logo-mark strong{
+        font-size:clamp(31px,11vw,44px)!important;
+        letter-spacing:.15em!important;
+      }
+      .hero-logo-mark span{
+        gap:8px!important;
+      }
+      .hero-logo-mark span i{
+        width:38px!important;
+      }
+      .hero-logo-mark span b{
+        font-size:10px!important;
+        letter-spacing:.34em!important;
+      }
+    }
+
 </style>
 </head>
 <body>
@@ -1398,9 +1599,9 @@
       </div>
       <div class="shell hero-grid">
         <div class="hero-copy">
-          <div class="hero-wordmark" aria-label="Leads Imóveis">
-            <strong>Leads Imóveis</strong>
-            <i aria-hidden="true"></i>
+          <div class="hero-logo-mark" aria-label="LEADS IMÓVEIS">
+            <strong>LEADS</strong>
+            <span><i aria-hidden="true"></i><b>IMÓVEIS</b><i aria-hidden="true"></i></span>
           </div>
           <span class="eyebrow">Florianópolis · Jurerê · Norte da Ilha</span>
           <h1><span id="fraseRotativa" class="frase-rotativa">Viva seu próximo imóvel em Florianópolis.</span></h1>
