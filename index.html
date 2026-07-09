@@ -7,10 +7,10 @@
   <meta name="description" content="Leads Imóveis: curadoria de imóveis para venda, temporada e aluguel anual em Florianópolis, Jurerê Internacional, Norte da Ilha e região." />
   <title>Leads Imóveis · Imóveis em Florianópolis</title>
 
-  <link rel="icon" href="assets/favicon.png" />
-  <link rel="preload" href="assets/hero-leads-floripa-final.webp" as="image" />
-  <link rel="preload" href="assets/hero-leads-floripa-mobile.webp" as="image" media="(max-width: 760px)" />
-  <link rel="preload" href="assets/logo-leads-icon-premium.webp" as="image" />
+  <link rel="icon" href="favicon.png" />
+  <link rel="preload" href="hero-leads-floripa-final.webp" as="image" />
+  <link rel="preload" href="hero-leads-floripa-mobile.webp" as="image" media="(max-width: 760px)" />
+  <link rel="preload" href="logo-leads-icon-premium.webp" as="image" />
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
@@ -45,7 +45,7 @@
     button{border:0;cursor:pointer}
     a{color:inherit;text-decoration:none}
 
-    .hero-bg{position:fixed;inset:0;z-index:-4;background:url("assets/hero-leads-floripa-final.webp") center 48%/cover no-repeat;transform:scale(1);animation:bgMove 30s ease-in-out infinite alternate}
+    .hero-bg{position:fixed;inset:0;z-index:-4;background:url("hero-leads-floripa-final.webp") center 48%/cover no-repeat;transform:scale(1);animation:bgMove 30s ease-in-out infinite alternate}
     .hero-bg:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,15,25,.88),rgba(7,20,34,.58) 42%,rgba(5,15,25,.25) 70%,rgba(7,20,34,.76)),linear-gradient(180deg,rgba(5,13,21,.20),rgba(5,13,21,.74))}
     .hero-bg:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 78% 18%,rgba(189,239,255,.32),transparent 34%),linear-gradient(120deg,transparent 0%,rgba(255,255,255,.12) 42%,transparent 67%);opacity:.55;animation:sweep 10s ease-in-out infinite}
     @keyframes bgMove{from{transform:scale(1) translate3d(-.25%,-.15%,0)}to{transform:scale(1.025) translate3d(.25%,.15%,0)}}
@@ -81,7 +81,7 @@
     footer{background:#f8fdff;color:#071422;padding:26px 0;border-top:1px solid #d9f0fa}footer .foot{display:flex;align-items:center;justify-content:space-between;gap:14px}footer img{width:92px;height:92px;object-fit:contain;border-radius:20px;background:#071422}footer p{font-size:12px;color:#55788f;line-height:1.5}footer a{font-size:12px;color:#55788f;text-decoration:underline;opacity:.75}
 
     @media (max-width:980px){.topbar{height:74px;padding:10px 14px}.brand{min-width:0}.brand-logo{width:54px;height:54px}.brand-text b{font-size:12px}.brand-text span{font-size:9px}.nav{display:none}.menu-btn{display:grid;place-items:center}.hero{padding-top:92px;min-height:auto}.hero-grid{grid-template-columns:1fr}.hero-logo{width:min(260px,70vw);margin:0 auto 14px}.hero-copy{text-align:center;margin:auto}.hero p{margin:auto}.hero-actions{justify-content:center}.quick-choice{grid-template-columns:repeat(2,1fr);margin-inline:auto}.smart-card{max-width:560px;margin:auto}.search-panel{grid-template-columns:1fr 1fr}.search-panel .btn{grid-column:1/-1}.section{padding:42px 0}.contact-grid{grid-template-columns:1fr}.ai-float{display:grid;place-items:center}.ai-panel{right:12px;bottom:calc(82px + var(--safe))}.section-title{display:block}.section-title p{margin-top:8px}.card-img{height:190px}}
-    @media (max-width:620px){.shell{width:min(100% - 20px,1180px)}.hero{padding-bottom:28px}.hero h1{font-size:38px;letter-spacing:-1.2px}.hero p{font-size:13px}.hero-actions .btn{width:100%}.quick-choice{grid-template-columns:1fr}.choice{min-height:56px;padding:12px}.search-panel{grid-template-columns:1fr;padding:10px}.field select,.field input,.search-panel .btn{height:50px}.step-grid,.cards{grid-template-columns:1fr}.contact-card{padding:18px;border-radius:24px}footer .foot{display:block;text-align:center}footer img{margin-bottom:12px}.brand-text{display:none}.smart-card{padding:14px;border-radius:24px}.hero-bg{background-image:url("assets/hero-leads-floripa-mobile.webp");background-position:center top}.ai-chips .chip{padding:7px 8px;font-size:10px}}
+    @media (max-width:620px){.shell{width:min(100% - 20px,1180px)}.hero{padding-bottom:28px}.hero h1{font-size:38px;letter-spacing:-1.2px}.hero p{font-size:13px}.hero-actions .btn{width:100%}.quick-choice{grid-template-columns:1fr}.choice{min-height:56px;padding:12px}.search-panel{grid-template-columns:1fr;padding:10px}.field select,.field input,.search-panel .btn{height:50px}.step-grid,.cards{grid-template-columns:1fr}.contact-card{padding:18px;border-radius:24px}footer .foot{display:block;text-align:center}footer img{margin-bottom:12px}.brand-text{display:none}.smart-card{padding:14px;border-radius:24px}.hero-bg{background-image:url("hero-leads-floripa-mobile.webp");background-position:center top}.ai-chips .chip{padding:7px 8px;font-size:10px}}
     @media (prefers-reduced-motion:reduce){.hero-bg,.hero-bg:after{animation:none!important}}
 
 
@@ -228,7 +228,7 @@
     }
     .search-panel,.smart-card{background:rgba(248,253,255,.80)!important;}
     .card-img.no-img{
-      background-image:url('assets/imovel-sem-foto.webp')!important;
+      background-image:url('hero-leads-floripa-final.webp')!important;
       background-size:cover!important;
       background-position:center!important;
     }
@@ -371,7 +371,7 @@
 
   <header class="topbar" aria-label="Menu principal">
     <a class="brand" href="#inicio" aria-label="Leads Imóveis">
-      <img class="brand-logo" src="assets/logo-leads-icon-premium.webp" alt="Leads Imóveis" />
+      <img class="brand-logo" src="logo-leads-icon-premium.webp" alt="Leads Imóveis" />
     </a>
     <nav class="nav" aria-label="Navegação">
       <button onclick="escolherFinalidade('Venda')">Venda</button>
@@ -384,7 +384,7 @@
   </header>
 
   <aside class="mobile-drawer" id="drawer" aria-label="Menu lateral">
-    <div class="drawer-head"><img src="assets/logo-leads-icon-premium.webp" alt="Leads Imóveis" /><button onclick="fecharMenu()">×</button></div>
+    <div class="drawer-head"><img src="logo-leads-icon-premium.webp" alt="Leads Imóveis" /><button onclick="fecharMenu()">×</button></div>
     <div class="drawer-nav">
       <button onclick="fecharMenu(); escolherFinalidade('Venda')">Venda</button>
       <button onclick="fecharMenu(); escolherFinalidade('Temporada')">Temporada</button>
@@ -411,7 +411,7 @@
       </div>
       <div class="shell hero-grid">
         <div class="hero-copy">
-          <img class="hero-logo" src="assets/logo-leads-icon-premium.webp" alt="Leads Imóveis" />
+          <img class="hero-logo" src="logo-leads-icon-premium.webp" alt="Leads Imóveis" />
           <div class="brand-signature" aria-label="Leads Imóveis">
             <strong>Leads</strong>
             <span>Imóveis</span>
@@ -517,7 +517,7 @@
 
   <footer>
     <div class="shell foot">
-      <img src="assets/logo-leads-icon-premium.webp" alt="Leads Imóveis" />
+      <img src="logo-leads-icon-premium.webp" alt="Leads Imóveis" />
       <p><b>Leads Imóveis</b><br />Conectando sonhos. Realizando histórias.<br />Av. dos Búzios · Jurerê Internacional · Florianópolis/SC</p>
     </div>
   </footer>
@@ -606,7 +606,7 @@ function money(v){ const n=Number(v)||0; return n ? n.toLocaleString('pt-BR',{st
 function safeImageUrl(url){
   const u = String(url || '').trim();
   if(!u) return '';
-  if(u.startsWith('assets/')) return u.replace(/[\"'<>]/g,'');
+  if(/^[a-z0-9_\-./]+\.(png|jpe?g|webp|gif)$/i.test(u)) return u.replace(/[\"'<>]/g,'');
   if(/^https:\/\//i.test(u)) return u.replace(/[\"'<>]/g,'');
   if(/^data:image\/(png|jpeg|jpg|webp);base64,/i.test(u)) return u;
   return '';
