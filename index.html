@@ -1,4 +1,3 @@
-sobe site publico final leads imoveis
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -57,7 +56,7 @@ sobe site publico final leads imoveis
     .brand-logo{width:64px;height:64px;object-fit:contain;border-radius:18px;background:rgba(7,20,34,.92);box-shadow:0 10px 26px rgba(0,0,0,.16)}
     .brand-text b{display:block;font-size:14px;letter-spacing:4px;line-height:1;color:#071422}.brand-text span{display:block;margin-top:5px;font-size:10px;letter-spacing:2.5px;color:#4b7085;text-transform:uppercase}
     .nav{display:flex;align-items:center;gap:7px;margin-left:auto}.nav button,.nav a{height:38px;padding:0 13px;border-radius:999px;background:transparent;color:#18384d;font-size:12px;font-weight:800;letter-spacing:.2px}.nav button:hover,.nav a:hover{background:rgba(116,213,255,.18);color:#071422}
-    .internal-link{opacity:.55}.menu-btn{display:none;margin-left:auto;width:42px;height:42px;border-radius:14px;background:rgba(7,20,34,.06);color:var(--ink);font-size:19px}
+    /* acesso interno removido do site público */.menu-btn{display:none;margin-left:auto;width:42px;height:42px;border-radius:14px;background:rgba(7,20,34,.06);color:var(--ink);font-size:19px}
 
     .mobile-drawer{position:fixed;top:0;right:-330px;width:min(310px,88vw);height:100dvh;z-index:120;background:rgba(247,253,255,.95);backdrop-filter:blur(20px);box-shadow:-24px 0 60px rgba(0,0,0,.30);padding:18px;transition:.25s;color:var(--ink);display:flex;flex-direction:column;gap:14px}.mobile-drawer.open{right:0}.drawer-head{display:flex;align-items:center;justify-content:space-between}.drawer-head img{width:70px;height:70px;object-fit:contain;border-radius:18px;background:#071422}.drawer-head button{width:40px;height:40px;border-radius:14px;background:#e9f8ff;color:#071422;font-size:22px}.drawer-nav{display:grid;gap:8px;margin-top:16px}.drawer-nav button,.drawer-nav a{text-align:left;padding:14px;border-radius:18px;background:#f0fbff;color:#071422;font-weight:900;font-size:14px}
     .backdrop{display:none;position:fixed;inset:0;z-index:110;background:rgba(0,0,0,.45)}.backdrop.show{display:block}
@@ -186,7 +185,6 @@ sobe site publico final leads imoveis
       <button onclick="escolherFinalidade('Aluguel Anual')">Anual</button>
       <button onclick="focoCodigo()">Código</button>
       <button onclick="irPara('contato')">Contato</button>
-      <a class="internal-link" href="login.html">Acesso interno</a>
     </nav>
     <button class="menu-btn" onclick="abrirMenu()" aria-label="Abrir menu">☰</button>
   </header>
@@ -200,7 +198,6 @@ sobe site publico final leads imoveis
       <button onclick="fecharMenu(); focoCodigo()">Código do Imóvel</button>
       <button onclick="fecharMenu(); irPara('bairros')">Localização</button>
       <button onclick="fecharMenu(); irPara('contato')">Contato</button>
-      <a href="login.html">Acesso interno</a>
     </div>
   </aside>
 
@@ -316,7 +313,6 @@ sobe site publico final leads imoveis
     <div class="shell foot">
       <img src="assets/logo-leads-icon-premium.webp" alt="Leads Imóveis" />
       <p><b>Leads Imóveis</b><br />Conectando sonhos. Realizando histórias.<br />Av. dos Búzios · Jurerê Internacional · Florianópolis/SC</p>
-      <a href="login.html">Acesso interno</a>
     </div>
   </footer>
 
