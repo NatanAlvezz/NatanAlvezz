@@ -1259,6 +1259,98 @@
       }
     }
 
+
+
+    /* OPÇÃO CINEMATOGRÁFICA FINAL: trocar barcos por praia de Jurerê, areia branca e mar elegante */
+    :root{
+      --bottom-bg-image:url("https://commons.wikimedia.org/wiki/Special:FilePath/Praia%20de%20Jurer%C3%AA%20Internacional%20(cropped).JPG");
+    }
+
+    .surface{
+      background:
+        linear-gradient(180deg,rgba(7,20,34,.92),rgba(7,20,34,.72)),
+        var(--bottom-bg-image) center center/cover no-repeat fixed!important;
+    }
+
+    .surface::before{
+      background:
+        radial-gradient(circle at 16% 10%,rgba(189,239,255,.34),transparent 33%),
+        radial-gradient(circle at 84% 18%,rgba(255,255,255,.18),transparent 32%),
+        linear-gradient(180deg,rgba(7,20,34,.08),rgba(7,20,34,.22) 28%,rgba(7,20,34,.54) 68%,rgba(7,20,34,.82) 100%)!important;
+    }
+
+    .surface::after{
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,0) 18%,rgba(255,255,255,.03) 100%),
+        radial-gradient(circle at center,rgba(255,255,255,.05),transparent 66%)!important;
+    }
+
+    #bairros.surface,
+    #tipos.surface,
+    #imoveis.surface{
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.08), inset 0 120px 160px rgba(7,20,34,.10)!important;
+    }
+
+    .step-btn,
+    .card,
+    .step-actions .btn.ghost{
+      backdrop-filter:blur(16px) saturate(138%)!important;
+      -webkit-backdrop-filter:blur(16px) saturate(138%)!important;
+      box-shadow:0 26px 80px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.44), 0 0 24px rgba(116,213,255,.08)!important;
+    }
+
+    footer{
+      position:relative!important;
+      overflow:hidden!important;
+      background:
+        linear-gradient(180deg,rgba(7,20,34,.76),rgba(7,20,34,.95) 54%,rgba(5,12,20,.98) 100%),
+        var(--bottom-bg-image) center bottom/cover no-repeat!important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.08)!important;
+    }
+
+    footer::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.04),transparent 24%),
+        radial-gradient(circle at 20% 18%,rgba(189,239,255,.16),transparent 32%),
+        radial-gradient(circle at 78% 24%,rgba(255,255,255,.10),transparent 24%);
+      opacity:.95;
+    }
+
+    footer .foot,
+    footer .shell{
+      position:relative;
+      z-index:2;
+    }
+
+    footer img{
+      box-shadow:0 16px 42px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.22), 0 0 28px rgba(116,213,255,.10)!important;
+    }
+
+    @media (max-width:980px){
+      .surface{
+        background:
+          linear-gradient(180deg,rgba(7,20,34,.92),rgba(7,20,34,.76)),
+          var(--bottom-bg-image) center center/cover no-repeat!important;
+      }
+    }
+
+    @media (max-width:620px){
+      .surface{
+        background:
+          linear-gradient(180deg,rgba(7,20,34,.94),rgba(7,20,34,.82)),
+          var(--bottom-bg-image) center top/cover no-repeat!important;
+      }
+      footer{
+        background:
+          linear-gradient(180deg,rgba(7,20,34,.80),rgba(5,12,20,.98)),
+          var(--bottom-bg-image) center bottom/cover no-repeat!important;
+      }
+    }
+
 </style>
 </head>
 <body>
