@@ -1775,14 +1775,7 @@ function iniciarFrasesRotativas(){
 
 const estado = { finalidade:'', bairro:'', tipo:'', imoveis:[], resultado:[], etapa:'inicio' };
 
-const demoImoveis = [
-  {codigo:'LID-101',titulo:'Casa premium em Jurerê Internacional',finalidade:'Venda',bairro:'Jurerê Internacional',tipo:'Casas',valor:8250000,area:520,dormitorios:5,suites:5,vagas:4,descricao:'Arquitetura contemporânea, área social integrada e localização exclusiva.',fotos:[],status:'Publicado',is_public:true},
-  {codigo:'LID-202',titulo:'Apartamento elegante próximo ao mar',finalidade:'Venda',bairro:'Jurerê',tipo:'Apartamentos',valor:1950000,area:138,dormitorios:3,suites:2,vagas:2,descricao:'Planta prática, acabamento claro e acesso rápido à praia.',fotos:[],status:'Publicado',is_public:true},
-  {codigo:'LID-303',titulo:'Cobertura com vista em Beira-Mar Norte',finalidade:'Venda',bairro:'Beira-Mar Norte',tipo:'Coberturas',valor:6900000,area:310,dormitorios:4,suites:4,vagas:3,descricao:'Vista urbana, privacidade e terraço para receber com estilo.',fotos:[],status:'Publicado',is_public:true},
-  {codigo:'LID-404',titulo:'Casa de temporada com piscina',finalidade:'Temporada',bairro:'Canasvieiras',tipo:'Casas com piscina',valor:0,area:240,dormitorios:4,suites:2,vagas:3,descricao:'Ideal para verão, família e estadias próximas ao mar.',fotos:[],status:'Publicado',is_public:true},
-  {codigo:'LID-505',titulo:'Apartamento anual mobiliado',finalidade:'Aluguel Anual',bairro:'Campeche',tipo:'Imóveis mobiliados',valor:5800,area:92,dormitorios:2,suites:1,vagas:1,descricao:'Pronto para morar, com excelente mobilidade no sul da ilha.',fotos:[],status:'Publicado',is_public:true},
-  {codigo:'LID-606',titulo:'Terreno para projeto exclusivo',finalidade:'Venda',bairro:'Lagoa da Conceição',tipo:'Terrenos',valor:2200000,area:800,dormitorios:0,suites:0,vagas:0,descricao:'Área estratégica para construir com personalidade.',fotos:[],status:'Publicado',is_public:true}
-];
+const demoImoveis = [];
 
 function escapeHTML(valor){
   return String(valor ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -1822,24 +1815,58 @@ function normalizarImovel(p){
 
 async function carregarImoveisPublicos(){
   let lista = [];
+  let erroCarregamento = '';
+
   try{
     const client = window.supabaseClient || window.leadsSupabaseClient || null;
-    if(client){
+
+    if(!client){
+      erroCarregamento = 'Supabase não conectado. Verifique o arquivo supabase-config.js.';
+    } else {
       const { data, error } = await client
         .from('public_properties')
         .select('code,title,purpose,neighborhood,type,price,area,bedrooms,suites,parking,description,photos,image_url,is_public,status,updated_at')
         .eq('is_public', true)
         .eq('status', 'Publicado')
         .order('updated_at', { ascending:false })
-        .limit(80);
-      if(!error && Array.isArray(data)) lista = data.map(normalizarImovel);
+        .limit(120);
+
+      if(error){
+        console.error('Erro ao carregar imóveis públicos:', error);
+        erroCarregamento = 'Erro ao carregar imóveis publicados do CRM.';
+      } else if(Array.isArray(data)){
+        lista = data.map(normalizarImovel).filter(p => p.is_public && p.status === 'Publicado');
+      }
     }
-  } catch(_e) {}
-  estado.imoveis = lista.length ? lista : demoImoveis.map(normalizarImovel);
+  } catch(e) {
+    console.error('Falha inesperada ao carregar imóveis:', e);
+    erroCarregamento = 'Falha inesperada ao buscar imóveis do CRM.';
+  }
+
+  estado.imoveis = lista;
+  estado.erroCarregamento = erroCarregamento;
+
   filtrarImoveis(false);
   renderizarBairros();
   renderizarTipos();
   sugestoesRapidasIA();
+}
+
+function iniciarSincronizacaoCRM(){
+  try{
+    const client = window.supabaseClient || window.leadsSupabaseClient || null;
+    if(!client || !client.channel) return;
+
+    client
+      .channel('site-public-properties-sync')
+      .on('postgres_changes', { event:'*', schema:'public', table:'properties' }, () => {
+        carregarImoveisPublicos();
+  iniciarSincronizacaoCRM();
+      })
+      .subscribe();
+  } catch(e){
+    console.warn('Realtime CRM não iniciado:', e);
+  }
 }
 
 function renderizarBairros(){
@@ -1926,7 +1953,13 @@ function renderizarImoveis(titulo){
   byId('resultadoTitulo').textContent = titulo || (total ? `${total} imóveis selecionados` : 'Nenhum imóvel encontrado');
   byId('resultadoSub').textContent = total ? 'Escolha uma opção e fale com um especialista pelo WhatsApp.' : 'Ajuste os filtros ou fale com a equipe para receber uma curadoria.';
   if(!total){
-    grid.innerHTML = `<div class="card"><div class="card-body"><h3>Receba uma curadoria personalizada</h3><p class="desc">Não encontrou o imóvel ideal? A Leads Imóveis pode buscar opções para você.</p><div class="card-actions"><button class="btn whatsapp" onclick="abrirWhatsApp()">Chamar no WhatsApp</button></div></div></div>`;
+    const temFiltro = !!(estado.finalidade || estado.bairro || estado.tipo || (byId('codigoBusca')?.value || '').trim());
+    const msgErro = estado.erroCarregamento ? `<p class="desc">${escapeHTML(estado.erroCarregamento)}</p>` : '';
+    const tituloVazio = temFiltro ? 'Nenhum imóvel publicado com esse filtro' : 'Nenhum imóvel publicado ainda';
+    const textoVazio = temFiltro
+      ? 'Ajuste os filtros ou fale com a equipe para receber uma curadoria.'
+      : 'Assim que o administrador ou corretor publicar um imóvel no CRM, ele aparecerá automaticamente aqui no site.';
+    grid.innerHTML = `<div class="card"><div class="card-body"><h3>${tituloVazio}</h3><p class="desc">${textoVazio}</p>${msgErro}<div class="card-actions"><button class="btn whatsapp" onclick="abrirWhatsApp()">Chamar no WhatsApp</button></div></div></div>`;
     return;
   }
   grid.innerHTML = estado.resultado.map((p, idx) => {
@@ -1967,7 +2000,7 @@ function abrirIA(){ byId('aiPanel').classList.add('open'); byId('backdrop').clas
 function fecharIA(){ byId('aiPanel').classList.remove('open'); if(!byId('drawer').classList.contains('open')) byId('backdrop').classList.remove('show'); document.body.classList.remove('ai-open'); }
 
 function sugestoesRapidasIA(){
-  const chips = ['Casa em Jurerê','Temporada com piscina','Apartamento anual','Código LID-101','Falar no WhatsApp'];
+  const chips = ['Casa em Jurerê','Temporada com piscina','Apartamento anual','Código do imóvel','Falar no WhatsApp'];
   const html = chips.map(c => `<button class="chip" onclick="buscarComIA('${escapeHTML(c)}')">${escapeHTML(c)}</button>`).join('');
   if(byId('heroAiChips')) byId('heroAiChips').innerHTML = html;
   if(byId('panelAiChips')) byId('panelAiChips').innerHTML = html;
