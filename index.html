@@ -8920,7 +8920,7 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
         field('Telefone proprietário', '<input id="p_tel" value="' + H(p.tel || '') + '">') +
         field('Descrição / próxima ação', '<textarea id="p_acao" rows="3" placeholder="Ex: confirmar documentação, combinar fotos, autorização, exclusividade...">' + H(p.proximaAcao || '') + '</textarea>', true) +
         '<div class="field full"><label>Responsável pela captação</label><div class="crm-final-ok-note"><b>Captado por:</b> ' + H(p.captadorNome || userName()) + '<br><b>Última edição:</b> ' + H(userName()) + '<br><span class="crm-final-muted">Esses dados ficam internos no CRM.</span></div></div>' +
-        '<div class="field full"><label>Fotos do imóvel</label><label class="photo-box"><input id="p_fotos" type="file" accept="image/*" multiple><b>Adicionar fotos</b><small>Até 10 fotos leves. Toque nas setas, bolinhas ou miniaturas para ver todas.</small></label>' + window.renderPhotoGrid(p) + '</div>' +
+        '<div class="field full"><label>Fotos do imóvel</label><label class="photo-box"><input id="p_fotos" type="file" accept="image/*" multiple><b>Adicionar fotos</b><small>Até 10 fotos leves. A galeria foi corrigida para celular.</small></label>' + window.renderPhotoGrid(p) + '</div>' +
       '</div>';
     document.getElementById('modalFoot').innerHTML =
       (isEdit && isAdmin() ? '<button class="btn btn-danger" onclick="deleteImovel(\'' + JS(p.id) + '\')">Excluir</button>' : '') +
@@ -9029,89 +9029,95 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
 </script>
 
 
-<!-- PATCH V10.1 · Fotos até 10 + galeria mobile com miniaturas -->
-<style id="leadsCrmFotosV101Styles">
-  .pc-gallery-final,
-  .pc-gallery-v101{
+<!-- PATCH V10.2 · Correção definitiva da galeria mobile: usa IMG real + até 10 fotos -->
+<style id="leadsCrmFotosV102Styles">
+  .pc-gallery-v102{
     position:relative!important;
     overflow:hidden!important;
     touch-action:pan-y!important;
-    background-size:cover!important;
-    background-position:center!important;
+    background:#14161a!important;
   }
-  .pc-gallery-final::after,
-  .pc-gallery-v101::after{
+  .pc-gallery-v102 .gallery-img-v102{
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+    object-fit:cover!important;
+    display:block!important;
+    z-index:1!important;
+    user-select:none!important;
+    -webkit-user-drag:none!important;
+  }
+  .pc-gallery-v102::after{
     content:""!important;
     position:absolute!important;
     inset:0!important;
-    background:linear-gradient(180deg,rgba(0,0,0,.03),rgba(0,0,0,.74))!important;
+    z-index:2!important;
+    background:linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.74))!important;
     pointer-events:none!important;
   }
-  .gallery-nav-final,
-  .gallery-nav-v101{
+  .pc-gallery-v102 .photo-count{
+    position:absolute!important;
+    z-index:9!important;
+    left:10px!important;
+    top:10px!important;
+  }
+  .gallery-nav-v102{
     position:absolute!important;
     top:50%!important;
     transform:translateY(-50%)!important;
-    z-index:8!important;
-    width:42px!important;
-    height:48px!important;
-    border-radius:16px!important;
-    border:1px solid rgba(255,255,255,.24)!important;
-    background:rgba(0,0,0,.54)!important;
+    z-index:10!important;
+    width:44px!important;
+    height:50px!important;
+    border-radius:17px!important;
+    border:1px solid rgba(255,255,255,.28)!important;
+    background:rgba(0,0,0,.58)!important;
     color:#fff!important;
-    font-size:30px!important;
+    font-size:34px!important;
     line-height:1!important;
     display:grid!important;
     place-items:center!important;
     backdrop-filter:blur(10px)!important;
+    box-shadow:0 10px 28px rgba(0,0,0,.30)!important;
   }
-  .gallery-nav-final.prev,
-  .gallery-nav-v101.prev{left:10px!important}
-  .gallery-nav-final.next,
-  .gallery-nav-v101.next{right:10px!important}
-  .gallery-dots-final,
-  .gallery-dots-v101{
+  .gallery-nav-v102.prev{left:10px!important}
+  .gallery-nav-v102.next{right:10px!important}
+  .gallery-dots-v102{
     position:absolute!important;
     left:50%!important;
-    bottom:13px!important;
+    bottom:12px!important;
     transform:translateX(-50%)!important;
-    z-index:8!important;
+    z-index:10!important;
     display:flex!important;
     gap:6px!important;
     max-width:72%!important;
     overflow:hidden!important;
   }
-  .gallery-dot-final,
-  .gallery-dot-v101{
+  .gallery-dot-v102{
     width:8px!important;
     height:8px!important;
     min-width:8px!important;
     border-radius:999px!important;
-    background:rgba(255,255,255,.38)!important;
+    background:rgba(255,255,255,.42)!important;
   }
-  .gallery-dot-final.active,
-  .gallery-dot-v101.active{
+  .gallery-dot-v102.active{
     background:#8fd3ff!important;
-    box-shadow:0 0 16px rgba(143,211,255,.75)!important;
+    box-shadow:0 0 16px rgba(143,211,255,.78)!important;
   }
-  .gallery-hint-final,
-  .gallery-hint-v101{
+  .gallery-hint-v102{
     position:absolute!important;
     right:11px!important;
     bottom:38px!important;
-    z-index:8!important;
+    z-index:10!important;
     border-radius:999px!important;
     padding:4px 7px!important;
-    background:rgba(0,0,0,.44)!important;
+    background:rgba(0,0,0,.46)!important;
     color:#dff4ff!important;
-    border:1px solid rgba(143,211,255,.26)!important;
+    border:1px solid rgba(143,211,255,.28)!important;
     font-size:10px!important;
     pointer-events:none!important;
   }
-  .photo-count{
-    z-index:9!important;
-  }
-  .gallery-thumbs-v101{
+  .gallery-thumbs-v102{
     display:flex!important;
     gap:8px!important;
     padding:9px 13px 0!important;
@@ -9119,28 +9125,34 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     -webkit-overflow-scrolling:touch!important;
     scrollbar-width:none!important;
   }
-  .gallery-thumbs-v101::-webkit-scrollbar{display:none!important}
-  .gallery-thumb-v101{
-    flex:0 0 48px!important;
-    width:48px!important;
+  .gallery-thumbs-v102::-webkit-scrollbar{display:none!important}
+  .gallery-thumb-v102{
+    flex:0 0 50px!important;
+    width:50px!important;
     height:42px!important;
     border-radius:12px!important;
-    border:2px solid rgba(255,255,255,.12)!important;
-    background-size:cover!important;
-    background-position:center!important;
-    background-color:#15161a!important;
+    border:2px solid rgba(255,255,255,.14)!important;
+    background:#15161a!important;
+    padding:0!important;
+    overflow:hidden!important;
     opacity:.82!important;
   }
-  .gallery-thumb-v101.active{
+  .gallery-thumb-v102 img{
+    width:100%!important;
+    height:100%!important;
+    object-fit:cover!important;
+    display:block!important;
+  }
+  .gallery-thumb-v102.active{
     opacity:1!important;
     border-color:#8fd3ff!important;
-    box-shadow:0 0 0 3px rgba(143,211,255,.12)!important;
+    box-shadow:0 0 0 3px rgba(143,211,255,.13)!important;
   }
-  .photo-limit-v101{
+  .photo-limit-v102{
     display:inline-flex!important;
     margin-top:8px!important;
-    border:1px solid rgba(143,211,255,.22)!important;
-    background:rgba(143,211,255,.07)!important;
+    border:1px solid rgba(143,211,255,.24)!important;
+    background:rgba(143,211,255,.08)!important;
     color:#dff4ff!important;
     border-radius:999px!important;
     padding:6px 9px!important;
@@ -9148,44 +9160,34 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     font-weight:850!important;
   }
   @media(max-width:620px){
-    .gallery-nav-final,
-    .gallery-nav-v101{
-      width:46px!important;
-      height:52px!important;
-      font-size:34px!important;
-      border-radius:18px!important;
+    .pc-gallery-v102{
+      min-height:230px!important;
     }
-    .pc-gallery-final,
-    .pc-gallery-v101{
-      min-height:220px!important;
+    .gallery-nav-v102{
+      width:48px!important;
+      height:54px!important;
+      font-size:38px!important;
     }
-    .gallery-thumbs-v101{
-      padding-top:10px!important;
-      padding-bottom:2px!important;
-    }
-    .gallery-thumb-v101{
-      flex-basis:54px!important;
-      width:54px!important;
-      height:46px!important;
+    .gallery-thumb-v102{
+      flex-basis:56px!important;
+      width:56px!important;
+      height:48px!important;
     }
   }
 </style>
 
-<script id="leadsCrmFotosV101JS">
+<script id="leadsCrmFotosV102JS">
 (function(){
   "use strict";
 
   var MAX_FOTOS = 10;
 
   function arr(v){ return Array.isArray(v) ? v : []; }
-  function txt(v){ return String(v == null ? "" : v); }
-  function safe(v){
-    return txt(v).replace(/[&<>"']/g,function(ch){
+  function str(v){ return String(v == null ? "" : v); }
+  function escHtml(v){
+    return str(v).replace(/[&<>"']/g,function(ch){
       return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch];
     });
-  }
-  function js(v){
-    return txt(v).replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\n/g," ");
   }
   function photoSrc(f){
     return f && (f.data || f.url || f.publicUrl || f.cover_image || "");
@@ -9193,18 +9195,16 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
   function photosOf(p){
     return arr(p && p.photos).filter(function(f){ return !!photoSrc(f); }).slice(0, MAX_FOTOS);
   }
-  function bgPhoto(f){
-    var src = photoSrc(f);
-    if(!src) return "";
-    return "linear-gradient(180deg,rgba(0,0,0,.03),rgba(0,0,0,.74)),url('" + txt(src).replace(/'/g,"%27") + "')";
-  }
   function moneyValue(v){
     if(typeof money === "function") return money(v);
     var n = Number(v) || 0;
     return n ? n.toLocaleString("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0}) : "A consultar";
   }
-  function userAdmin(){
-    try { return typeof isAdmin === "function" ? isAdmin() : false; } catch(_) { return false; }
+  function isAdminSafe(){
+    try { return typeof isAdmin === "function" && isAdmin(); } catch(_) { return false; }
+  }
+  function toastSafeV102(msg){
+    try { if(typeof toast === "function") toast(msg); } catch(_) {}
   }
 
   window.readSelectedPhotos = async function(existingPhotos){
@@ -9220,24 +9220,24 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     var remaining = Math.max(0, MAX_FOTOS - photos.length);
     var limited = files.slice(0, remaining);
 
-    if(files.length > remaining && typeof toast === "function"){
-      toast("Limite: " + MAX_FOTOS + " fotos por imóvel. As fotos extras foram ignoradas.");
+    if(files.length > remaining){
+      toastSafeV102("Limite: " + MAX_FOTOS + " fotos por imóvel. As extras foram ignoradas.");
     }
 
     for(var i=0;i<limited.length;i++){
       var file = limited[i];
       try{
-        var data;
-        if(typeof resizeImage === "function") data = await resizeImage(file, 760, 0.50);
-        else {
+        var data = "";
+        if(typeof resizeImage === "function"){
+          data = await resizeImage(file, 720, 0.48);
+        } else {
           data = await new Promise(function(resolve,reject){
-            var r = new FileReader();
-            r.onload = function(){ resolve(r.result); };
-            r.onerror = reject;
-            r.readAsDataURL(file);
+            var reader = new FileReader();
+            reader.onload = function(){ resolve(reader.result); };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
           });
         }
-
         photos.push({
           id: (typeof uid === "function" ? uid("foto") : ("foto_" + Date.now() + "_" + i)),
           name: file.name || "foto-imovel.jpg",
@@ -9246,8 +9246,8 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
           created: Date.now()
         });
       }catch(e){
-        console.error(e);
-        if(typeof toast === "function") toast("Uma foto não pôde ser carregada.");
+        console.error("Erro foto:", e);
+        toastSafeV102("Uma foto não pôde ser carregada.");
       }
     }
 
@@ -9258,7 +9258,7 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
   function setGalleryPhoto(gallery, index){
     if(!gallery) return;
     var propId = gallery.getAttribute("data-prop-id");
-    var prop = arr(db && db.imoveis).find(function(x){ return String(x.id) === String(propId); });
+    var prop = arr(window.db && db.imoveis).find(function(x){ return String(x.id) === String(propId); });
     if(!prop) return;
 
     var photos = photosOf(prop);
@@ -9266,27 +9266,38 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
 
     index = (Number(index) + photos.length) % photos.length;
     gallery.dataset.photoIndex = String(index);
-    gallery.style.backgroundImage = bgPhoto(photos[index]);
+
+    var src = photoSrc(photos[index]);
+    var img = gallery.querySelector(".gallery-img-v102");
+    if(img && src) img.src = src;
 
     var count = gallery.querySelector(".photo-count");
     if(count) count.textContent = "Fotos " + (index + 1) + "/" + photos.length;
 
     var card = gallery.closest(".property-card") || gallery.parentElement;
     if(card){
-      card.querySelectorAll(".gallery-dot-final,.gallery-dot-v101").forEach(function(dot,idx){
+      card.querySelectorAll(".gallery-dot-v102").forEach(function(dot,idx){
         dot.classList.toggle("active", idx === index);
       });
-      card.querySelectorAll(".gallery-thumb-v101").forEach(function(thumb,idx){
+      card.querySelectorAll(".gallery-thumb-v102").forEach(function(thumb,idx){
         thumb.classList.toggle("active", idx === index);
       });
     }
   }
 
+  function cardByTarget(target){
+    return target && target.closest ? target.closest(".property-card") : null;
+  }
+
+  function galleryInCard(card){
+    return card ? card.querySelector(".pc-gallery-v102") : null;
+  }
+
   window.slidePropertyPhoto = function(propId, dir, trigger){
-    var gallery = null;
-    if(trigger && trigger.closest) gallery = trigger.closest(".pc-gallery-final,.pc-gallery-v101");
-    if(!gallery && window.CSS && CSS.escape) gallery = document.querySelector('.pc-gallery-final[data-prop-id="' + CSS.escape(propId) + '"],.pc-gallery-v101[data-prop-id="' + CSS.escape(propId) + '"]');
-    if(!gallery) gallery = document.querySelector('.pc-gallery-final[data-prop-id="' + propId + '"],.pc-gallery-v101[data-prop-id="' + propId + '"]');
+    var gallery = galleryInCard(cardByTarget(trigger));
+    if(!gallery){
+      gallery = document.querySelector('.pc-gallery-v102[data-prop-id="' + String(propId).replace(/"/g,'\\"') + '"]');
+    }
     if(!gallery) return;
 
     var current = Number(gallery.dataset.photoIndex || 0);
@@ -9294,24 +9305,19 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     setGalleryPhoto(gallery, current + Number(dir || 1));
   };
 
-  window.jumpPropertyPhotoV101 = function(propId, index, trigger){
-    var card = trigger && trigger.closest ? trigger.closest(".property-card") : null;
-    var gallery = card ? card.querySelector(".pc-gallery-final,.pc-gallery-v101") : null;
-    if(!gallery && window.CSS && CSS.escape) gallery = document.querySelector('.pc-gallery-final[data-prop-id="' + CSS.escape(propId) + '"],.pc-gallery-v101[data-prop-id="' + CSS.escape(propId) + '"]');
-    if(gallery) setGalleryPhoto(gallery, index);
-  };
-
-  function galleryDots(photos, propId){
+  function renderDots(photos){
     if(photos.length <= 1) return "";
-    return '<div class="gallery-dots-v101">' + photos.map(function(_,idx){
-      return '<span class="gallery-dot-v101 ' + (idx===0?'active':'') + '"></span>';
+    return '<div class="gallery-dots-v102">' + photos.map(function(_,idx){
+      return '<span class="gallery-dot-v102 ' + (idx === 0 ? "active" : "") + '"></span>';
     }).join("") + '</div>';
   }
 
-  function galleryThumbs(photos, propId){
+  function renderThumbs(photos, propId){
     if(photos.length <= 1) return "";
-    return '<div class="gallery-thumbs-v101">' + photos.map(function(f,idx){
-      return '<button type="button" class="gallery-thumb-v101 ' + (idx===0?'active':'') + '" style="background-image:url(\\'' + txt(photoSrc(f)).replace(/'/g,"%27") + '\\')" onclick="event.preventDefault();event.stopPropagation();jumpPropertyPhotoV101(\\'' + js(propId) + '\\',' + idx + ',this)" aria-label="Ver foto ' + (idx+1) + '"></button>';
+    return '<div class="gallery-thumbs-v102">' + photos.map(function(f,idx){
+      return '<button type="button" class="gallery-thumb-v102 ' + (idx === 0 ? "active" : "") + '" data-index="' + idx + '" aria-label="Ver foto ' + (idx+1) + '">' +
+        '<img src="' + escHtml(photoSrc(f)) + '" alt="Foto ' + (idx+1) + '">' +
+      '</button>';
     }).join("") + '</div>';
   }
 
@@ -9319,104 +9325,159 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     p = p || {};
     var photos = photosOf(p);
     var cover = photos.find(function(f){ return !!f.cover; }) || photos[0] || null;
-    var bg = cover ? bgPhoto(cover) : "";
+    var firstSrc = photoSrc(cover);
     var controls = photos.length > 1
-      ? '<button class="gallery-nav-v101 prev" type="button" onclick="event.preventDefault();event.stopPropagation();slidePropertyPhoto(\\'' + js(p.id) + '\\',-1,this)">‹</button>' +
-        '<button class="gallery-nav-v101 next" type="button" onclick="event.preventDefault();event.stopPropagation();slidePropertyPhoto(\\'' + js(p.id) + '\\',1,this)">›</button>' +
-        '<span class="gallery-hint-v101">arraste</span>' + galleryDots(photos, p.id)
+      ? '<button class="gallery-nav-v102 prev" data-gallery-action="prev" type="button">‹</button>' +
+        '<button class="gallery-nav-v102 next" data-gallery-action="next" type="button">›</button>' +
+        '<span class="gallery-hint-v102">arraste</span>' + renderDots(photos)
       : "";
-    var deleteButton = userAdmin() ? '<button class="btn btn-sm btn-danger" onclick="deleteImovel(\\'' + js(p.id) + '\\')">Excluir</button>' : "";
+    var deleteButton = isAdminSafe() ? '<button class="btn btn-sm btn-danger crm-delete-v102" data-id="' + escHtml(p.id) + '">Excluir</button>' : "";
 
-    return '<div class="property-card">' +
-      '<div class="pc-img pc-gallery-final pc-gallery-v101" data-prop-id="' + safe(p.id) + '" data-photo-index="0" style="' + (bg ? 'background-image:' + safe(bg) + '!important;' : '') + '">' +
+    return '<div class="property-card" data-card-prop-id="' + escHtml(p.id) + '">' +
+      '<div class="pc-img pc-gallery-v102" data-prop-id="' + escHtml(p.id) + '" data-photo-index="0">' +
+        (firstSrc ? '<img class="gallery-img-v102" src="' + escHtml(firstSrc) + '" alt="Foto do imóvel">' : '') +
         '<span class="photo-count">' + (photos.length ? 'Fotos 1/' + photos.length : 'Sem foto') + '</span>' + controls +
       '</div>' +
-      galleryThumbs(photos, p.id) +
+      renderThumbs(photos, p.id) +
       '<div class="pc-body">' +
-        '<h3>' + safe(p.titulo || p.title || "Imóvel captado") + '</h3>' +
-        '<p>' + safe(p.finalidade || "Venda") + ' · ' + safe(p.tipo || "Imóvel") + ' · ' + safe(p.bairro || "-") + '</p>' +
+        '<h3>' + escHtml(p.titulo || p.title || "Imóvel captado") + '</h3>' +
+        '<p>' + escHtml(p.finalidade || "Venda") + ' · ' + escHtml(p.tipo || "Imóvel") + ' · ' + escHtml(p.bairro || "-") + '</p>' +
         '<p>' + (Number(p.area)||0) + ' m² · ' + (Number(p.dormitorios)||0) + ' dorm. · ' + (Number(p.suites)||0) + ' suítes · ' + (Number(p.vagas)||0) + ' vagas</p>' +
         '<p class="price">' + moneyValue(p.valor || p.price || 0) + '</p>' +
-        '<span class="pill gold">' + safe(p.etapa || "Captação") + '</span> <span class="pill green">' + (p.publicarSite ? 'No site' : 'Interno') + '</span>' +
-        '<p class="crm-final-meta"><b>Captado por:</b> ' + safe(p.captadorNome || "Corretor") + '<br><b>Origem:</b> ' + safe(p.origemCaptacao || "-") + '</p>' +
-        '<p><b>Proprietário:</b> ' + safe(p.prop || "Não informado") + '</p>' +
-        '<p><b>Próxima ação:</b> ' + safe(p.proximaAcao || "Definir atendimento") + '</p>' +
+        '<span class="pill gold">' + escHtml(p.etapa || "Captação") + '</span> <span class="pill green">' + (p.publicarSite ? 'No site' : 'Interno') + '</span>' +
+        '<p class="crm-final-meta"><b>Captado por:</b> ' + escHtml(p.captadorNome || "Corretor") + '<br><b>Origem:</b> ' + escHtml(p.origemCaptacao || "-") + '</p>' +
+        '<p><b>Proprietário:</b> ' + escHtml(p.prop || "Não informado") + '</p>' +
+        '<p><b>Próxima ação:</b> ' + escHtml(p.proximaAcao || "Definir atendimento") + '</p>' +
         '<div class="actions">' +
-          '<button class="btn btn-sm btn-ghost" onclick="openImovelModal(\\'' + js(p.id) + '\\')">Editar</button>' +
-          '<button class="btn btn-sm" onclick="askAI(\\'Crie um anúncio premium para este imóvel: ' + js(p.titulo || "imóvel") + ' em ' + js(p.bairro || "Florianópolis") + '.\\')">IA anúncio</button>' + deleteButton +
+          '<button class="btn btn-sm btn-ghost crm-edit-v102" data-id="' + escHtml(p.id) + '">Editar</button>' +
+          '<button class="btn btn-sm crm-ai-v102" data-title="' + escHtml(p.titulo || "imóvel") + '" data-bairro="' + escHtml(p.bairro || "Florianópolis") + '">IA anúncio</button>' +
+          deleteButton +
         '</div>' +
       '</div>' +
     '</div>';
   };
 
-  window.renderFeatured = function(){
-    var el = document.getElementById("featuredCards");
-    if(!el) return;
-    var list = arr(db && db.imoveis).slice(0,3);
-    el.innerHTML = list.length ? list.map(window.propertyCard).join("") : '<div class="empty">Nenhum imóvel cadastrado.</div>';
-    wireGalleryV101();
-  };
-
-  function wireGalleryV101(){
-    document.querySelectorAll(".pc-gallery-v101").forEach(function(g){
-      if(g.dataset.swipeV101 === "1") return;
-      g.dataset.swipeV101 = "1";
+  function wireGallery(){
+    document.querySelectorAll(".pc-gallery-v102").forEach(function(gallery){
+      if(gallery.dataset.wiredV102 === "1") return;
+      gallery.dataset.wiredV102 = "1";
       var sx = 0, sy = 0, down = false;
 
-      g.addEventListener("pointerdown", function(e){
-        if(e.target.closest && (e.target.closest(".gallery-nav-final") || e.target.closest(".gallery-nav-v101"))) return;
-        sx = e.clientX; sy = e.clientY; down = true;
+      gallery.addEventListener("pointerdown", function(e){
+        if(e.target.closest && e.target.closest(".gallery-nav-v102")) return;
+        sx = e.clientX;
+        sy = e.clientY;
+        down = true;
       }, {passive:true});
 
-      g.addEventListener("pointerup", function(e){
+      gallery.addEventListener("pointerup", function(e){
         if(!down) return;
         down = false;
         var dx = e.clientX - sx;
         var dy = e.clientY - sy;
-        if(Math.abs(dx) > 28 && Math.abs(dx) > Math.abs(dy)){
-          window.slidePropertyPhoto(g.dataset.propId, dx < 0 ? 1 : -1, g);
+        if(Math.abs(dx) > 26 && Math.abs(dx) > Math.abs(dy)){
+          var current = Number(gallery.dataset.photoIndex || 0);
+          setGalleryPhoto(gallery, current + (dx < 0 ? 1 : -1));
         }
       }, {passive:true});
 
-      g.addEventListener("pointercancel", function(){ down = false; }, {passive:true});
+      gallery.addEventListener("pointercancel", function(){ down = false; }, {passive:true});
     });
   }
 
-  var oldRenderImoveis = window.renderImoveis;
+  document.addEventListener("click", function(e){
+    var prev = e.target.closest && e.target.closest(".gallery-nav-v102.prev");
+    var next = e.target.closest && e.target.closest(".gallery-nav-v102.next");
+    if(prev || next){
+      e.preventDefault();
+      e.stopPropagation();
+      var gallery = galleryInCard(cardByTarget(prev || next));
+      if(!gallery) return;
+      var current = Number(gallery.dataset.photoIndex || 0);
+      setGalleryPhoto(gallery, current + (next ? 1 : -1));
+      return;
+    }
+
+    var thumb = e.target.closest && e.target.closest(".gallery-thumb-v102");
+    if(thumb){
+      e.preventDefault();
+      e.stopPropagation();
+      var card = cardByTarget(thumb);
+      var gallery = galleryInCard(card);
+      var index = Number(thumb.dataset.index || 0);
+      setGalleryPhoto(gallery, index);
+      return;
+    }
+
+    var edit = e.target.closest && e.target.closest(".crm-edit-v102");
+    if(edit){
+      e.preventDefault();
+      if(typeof openImovelModal === "function") openImovelModal(edit.dataset.id);
+      return;
+    }
+
+    var del = e.target.closest && e.target.closest(".crm-delete-v102");
+    if(del){
+      e.preventDefault();
+      if(typeof deleteImovel === "function") deleteImovel(del.dataset.id);
+      return;
+    }
+
+    var ai = e.target.closest && e.target.closest(".crm-ai-v102");
+    if(ai){
+      e.preventDefault();
+      if(typeof askAI === "function") askAI("Crie um anúncio premium para este imóvel: " + (ai.dataset.title || "imóvel") + " em " + (ai.dataset.bairro || "Florianópolis") + ".");
+    }
+  }, true);
+
+  window.renderFeatured = function(){
+    var el = document.getElementById("featuredCards");
+    if(!el) return;
+    var list = arr(window.db && db.imoveis).slice(0,3);
+    el.innerHTML = list.length ? list.map(window.propertyCard).join("") : '<div class="empty">Nenhum imóvel cadastrado.</div>';
+    wireGallery();
+  };
+
+  var renderImoveisBase = window.renderImoveis;
   window.renderImoveis = function(){
-    if(typeof oldRenderImoveis === "function") oldRenderImoveis.apply(this, arguments);
-    wireGalleryV101();
+    if(typeof renderImoveisBase === "function") renderImoveisBase.apply(this, arguments);
+    wireGallery();
   };
 
-  var oldRenderAll = window.renderAll;
+  var renderAllBase = window.renderAll;
   window.renderAll = function(){
-    if(typeof oldRenderAll === "function") oldRenderAll.apply(this, arguments);
-    wireGalleryV101();
+    if(typeof renderAllBase === "function") renderAllBase.apply(this, arguments);
+    wireGallery();
   };
 
-  function markModalLimit(){
+  function fixModalText(){
     document.querySelectorAll(".photo-box small").forEach(function(el){
-      if(/fotos/i.test(el.textContent)) el.textContent = "Até 10 fotos leves. Toque nas setas, bolinhas ou miniaturas para ver todas.";
+      if(/foto/i.test(el.textContent)){
+        el.textContent = "Até 10 fotos leves. Depois de salvar, use setas, arraste ou toque nas miniaturas.";
+      }
     });
-    if(!document.querySelector(".photo-limit-v101") && document.querySelector(".photo-box")){
+    if(document.querySelector(".photo-box") && !document.querySelector(".photo-limit-v102")){
       var chip = document.createElement("span");
-      chip.className = "photo-limit-v101";
+      chip.className = "photo-limit-v102";
       chip.textContent = "Limite atualizado: 10 fotos por imóvel";
       var box = document.querySelector(".photo-box");
       if(box && box.parentElement) box.parentElement.insertBefore(chip, box.nextSibling);
     }
   }
 
-  var oldOpenImovelModal = window.openImovelModal;
+  var openImovelModalBase = window.openImovelModal;
   window.openImovelModal = function(){
-    var r = oldOpenImovelModal && oldOpenImovelModal.apply(this, arguments);
-    setTimeout(markModalLimit, 80);
-    return r;
+    var result = openImovelModalBase && openImovelModalBase.apply(this, arguments);
+    setTimeout(fixModalText, 120);
+    return result;
   };
 
   setTimeout(function(){
-    try { if(typeof renderAll === "function") renderAll(); else if(typeof renderImoveis === "function") renderImoveis(); } catch(e){ console.warn(e); }
-  }, 450);
+    try{
+      if(typeof renderAll === "function") renderAll();
+      else if(typeof renderImoveis === "function") renderImoveis();
+    }catch(e){ console.warn("Galeria V10.2:", e); }
+  }, 700);
 })();
 </script>
 
