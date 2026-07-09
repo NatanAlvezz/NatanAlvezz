@@ -10,7 +10,7 @@
   <link rel="icon" href="favicon.png" />
   <link rel="preload" href="hero-leads-floripa-final.webp" as="image" />
   <link rel="preload" href="hero-leads-floripa-mobile.webp" as="image" media="(max-width: 760px)" />
-  <link rel="preload" href="logo-leads-icon-premium.webp" as="image" />
+  <link rel="preload" href="leads-logo.jpeg" as="image" />
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
@@ -228,7 +228,7 @@
     }
     .search-panel,.smart-card{background:rgba(248,253,255,.80)!important;}
     .card-img.no-img{
-      background-image:url('hero-leads-floripa-final.webp')!important;
+      background-image:radial-gradient(circle at 72% 20%,rgba(189,239,255,.62),transparent 28%),linear-gradient(135deg,#eafaff,#dff4fb 45%,#cadfec)!important;
       background-size:cover!important;
       background-position:center!important;
     }
@@ -363,6 +363,62 @@
       .hero{overflow:hidden;}
     }
 
+
+    /* CORREÇÃO FINAL 09/07: logo completa e cards sem foto sem puxar imagem de fundo */
+    .brand-logo,
+    .drawer-head img,
+    .hero-logo,
+    footer img{
+      object-fit:contain!important;
+      object-position:center!important;
+      background:#071422!important;
+    }
+    .hero-logo{
+      width:min(270px,62vw)!important;
+      max-height:none!important;
+      aspect-ratio:1/1!important;
+      padding:10px!important;
+      border-radius:34px!important;
+    }
+    .brand-logo{
+      width:70px!important;
+      height:70px!important;
+      padding:5px!important;
+      border-radius:22px!important;
+    }
+    .drawer-head img,
+    footer img{
+      padding:6px!important;
+    }
+    .card-img.no-img{
+      background-image:radial-gradient(circle at 72% 20%,rgba(189,239,255,.62),transparent 28%),linear-gradient(135deg,#eafaff,#dff4fb 45%,#cadfec)!important;
+      background-size:cover!important;
+      background-position:center!important;
+    }
+    .card-img.no-img:before{
+      content:"LEADS IMÓVEIS"!important;
+      position:absolute!important;
+      left:50%!important;
+      top:50%!important;
+      transform:translate(-50%,-50%)!important;
+      z-index:1!important;
+      color:rgba(7,20,34,.24)!important;
+      font-size:24px!important;
+      font-weight:950!important;
+      letter-spacing:.18em!important;
+      text-align:center!important;
+      width:100%!important;
+      padding:0 18px!important;
+    }
+    @media (max-width:980px){
+      .hero-logo{width:min(230px,68vw)!important;}
+      .brand-logo{width:62px!important;height:62px!important;}
+    }
+    @media (max-width:620px){
+      .hero-logo{width:min(190px,70vw)!important;border-radius:28px!important;}
+      .brand-logo{width:58px!important;height:58px!important;border-radius:20px!important;}
+    }
+
   </style>
 </head>
 <body>
@@ -371,7 +427,7 @@
 
   <header class="topbar" aria-label="Menu principal">
     <a class="brand" href="#inicio" aria-label="Leads Imóveis">
-      <img class="brand-logo" src="logo-leads-icon-premium.webp" alt="Leads Imóveis" />
+      <img class="brand-logo" src="leads-logo.jpeg" alt="Leads Imóveis" />
     </a>
     <nav class="nav" aria-label="Navegação">
       <button onclick="escolherFinalidade('Venda')">Venda</button>
@@ -384,7 +440,7 @@
   </header>
 
   <aside class="mobile-drawer" id="drawer" aria-label="Menu lateral">
-    <div class="drawer-head"><img src="logo-leads-icon-premium.webp" alt="Leads Imóveis" /><button onclick="fecharMenu()">×</button></div>
+    <div class="drawer-head"><img src="leads-logo.jpeg" alt="Leads Imóveis" /><button onclick="fecharMenu()">×</button></div>
     <div class="drawer-nav">
       <button onclick="fecharMenu(); escolherFinalidade('Venda')">Venda</button>
       <button onclick="fecharMenu(); escolherFinalidade('Temporada')">Temporada</button>
@@ -411,7 +467,7 @@
       </div>
       <div class="shell hero-grid">
         <div class="hero-copy">
-          <img class="hero-logo" src="logo-leads-icon-premium.webp" alt="Leads Imóveis" />
+          <img class="hero-logo" src="leads-logo.jpeg" alt="Leads Imóveis" />
           <div class="brand-signature" aria-label="Leads Imóveis">
             <strong>Leads</strong>
             <span>Imóveis</span>
@@ -517,7 +573,7 @@
 
   <footer>
     <div class="shell foot">
-      <img src="logo-leads-icon-premium.webp" alt="Leads Imóveis" />
+      <img src="leads-logo.jpeg" alt="Leads Imóveis" />
       <p><b>Leads Imóveis</b><br />Conectando sonhos. Realizando histórias.<br />Av. dos Búzios · Jurerê Internacional · Florianópolis/SC</p>
     </div>
   </footer>
@@ -864,4 +920,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-Corrigir caminhos das imagens e logo
