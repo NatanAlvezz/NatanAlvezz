@@ -727,7 +727,218 @@
       .hero h1{font-size:30px!important;}
     }
 
-  </style>
+
+    /* AJUSTE FINAL: símbolos flutuantes menores, arredondados e simétricos */
+    .lux-icon.one{
+      display:none!important;
+    }
+    .lux-icon{
+      width:86px!important;
+      min-width:86px!important;
+      height:86px!important;
+      min-height:86px!important;
+      padding:8px!important;
+      border-radius:50%!important;
+      flex-direction:column!important;
+      justify-content:center!important;
+      align-items:center!important;
+      gap:5px!important;
+      text-align:center!important;
+      background:radial-gradient(circle at 34% 22%,rgba(255,255,255,.28),rgba(223,248,255,.10) 38%,rgba(7,20,34,.26) 100%)!important;
+      border:1px solid rgba(223,248,255,.38)!important;
+      box-shadow:0 18px 50px rgba(0,0,0,.22),0 0 24px rgba(116,213,255,.12),inset 0 1px 0 rgba(255,255,255,.18)!important;
+      backdrop-filter:blur(16px) saturate(142%)!important;
+      -webkit-backdrop-filter:blur(16px) saturate(142%)!important;
+      opacity:.82!important;
+    }
+    .lux-icon i{
+      width:30px!important;
+      height:30px!important;
+      border-radius:50%!important;
+      font-size:13px!important;
+      background:radial-gradient(circle at 35% 22%,rgba(255,255,255,.92),rgba(189,239,255,.40) 48%,rgba(7,20,34,.18))!important;
+      border:1px solid rgba(255,255,255,.42)!important;
+      box-shadow:0 0 18px rgba(116,213,255,.20)!important;
+    }
+    .lux-icon b{
+      font-size:8.4px!important;
+      line-height:1.02!important;
+      letter-spacing:.105em!important;
+      white-space:normal!important;
+      max-width:72px!important;
+    }
+    .lux-icon span{
+      margin-top:1px!important;
+      font-size:7.5px!important;
+      line-height:1.05!important;
+      letter-spacing:.035em!important;
+      white-space:normal!important;
+      max-width:74px!important;
+      color:rgba(247,252,255,.72)!important;
+    }
+    .lux-icon.two{right:5.2%!important;top:20%!important;}
+    .lux-icon.three{left:5.2%!important;bottom:21%!important;}
+    .lux-icon.four{right:5.2%!important;bottom:21%!important;}
+    .lux-icon.five{left:46%!important;top:11%!important;transform:scale(.90)!important;}
+    .lux-icon.six{right:23%!important;bottom:9%!important;transform:scale(.86)!important;}
+    @media (max-width:1180px){
+      .lux-icon{width:76px!important;min-width:76px!important;height:76px!important;min-height:76px!important;padding:7px!important;}
+      .lux-icon b{font-size:7.7px!important;max-width:64px!important;}
+      .lux-icon span{font-size:6.9px!important;max-width:66px!important;}
+      .lux-icon.two{right:2.4%!important;top:20%!important;}
+      .lux-icon.three{left:2.4%!important;bottom:17%!important;}
+      .lux-icon.four{right:2.4%!important;bottom:17%!important;}
+    }
+
+
+  
+
+    /* ACABAMENTO ALTO LUXO: IA flutuante + barra superior mais fina e futurista */
+    .topbar{
+      height:66px!important;
+      padding:5px clamp(12px,3.2vw,42px)!important;
+      gap:14px!important;
+      background:linear-gradient(135deg,rgba(248,253,255,.52),rgba(223,248,255,.28))!important;
+      border-bottom:1px solid rgba(223,248,255,.44)!important;
+      box-shadow:0 10px 32px rgba(0,0,0,.085), inset 0 1px 0 rgba(255,255,255,.32)!important;
+      backdrop-filter:blur(22px) saturate(145%)!important;
+      -webkit-backdrop-filter:blur(22px) saturate(145%)!important;
+    }
+    .brand-logo{
+      width:52px!important;
+      height:52px!important;
+      padding:4px!important;
+      border-radius:18px!important;
+      filter:contrast(1.10) saturate(1.06) drop-shadow(0 8px 18px rgba(0,0,0,.18))!important;
+    }
+    .nav button,
+    .nav a{
+      height:32px!important;
+      padding:0 11px!important;
+      font-size:11px!important;
+      letter-spacing:.18px!important;
+    }
+    .menu-btn{
+      width:36px!important;
+      height:36px!important;
+      border-radius:13px!important;
+      font-size:17px!important;
+      background:rgba(7,20,34,.055)!important;
+    }
+    .hero{
+      padding-top:86px!important;
+    }
+    .ai-float{
+      display:grid!important;
+      place-items:center!important;
+      width:66px!important;
+      height:66px!important;
+      right:18px!important;
+      bottom:calc(18px + var(--safe))!important;
+      border-radius:50%!important;
+      background:radial-gradient(circle at 34% 22%,rgba(255,255,255,.96),rgba(223,248,255,.72) 28%,rgba(120,219,255,.42) 55%,rgba(7,20,34,.94) 100%)!important;
+      border:1px solid rgba(223,248,255,.56)!important;
+      color:#071422!important;
+      box-shadow:0 22px 62px rgba(0,0,0,.30),0 0 34px rgba(116,213,255,.30),inset 0 1px 0 rgba(255,255,255,.62)!important;
+      animation:iaRoyalFloat 7.2s ease-in-out infinite!important;
+      transform-origin:center!important;
+      overflow:visible!important;
+    }
+    .ai-float::before{
+      content:"";
+      position:absolute;
+      inset:-8px;
+      border-radius:50%;
+      background:radial-gradient(circle,rgba(189,239,255,.22),transparent 67%);
+      opacity:.78;
+      animation:iaRoyalGlow 4.8s ease-in-out infinite!important;
+      pointer-events:none;
+    }
+    .ai-float span{
+      position:relative!important;
+      z-index:2!important;
+      display:grid!important;
+      place-items:center!important;
+      width:43px!important;
+      height:43px!important;
+      border-radius:50%!important;
+      background:rgba(255,255,255,.30)!important;
+      border:1px solid rgba(255,255,255,.62)!important;
+      color:#071422!important;
+      font-size:14px!important;
+      line-height:1!important;
+      font-weight:950!important;
+      letter-spacing:.04em!important;
+      text-shadow:0 1px 0 rgba(255,255,255,.40)!important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.50),0 0 18px rgba(116,213,255,.16)!important;
+    }
+    @keyframes iaRoyalFloat{
+      0%,100%{transform:translate3d(0,0,0) rotate(-1.2deg) scale(1)}
+      50%{transform:translate3d(0,-14px,0) rotate(1.2deg) scale(1.025)}
+    }
+    @keyframes iaRoyalGlow{
+      0%,100%{opacity:.48;transform:scale(.94)}
+      50%{opacity:.88;transform:scale(1.08)}
+    }
+    .ai-panel{
+      width:min(360px,calc(100vw - 22px))!important;
+      right:16px!important;
+      bottom:calc(88px + var(--safe))!important;
+      border-radius:26px!important;
+    }
+    @media (max-width:980px){
+      .topbar{
+        height:62px!important;
+        padding:5px 12px!important;
+      }
+      .brand-logo{
+        width:50px!important;
+        height:50px!important;
+        border-radius:17px!important;
+        padding:4px!important;
+      }
+      .hero{padding-top:76px!important;}
+      .ai-float{
+        width:62px!important;
+        height:62px!important;
+        right:14px!important;
+        bottom:calc(15px + var(--safe))!important;
+      }
+      .ai-float span{
+        width:40px!important;
+        height:40px!important;
+        font-size:13px!important;
+      }
+      .ai-panel{bottom:calc(82px + var(--safe))!important;right:10px!important;}
+    }
+    @media (max-width:620px){
+      .topbar{
+        height:58px!important;
+        padding:4px 10px!important;
+      }
+      .brand-logo{
+        width:46px!important;
+        height:46px!important;
+        border-radius:16px!important;
+        padding:3px!important;
+      }
+      .menu-btn{
+        width:34px!important;
+        height:34px!important;
+      }
+      .hero{padding-top:70px!important;}
+      .ai-float{
+        width:58px!important;
+        height:58px!important;
+        right:12px!important;
+      }
+      .ai-float span{
+        width:37px!important;
+        height:37px!important;
+        font-size:12px!important;
+      }
+    }
+</style>
 </head>
 <body>
   <div class="hero-bg" aria-hidden="true"></div>
@@ -766,8 +977,7 @@
         <span class="lux-orb a"></span>
         <span class="lux-orb b"></span>
         <span class="lux-orb c"></span>
-        <div class="lux-icon one"><i>⌂</i><div><b>Vista mar</b><span>seleção exclusiva</span></div></div>
-        <div class="lux-icon two"><i>✦</i><div><b>Alto padrão</b><span>imóveis selecionados</span></div></div>
+        <div class="lux-icon two"><i>✦</i><div><b>Alto padrão</b><span>Vista mar · selecionados</span></div></div>
         <div class="lux-icon three"><i>⌖</i><div><b>Jurerê</b><span>localização nobre</span></div></div>
         <div class="lux-icon four"><i>☼</i><div><b>Temporada</b><span>verão em Floripa</span></div></div>
         <div class="lux-icon five"><i>IA</i><div><b>Busca IA</b><span>resposta rápida</span></div></div>
@@ -867,7 +1077,7 @@
     </section>
   </main>
 
-  <button class="ai-float" onclick="abrirIA()" aria-label="Abrir Assistente Leads"><span>✦</span></button>
+  <button class="ai-float" onclick="abrirIA()" aria-label="Abrir Assistente Leads"><span>IA</span></button>
   <aside class="ai-panel" id="aiPanel" aria-label="Assistente Leads">
     <div class="ai-panel-head"><b>Assistente Leads</b><button onclick="fecharIA()">×</button></div>
     <div class="ai-panel-body">
@@ -1226,4 +1436,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-Refinar nome Leads Imóveis estilo premium
