@@ -187,6 +187,182 @@
       background:linear-gradient(180deg,rgba(7,20,34,.02),rgba(7,20,34,.58))!important;
     }
 
+
+    /* VERSÃO PREMIUM 2: logo menor, transparente e integrada ao fundo */
+    .hero-copy{max-width:650px!important;}
+    .hero-logo{
+      width:min(238px,54vw)!important;
+      max-height:238px!important;
+      height:auto!important;
+      object-fit:contain!important;
+      padding:12px!important;
+      margin:0 0 16px!important;
+      border-radius:34px!important;
+      background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.045))!important;
+      border:1px solid rgba(223,248,255,.42)!important;
+      backdrop-filter:blur(16px) saturate(138%)!important;
+      -webkit-backdrop-filter:blur(16px) saturate(138%)!important;
+      box-shadow:0 22px 68px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.18)!important;
+      opacity:.94;
+      filter:drop-shadow(0 12px 28px rgba(0,0,0,.38))!important;
+    }
+    .brand-signature{display:none!important;}
+    .brand-logo{
+      width:68px!important;
+      height:68px!important;
+      border-radius:23px!important;
+      object-fit:contain!important;
+      padding:7px!important;
+      background:linear-gradient(135deg,rgba(7,20,34,.22),rgba(255,255,255,.16))!important;
+      border:1px solid rgba(7,20,34,.12)!important;
+      backdrop-filter:blur(12px)!important;
+      -webkit-backdrop-filter:blur(12px)!important;
+    }
+    .topbar{height:88px!important;background:rgba(248,253,255,.62)!important;}
+    .hero h1{font-size:clamp(30px,5.3vw,62px)!important;letter-spacing:-1.8px!important;margin-top:14px!important;}
+    .hero p{max-width:560px!important;}
+    .hero-bg{background-position:center center!important;filter:saturate(1.06) contrast(1.02);}
+    .hero-bg:before{
+      background:linear-gradient(90deg,rgba(5,15,25,.78),rgba(7,20,34,.48) 42%,rgba(5,15,25,.20) 70%,rgba(7,20,34,.68)),
+                 linear-gradient(180deg,rgba(5,13,21,.10),rgba(5,13,21,.64))!important;
+    }
+    .search-panel,.smart-card{background:rgba(248,253,255,.80)!important;}
+    .card-img.no-img{
+      background-image:url('assets/imovel-sem-foto.webp')!important;
+      background-size:cover!important;
+      background-position:center!important;
+    }
+    .card-img.no-img:before{content:none!important;}
+    .no-photo-label{background:rgba(255,255,255,.92)!important;}
+    @media (max-width:980px){
+      .hero-logo{width:min(190px,58vw)!important;max-height:190px!important;margin:0 auto 14px!important;border-radius:30px!important;}
+      .brand-logo{width:60px!important;height:60px!important;border-radius:20px!important;}
+      .topbar{height:78px!important;}
+    }
+    @media (max-width:620px){
+      .hero-logo{width:min(165px,56vw)!important;max-height:165px!important;border-radius:26px!important;padding:10px!important;}
+      .hero h1{font-size:32px!important;}
+    }
+
+
+    /* ÍCONES FLUTUANTES PREMIUM: inspiração visual de cards flutuantes, sem copiar layout externo */
+    .hero{position:relative;overflow:hidden;}
+    .floating-luxury-icons{
+      position:absolute;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    .lux-icon{
+      position:absolute;
+      min-width:104px;
+      min-height:58px;
+      padding:10px 13px;
+      border-radius:22px;
+      display:flex;
+      align-items:center;
+      gap:9px;
+      color:#f7fcff;
+      background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(223,248,255,.055));
+      border:1px solid rgba(223,248,255,.34);
+      box-shadow:0 20px 58px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.18);
+      backdrop-filter:blur(16px) saturate(136%);
+      -webkit-backdrop-filter:blur(16px) saturate(136%);
+      opacity:.86;
+      animation:luxFloat 8.6s ease-in-out infinite;
+    }
+    .lux-icon i{
+      width:34px;
+      height:34px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      background:radial-gradient(circle at 35% 20%,rgba(255,255,255,.9),rgba(189,239,255,.36) 42%,rgba(7,20,34,.30));
+      border:1px solid rgba(255,255,255,.38);
+      box-shadow:0 0 22px rgba(116,213,255,.24);
+      font-style:normal;
+      font-size:16px;
+      flex:0 0 auto;
+    }
+    .lux-icon b{
+      display:block;
+      font-size:11px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      line-height:1.05;
+      color:#ffffff;
+      white-space:nowrap;
+    }
+    .lux-icon span{
+      display:block;
+      margin-top:3px;
+      font-size:10px;
+      color:rgba(247,252,255,.70);
+      white-space:nowrap;
+    }
+    .lux-icon.one{left:4%;top:20%;animation-delay:-.6s;}
+    .lux-icon.two{right:6%;top:18%;animation-delay:-2.8s;}
+    .lux-icon.three{left:8%;bottom:18%;animation-delay:-4.4s;}
+    .lux-icon.four{right:4%;bottom:22%;animation-delay:-1.4s;}
+    .lux-icon.five{left:42%;top:12%;animation-delay:-5.2s;transform:scale(.92);}
+    .lux-icon.six{right:22%;bottom:8%;animation-delay:-3.6s;transform:scale(.88);}
+    .lux-orb{
+      position:absolute;
+      border-radius:50%;
+      background:radial-gradient(circle,rgba(189,239,255,.30),rgba(116,213,255,.10) 36%,transparent 68%);
+      filter:blur(.2px);
+      opacity:.55;
+      animation:orbDrift 12s ease-in-out infinite alternate;
+    }
+    .lux-orb.a{width:170px;height:170px;left:26%;top:18%;}
+    .lux-orb.b{width:220px;height:220px;right:16%;top:48%;animation-delay:-3s;}
+    .lux-orb.c{width:140px;height:140px;left:62%;top:8%;animation-delay:-6s;}
+    @keyframes luxFloat{
+      0%,100%{transform:translate3d(0,0,0) rotate(-1deg)}
+      50%{transform:translate3d(0,-16px,0) rotate(1.2deg)}
+    }
+    @keyframes orbDrift{
+      from{transform:translate3d(-10px,4px,0) scale(.96)}
+      to{transform:translate3d(12px,-12px,0) scale(1.08)}
+    }
+    .hero-grid{position:relative;z-index:2;}
+    .hero::after{
+      content:"";
+      position:absolute;
+      inset:auto 0 0 0;
+      height:180px;
+      background:linear-gradient(180deg,transparent,rgba(247,253,255,.18));
+      pointer-events:none;
+      z-index:1;
+    }
+    .choice,.smart-card,.search-panel{position:relative;z-index:3;}
+    .choice{
+      border-color:rgba(223,248,255,.30)!important;
+      box-shadow:0 16px 42px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.10);
+    }
+    .choice i{
+      width:28px;
+      height:28px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      background:rgba(223,248,255,.14);
+      border:1px solid rgba(223,248,255,.22);
+      margin-bottom:2px;
+    }
+    @media (max-width:1180px){
+      .lux-icon.five,.lux-icon.six{display:none;}
+      .lux-icon.one{left:2%;top:18%;transform:scale(.86)}
+      .lux-icon.two{right:2%;top:18%;transform:scale(.86)}
+      .lux-icon.three{left:2%;bottom:14%;transform:scale(.82)}
+      .lux-icon.four{right:2%;bottom:14%;transform:scale(.82)}
+    }
+    @media (max-width:980px){
+      .floating-luxury-icons{display:none;}
+      .hero{overflow:hidden;}
+    }
+
   </style>
 </head>
 <body>
@@ -221,6 +397,18 @@
 
   <main id="inicio">
     <section class="hero">
+
+      <div class="floating-luxury-icons" aria-hidden="true">
+        <span class="lux-orb a"></span>
+        <span class="lux-orb b"></span>
+        <span class="lux-orb c"></span>
+        <div class="lux-icon one"><i>⌂</i><div><b>Vista mar</b><span>curadoria premium</span></div></div>
+        <div class="lux-icon two"><i>✦</i><div><b>Alto padrão</b><span>imóveis selecionados</span></div></div>
+        <div class="lux-icon three"><i>⌖</i><div><b>Jurerê</b><span>localização nobre</span></div></div>
+        <div class="lux-icon four"><i>☼</i><div><b>Temporada</b><span>verão em Floripa</span></div></div>
+        <div class="lux-icon five"><i>IA</i><div><b>Busca IA</b><span>resposta rápida</span></div></div>
+        <div class="lux-icon six"><i>#</i><div><b>Código</b><span>busca direta</span></div></div>
+      </div>
       <div class="shell hero-grid">
         <div class="hero-copy">
           <img class="hero-logo" src="assets/logo-leads-icon-premium.webp" alt="Leads Imóveis" />
