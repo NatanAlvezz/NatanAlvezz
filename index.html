@@ -45,10 +45,10 @@
     button{border:0;cursor:pointer}
     a{color:inherit;text-decoration:none}
 
-    .hero-bg{position:fixed;inset:0;z-index:-4;background:url("assets/hero-leads-floripa-final.webp") center/cover no-repeat;transform:scale(1.03);animation:bgMove 26s ease-in-out infinite alternate}
+    .hero-bg{position:fixed;inset:0;z-index:-4;background:url("assets/hero-leads-floripa-final.webp") center 48%/cover no-repeat;transform:scale(1);animation:bgMove 30s ease-in-out infinite alternate}
     .hero-bg:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,15,25,.88),rgba(7,20,34,.58) 42%,rgba(5,15,25,.25) 70%,rgba(7,20,34,.76)),linear-gradient(180deg,rgba(5,13,21,.20),rgba(5,13,21,.74))}
     .hero-bg:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 78% 18%,rgba(189,239,255,.32),transparent 34%),linear-gradient(120deg,transparent 0%,rgba(255,255,255,.12) 42%,transparent 67%);opacity:.55;animation:sweep 10s ease-in-out infinite}
-    @keyframes bgMove{from{transform:scale(1.03) translate3d(-.6%,-.4%,0)}to{transform:scale(1.08) translate3d(.7%,.5%,0)}}
+    @keyframes bgMove{from{transform:scale(1) translate3d(-.25%,-.15%,0)}to{transform:scale(1.025) translate3d(.25%,.15%,0)}}
     @keyframes sweep{0%,62%{opacity:.10;transform:translateX(-12%)}78%{opacity:.42}100%{opacity:.12;transform:translateX(12%)}}
 
     .topbar{position:fixed;top:0;left:0;right:0;z-index:80;height:82px;display:flex;align-items:center;gap:18px;padding:12px clamp(14px,4vw,54px);background:rgba(248,253,255,.78);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.38);box-shadow:0 12px 36px rgba(0,0,0,.10)}
@@ -72,7 +72,7 @@
 
     section{position:relative}.section{padding:56px 0}.surface{background:linear-gradient(180deg,#f7fdff,#eef9ff);color:var(--ink)}.surface .section-title h2{color:var(--ink)}.section-title{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:20px}.section-title small{display:block;color:#6490a5;text-transform:uppercase;font-weight:900;letter-spacing:1.6px;font-size:10px;margin-bottom:6px}.section-title h2{font-size:clamp(24px,3vw,38px);letter-spacing:-1px}.section-title p{color:#55778c;font-size:13px;max-width:470px;line-height:1.55}.step-area{display:none}.step-area.active{display:block}.step-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}.step-btn{border-radius:22px;padding:16px;background:#fff;border:1px solid #d7eef8;color:#071422;text-align:left;min-height:78px;box-shadow:0 10px 28px rgba(30,80,110,.08)}.step-btn b{display:block;font-size:14px}.step-btn span{display:block;margin-top:5px;color:#638395;font-size:12px}.step-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
 
-    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}.card{background:#fff;border:1px solid #dbeff8;border-radius:26px;overflow:hidden;box-shadow:0 18px 50px rgba(14,55,82,.10);color:var(--ink)}.card-img{height:210px;background:url("assets/hero-leads-floripa-final.webp") center/cover no-repeat;position:relative}.card-img:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.58))}.code{position:absolute;left:12px;top:12px;z-index:2;background:rgba(255,255,255,.92);color:#071422;border-radius:999px;font-size:11px;font-weight:900;padding:7px 9px}.tag{position:absolute;right:12px;top:12px;z-index:2;background:rgba(223,248,255,.92);color:#071422;border-radius:999px;font-size:11px;font-weight:900;padding:7px 9px}.card-body{padding:15px}.card-body h3{font-size:16px;line-height:1.2;margin-bottom:7px}.meta{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.meta span{font-size:11px;color:#395f75;background:#f0fbff;border:1px solid #d9f0fa;border-radius:999px;padding:6px 8px}.price{font-size:19px;font-weight:950;margin:10px 0;color:#071422}.desc{color:#537389;font-size:12px;line-height:1.45;min-height:34px}.card-actions{display:flex;gap:8px;margin-top:13px}.card-actions .btn{flex:1}
+    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}.card{background:#fff;border:1px solid #dbeff8;border-radius:26px;overflow:hidden;box-shadow:0 18px 50px rgba(14,55,82,.10);color:var(--ink)}.card-img{height:210px;background:radial-gradient(circle at 72% 20%,rgba(189,239,255,.62),transparent 28%),linear-gradient(135deg,#eafaff,#dff4fb 45%,#cadfec);background-size:cover;background-position:center;position:relative;overflow:hidden}.card-img.has-photo{background-size:cover;background-position:center}.card-img:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,20,34,.02),rgba(7,20,34,.62))}.card-img.no-img:before{content:"LEADS IMÓVEIS";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;color:rgba(7,20,34,.22);font-size:24px;font-weight:950;letter-spacing:.18em;text-align:center;width:100%;padding:0 18px}.no-photo-label{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:2;background:rgba(255,255,255,.90);color:#071422;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:900;white-space:nowrap}.code{position:absolute;left:12px;top:12px;z-index:2;background:rgba(255,255,255,.92);color:#071422;border-radius:999px;font-size:11px;font-weight:900;padding:7px 9px}.tag{position:absolute;right:12px;top:12px;z-index:2;background:rgba(223,248,255,.92);color:#071422;border-radius:999px;font-size:11px;font-weight:900;padding:7px 9px}.card-body{padding:15px}.card-body h3{font-size:16px;line-height:1.2;margin-bottom:7px}.meta{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.meta span{font-size:11px;color:#395f75;background:#f0fbff;border:1px solid #d9f0fa;border-radius:999px;padding:6px 8px}.price{font-size:19px;font-weight:950;margin:10px 0;color:#071422}.desc{color:#537389;font-size:12px;line-height:1.45;min-height:34px}.card-actions{display:flex;gap:8px;margin-top:13px}.card-actions .btn{flex:1}
 
     .contact{background:linear-gradient(135deg,rgba(7,20,34,.96),rgba(15,48,72,.92));color:#fff}.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}.contact-card{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);border-radius:28px;padding:22px;backdrop-filter:blur(16px)}.contact-card h3{font-size:22px;margin-bottom:8px}.contact-card p{font-size:13px;line-height:1.6;color:rgba(255,255,255,.76)}.contact-lines{display:grid;gap:10px;margin-top:18px}.contact-line{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:10px;color:rgba(255,255,255,.82);font-size:13px}.contact-form{display:grid;gap:9px}.contact-form input,.contact-form textarea{width:100%;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.10);color:#fff;border-radius:18px;padding:13px;outline:0}.contact-form textarea{min-height:98px;resize:vertical}.contact-form input::placeholder,.contact-form textarea::placeholder{color:rgba(255,255,255,.56)}.hp{position:absolute;left:-9999px;opacity:0;height:0;width:0}
 
@@ -81,17 +81,17 @@
     footer{background:#f8fdff;color:#071422;padding:26px 0;border-top:1px solid #d9f0fa}footer .foot{display:flex;align-items:center;justify-content:space-between;gap:14px}footer img{width:92px;height:92px;object-fit:contain;border-radius:20px;background:#071422}footer p{font-size:12px;color:#55788f;line-height:1.5}footer a{font-size:12px;color:#55788f;text-decoration:underline;opacity:.75}
 
     @media (max-width:980px){.topbar{height:74px;padding:10px 14px}.brand{min-width:0}.brand-logo{width:54px;height:54px}.brand-text b{font-size:12px}.brand-text span{font-size:9px}.nav{display:none}.menu-btn{display:grid;place-items:center}.hero{padding-top:92px;min-height:auto}.hero-grid{grid-template-columns:1fr}.hero-logo{width:min(260px,70vw);margin:0 auto 14px}.hero-copy{text-align:center;margin:auto}.hero p{margin:auto}.hero-actions{justify-content:center}.quick-choice{grid-template-columns:repeat(2,1fr);margin-inline:auto}.smart-card{max-width:560px;margin:auto}.search-panel{grid-template-columns:1fr 1fr}.search-panel .btn{grid-column:1/-1}.section{padding:42px 0}.contact-grid{grid-template-columns:1fr}.ai-float{display:grid;place-items:center}.ai-panel{right:12px;bottom:calc(82px + var(--safe))}.section-title{display:block}.section-title p{margin-top:8px}.card-img{height:190px}}
-    @media (max-width:620px){.shell{width:min(100% - 20px,1180px)}.hero{padding-bottom:28px}.hero h1{font-size:38px;letter-spacing:-1.2px}.hero p{font-size:13px}.hero-actions .btn{width:100%}.quick-choice{grid-template-columns:1fr}.choice{min-height:56px;padding:12px}.search-panel{grid-template-columns:1fr;padding:10px}.field select,.field input,.search-panel .btn{height:50px}.step-grid,.cards{grid-template-columns:1fr}.contact-card{padding:18px;border-radius:24px}footer .foot{display:block;text-align:center}footer img{margin-bottom:12px}.brand-text{display:none}.smart-card{padding:14px;border-radius:24px}.hero-bg{background-image:url("assets/hero-leads-floripa-mobile.webp")}.ai-chips .chip{padding:7px 8px;font-size:10px}}
+    @media (max-width:620px){.shell{width:min(100% - 20px,1180px)}.hero{padding-bottom:28px}.hero h1{font-size:38px;letter-spacing:-1.2px}.hero p{font-size:13px}.hero-actions .btn{width:100%}.quick-choice{grid-template-columns:1fr}.choice{min-height:56px;padding:12px}.search-panel{grid-template-columns:1fr;padding:10px}.field select,.field input,.search-panel .btn{height:50px}.step-grid,.cards{grid-template-columns:1fr}.contact-card{padding:18px;border-radius:24px}footer .foot{display:block;text-align:center}footer img{margin-bottom:12px}.brand-text{display:none}.smart-card{padding:14px;border-radius:24px}.hero-bg{background-image:url("assets/hero-leads-floripa-mobile.webp");background-position:center top}.ai-chips .chip{padding:7px 8px;font-size:10px}}
     @media (prefers-reduced-motion:reduce){.hero-bg,.hero-bg:after{animation:none!important}}
 
 
     /* ULTRA PREMIUM: logo arredondada, sem nome no header e IA futurista */
     .topbar{height:96px;background:rgba(248,253,255,.72);border-bottom:1px solid rgba(203,242,255,.72)}
     .brand{min-width:0;width:auto;gap:0}.brand-text{display:none!important}
-    .brand-logo{width:82px!important;height:82px!important;border-radius:30px!important;object-fit:cover!important;background:rgba(5,12,20,.98)!important;padding:0!important;border:1px solid rgba(214,247,255,.72);box-shadow:0 18px 46px rgba(0,0,0,.24),0 0 0 8px rgba(223,248,255,.08),inset 0 1px 0 rgba(255,255,255,.20)!important}
-    .hero-logo{width:min(410px,76vw)!important;border-radius:46px;background:rgba(5,12,20,.76);border:1px solid rgba(218,248,255,.50);box-shadow:0 28px 80px rgba(0,0,0,.46),0 0 0 10px rgba(223,248,255,.06);object-fit:cover}
-    .drawer-head img{width:84px!important;height:84px!important;border-radius:30px!important;object-fit:cover!important;border:1px solid #d8f2ff;box-shadow:0 14px 36px rgba(0,0,0,.20)}
-    footer img{width:104px!important;height:104px!important;border-radius:34px!important;object-fit:cover!important;border:1px solid #d8f2ff;box-shadow:0 14px 36px rgba(7,20,34,.14)}
+    .brand-logo{width:82px!important;height:82px!important;border-radius:30px!important;object-fit:contain!important;background:rgba(5,12,20,.98)!important;padding:8px!important;border:1px solid rgba(214,247,255,.72);box-shadow:0 18px 46px rgba(0,0,0,.24),0 0 0 8px rgba(223,248,255,.08),inset 0 1px 0 rgba(255,255,255,.20)!important}
+    .hero-logo{width:min(410px,76vw)!important;border-radius:46px;background:rgba(5,12,20,.76);border:1px solid rgba(218,248,255,.50);box-shadow:0 28px 80px rgba(0,0,0,.46),0 0 0 10px rgba(223,248,255,.06);object-fit:contain!important;padding:16px!important}
+    .drawer-head img{width:84px!important;height:84px!important;border-radius:30px!important;object-fit:contain!important;padding:8px!important;border:1px solid #d8f2ff;box-shadow:0 14px 36px rgba(0,0,0,.20);background:#071422}
+    footer img{width:104px!important;height:104px!important;border-radius:34px!important;object-fit:contain!important;padding:10px!important;border:1px solid #d8f2ff;box-shadow:0 14px 36px rgba(7,20,34,.14);background:#071422}
     .smart-card{border:1px solid rgba(211,246,255,.74);background:rgba(248,253,255,.90);box-shadow:0 28px 90px rgba(0,0,0,.34),0 0 0 1px rgba(255,255,255,.45)}
     .smart-orb{position:relative;width:50px!important;height:50px!important;border-radius:50%!important;background:radial-gradient(circle at 35% 28%,#ffffff 0,#dff8ff 27%,#84dcff 54%,#16364c 100%)!important;color:#071422!important;font-size:20px!important;box-shadow:0 18px 50px rgba(116,213,255,.42),inset 0 1px 0 rgba(255,255,255,.8)!important;overflow:hidden}
     .smart-orb::after{content:"";position:absolute;inset:7px;border-radius:50%;border:1px solid rgba(255,255,255,.78);opacity:.75}
@@ -167,6 +167,24 @@
       .brand-signature strong{font-size:18px;letter-spacing:.22em}
       .brand-signature span{font-size:9px;letter-spacing:.38em;gap:7px}
       .brand-signature span::before,.brand-signature span::after{width:24px}
+    }
+
+
+    /* ORGANIZAÇÃO FINAL DAS IMAGENS: logo sem corte e cards sem usar fundo do site */
+    img.brand-logo,
+    img.hero-logo,
+    .drawer-head img,
+    footer img{
+      object-fit:contain!important;
+    }
+    .hero-bg{
+      background-position:center center!important;
+    }
+    .card-img.no-img{
+      background-image:radial-gradient(circle at 72% 20%,rgba(189,239,255,.62),transparent 28%),linear-gradient(135deg,#eafaff,#dff4fb 45%,#cadfec)!important;
+    }
+    .card-img.no-img:after{
+      background:linear-gradient(180deg,rgba(7,20,34,.02),rgba(7,20,34,.58))!important;
     }
 
   </style>
@@ -384,12 +402,12 @@ function iniciarFrasesRotativas(){
 const estado = { finalidade:'', bairro:'', tipo:'', imoveis:[], resultado:[], etapa:'inicio' };
 
 const demoImoveis = [
-  {codigo:'LID-101',titulo:'Casa premium em Jurerê Internacional',finalidade:'Venda',bairro:'Jurerê Internacional',tipo:'Casas',valor:8250000,area:520,dormitorios:5,suites:5,vagas:4,descricao:'Arquitetura contemporânea, área social integrada e localização exclusiva.',fotos:['assets/hero-leads-floripa-final.webp'],status:'Publicado',is_public:true},
-  {codigo:'LID-202',titulo:'Apartamento elegante próximo ao mar',finalidade:'Venda',bairro:'Jurerê',tipo:'Apartamentos',valor:1950000,area:138,dormitorios:3,suites:2,vagas:2,descricao:'Planta prática, acabamento claro e acesso rápido à praia.',fotos:['assets/hero-leads-floripa-final.webp'],status:'Publicado',is_public:true},
-  {codigo:'LID-303',titulo:'Cobertura com vista em Beira-Mar Norte',finalidade:'Venda',bairro:'Beira-Mar Norte',tipo:'Coberturas',valor:6900000,area:310,dormitorios:4,suites:4,vagas:3,descricao:'Vista urbana, privacidade e terraço para receber com estilo.',fotos:['assets/hero-leads-floripa-final.webp'],status:'Publicado',is_public:true},
-  {codigo:'LID-404',titulo:'Casa de temporada com piscina',finalidade:'Temporada',bairro:'Canasvieiras',tipo:'Casas com piscina',valor:0,area:240,dormitorios:4,suites:2,vagas:3,descricao:'Ideal para verão, família e estadias próximas ao mar.',fotos:['assets/hero-leads-floripa-final.webp'],status:'Publicado',is_public:true},
-  {codigo:'LID-505',titulo:'Apartamento anual mobiliado',finalidade:'Aluguel Anual',bairro:'Campeche',tipo:'Imóveis mobiliados',valor:5800,area:92,dormitorios:2,suites:1,vagas:1,descricao:'Pronto para morar, com excelente mobilidade no sul da ilha.',fotos:['assets/hero-leads-floripa-final.webp'],status:'Publicado',is_public:true},
-  {codigo:'LID-606',titulo:'Terreno para projeto exclusivo',finalidade:'Venda',bairro:'Lagoa da Conceição',tipo:'Terrenos',valor:2200000,area:800,dormitorios:0,suites:0,vagas:0,descricao:'Área estratégica para construir com personalidade.',fotos:['assets/hero-leads-floripa-final.webp'],status:'Publicado',is_public:true}
+  {codigo:'LID-101',titulo:'Casa premium em Jurerê Internacional',finalidade:'Venda',bairro:'Jurerê Internacional',tipo:'Casas',valor:8250000,area:520,dormitorios:5,suites:5,vagas:4,descricao:'Arquitetura contemporânea, área social integrada e localização exclusiva.',fotos:[],status:'Publicado',is_public:true},
+  {codigo:'LID-202',titulo:'Apartamento elegante próximo ao mar',finalidade:'Venda',bairro:'Jurerê',tipo:'Apartamentos',valor:1950000,area:138,dormitorios:3,suites:2,vagas:2,descricao:'Planta prática, acabamento claro e acesso rápido à praia.',fotos:[],status:'Publicado',is_public:true},
+  {codigo:'LID-303',titulo:'Cobertura com vista em Beira-Mar Norte',finalidade:'Venda',bairro:'Beira-Mar Norte',tipo:'Coberturas',valor:6900000,area:310,dormitorios:4,suites:4,vagas:3,descricao:'Vista urbana, privacidade e terraço para receber com estilo.',fotos:[],status:'Publicado',is_public:true},
+  {codigo:'LID-404',titulo:'Casa de temporada com piscina',finalidade:'Temporada',bairro:'Canasvieiras',tipo:'Casas com piscina',valor:0,area:240,dormitorios:4,suites:2,vagas:3,descricao:'Ideal para verão, família e estadias próximas ao mar.',fotos:[],status:'Publicado',is_public:true},
+  {codigo:'LID-505',titulo:'Apartamento anual mobiliado',finalidade:'Aluguel Anual',bairro:'Campeche',tipo:'Imóveis mobiliados',valor:5800,area:92,dormitorios:2,suites:1,vagas:1,descricao:'Pronto para morar, com excelente mobilidade no sul da ilha.',fotos:[],status:'Publicado',is_public:true},
+  {codigo:'LID-606',titulo:'Terreno para projeto exclusivo',finalidade:'Venda',bairro:'Lagoa da Conceição',tipo:'Terrenos',valor:2200000,area:800,dormitorios:0,suites:0,vagas:0,descricao:'Área estratégica para construir com personalidade.',fotos:[],status:'Publicado',is_public:true}
 ];
 
 function escapeHTML(valor){
@@ -398,11 +416,12 @@ function escapeHTML(valor){
 function normalizarTexto(s){ return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim(); }
 function money(v){ const n=Number(v)||0; return n ? n.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}) : 'A consultar'; }
 function safeImageUrl(url){
-  const u = String(url || 'assets/hero-leads-floripa-final.webp').trim();
+  const u = String(url || '').trim();
+  if(!u) return '';
   if(u.startsWith('assets/')) return u.replace(/[\"'<>]/g,'');
   if(/^https:\/\//i.test(u)) return u.replace(/[\"'<>]/g,'');
   if(/^data:image\/(png|jpeg|jpg|webp);base64,/i.test(u)) return u;
-  return 'assets/hero-leads-floripa-final.webp';
+  return '';
 }
 function byId(id){ return document.getElementById(id); }
 function irPara(id){ const el=byId(id); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
@@ -421,7 +440,7 @@ function normalizarImovel(p){
     suites: p.suites ?? 0,
     vagas: p.parking ?? p.vagas ?? 0,
     descricao: p.description || p.descricao || p.descricao_comercial || '',
-    foto: p.image_url || p.foto || fotos[0] || 'assets/hero-leads-floripa-final.webp',
+    foto: p.image_url || p.foto || fotos[0] || '', 
     status: p.status || 'Publicado',
     is_public: p.is_public !== false
   };
@@ -536,9 +555,14 @@ function renderizarImoveis(titulo){
     grid.innerHTML = `<div class="card"><div class="card-body"><h3>Receba uma curadoria personalizada</h3><p class="desc">Não encontrou o imóvel ideal? A Leads Imóveis pode buscar opções para você.</p><div class="card-actions"><button class="btn whatsapp" onclick="abrirWhatsApp()">Chamar no WhatsApp</button></div></div></div>`;
     return;
   }
-  grid.innerHTML = estado.resultado.map((p, idx) => `
+  grid.innerHTML = estado.resultado.map((p, idx) => {
+    const img = safeImageUrl(p.foto);
+    const imgStyle = img ? `style="background-image:url('${img}')"` : '';
+    const imgClass = img ? 'card-img has-photo' : 'card-img no-img';
+    const semFoto = img ? '' : '<span class="no-photo-label">Imagem do imóvel em breve</span>';
+    return `
     <article class="card">
-      <div class="card-img" style="background-image:url('${safeImageUrl(p.foto)}')"><span class="code">${escapeHTML(p.codigo || 'LEADS')}</span><span class="tag">${escapeHTML(p.finalidade)}</span></div>
+      <div class="${imgClass}" ${imgStyle}><span class="code">${escapeHTML(p.codigo || 'LEADS')}</span><span class="tag">${escapeHTML(p.finalidade)}</span>${semFoto}</div>
       <div class="card-body">
         <h3>${escapeHTML(p.titulo)}</h3>
         <p class="desc">${escapeHTML(p.bairro)} · ${escapeHTML(p.tipo)}</p>
@@ -552,7 +576,8 @@ function renderizarImoveis(titulo){
         <p class="desc">${escapeHTML(p.descricao || 'Imóvel selecionado pela Leads Imóveis.')}</p>
         <div class="card-actions"><button class="btn whatsapp" onclick="abrirWhatsAppPorIndice(${idx})">Tenho interesse</button><button class="btn ghost" onclick="resumirImovelIAPorIndice(${idx})">IA</button></div>
       </div>
-    </article>`).join('');
+    </article>`;
+  }).join('');
 }
 
 function abrirWhatsApp(imovel){
