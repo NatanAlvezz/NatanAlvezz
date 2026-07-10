@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1711,6 +1712,32 @@
 <script>
 'use strict';
 
+const LEADS_SUPABASE_URL_DIRETO = 'https://zyfbgydbwsvbaogbxzrd.supabase.co';
+const LEADS_SUPABASE_KEY_DIRETO = 'sb_publishable_AP670pbIpkD_KleT7VaQ3Q_BTsBh8yh';
+
+async function buscarImoveisViaRestDireto(){
+  const select = 'code,title,purpose,neighborhood,type,price,area,bedrooms,suites,parking,description,photos,image_url,is_public,status,updated_at';
+  const url = `${LEADS_SUPABASE_URL_DIRETO}/rest/v1/public_properties?select=${select}&is_public=eq.true&status=eq.Publicado&order=updated_at.desc&limit=120&_=${Date.now()}`;
+
+  const resposta = await fetch(url, {
+    method: 'GET',
+    headers: {
+      apikey: LEADS_SUPABASE_KEY_DIRETO,
+      Authorization: `Bearer ${LEADS_SUPABASE_KEY_DIRETO}`,
+      Accept: 'application/json'
+    }
+  });
+
+  if(!resposta.ok){
+    const texto = await resposta.text().catch(() => '');
+    throw new Error(`REST Supabase falhou: ${resposta.status} ${texto}`);
+  }
+
+  const data = await resposta.json();
+  return Array.isArray(data) ? data : [];
+}
+
+
 const WHATSAPP_NUMERO = '5548991115992';
 const BAIRROS = ['Jurerê Internacional','Jurerê','Canasvieiras','Ingleses','Campeche','Lagoa da Conceição','Beira-Mar Norte','Centro','Outros Bairros'];
 const TIPOS = {
@@ -1820,9 +1847,7 @@ async function carregarImoveisPublicos(){
   try{
     const client = window.supabaseClient || window.leadsSupabaseClient || null;
 
-    if(!client){
-      erroCarregamento = 'Supabase não conectado. Verifique o arquivo supabase-config.js.';
-    } else {
+    if(client){
       const { data, error } = await client
         .from('public_properties')
         .select('code,title,purpose,neighborhood,type,price,area,bedrooms,suites,parking,description,photos,image_url,is_public,status,updated_at')
@@ -1832,15 +1857,21 @@ async function carregarImoveisPublicos(){
         .limit(120);
 
       if(error){
-        console.error('Erro ao carregar imóveis públicos:', error);
-        erroCarregamento = 'Erro ao carregar imóveis publicados do CRM.';
+        console.error('Erro Supabase JS:', error);
+        erroCarregamento = 'Erro ao carregar pelo Supabase JS. Tentando conexão direta.';
       } else if(Array.isArray(data)){
         lista = data.map(normalizarImovel).filter(p => p.is_public && p.status === 'Publicado');
       }
     }
+
+    if(!lista.length){
+      const dataRest = await buscarImoveisViaRestDireto();
+      lista = dataRest.map(normalizarImovel).filter(p => p.is_public && p.status === 'Publicado');
+    }
+
   } catch(e) {
-    console.error('Falha inesperada ao carregar imóveis:', e);
-    erroCarregamento = 'Falha inesperada ao buscar imóveis do CRM.';
+    console.error('Falha ao carregar imóveis públicos:', e);
+    erroCarregamento = 'Não foi possível buscar imóveis publicados do CRM agora.';
   }
 
   estado.imoveis = lista;
@@ -1856,12 +1887,13 @@ function iniciarSincronizacaoCRM(){
   try{
     const client = window.supabaseClient || window.leadsSupabaseClient || null;
     if(!client || !client.channel) return;
+    if(window.__leadsRealtimeIniciado) return;
+    window.__leadsRealtimeIniciado = true;
 
     client
       .channel('site-public-properties-sync')
       .on('postgres_changes', { event:'*', schema:'public', table:'properties' }, () => {
         carregarImoveisPublicos();
-  iniciarSincronizacaoCRM();
       })
       .subscribe();
   } catch(e){
@@ -1951,7 +1983,7 @@ function renderizarImoveis(titulo){
   const grid = byId('imoveisGrid');
   const total = estado.resultado.length;
   byId('resultadoTitulo').textContent = titulo || (total ? `${total} imóveis selecionados` : 'Nenhum imóvel encontrado');
-  byId('resultadoSub').textContent = total ? 'Escolha uma opção e fale com um especialista pelo WhatsApp.' : 'Ajuste os filtros ou fale com a equipe para receber uma curadoria.';
+  byId('resultadoSub').textContent = total ? 'Escolha uma opção e fale com um especialista pelo WhatsApp.' : 'Ajuste os filtros, busque pelo código cod-01 ou fale com a equipe para confirmar disponibilidade.';
   if(!total){
     const temFiltro = !!(estado.finalidade || estado.bairro || estado.tipo || (byId('codigoBusca')?.value || '').trim());
     const msgErro = estado.erroCarregamento ? `<p class="desc">${escapeHTML(estado.erroCarregamento)}</p>` : '';
@@ -2076,6 +2108,7 @@ function enviarContato(event){
 
 document.addEventListener('DOMContentLoaded', () => {
   carregarImoveisPublicos();
+  iniciarSincronizacaoCRM();
   renderizarBairros();
   renderizarTipos();
   iniciarFrasesRotativas();
