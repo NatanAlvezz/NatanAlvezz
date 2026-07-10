@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -13,7 +12,7 @@
   <link rel="icon" href="favicon.png" />
   <link rel="preload" href="hero-leads-floripa-final.webp" as="image" />
   <link rel="preload" href="hero-leads-floripa-mobile.webp" as="image" media="(max-width: 760px)" />
-  <link rel="preload" href="leads-logo-vetor-final.png?v=20260710" as="image" />
+  <link rel="preload" href="leads-logo-vetor-otimizada.webp?v=20260710-2" as="image" />
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
@@ -1358,8 +1357,8 @@
 
     /* FINALIZAÇÃO MASTER: nova imagem 4K + logo LEADS IMÓVEIS vetorizada/flutuante */
     :root{
-      --bottom-bg-image:url("leads-praia-hero-final.png?v=20260709-final");
-      --hero-brand-image:url("leads-praia-hero-final.png?v=20260709-final");
+      --bottom-bg-image:url("leads-praia-hero-final-otimizada.webp?v=20260710-2");
+      --hero-brand-image:url("leads-praia-hero-final-otimizada.webp?v=20260710-2");
     }
 
     /* Mantém o fundo original do topo, mas usa a nova imagem tratada nas partes inferiores */
@@ -1559,7 +1558,7 @@
 
     /* =========================================================
        FINALIZAÇÃO OFICIAL — LOGO LEADS IMÓVEIS VETORIZADA
-       Arquivo: leads-logo-vetor-final.png
+       Arquivo: leads-logo-vetor-otimizada.webp
        ========================================================= */
 
     .hero-logo-mark,
@@ -1616,7 +1615,7 @@
     }
 
     .topbar .brand-logo{
-      content:url("leads-logo-vetor-final.png?v=20260710")!important;
+      content:url("leads-logo-vetor-otimizada.webp?v=20260710-2")!important;
       display:block!important;
       width:84px!important;
       height:54px!important;
@@ -1640,7 +1639,7 @@
     }
 
     .drawer-head img{
-      content:url("leads-logo-vetor-final.png?v=20260710")!important;
+      content:url("leads-logo-vetor-otimizada.webp?v=20260710-2")!important;
       width:138px!important;
       height:100px!important;
       padding:5px!important;
@@ -1655,7 +1654,7 @@
 
     /* Rodapé */
     footer img{
-      content:url("leads-logo-vetor-final.png?v=20260710")!important;
+      content:url("leads-logo-vetor-otimizada.webp?v=20260710-2")!important;
       width:168px!important;
       height:130px!important;
       padding:7px!important;
@@ -1746,6 +1745,255 @@
       }
     }
 
+
+
+    /* =========================================================
+       REFINO FINAL 10/07 — TAMANHOS PADRÃO + SITE MAIS LEVE
+       ========================================================= */
+
+    :root{
+      --logo-leads:url("leads-logo-vetor-otimizada.webp?v=20260710-2");
+    }
+
+    /* Remove regras antigas conflitantes e usa a mesma logo em todos os pontos */
+    .topbar .brand-logo,
+    .drawer-head img,
+    footer img,
+    .hero-logo-premium{
+      content:var(--logo-leads)!important;
+      object-fit:contain!important;
+      object-position:center!important;
+      image-rendering:auto!important;
+      background:transparent!important;
+    }
+
+    /* Barra superior organizada */
+    .topbar{
+      height:68px!important;
+      padding:5px clamp(12px,3vw,38px)!important;
+      gap:12px!important;
+      backdrop-filter:blur(10px) saturate(125%)!important;
+      -webkit-backdrop-filter:blur(10px) saturate(125%)!important;
+    }
+
+    .topbar .brand{
+      width:58px!important;
+      min-width:58px!important;
+      height:58px!important;
+      padding:3px!important;
+      border-radius:18px!important;
+      display:grid!important;
+      place-items:center!important;
+      overflow:hidden!important;
+      background:linear-gradient(135deg,rgba(7,20,34,.96),rgba(13,36,56,.92))!important;
+      border:1px solid rgba(223,248,255,.26)!important;
+      box-shadow:0 10px 26px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.12)!important;
+      backdrop-filter:none!important;
+      -webkit-backdrop-filter:none!important;
+    }
+
+    .topbar .brand-logo{
+      width:52px!important;
+      height:52px!important;
+      max-width:52px!important;
+      max-height:52px!important;
+      padding:0!important;
+      margin:0!important;
+      border:0!important;
+      border-radius:0!important;
+      box-shadow:none!important;
+      filter:drop-shadow(0 5px 9px rgba(0,0,0,.26))!important;
+      transform:none!important;
+    }
+
+    /* Logo principal menor e proporcional */
+    .hero-logo-premium{
+      width:min(255px,42vw)!important;
+      max-width:255px!important;
+      height:auto!important;
+      margin:0 0 12px!important;
+      padding:0!important;
+      border:0!important;
+      border-radius:0!important;
+      box-shadow:none!important;
+      filter:drop-shadow(0 15px 26px rgba(0,0,0,.42))!important;
+      animation:leadsLogoLeve 8s ease-in-out infinite!important;
+      will-change:transform!important;
+    }
+
+    @keyframes leadsLogoLeve{
+      0%,100%{transform:translate3d(0,0,0)}
+      50%{transform:translate3d(0,-6px,0)}
+    }
+
+    /* Menu do celular com o mesmo padrão */
+    .drawer-head{
+      min-height:88px!important;
+    }
+
+    .drawer-head img{
+      width:92px!important;
+      height:82px!important;
+      padding:4px!important;
+      border-radius:20px!important;
+      background:linear-gradient(135deg,#071422,#102b42)!important;
+      border:1px solid rgba(223,248,255,.24)!important;
+      box-shadow:0 10px 26px rgba(0,0,0,.18)!important;
+      filter:drop-shadow(0 5px 9px rgba(0,0,0,.24))!important;
+    }
+
+    /* Rodapé padronizado */
+    footer img{
+      width:112px!important;
+      height:102px!important;
+      padding:5px!important;
+      border-radius:22px!important;
+      background:linear-gradient(135deg,#071422,#102b42)!important;
+      border:1px solid rgba(223,248,255,.24)!important;
+      box-shadow:0 12px 30px rgba(0,0,0,.18)!important;
+      filter:drop-shadow(0 5px 9px rgba(0,0,0,.18))!important;
+    }
+
+    /* Otimizações para reduzir peso e travamentos */
+    .surface{
+      background-attachment:scroll!important;
+    }
+
+    .lux-orb,
+    .lux-icon.five,
+    .lux-icon.six{
+      display:none!important;
+    }
+
+    .smart-card,
+    .search-panel,
+    .choice,
+    .step-btn,
+    .card{
+      backdrop-filter:blur(8px) saturate(118%)!important;
+      -webkit-backdrop-filter:blur(8px) saturate(118%)!important;
+    }
+
+    #bairros,
+    #tipos,
+    #imoveis,
+    #contato,
+    footer{
+      content-visibility:auto;
+      contain-intrinsic-size:1px 700px;
+    }
+
+    @media (max-width:980px){
+      .topbar{
+        height:64px!important;
+        padding:4px 11px!important;
+      }
+
+      .topbar .brand{
+        width:54px!important;
+        min-width:54px!important;
+        height:54px!important;
+        border-radius:17px!important;
+      }
+
+      .topbar .brand-logo{
+        width:48px!important;
+        height:48px!important;
+        max-width:48px!important;
+        max-height:48px!important;
+      }
+
+      .hero{
+        padding-top:78px!important;
+      }
+
+      .hero-logo-premium{
+        width:min(220px,54vw)!important;
+        max-width:220px!important;
+        margin:0 auto 10px!important;
+      }
+
+      .hero-bg{
+        animation:none!important;
+        transform:none!important;
+      }
+
+      .hero-bg::after{
+        animation:none!important;
+      }
+
+      .floating-luxury-icons{
+        display:none!important;
+      }
+    }
+
+    @media (max-width:620px){
+      .topbar{
+        height:60px!important;
+      }
+
+      .topbar .brand{
+        width:50px!important;
+        min-width:50px!important;
+        height:50px!important;
+        border-radius:16px!important;
+      }
+
+      .topbar .brand-logo{
+        width:44px!important;
+        height:44px!important;
+        max-width:44px!important;
+        max-height:44px!important;
+      }
+
+      .hero{
+        padding-top:70px!important;
+      }
+
+      .hero-logo-premium{
+        width:min(176px,52vw)!important;
+        max-width:176px!important;
+        margin:0 auto 8px!important;
+        animation:none!important;
+        filter:drop-shadow(0 11px 20px rgba(0,0,0,.38))!important;
+      }
+
+      .drawer-head img{
+        width:82px!important;
+        height:74px!important;
+      }
+
+      footer img{
+        width:96px!important;
+        height:88px!important;
+        margin:0 auto 12px!important;
+      }
+
+      .smart-card,
+      .search-panel,
+      .choice,
+      .step-btn,
+      .card{
+        backdrop-filter:none!important;
+        -webkit-backdrop-filter:none!important;
+      }
+
+      .ai-float,
+      .ai-float::before{
+        animation:none!important;
+      }
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      .hero-logo-premium,
+      .hero-bg,
+      .hero-bg::after,
+      .ai-float,
+      .ai-float::before{
+        animation:none!important;
+      }
+    }
+
 </style>
 </head>
 <body>
@@ -1754,7 +2002,7 @@
 
   <header class="topbar" aria-label="Menu principal">
     <a class="brand" href="#inicio" aria-label="Leads Imóveis">
-      <img class="brand-logo" src="leads-logo-vetor-final.png?v=20260710" alt="Leads Imóveis" width="168" height="116" decoding="async" fetchpriority="high" />
+      <img class="brand-logo" src="leads-logo-vetor-otimizada.webp?v=20260710-2" alt="Leads Imóveis" width="58" height="58" decoding="async" fetchpriority="high" />
     </a>
     <nav class="nav" aria-label="Navegação">
       <button onclick="escolherFinalidade('Venda')">Venda</button>
@@ -1767,7 +2015,7 @@
   </header>
 
   <aside class="mobile-drawer" id="drawer" aria-label="Menu lateral">
-    <div class="drawer-head"><img src="leads-logo-vetor-final.png?v=20260710" alt="Leads Imóveis" width="148" height="148" decoding="async" /><button onclick="fecharMenu()">×</button></div>
+    <div class="drawer-head"><img loading="lazy" src="leads-logo-vetor-otimizada.webp?v=20260710-2" alt="Leads Imóveis" width="148" height="148" decoding="async" /><button onclick="fecharMenu()">×</button></div>
     <div class="drawer-nav">
       <button onclick="fecharMenu(); escolherFinalidade('Venda')">Venda</button>
       <button onclick="fecharMenu(); escolherFinalidade('Temporada')">Temporada</button>
@@ -1795,7 +2043,7 @@
         <div class="hero-copy">
           <img
             class="hero-logo-premium"
-            src="leads-logo-vetor-final.png?v=20260710"
+            src="leads-logo-vetor-otimizada.webp?v=20260710-2"
             alt="Leads Imóveis"
             width="620"
             height="575"
@@ -1902,7 +2150,7 @@
 
   <footer>
     <div class="shell foot">
-      <img src="leads-logo-vetor-final.png?v=20260710" alt="Leads Imóveis" width="176" height="176" decoding="async" />
+      <img src="leads-logo-vetor-otimizada.webp?v=20260710-2" alt="Leads Imóveis" width="176" height="176" decoding="async" / loading="lazy">
       <p><b>Leads Imóveis</b><br />Conectando sonhos. Realizando histórias.<br />Av. dos Búzios · Jurerê Internacional · Florianópolis/SC</p>
     </div>
   </footer>
@@ -2581,4 +2829,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-Aplicar logo premium completa no site
+Adicionar logo vetorizada premium Leads
