@@ -2114,6 +2114,41 @@ document.addEventListener('DOMContentLoaded', () => {
   iniciarFrasesRotativas();
 });
 </script>
+<script>
+(function(){
+  'use strict';
+  window.money = function(v){
+    var n = Number(v) || 0;
+    return n > 0
+      ? n.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0})
+      : 'Consulte';
+  };
+  var timer = null;
+  window.iniciarSincronizacaoCRM = function(){
+    if(window.__leadsRealtimeOK) return;
+    var c = window.supabaseClient || window.leadsSupabaseClient;
+    if(!c || typeof c.channel !== 'function') return;
+    window.__leadsRealtimeOK = true;
+    c.channel('site-crm-properties-sync')
+     .on('postgres_changes',
+         { event:'*', schema:'public', table:'crm_properties' },
+         function(){
+           clearTimeout(timer);
+           timer = setTimeout(window.carregarImoveisPublicos, 400);
+         })
+     .subscribe(function(s){ console.log('[Leads] Realtime:', s); });
+  };
+  function aplicar(){
+    setTimeout(function(){
+      if(typeof window.carregarImoveisPublicos === 'function') window.carregarImoveisPublicos();
+      window.iniciarSincronizacaoCRM();
+    }, 300);
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', aplicar, { once:true });
+  } else { aplicar(); }
+})();
+</script>
 </body>
 </html>
 Corrigir conexão direta Supabase cod-01
