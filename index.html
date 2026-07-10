@@ -12,7 +12,7 @@
   <link rel="icon" href="favicon.png" />
   <link rel="preload" href="hero-leads-floripa-final.webp" as="image" />
   <link rel="preload" href="hero-leads-floripa-mobile.webp" as="image" media="(max-width: 760px)" />
-  <link rel="preload" href="leads-logo.jpeg?v=20260709-master3" as="image" />
+  <link rel="preload" href="leads-logo-vetor-final.png?v=20260710" as="image" />
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
@@ -1554,6 +1554,197 @@
       }
     }
 
+
+
+    /* =========================================================
+       FINALIZAÇÃO OFICIAL — LOGO LEADS IMÓVEIS VETORIZADA
+       Arquivo: leads-logo-vetor-final.png
+       ========================================================= */
+
+    .hero-logo-mark,
+    .hero-wordmark,
+    .brand-signature,
+    .hero-logo{
+      display:none!important;
+    }
+
+    /* Logo principal na abertura */
+    .hero-logo-premium{
+      position:relative!important;
+      z-index:5!important;
+      display:block!important;
+      width:min(430px,72vw)!important;
+      max-width:100%!important;
+      height:auto!important;
+      margin:-12px 0 14px!important;
+      padding:0!important;
+      object-fit:contain!important;
+      object-position:center!important;
+      background:transparent!important;
+      border:0!important;
+      border-radius:0!important;
+      box-shadow:none!important;
+      filter:
+        drop-shadow(0 24px 42px rgba(0,0,0,.52))
+        drop-shadow(0 0 22px rgba(223,248,255,.16))!important;
+      animation:leadsLogoPremiumFloat 7.5s ease-in-out infinite!important;
+      transform-origin:center center!important;
+      image-rendering:auto!important;
+      -webkit-user-drag:none;
+      user-select:none;
+    }
+
+    @keyframes leadsLogoPremiumFloat{
+      0%,100%{transform:translate3d(0,0,0) scale(1)}
+      50%{transform:translate3d(0,-10px,0) scale(1.012)}
+    }
+
+    /* Logo no topo */
+    .topbar .brand{
+      min-width:0!important;
+      width:auto!important;
+      height:62px!important;
+      padding:4px 9px!important;
+      border-radius:19px!important;
+      background:linear-gradient(135deg,rgba(7,20,34,.96),rgba(13,36,56,.90))!important;
+      border:1px solid rgba(223,248,255,.28)!important;
+      box-shadow:0 14px 36px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.14)!important;
+      backdrop-filter:blur(14px) saturate(135%)!important;
+      -webkit-backdrop-filter:blur(14px) saturate(135%)!important;
+      overflow:visible!important;
+    }
+
+    .topbar .brand-logo{
+      content:url("leads-logo-vetor-final.png?v=20260710")!important;
+      display:block!important;
+      width:84px!important;
+      height:54px!important;
+      max-width:none!important;
+      padding:0!important;
+      margin:0!important;
+      object-fit:contain!important;
+      object-position:center!important;
+      background:transparent!important;
+      border:0!important;
+      border-radius:0!important;
+      box-shadow:none!important;
+      filter:drop-shadow(0 8px 16px rgba(0,0,0,.32))!important;
+      transform:none!important;
+      opacity:1!important;
+    }
+
+    /* Menu mobile */
+    .drawer-head{
+      min-height:108px!important;
+    }
+
+    .drawer-head img{
+      content:url("leads-logo-vetor-final.png?v=20260710")!important;
+      width:138px!important;
+      height:100px!important;
+      padding:5px!important;
+      object-fit:contain!important;
+      background:linear-gradient(135deg,#071422,#102b42)!important;
+      border:1px solid rgba(223,248,255,.30)!important;
+      border-radius:24px!important;
+      box-shadow:0 18px 42px rgba(0,0,0,.24)!important;
+      filter:drop-shadow(0 8px 16px rgba(0,0,0,.28))!important;
+      transform:none!important;
+    }
+
+    /* Rodapé */
+    footer img{
+      content:url("leads-logo-vetor-final.png?v=20260710")!important;
+      width:168px!important;
+      height:130px!important;
+      padding:7px!important;
+      object-fit:contain!important;
+      object-position:center!important;
+      background:linear-gradient(135deg,#071422,#102b42)!important;
+      border:1px solid rgba(223,248,255,.28)!important;
+      border-radius:28px!important;
+      box-shadow:0 18px 46px rgba(0,0,0,.22)!important;
+      filter:drop-shadow(0 8px 16px rgba(0,0,0,.22))!important;
+      transform:none!important;
+    }
+
+    /* Ajuste da composição para dar destaque sem cobrir o conteúdo */
+    .hero-copy{
+      display:flex!important;
+      flex-direction:column!important;
+      align-items:flex-start!important;
+    }
+
+    .hero-copy .eyebrow,
+    .hero-copy h1,
+    .hero-copy p,
+    .hero-copy .hero-actions,
+    .hero-copy .quick-choice{
+      position:relative!important;
+      z-index:5!important;
+    }
+
+    @media (max-width:980px){
+      .hero-copy{
+        align-items:center!important;
+        text-align:center!important;
+      }
+
+      .hero-logo-premium{
+        width:min(370px,78vw)!important;
+        margin:-4px auto 14px!important;
+      }
+
+      .topbar .brand{
+        height:56px!important;
+        padding:3px 7px!important;
+        border-radius:17px!important;
+      }
+
+      .topbar .brand-logo{
+        width:76px!important;
+        height:48px!important;
+      }
+    }
+
+    @media (max-width:620px){
+      .hero-logo-premium{
+        width:min(300px,84vw)!important;
+        margin:0 auto 12px!important;
+        filter:
+          drop-shadow(0 18px 34px rgba(0,0,0,.50))
+          drop-shadow(0 0 16px rgba(223,248,255,.14))!important;
+      }
+
+      .topbar .brand{
+        height:50px!important;
+        padding:2px 6px!important;
+        border-radius:15px!important;
+      }
+
+      .topbar .brand-logo{
+        width:68px!important;
+        height:44px!important;
+      }
+
+      .drawer-head img{
+        width:124px!important;
+        height:90px!important;
+      }
+
+      footer img{
+        width:150px!important;
+        height:116px!important;
+        margin:0 auto 14px!important;
+      }
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      .hero-logo-premium{
+        animation:none!important;
+      }
+    }
+
 </style>
 </head>
 <body>
@@ -1562,7 +1753,7 @@
 
   <header class="topbar" aria-label="Menu principal">
     <a class="brand" href="#inicio" aria-label="Leads Imóveis">
-      <img class="brand-logo" src="leads-logo.jpeg?v=20260709-master3" alt="Leads Imóveis" width="128" height="128" decoding="async" fetchpriority="high" />
+      <img class="brand-logo" src="leads-logo-vetor-final.png?v=20260710" alt="Leads Imóveis" width="168" height="116" decoding="async" fetchpriority="high" />
     </a>
     <nav class="nav" aria-label="Navegação">
       <button onclick="escolherFinalidade('Venda')">Venda</button>
@@ -1575,7 +1766,7 @@
   </header>
 
   <aside class="mobile-drawer" id="drawer" aria-label="Menu lateral">
-    <div class="drawer-head"><img src="leads-logo.jpeg?v=20260709-master3" alt="Leads Imóveis" width="148" height="148" decoding="async" /><button onclick="fecharMenu()">×</button></div>
+    <div class="drawer-head"><img src="leads-logo-vetor-final.png?v=20260710" alt="Leads Imóveis" width="148" height="148" decoding="async" /><button onclick="fecharMenu()">×</button></div>
     <div class="drawer-nav">
       <button onclick="fecharMenu(); escolherFinalidade('Venda')">Venda</button>
       <button onclick="fecharMenu(); escolherFinalidade('Temporada')">Temporada</button>
@@ -1601,10 +1792,15 @@
       </div>
       <div class="shell hero-grid">
         <div class="hero-copy">
-          <div class="hero-logo-mark" aria-label="LEADS IMÓVEIS">
-            <strong>LEADS</strong>
-            <span><i aria-hidden="true"></i><b>IMÓVEIS</b><i aria-hidden="true"></i></span>
-          </div>
+          <img
+            class="hero-logo-premium"
+            src="leads-logo-vetor-final.png?v=20260710"
+            alt="Leads Imóveis"
+            width="620"
+            height="575"
+            decoding="async"
+            fetchpriority="high"
+          />
           <span class="eyebrow">Florianópolis · Jurerê · Norte da Ilha</span>
           <h1><span id="fraseRotativa" class="frase-rotativa">Viva seu próximo imóvel em Florianópolis.</span></h1>
           <p id="fraseApoio" class="frase-apoio">Escolha a região, o tipo de imóvel e receba uma curadoria direta da Leads Imóveis.</p>
@@ -1705,7 +1901,7 @@
 
   <footer>
     <div class="shell foot">
-      <img src="leads-logo.jpeg?v=20260709-master3" alt="Leads Imóveis" width="176" height="176" decoding="async" />
+      <img src="leads-logo-vetor-final.png?v=20260710" alt="Leads Imóveis" width="176" height="176" decoding="async" />
       <p><b>Leads Imóveis</b><br />Conectando sonhos. Realizando histórias.<br />Av. dos Búzios · Jurerê Internacional · Florianópolis/SC</p>
     </div>
   </footer>
