@@ -3019,6 +3019,457 @@
       }
     }
 
+
+
+    /* =========================================================
+       MASTER ÚNICO FINAL — DUAS IMAGENS + VIDRO + FLUTUAÇÃO
+       ========================================================= */
+
+    :root{
+      --leads-top-image:url("hero-leads-floripa-final.webp");
+      --leads-bottom-image:url("leads-praia-hero-final-otimizada.webp");
+      --leads-glass-light:rgba(248,253,255,.76);
+      --leads-glass-dark:rgba(7,20,34,.52);
+      --leads-glass-border:rgba(223,248,255,.42);
+      --leads-cyan-glow:rgba(116,213,255,.24);
+    }
+
+    /* Remove definitivamente os atalhos inferiores antigos. */
+    .quick-choice{
+      display:none!important;
+    }
+
+    /* Imagem 1: topo do site. */
+    .hero-bg{
+      display:block!important;
+      opacity:1!important;
+      visibility:visible!important;
+      background-image:var(--leads-top-image)!important;
+      background-position:center 46%!important;
+      background-size:cover!important;
+      background-repeat:no-repeat!important;
+      filter:saturate(1.06) contrast(1.03)!important;
+    }
+
+    .hero-bg::before{
+      background:
+        linear-gradient(90deg,rgba(4,13,23,.80),rgba(7,20,34,.49) 42%,rgba(7,20,34,.24) 72%,rgba(5,15,25,.66)),
+        linear-gradient(180deg,rgba(5,13,21,.12),rgba(5,13,21,.64))!important;
+    }
+
+    .hero{
+      position:relative!important;
+      overflow:hidden!important;
+      isolation:isolate!important;
+    }
+
+    /* Luz ambiente acima da imagem. */
+    .hero::before{
+      content:""!important;
+      position:absolute!important;
+      inset:0!important;
+      z-index:0!important;
+      pointer-events:none!important;
+      height:auto!important;
+      background:
+        radial-gradient(circle at 18% 22%,rgba(189,239,255,.18),transparent 28%),
+        radial-gradient(circle at 82% 16%,rgba(116,213,255,.14),transparent 31%),
+        linear-gradient(180deg,rgba(255,255,255,.025),transparent 42%)!important;
+    }
+
+    /* Conexão suave entre a imagem superior e a inferior. */
+    .hero::after{
+      content:""!important;
+      position:absolute!important;
+      left:0!important;
+      right:0!important;
+      bottom:-2px!important;
+      height:190px!important;
+      z-index:2!important;
+      pointer-events:none!important;
+      opacity:1!important;
+      background:
+        linear-gradient(
+          180deg,
+          rgba(7,20,34,0) 0%,
+          rgba(7,20,34,.16) 26%,
+          rgba(7,20,34,.58) 66%,
+          rgba(7,20,34,.94) 100%
+        )!important;
+    }
+
+    .hero-grid{
+      position:relative!important;
+      z-index:5!important;
+    }
+
+    /* Imagem 2: todas as partes inferiores. */
+    .surface,
+    .contact,
+    footer{
+      position:relative!important;
+      isolation:isolate!important;
+      background:
+        linear-gradient(180deg,rgba(7,20,34,.91),rgba(7,20,34,.76)),
+        var(--leads-bottom-image) center center/cover no-repeat!important;
+      background-attachment:scroll!important;
+    }
+
+    .surface::before,
+    .contact::before,
+    footer::before{
+      content:""!important;
+      position:absolute!important;
+      inset:0!important;
+      z-index:0!important;
+      pointer-events:none!important;
+      background:
+        radial-gradient(circle at 14% 8%,rgba(189,239,255,.16),transparent 30%),
+        radial-gradient(circle at 85% 18%,rgba(255,255,255,.09),transparent 24%),
+        linear-gradient(180deg,rgba(7,20,34,.05),rgba(7,20,34,.28) 36%,rgba(7,20,34,.58))!important;
+    }
+
+    .surface > .shell,
+    .contact > .shell,
+    footer > .shell{
+      position:relative!important;
+      z-index:2!important;
+    }
+
+    /* Textos claros sobre a segunda imagem. */
+    .surface,
+    .surface .section-title h2,
+    .surface .section-title p,
+    .surface .section-title small{
+      color:#f7fcff!important;
+    }
+
+    .surface .section-title p{
+      color:rgba(247,252,255,.74)!important;
+    }
+
+    /* Vidro real com fallback para navegadores sem backdrop-filter. */
+    .topbar{
+      background:linear-gradient(135deg,rgba(248,253,255,.72),rgba(223,248,255,.34))!important;
+      border-bottom:1px solid rgba(255,255,255,.48)!important;
+      box-shadow:
+        0 14px 42px rgba(0,0,0,.12),
+        inset 0 1px 0 rgba(255,255,255,.52)!important;
+      -webkit-backdrop-filter:blur(17px) saturate(142%)!important;
+      backdrop-filter:blur(17px) saturate(142%)!important;
+    }
+
+    .smart-card,
+    .search-panel,
+    .ai-panel{
+      background:
+        linear-gradient(135deg,rgba(248,253,255,.88),rgba(223,248,255,.72))!important;
+      border:1px solid rgba(255,255,255,.68)!important;
+      box-shadow:
+        0 28px 78px rgba(0,0,0,.25),
+        inset 0 1px 0 rgba(255,255,255,.72),
+        0 0 38px rgba(116,213,255,.13)!important;
+      -webkit-backdrop-filter:blur(18px) saturate(145%)!important;
+      backdrop-filter:blur(18px) saturate(145%)!important;
+    }
+
+    .step-btn,
+    .card{
+      background:linear-gradient(145deg,rgba(255,255,255,.91),rgba(234,249,255,.82))!important;
+      border:1px solid rgba(223,248,255,.58)!important;
+      box-shadow:
+        0 22px 58px rgba(0,0,0,.21),
+        inset 0 1px 0 rgba(255,255,255,.76),
+        0 0 28px rgba(116,213,255,.08)!important;
+      -webkit-backdrop-filter:blur(13px) saturate(132%)!important;
+      backdrop-filter:blur(13px) saturate(132%)!important;
+    }
+
+    .contact-card{
+      background:linear-gradient(135deg,rgba(255,255,255,.13),rgba(223,248,255,.06))!important;
+      border:1px solid rgba(223,248,255,.28)!important;
+      box-shadow:
+        0 22px 60px rgba(0,0,0,.24),
+        inset 0 1px 0 rgba(255,255,255,.17)!important;
+      -webkit-backdrop-filter:blur(15px) saturate(132%)!important;
+      backdrop-filter:blur(15px) saturate(132%)!important;
+    }
+
+    /* =========================================================
+       NOVA CAMADA DE BOLHAS: CLASSES ÚNICAS, SEM CONFLITO
+       ========================================================= */
+    .premium-floating-layer{
+      display:block!important;
+      visibility:visible!important;
+      opacity:1!important;
+      position:absolute!important;
+      inset:0!important;
+      z-index:3!important;
+      pointer-events:none!important;
+      overflow:hidden!important;
+    }
+
+    .premium-orb{
+      display:block!important;
+      position:absolute!important;
+      border-radius:50%!important;
+      opacity:.74!important;
+      background:
+        radial-gradient(circle at 40% 36%,rgba(235,252,255,.46),rgba(116,213,255,.16) 34%,rgba(116,213,255,.035) 62%,transparent 72%)!important;
+      filter:blur(.2px)!important;
+      box-shadow:0 0 58px rgba(116,213,255,.14)!important;
+      animation:premiumOrbMove 11s ease-in-out infinite alternate!important;
+      will-change:transform!important;
+    }
+
+    .premium-orb.orb-a{
+      width:210px!important;
+      height:210px!important;
+      left:19%!important;
+      top:14%!important;
+    }
+
+    .premium-orb.orb-b{
+      width:270px!important;
+      height:270px!important;
+      right:12%!important;
+      top:42%!important;
+      animation-delay:-3.4s!important;
+    }
+
+    .premium-orb.orb-c{
+      width:155px!important;
+      height:155px!important;
+      left:59%!important;
+      top:5%!important;
+      animation-delay:-6.2s!important;
+    }
+
+    @keyframes premiumOrbMove{
+      0%{transform:translate3d(-10px,7px,0) scale(.94)}
+      100%{transform:translate3d(17px,-17px,0) scale(1.10)}
+    }
+
+    .premium-bubble{
+      display:grid!important;
+      visibility:visible!important;
+      opacity:.94!important;
+      position:absolute!important;
+      place-items:center!important;
+      width:74px!important;
+      height:74px!important;
+      border-radius:50%!important;
+      color:#071422!important;
+      font-size:18px!important;
+      line-height:1!important;
+      font-weight:950!important;
+      letter-spacing:.02em!important;
+      background:
+        radial-gradient(circle at 31% 20%,rgba(255,255,255,.96),rgba(223,248,255,.72) 29%,rgba(116,213,255,.28) 57%,rgba(7,20,34,.30) 100%)!important;
+      border:1px solid rgba(255,255,255,.62)!important;
+      box-shadow:
+        0 20px 54px rgba(0,0,0,.25),
+        0 0 34px rgba(116,213,255,.22),
+        inset 0 1px 0 rgba(255,255,255,.70)!important;
+      -webkit-backdrop-filter:blur(12px) saturate(140%)!important;
+      backdrop-filter:blur(12px) saturate(140%)!important;
+      animation:premiumBubbleMove 7.2s ease-in-out infinite!important;
+      will-change:transform!important;
+    }
+
+    .premium-bubble.bubble-a{
+      left:4.5%!important;
+      top:21%!important;
+      animation-delay:-.8s!important;
+    }
+
+    .premium-bubble.bubble-b{
+      right:5%!important;
+      top:20%!important;
+      animation-delay:-2.2s!important;
+    }
+
+    .premium-bubble.bubble-c{
+      left:5.5%!important;
+      bottom:19%!important;
+      animation-delay:-4.4s!important;
+    }
+
+    .premium-bubble.bubble-d{
+      right:6%!important;
+      bottom:19%!important;
+      animation-delay:-5.7s!important;
+      font-size:14px!important;
+    }
+
+    .premium-bubble.bubble-e{
+      left:48%!important;
+      top:8%!important;
+      width:58px!important;
+      height:58px!important;
+      animation-delay:-3.1s!important;
+    }
+
+    @keyframes premiumBubbleMove{
+      0%,100%{transform:translate3d(0,0,0) rotate(-1.4deg) scale(1)}
+      50%{transform:translate3d(0,-15px,0) rotate(1.4deg) scale(1.035)}
+    }
+
+    /* Flutuação também na marca e na IA. */
+    .hero-logo-premium{
+      animation:premiumBrandMove 7.8s ease-in-out infinite!important;
+    }
+
+    @keyframes premiumBrandMove{
+      0%,100%{transform:translate3d(0,0,0) scale(1)}
+      50%{transform:translate3d(0,-8px,0) scale(1.012)}
+    }
+
+    .smart-card{
+      animation:premiumCardMove 9.4s ease-in-out infinite!important;
+    }
+
+    @keyframes premiumCardMove{
+      0%,100%{transform:translate3d(0,0,0)}
+      50%{transform:translate3d(0,-7px,0)}
+    }
+
+    .ai-float{
+      display:grid!important;
+      visibility:visible!important;
+      opacity:1!important;
+      animation:premiumAiMove 6.6s ease-in-out infinite!important;
+    }
+
+    @keyframes premiumAiMove{
+      0%,100%{transform:translate3d(0,0,0) scale(1)}
+      50%{transform:translate3d(0,-11px,0) scale(1.025)}
+    }
+
+    /* Tablet: efeitos continuam aparecendo, sem esconder toda a camada. */
+    @media(max-width:980px){
+      .hero-bg{
+        background-image:url("hero-leads-floripa-mobile.webp")!important;
+        background-position:center top!important;
+      }
+
+      .hero::after{
+        height:145px!important;
+      }
+
+      .premium-floating-layer{
+        display:block!important;
+      }
+
+      .premium-orb.orb-b,
+      .premium-orb.orb-c,
+      .premium-bubble.bubble-c,
+      .premium-bubble.bubble-d,
+      .premium-bubble.bubble-e{
+        display:none!important;
+      }
+
+      .premium-orb.orb-a{
+        width:155px!important;
+        height:155px!important;
+        left:36%!important;
+        top:12%!important;
+        opacity:.48!important;
+      }
+
+      .premium-bubble.bubble-a,
+      .premium-bubble.bubble-b{
+        display:grid!important;
+        width:62px!important;
+        height:62px!important;
+        opacity:.72!important;
+      }
+
+      .premium-bubble.bubble-a{
+        left:1.5%!important;
+        top:25%!important;
+      }
+
+      .premium-bubble.bubble-b{
+        right:1.5%!important;
+        top:25%!important;
+      }
+
+      .surface,
+      .contact,
+      footer{
+        background:
+          linear-gradient(180deg,rgba(7,20,34,.92),rgba(7,20,34,.80)),
+          var(--leads-bottom-image) center center/cover no-repeat!important;
+      }
+    }
+
+    /* Celular: duas bolhas pequenas permanecem visíveis. */
+    @media(max-width:620px){
+      .hero::after{
+        height:112px!important;
+      }
+
+      .premium-bubble.bubble-a,
+      .premium-bubble.bubble-b{
+        width:49px!important;
+        height:49px!important;
+        font-size:13px!important;
+        opacity:.62!important;
+      }
+
+      .premium-bubble.bubble-a{
+        left:-7px!important;
+        top:27%!important;
+      }
+
+      .premium-bubble.bubble-b{
+        right:-7px!important;
+        top:27%!important;
+      }
+
+      .premium-orb.orb-a{
+        width:120px!important;
+        height:120px!important;
+        left:35%!important;
+        top:13%!important;
+        opacity:.36!important;
+      }
+
+      .smart-card,
+      .search-panel{
+        -webkit-backdrop-filter:blur(12px) saturate(132%)!important;
+        backdrop-filter:blur(12px) saturate(132%)!important;
+      }
+
+      .surface,
+      .contact,
+      footer{
+        background:
+          linear-gradient(180deg,rgba(7,20,34,.94),rgba(7,20,34,.84)),
+          var(--leads-bottom-image) center top/cover no-repeat!important;
+      }
+    }
+
+    /* Mesmo com reduzir movimento ativado, elementos continuam visíveis. */
+    @media(prefers-reduced-motion:reduce){
+      .premium-floating-layer,
+      .premium-bubble,
+      .premium-orb{
+        display:block!important;
+        visibility:visible!important;
+        opacity:.68!important;
+      }
+
+      .premium-bubble,
+      .premium-orb,
+      .hero-logo-premium,
+      .smart-card,
+      .ai-float{
+        animation:none!important;
+      }
+    }
+
 </style>
 </head>
 <body>
@@ -3054,17 +3505,18 @@
   <main id="inicio">
     <section class="hero">
 
-      <div class="floating-luxury-icons" aria-hidden="true">
-        <span class="lux-orb a"></span>
-        <span class="lux-orb b"></span>
-        <span class="lux-orb c"></span>
-        <div class="lux-icon two"><i>✦</i><div><b>Alto padrão</b><span>Vista mar · selecionados</span></div></div>
-        <div class="lux-icon three"><i>⌖</i><div><b>Jurerê</b><span>localização nobre</span></div></div>
-        <div class="lux-icon four"><i>☼</i><div><b>Temporada</b><span>verão em Floripa</span></div></div>
-        <div class="lux-icon five"><i>IA</i><div><b>Busca IA</b><span>resposta rápida</span></div></div>
-        <div class="lux-icon six"><i>#</i><div><b>Código</b><span>busca direta</span></div></div>
+      <div class="premium-floating-layer" aria-hidden="true">
+        <span class="premium-orb orb-a"></span>
+        <span class="premium-orb orb-b"></span>
+        <span class="premium-orb orb-c"></span>
+
+        <span class="premium-bubble bubble-a">✦</span>
+        <span class="premium-bubble bubble-b">⌂</span>
+        <span class="premium-bubble bubble-c">⌖</span>
+        <span class="premium-bubble bubble-d">IA</span>
+        <span class="premium-bubble bubble-e">◇</span>
       </div>
-      <div class="shell hero-grid">
+<div class="shell hero-grid">
         <div class="hero-copy">
           <img
             class="hero-logo-premium"
@@ -3081,15 +3533,7 @@
             <button class="btn" onclick="escolherFinalidade('Venda')">Ver imóveis</button>
             <button class="btn secondary" onclick="abrirWhatsApp()">Falar com especialista</button>
           </div>
-          <div class="quick-choice" aria-label="Opções rápidas">
-            <button class="choice" onclick="escolherFinalidade('Venda')"><i>⌂</i><b>Venda</b><span>Comprar em Floripa</span></button>
-            <button class="choice" onclick="escolherFinalidade('Temporada')"><i>☼</i><b>Temporada</b><span>Verão e férias</span></button>
-            <button class="choice" onclick="escolherFinalidade('Aluguel Anual')"><i>▣</i><b>Anual</b><span>Morar na ilha</span></button>
-            <button class="choice" onclick="focoCodigo()"><i>#</i><b>Código</b><span>Busca direta</span></button>
-            <button class="choice" onclick="irPara('bairros')"><i>⌖</i><b>Localização</b><span>Bairros premium</span></button>
-            <button class="choice" onclick="irPara('contato')"><i>↗</i><b>Contato</b><span>Atendimento rápido</span></button>
-          </div>
-        </div>
+</div>
 
         <aside class="smart-card" aria-label="Busca inteligente">
           <div class="smart-head"><div class="smart-orb" aria-hidden="true">✦</div><div><b>Assistente Leads</b><span>Busca inteligente gratuita</span></div></div>
@@ -3818,7 +4262,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 })();
 </script>
-  Aplicar HTML final V3 validado
 </body>
 </html>
 Adicionar logo vetorizada premium Leads
