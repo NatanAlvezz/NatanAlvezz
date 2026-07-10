@@ -1994,6 +1994,249 @@
       }
     }
 
+
+
+    /* =========================================================
+       EFEITOS FUTURISTAS PREMIUM — TRANSLÚCIDO + FLUTUANTE
+       Mantém desempenho otimizado
+       ========================================================= */
+
+    :root{
+      --glass-premium:rgba(248,253,255,.16);
+      --glass-premium-strong:rgba(248,253,255,.23);
+      --glass-border:rgba(223,248,255,.34);
+      --glass-shadow:0 22px 60px rgba(0,0,0,.20);
+      --glass-glow:0 0 34px rgba(116,213,255,.12);
+    }
+
+    /* Fundo com profundidade e brilho futurista */
+    .hero::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      z-index:0;
+      background:
+        radial-gradient(circle at 18% 26%,rgba(189,239,255,.13),transparent 26%),
+        radial-gradient(circle at 78% 18%,rgba(116,213,255,.10),transparent 30%),
+        linear-gradient(180deg,rgba(255,255,255,.03),transparent 36%);
+    }
+
+    .hero-grid,
+    .search-panel{
+      position:relative!important;
+      z-index:2!important;
+    }
+
+    /* Barra superior vidro premium */
+    .topbar{
+      background:
+        linear-gradient(135deg,rgba(248,253,255,.62),rgba(223,248,255,.26))!important;
+      border-bottom:1px solid rgba(255,255,255,.38)!important;
+      box-shadow:
+        0 12px 38px rgba(0,0,0,.10),
+        inset 0 1px 0 rgba(255,255,255,.40)!important;
+      backdrop-filter:blur(14px) saturate(135%)!important;
+      -webkit-backdrop-filter:blur(14px) saturate(135%)!important;
+    }
+
+    /* Logo do topo com efeito flutuante discreto */
+    .topbar .brand{
+      animation:brandFloatPremium 7.8s ease-in-out infinite!important;
+      box-shadow:
+        0 14px 36px rgba(0,0,0,.18),
+        inset 0 1px 0 rgba(255,255,255,.18),
+        0 0 24px rgba(116,213,255,.10)!important;
+    }
+
+    @keyframes brandFloatPremium{
+      0%,100%{transform:translate3d(0,0,0)}
+      50%{transform:translate3d(0,-4px,0)}
+    }
+
+    /* Logo principal flutuando com brilho suave */
+    .hero-logo-premium{
+      animation:heroLogoPremiumFloat 8.6s ease-in-out infinite!important;
+      filter:
+        drop-shadow(0 18px 30px rgba(0,0,0,.40))
+        drop-shadow(0 0 16px rgba(189,239,255,.12))!important;
+    }
+
+    @keyframes heroLogoPremiumFloat{
+      0%,100%{transform:translate3d(0,0,0) scale(1)}
+      50%{transform:translate3d(0,-8px,0) scale(1.012)}
+    }
+
+    /* Painel de IA translúcido */
+    .smart-card{
+      background:
+        linear-gradient(135deg,rgba(248,253,255,.88),rgba(223,248,255,.70))!important;
+      border:1px solid rgba(255,255,255,.62)!important;
+      box-shadow:
+        0 28px 78px rgba(0,0,0,.24),
+        inset 0 1px 0 rgba(255,255,255,.66),
+        0 0 34px rgba(116,213,255,.12)!important;
+      backdrop-filter:blur(16px) saturate(138%)!important;
+      -webkit-backdrop-filter:blur(16px) saturate(138%)!important;
+      animation:panelFloatPremium 9.5s ease-in-out infinite!important;
+    }
+
+    @keyframes panelFloatPremium{
+      0%,100%{transform:translate3d(0,0,0)}
+      50%{transform:translate3d(0,-7px,0)}
+    }
+
+    /* Busca principal em vidro */
+    .search-panel{
+      background:
+        linear-gradient(135deg,rgba(248,253,255,.78),rgba(223,248,255,.58))!important;
+      border:1px solid rgba(255,255,255,.54)!important;
+      box-shadow:
+        0 24px 66px rgba(0,0,0,.18),
+        inset 0 1px 0 rgba(255,255,255,.52),
+        0 0 28px rgba(116,213,255,.08)!important;
+      backdrop-filter:blur(14px) saturate(130%)!important;
+      -webkit-backdrop-filter:blur(14px) saturate(130%)!important;
+    }
+
+    /* Cards rápidos e blocos premium */
+    .choice,
+    .step-btn,
+    .card,
+    .contact-card{
+      border:1px solid rgba(223,248,255,.30)!important;
+      box-shadow:
+        0 18px 48px rgba(0,0,0,.14),
+        inset 0 1px 0 rgba(255,255,255,.22),
+        0 0 24px rgba(116,213,255,.07)!important;
+      transition:
+        transform .28s ease,
+        box-shadow .28s ease,
+        border-color .28s ease!important;
+    }
+
+    .choice{
+      background:
+        linear-gradient(135deg,rgba(255,255,255,.17),rgba(223,248,255,.065))!important;
+      backdrop-filter:blur(12px) saturate(128%)!important;
+      -webkit-backdrop-filter:blur(12px) saturate(128%)!important;
+    }
+
+    .choice:hover,
+    .step-btn:hover,
+    .card:hover{
+      transform:translate3d(0,-6px,0)!important;
+      border-color:rgba(223,248,255,.52)!important;
+      box-shadow:
+        0 26px 64px rgba(0,0,0,.18),
+        inset 0 1px 0 rgba(255,255,255,.30),
+        0 0 34px rgba(116,213,255,.12)!important;
+    }
+
+    /* Seções internas com leve transparência */
+    .surface{
+      position:relative!important;
+      overflow:hidden!important;
+    }
+
+    .surface::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      z-index:0;
+      background:
+        radial-gradient(circle at 14% 10%,rgba(189,239,255,.10),transparent 28%),
+        radial-gradient(circle at 86% 18%,rgba(255,255,255,.07),transparent 22%);
+    }
+
+    .surface > .shell{
+      position:relative!important;
+      z-index:1!important;
+    }
+
+    /* Botão IA flutuante premium */
+    .ai-float{
+      animation:aiFloatPremium 6.8s ease-in-out infinite!important;
+      box-shadow:
+        0 24px 68px rgba(0,0,0,.28),
+        0 0 36px rgba(116,213,255,.28),
+        inset 0 1px 0 rgba(255,255,255,.62)!important;
+    }
+
+    @keyframes aiFloatPremium{
+      0%,100%{transform:translate3d(0,0,0) scale(1)}
+      50%{transform:translate3d(0,-10px,0) scale(1.025)}
+    }
+
+    /* Menu mobile e rodapé com vidro */
+    .mobile-drawer{
+      background:
+        linear-gradient(145deg,rgba(248,253,255,.95),rgba(223,248,255,.86))!important;
+      backdrop-filter:blur(18px) saturate(135%)!important;
+      -webkit-backdrop-filter:blur(18px) saturate(135%)!important;
+      border-left:1px solid rgba(255,255,255,.55)!important;
+    }
+
+    footer{
+      backdrop-filter:blur(10px) saturate(120%)!important;
+      -webkit-backdrop-filter:blur(10px) saturate(120%)!important;
+    }
+
+    /* Performance: movimentos leves e sem exagero no celular */
+    @media (max-width:980px){
+      .smart-card{
+        animation:panelFloatPremiumMobile 10s ease-in-out infinite!important;
+      }
+
+      @keyframes panelFloatPremiumMobile{
+        0%,100%{transform:translate3d(0,0,0)}
+        50%{transform:translate3d(0,-4px,0)}
+      }
+
+      .hero-logo-premium{
+        animation:heroLogoPremiumMobile 9s ease-in-out infinite!important;
+      }
+
+      @keyframes heroLogoPremiumMobile{
+        0%,100%{transform:translate3d(0,0,0)}
+        50%{transform:translate3d(0,-5px,0)}
+      }
+    }
+
+    @media (max-width:620px){
+      .topbar{
+        backdrop-filter:blur(10px) saturate(125%)!important;
+        -webkit-backdrop-filter:blur(10px) saturate(125%)!important;
+      }
+
+      .smart-card,
+      .search-panel,
+      .choice{
+        backdrop-filter:blur(8px) saturate(118%)!important;
+        -webkit-backdrop-filter:blur(8px) saturate(118%)!important;
+      }
+
+      .choice:hover,
+      .step-btn:hover,
+      .card:hover{
+        transform:none!important;
+      }
+
+      .topbar .brand{
+        animation:none!important;
+      }
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      .topbar .brand,
+      .hero-logo-premium,
+      .smart-card,
+      .ai-float{
+        animation:none!important;
+      }
+    }
+
 </style>
 </head>
 <body>
@@ -2830,3 +3073,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </body>
 </html>
 Adicionar logo vetorizada premium Leads
+Aplicar acabamento futurista translúcido e flutuante
