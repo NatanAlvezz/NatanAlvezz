@@ -379,14 +379,65 @@
       line-height: 1.62;
     }
 
-    .rotating-title,
-    .rotating-copy {
-      transition: opacity 0.35s ease, transform 0.35s ease;
+    .hero-phrase-panel {
+      width: min(710px, 100%);
+      min-height: 190px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+      padding: clamp(18px, 2.4vw, 28px);
+      overflow: hidden;
+      isolation: isolate;
+      position: relative;
+      color: #fff;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.13), rgba(116, 213, 255, 0.055));
+      border: 1px solid rgba(189, 239, 255, 0.28);
+      border-radius: 28px;
+      box-shadow: 0 24px 58px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+      -webkit-backdrop-filter: blur(18px) saturate(145%);
+      backdrop-filter: blur(18px) saturate(145%);
+      transition: opacity 0.42s ease, transform 0.42s ease, filter 0.42s ease,
+                  background 0.42s ease, border-color 0.42s ease, box-shadow 0.42s ease;
     }
 
-    .changing {
+    .hero-phrase-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background: linear-gradient(110deg, transparent 10%, rgba(255, 255, 255, 0.10) 44%, transparent 72%);
+      transform: translateX(-120%);
+      transition: transform 0.8s ease;
+    }
+
+    .hero-phrase-panel:hover::before {
+      transform: translateX(120%);
+    }
+
+    .rotating-title,
+    .rotating-copy {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+      transition: opacity 0.38s ease, transform 0.38s ease, filter 0.38s ease;
+    }
+
+    .hero-phrase-panel.changing {
+      opacity: 0.30;
+      transform: translateY(8px) scale(0.985);
+      filter: saturate(1.18) brightness(1.08);
+      background: rgba(220, 247, 255, 0.16);
+      border-color: rgba(189, 239, 255, 0.52);
+      box-shadow: 0 18px 46px rgba(0, 0, 0, 0.18), 0 0 36px rgba(116, 213, 255, 0.16);
+    }
+
+    .hero-phrase-panel.changing .rotating-title,
+    .hero-phrase-panel.changing .rotating-copy {
       opacity: 0;
-      transform: translateY(7px);
+      transform: translateY(9px);
+      filter: blur(7px);
     }
 
     .hero-actions {
@@ -1490,6 +1541,62 @@
       transform: translateY(-5px);
     }
 
+    @media (min-width: 981px) {
+      .hero-copy {
+        animation: desktopHeroEntry 0.9s cubic-bezier(.22, .78, .28, 1) both;
+      }
+
+      .assistant-card {
+        animation: desktopAssistantFloat 6.2s ease-in-out infinite;
+        transition: transform 0.30s ease, box-shadow 0.30s ease,
+                    background 0.30s ease, border-color 0.30s ease;
+      }
+
+      .assistant-card:hover {
+        transform: translateY(-7px) scale(1.012);
+        background: rgba(248, 253, 255, 0.94);
+        border-color: rgba(189, 239, 255, 0.72);
+        box-shadow: 0 34px 88px rgba(0, 0, 0, 0.34), 0 0 42px rgba(116, 213, 255, 0.14);
+      }
+
+      .quick-option,
+      .search-box,
+      .contact-card,
+      .property-card {
+        transition: transform 0.28s ease, box-shadow 0.28s ease,
+                    background 0.28s ease, border-color 0.28s ease, filter 0.28s ease;
+      }
+
+      .quick-option:hover {
+        transform: translateY(-5px) scale(1.015);
+        background: rgba(223, 248, 255, 0.20);
+        border-color: rgba(189, 239, 255, 0.58);
+        box-shadow: 0 20px 46px rgba(0, 0, 0, 0.20);
+      }
+
+      .search-box:hover,
+      .contact-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 30px 78px rgba(4, 12, 22, 0.20), 0 0 34px rgba(116, 213, 255, 0.10);
+      }
+
+      .desktop-nav button:hover,
+      .desktop-nav a:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(116, 213, 255, 0.16);
+      }
+    }
+
+    @keyframes desktopHeroEntry {
+      from { opacity: 0; transform: translateY(22px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes desktopAssistantFloat {
+      0%, 100% { translate: 0 0; }
+      50% { translate: 0 -7px; }
+    }
+
     @media (max-width: 980px) {
       .desktop-nav { display: none; }
       .menu-button { display: grid; }
@@ -1520,7 +1627,12 @@
         padding: 104px 0 58px;
       }
       .hero-logo { width: min(270px, 74vw); }
-      .hero h1 { font-size: clamp(34px, 11vw, 53px); letter-spacing: -1.5px; }
+      .hero-phrase-panel {
+        min-height: 220px;
+        padding: 18px;
+        border-radius: 23px;
+      }
+      .hero h1 { font-size: clamp(32px, 10.2vw, 50px); letter-spacing: -1.35px; }
       .quick-options { grid-template-columns: 1fr; }
       .quick-option { min-height: 72px; }
       .search-section { padding-top: 58px; }
@@ -1553,11 +1665,22 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
+      html {
         scroll-behavior: auto !important;
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
+      }
+
+      .hero-background,
+      .brand,
+      .hero-logo,
+      .floating-ai,
+      .assistant-card,
+      .hero-copy {
+        animation: none !important;
+      }
+
+      .property-card {
+        opacity: 1 !important;
+        transform: none !important;
       }
     }
   </style>
@@ -1604,17 +1727,14 @@
         <div class="hero-copy">
           <img class="hero-logo" src="leads-logo-completa-v3.webp" alt="Leads Imóveis" />
           <span class="eyebrow">Florianópolis · Jurerê · Norte da Ilha</span>
-          <h1 class="rotating-title" id="rotatingTitle">Viva seu próximo imóvel em Florianópolis.</h1>
-          <p class="rotating-copy" id="rotatingCopy">Escolha a região, o tipo de imóvel e receba uma curadoria direta da Leads Imóveis.</p>
+          <div class="hero-phrase-panel" id="heroPhrasePanel" aria-live="polite" aria-atomic="true">
+            <h1 class="rotating-title" id="rotatingTitle">Seu próximo imóvel pode ser o começo da sua melhor fase.</h1>
+            <p class="rotating-copy" id="rotatingCopy">Comprar, vender ou alugar fica mais simples quando você encontra o lugar certo e o atendimento certo.</p>
+          </div>
 
           <div class="hero-actions">
             <button class="button" type="button" data-scroll-search>Ver imóveis</button>
             <a class="button secondary" href="https://wa.me/5548991115992?text=Olá%2C%20vim%20pelo%20site%20da%20Leads%20Imóveis%20e%20gostaria%20de%20falar%20com%20um%20especialista." target="_blank" rel="noopener noreferrer">Falar com especialista</a>
-          </div>
-
-          <div class="motivation-strip" aria-live="polite" aria-atomic="true">
-            <span class="motivation-mark" aria-hidden="true">✦</span>
-            <span class="motivation-text" id="clientMotivation">Seu próximo lar pode estar mais perto do que você imagina.</span>
           </div>
 
           <div class="quick-options" aria-label="Atalhos de busca">
@@ -1845,26 +1965,126 @@
     window.leadsSiteState = state;
 
     const phrases = [
-      "Seu próximo lar pode estar mais perto do que você imagina.",
-      "Grandes histórias começam com a escolha do lugar certo.",
-      "Encontre um imóvel que combine com a sua maneira de viver.",
-      "Florianópolis espera por você com novas possibilidades.",
-      "O endereço certo transforma planos em realidade.",
-      "Seu novo começo merece um lugar especial.",
-      "Cada imóvel pode guardar o início de uma nova história.",
-      "Mais que imóveis, encontramos espaços para viver momentos.",
-      "O seu sonho merece uma busca feita com atenção.",
-      "O imóvel ideal é aquele que faz você se sentir em casa.",
-      "Investir bem começa com informação e boas escolhas.",
-      "A vista perfeita pode ser o cenário da sua próxima fase.",
-      "Conforto, localização e propósito em uma única escolha.",
-      "Sua próxima conquista pode começar hoje.",
-      "Um bom imóvel conecta pessoas, planos e oportunidades.",
-      "Encontre o espaço certo para viver o que realmente importa.",
-      "O futuro que você imagina pode ter um novo endereço.",
-      "Escolher bem hoje é viver melhor amanhã.",
-      "Sua melhor experiência imobiliária começa com um bom atendimento.",
-      "A Leads Imóveis aproxima você do lugar que procura."
+      {
+        title: 'Seu próximo imóvel pode ser o começo da sua melhor fase.',
+        copy: 'Comprar, vender ou alugar fica mais simples quando você encontra o lugar certo e o atendimento certo.'
+      },
+      {
+        title: 'O endereço certo transforma planos em realidade.',
+        copy: 'A Leads Imóveis aproxima você das melhores oportunidades para morar, investir ou recomeçar em Florianópolis.'
+      },
+      {
+        title: 'Toda grande mudança começa com uma escolha bem feita.',
+        copy: 'Encontre um imóvel que combine com seus objetivos, seu estilo de vida e o momento que você está vivendo.'
+      },
+      {
+        title: 'Seu novo lar pode estar mais perto do que imagina.',
+        copy: 'Explore imóveis para venda e locação com informações claras, fotos reais e atendimento humanizado.'
+      },
+      {
+        title: 'Mais do que paredes, escolha onde sua história vai acontecer.',
+        copy: 'O imóvel ideal cria espaço para novos planos, conquistas e momentos que ficam para sempre.'
+      },
+      {
+        title: 'A melhor oportunidade é aquela que combina com você.',
+        copy: 'Conte o que procura e deixe a Leads Imóveis ajudar a transformar sua busca em uma decisão segura.'
+      },
+      {
+        title: 'Morar bem começa com uma busca feita com atenção.',
+        copy: 'Localização, conforto e propósito se encontram quando cada detalhe da escolha é realmente considerado.'
+      },
+      {
+        title: 'Seu próximo capítulo merece um endereço especial.',
+        copy: 'Descubra casas e apartamentos selecionados para viver o melhor de Florianópolis.'
+      },
+      {
+        title: 'O imóvel certo muda a rotina e amplia possibilidades.',
+        copy: 'Encontre espaços preparados para acompanhar seus planos de hoje e seus sonhos de amanhã.'
+      },
+      {
+        title: 'Comprar com confiança começa com informação de qualidade.',
+        copy: 'Compare opções, conheça os detalhes e converse com quem entende o mercado imobiliário da região.'
+      },
+      {
+        title: 'Alugar bem é encontrar praticidade sem abrir mão do conforto.',
+        copy: 'Veja opções de aluguel anual para viver Florianópolis com segurança, tranquilidade e conveniência.'
+      },
+      {
+        title: 'A locação ideal combina prazo, localização e estilo de vida.',
+        copy: 'Escolha um imóvel que faça sentido para sua rotina e permita aproveitar melhor cada dia.'
+      },
+      {
+        title: 'Seu imóvel também pode se transformar em uma grande oportunidade.',
+        copy: 'Anuncie para venda ou locação com apresentação profissional e atendimento próximo do início ao fim.'
+      },
+      {
+        title: 'Vender bem é apresentar valor antes mesmo da visita.',
+        copy: 'Fotos, descrição e divulgação estratégica ajudam seu imóvel a chegar às pessoas certas.'
+      },
+      {
+        title: 'Um bom negócio imobiliário começa com confiança.',
+        copy: 'Atendimento transparente e informações organizadas tornam cada decisão mais tranquila.'
+      },
+      {
+        title: 'O futuro que você imagina pode ter um novo endereço.',
+        copy: 'Encontre o espaço certo para transformar intenção em conquista e planejamento em realidade.'
+      },
+      {
+        title: 'A casa certa faz você sentir que chegou ao lugar certo.',
+        copy: 'Cada detalhe importa quando o objetivo é encontrar conforto, segurança e qualidade de vida.'
+      },
+      {
+        title: 'Investir em imóveis é investir em possibilidades.',
+        copy: 'Conheça oportunidades alinhadas ao seu perfil e tome decisões com mais clareza.'
+      },
+      {
+        title: 'Florianópolis pode ser o cenário da sua próxima conquista.',
+        copy: 'Viva perto do mar, dos serviços e das regiões que mais combinam com o seu momento.'
+      },
+      {
+        title: 'Sua próxima mudança pode começar hoje.',
+        copy: 'Pesquise por bairro, tipo ou finalidade e descubra imóveis publicados em tempo real.'
+      },
+      {
+        title: 'Escolher bem hoje é viver melhor amanhã.',
+        copy: 'Uma boa decisão imobiliária une planejamento, informação e uma oportunidade que faça sentido.'
+      },
+      {
+        title: 'O imóvel perfeito não é igual para todos. É certo para você.',
+        copy: 'Conte suas prioridades e encontre opções realmente próximas do que deseja.'
+      },
+      {
+        title: 'Grandes histórias começam quando encontramos o nosso lugar.',
+        copy: 'A Leads Imóveis conecta pessoas, imóveis e oportunidades em Florianópolis.'
+      },
+      {
+        title: 'Seu sonho merece uma busca feita com dedicação.',
+        copy: 'Do primeiro contato à escolha final, cada etapa pode ser leve, organizada e segura.'
+      },
+      {
+        title: 'Um novo endereço pode renovar toda a sua vida.',
+        copy: 'Encontre ambientes que inspirem bem-estar, liberdade e novos planos.'
+      },
+      {
+        title: 'A vista certa pode mudar a forma como você vive.',
+        copy: 'Descubra imóveis próximos ao mar e às melhores regiões de Florianópolis.'
+      },
+      {
+        title: 'Quando o imóvel combina com você, a decisão fica mais clara.',
+        copy: 'Nossa curadoria ajuda a reduzir a busca e destacar oportunidades realmente relevantes.'
+      },
+      {
+        title: 'Toda chave entregue representa uma nova conquista.',
+        copy: 'Venda, compra e locação podem ser experiências positivas quando existe cuidado em cada detalhe.'
+      },
+      {
+        title: 'Seu imóvel merece ser visto pelas pessoas certas.',
+        copy: 'Uma apresentação profissional aumenta a confiança e valoriza cada oportunidade de venda ou locação.'
+      },
+      {
+        title: 'A Leads Imóveis aproxima você do lugar que procura.',
+        copy: 'Tecnologia, atendimento humano e conhecimento local para tornar sua jornada imobiliária mais simples.'
+      }
     ];
 
     const assistantSuggestions = [
@@ -2597,42 +2817,50 @@
       if (window.__frasesRotativasAtivas) return;
       window.__frasesRotativasAtivas = true;
 
-      const element = byId("clientMotivation");
-      if (!element || !phrases.length) return;
+      const panel = byId("heroPhrasePanel");
+      const title = byId("rotatingTitle");
+      const copy = byId("rotatingCopy");
+
+      if (!panel || !title || !copy || !phrases.length) return;
 
       let currentIndex = 0;
       let timer = null;
+      let transitionTimer = null;
 
       const scheduleNext = () => {
         window.clearTimeout(timer);
-        const delay = 3000 + Math.floor(Math.random() * 2001);
+        const delay = 2000 + Math.floor(Math.random() * 3001);
         timer = window.setTimeout(showNext, delay);
       };
 
       const showNext = () => {
-        if (document.hidden) {
-          scheduleNext();
-          return;
-        }
+        if (document.hidden) return;
 
         let nextIndex = currentIndex;
         while (phrases.length > 1 && nextIndex === currentIndex) {
           nextIndex = Math.floor(Math.random() * phrases.length);
         }
 
-        element.classList.add("changing");
+        panel.classList.add("changing");
+        window.clearTimeout(transitionTimer);
 
-        window.setTimeout(() => {
+        transitionTimer = window.setTimeout(() => {
           currentIndex = nextIndex;
-          element.textContent = phrases[currentIndex];
-          element.classList.remove("changing");
+          title.textContent = phrases[currentIndex].title;
+          copy.textContent = phrases[currentIndex].copy;
+          panel.classList.remove("changing");
           scheduleNext();
-        }, 280);
+        }, 420);
       };
 
       document.addEventListener("visibilitychange", () => {
         window.clearTimeout(timer);
-        if (!document.hidden) scheduleNext();
+        window.clearTimeout(transitionTimer);
+
+        if (!document.hidden) {
+          panel.classList.remove("changing");
+          scheduleNext();
+        }
       });
 
       scheduleNext();
@@ -2799,6 +3027,6 @@
 
     window.addEventListener("DOMContentLoaded", initializeSite);
   </script>
-  <script src="site-chat-lia.js?v=20260711-2"></script>
+  <script src="site-chat-lia.js?v=20260711-3"></script>
 </body>
 </html>
