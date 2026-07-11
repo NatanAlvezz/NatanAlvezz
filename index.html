@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -2003,6 +2002,190 @@
       .lia-thread {
         min-height: 230px;
         max-height: calc(100dvh - 270px);
+      }
+    }
+
+  
+
+    /* ============================================================
+       NAVEGAÇÃO PREMIUM · ALINHAMENTO SIMÉTRICO
+       Venda · Temporada · Aluguel anual · Código · Contato
+    ============================================================ */
+    @media (min-width: 981px) {
+      .topbar {
+        display: grid;
+        grid-template-columns: 60px minmax(0, 1fr) 60px;
+        align-items: center;
+        column-gap: 18px;
+        padding-inline: clamp(18px, 3vw, 48px);
+      }
+
+      .topbar::after {
+        content: "";
+        width: 60px;
+        height: 1px;
+        grid-column: 3;
+        grid-row: 1;
+        pointer-events: none;
+      }
+
+      .brand {
+        grid-column: 1;
+        grid-row: 1;
+        justify-self: start;
+      }
+
+      .desktop-nav {
+        grid-column: 2;
+        grid-row: 1;
+        justify-self: center;
+        width: min(720px, calc(100vw - 220px));
+        min-height: 56px;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        align-items: center;
+        gap: 6px;
+        margin: 0;
+        padding: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.62);
+        border-radius: 999px;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.62), rgba(218, 244, 253, 0.34));
+        box-shadow:
+          0 14px 34px rgba(4, 12, 22, 0.10),
+          inset 0 1px 0 rgba(255, 255, 255, 0.72);
+        -webkit-backdrop-filter: blur(20px) saturate(150%);
+        backdrop-filter: blur(20px) saturate(150%);
+      }
+
+      .desktop-nav button,
+      .desktop-nav a {
+        width: 100%;
+        min-width: 0;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 10px;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        color: #153448;
+        background: transparent;
+        font-size: clamp(11.5px, 0.86vw, 13px);
+        font-weight: 850;
+        line-height: 1;
+        letter-spacing: 0.52px;
+        text-align: center;
+        text-transform: uppercase;
+        white-space: nowrap;
+        transition:
+          transform 0.22s ease,
+          color 0.22s ease,
+          background 0.22s ease,
+          border-color 0.22s ease,
+          box-shadow 0.22s ease,
+          filter 0.22s ease;
+      }
+
+      .desktop-nav button:hover,
+      .desktop-nav a:hover,
+      .desktop-nav button:focus-visible,
+      .desktop-nav a:focus-visible {
+        color: #071422;
+        background:
+          linear-gradient(145deg, rgba(235, 250, 255, 0.98), rgba(141, 225, 255, 0.76));
+        border-color: rgba(116, 188, 219, 0.42);
+        box-shadow:
+          0 11px 24px rgba(45, 137, 174, 0.16),
+          inset 0 1px 0 rgba(255, 255, 255, 0.74);
+        transform: translateY(-2px);
+        filter: brightness(1.02);
+      }
+
+      .desktop-nav button:active,
+      .desktop-nav a:active {
+        transform: translateY(0) scale(0.985);
+      }
+
+      .menu-button {
+        grid-column: 3;
+        grid-row: 1;
+      }
+    }
+
+    .mobile-nav {
+      gap: 8px;
+      padding-top: 4px;
+    }
+
+    .mobile-nav button,
+    .mobile-nav a {
+      width: 100%;
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 0 16px;
+      color: #102f42;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.88), rgba(234, 248, 253, 0.72));
+      border: 1px solid rgba(118, 183, 211, 0.28);
+      border-radius: 17px;
+      box-shadow:
+        0 9px 22px rgba(4, 12, 22, 0.07),
+        inset 0 1px 0 rgba(255, 255, 255, 0.82);
+      font-size: 13px;
+      font-weight: 850;
+      line-height: 1.2;
+      letter-spacing: 0.28px;
+      text-align: left;
+      transition:
+        transform 0.22s ease,
+        background 0.22s ease,
+        border-color 0.22s ease,
+        box-shadow 0.22s ease;
+    }
+
+    .mobile-nav button::after,
+    .mobile-nav a::after {
+      content: "›";
+      flex: 0 0 auto;
+      color: #39758f;
+      font-size: 20px;
+      font-weight: 500;
+      line-height: 1;
+      transition: transform 0.22s ease;
+    }
+
+    .mobile-nav button:hover,
+    .mobile-nav a:hover,
+    .mobile-nav button:active,
+    .mobile-nav a:active {
+      background:
+        linear-gradient(145deg, rgba(247, 253, 255, 1), rgba(197, 238, 252, 0.88));
+      border-color: rgba(74, 160, 197, 0.42);
+      box-shadow: 0 14px 30px rgba(4, 12, 22, 0.11);
+      transform: translateX(-2px);
+    }
+
+    .mobile-nav button:hover::after,
+    .mobile-nav a:hover::after,
+    .mobile-nav button:active::after,
+    .mobile-nav a:active::after {
+      transform: translateX(3px);
+    }
+
+    @media (max-width: 1120px) and (min-width: 981px) {
+      .desktop-nav {
+        width: min(660px, calc(100vw - 190px));
+      }
+
+      .desktop-nav button,
+      .desktop-nav a {
+        padding-inline: 7px;
+        font-size: 11.5px;
+        letter-spacing: 0.36px;
       }
     }
 
