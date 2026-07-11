@@ -472,7 +472,15 @@
     }
 
     function startPhrases(){let current=0;const panel=$("phrasePanel");setInterval(()=>{if(document.hidden)return;let next=current;while(next===current)next=Math.floor(Math.random()*phrases.length);panel.classList.add("changing");setTimeout(()=>{current=next;$("phraseTitle").textContent=phrases[current][0];$("phraseCopy").textContent=phrases[current][1];panel.classList.remove("changing")},420)},3500)}
-    function startRefresh(){state.refreshTimer=setInterval(()=>{if(!document.hidden&&navigator.onLine)loadProperties({silent:true})},30000)}
+    function startRefresh(){
+      if(state.refreshTimer) clearInterval(state.refreshTimer);
+      state.refreshTimer=setInterval(()=>{
+        if(!document.hidden&&navigator.onLine) loadProperties({silent:true});
+      },10000);
+      document.addEventListener("visibilitychange",()=>{
+        if(!document.hidden&&navigator.onLine) loadProperties({silent:true});
+      });
+    }
 
     function bindEvents(){
       $("openMenu").onclick=openMenu;$("closeMenu").onclick=closeMenu;$("overlay").onclick=closeMenu;$("openAi").onclick=()=>$("aiPanel").classList.contains("open")?closeAi():openAi;$("closeAi").onclick=closeAi;$("closeGallery").onclick=closeGallery;$("galleryPrevious").onclick=()=>moveGallery(-1);$("galleryNext").onclick=()=>moveGallery(1);$("galleryModal").onclick=e=>{if(e.target===$("galleryModal"))closeGallery()};
