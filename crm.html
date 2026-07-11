@@ -9813,4 +9813,257 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
 </script>
 
 </body>
+<!-- ============================================================
+     PATCH SYNC CRM → SITE · LEADS IMÓVEIS · V1
+     COLE ESTE BLOCO INTEIRO NO ARQUIVO DO CRM,
+     LOGO ANTES DA TAG </body> (depois de todos os outros patches).
+     Não altera nada do que já existe: apenas "abraça" as funções
+     de salvar/excluir para espelhar o site corretamente.
+
+     O que ele corrige:
+     1. Editar finalidade (Venda / Aluguel anual / Temporada) no CRM
+        agora ATUALIZA o mesmo imóvel no site, sempre.
+     2. Desligar "Publicar no site" tira o imóvel do site (Pausado).
+     3. Excluir imóvel no CRM também exclui da tabela do site.
+     4. Botão "Sincronizar site agora" em Configurações: espelha os
+        imóveis do CRM e remove as SOBRAS do site (o 4º imóvel).
+============================================================ -->
+<script id="leadsSyncCrmSiteFix2026">
+(function () {
+  "use strict";
+
+  var TABELA_SITE = "properties";
+
+  function cli() { return window.supabaseClient || window.leadsSupabaseClient || null; }
+  function A(v) { return Array.isArray(v) ? v : []; }
+  function avisar(m) {
+    try { if (typeof toast === "function") toast(m); } catch (_) {}
+    console.log("[SyncSite]", m);
+  }
+
+  // Finalidade sempre no formato que o site usa nos filtros
+  function normalizarFinalidade(v) {
+    var t = String(v || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    if (t.indexOf("tempor") >= 0 || t.indexOf("verao") >= 0) return "Temporada";
+    if (t.indexOf("anual") >= 0 || t.indexOf("aluguel") >= 0 || t.indexOf("locac") >= 0) return "Aluguel Anual";
+    return "Venda";
+  }
+
+  function fotoSrc(f) {
+    if (!f) return "";
+    if (typeof f === "string") return f;
+    return f.url || f.publicUrl || f.data || f.src || f.image_url || "";
+  }
+
+  // Mesmo código LI- que o CRM já gera, para casar com o que existe no site
+  function codigoDoImovel(p) {
+    if (p.code) return String(p.code);
+    if (p.codigo) return String(p.codigo);
+    var id = String(p.id || Date.now());
+    if (id.indexOf("LI-") === 0) return id;
+    return "LI-" + id.replace(/[^A-Za-z0-9]/g, "").slice(-8).toUpperCase();
+  }
+
+  function estaPublico(p) {
+    return !!(p.publicarSite || p.is_public || p.etapa === "Publicado" || p.status === "Publicado");
+  }
+
+  function montarLinhaSite(p) {
+    var fotos = A(p.photos).map(fotoSrc).filter(Boolean).slice(0, 10);
+    var publico = estaPublico(p);
+    return {
+      code: codigoDoImovel(p),
+      title: p.titulo || p.title || "Imóvel Leads Imóveis",
+      purpose: normalizarFinalidade(p.finalidade || p.purpose),
+      neighborhood: p.bairro || p.neighborhood || "Florianópolis",
+      type: p.tipo || p.type || "Imóvel",
+      price: Number(p.valor || p.price || 0),
+      area: Number(p.area || 0),
+      bedrooms: Number(p.dormitorios || p.bedrooms || 0),
+      suites: Number(p.suites || 0),
+      parking: Number(p.vagas || p.parking || 0),
+      description: p.proximaAcao || p.description || "Imóvel selecionado pela Leads Imóveis.",
+      photos: fotos,
+      image_url: fotos[0] || null,
+      status: publico ? "Publicado" : "Pausado",
+      is_public: publico,
+      source_crm_id: String(p.id || ""),
+      updated_at: new Date().toISOString()
+    };
+  }
+
+  // Espelha 1 imóvel: atualiza se existir, insere se for público e novo.
+  // Se o imóvel foi despublicado, a linha do site vira Pausado/oculto.
+  async function espelharNoSite(p) {
+    var c = cli();
+    if (!c || !p || !p.id) return false;
+    try {
+      var linha = montarLinhaSite(p);
+
+      var achado = await c.from(TABELA_SITE)
+        .select("id").eq("source_crm_id", linha.source_crm_id).maybeSingle();
+      if (achado.error) throw achado.error;
+
+      if (!achado.data) {
+        achado = await c.from(TABELA_SITE)
+          .select("id").eq("code", linha.code).maybeSingle();
+        if (achado.error) throw achado.error;
+      }
+
+      if (achado.data && achado.data.id) {
+        var upd = await c.from(TABELA_SITE).update(linha).eq("id", achado.data.id);
+        if (upd.error) throw upd.error;
+      } else if (linha.is_public) {
+        var ins = await c.from(TABELA_SITE).insert(linha);
+        if (ins.error) throw ins.error;
+      }
+      return true;
+    } catch (e) {
+      console.error("[SyncSite] Falha ao espelhar no site:", e);
+      return false;
+    }
+  }
+
+  async function apagarDoSite(p) {
+    var c = cli();
+    if (!c || !p) return;
+    try {
+      var idCrm = String(p.id || "");
+      var code = codigoDoImovel(p);
+      if (idCrm) await c.from(TABELA_SITE).delete().eq("source_crm_id", idCrm);
+      if (code) await c.from(TABELA_SITE).delete().eq("code", code);
+    } catch (e) {
+      console.error("[SyncSite] Falha ao apagar do site:", e);
+    }
+  }
+
+  // Espelha TODOS os imóveis do CRM e remove SOBRAS do site
+  async function sincronizarSiteAgora(mostrar) {
+    var c = cli();
+    if (!c) { if (mostrar) avisar("Supabase ainda não carregou. Tente de novo."); return; }
+
+    var lista = A(window.db && db.imoveis);
+    var idsCrm = {};
+    var codesCrm = {};
+
+    for (var i = 0; i < lista.length; i++) {
+      var p = lista[i];
+      idsCrm[String(p.id)] = true;
+      codesCrm[codigoDoImovel(p)] = true;
+      await espelharNoSite(p);
+    }
+
+    try {
+      var res = await c.from(TABELA_SITE).select("id,code,source_crm_id");
+      if (res.error) throw res.error;
+
+      var sobras = A(res.data).filter(function (r) {
+        var casaPorId = r.source_crm_id && idsCrm[String(r.source_crm_id)];
+        var casaPorCode = r.code && codesCrm[String(r.code)];
+        return !casaPorId && !casaPorCode;
+      });
+
+      for (var k = 0; k < sobras.length; k++) {
+        await c.from(TABELA_SITE).delete().eq("id", sobras[k].id);
+      }
+
+      if (mostrar) {
+        avisar("Site sincronizado: " + lista.length + " imóvel(is) do CRM · " +
+          sobras.length + " sobra(s) removida(s) do site.");
+      }
+    } catch (e) {
+      console.error("[SyncSite] Falha na limpeza de sobras:", e);
+      if (mostrar) avisar("Imóveis espelhados, mas a limpeza falhou. Rode o SQL de RLS da tabela properties.");
+    }
+  }
+
+  window.sincronizarSiteAgora = sincronizarSiteAgora;
+
+  function imovelMaisRecente() {
+    return A(window.db && db.imoveis).slice().sort(function (a, b) {
+      return (Number(b.updated) || 0) - (Number(a.updated) || 0);
+    })[0] || null;
+  }
+
+  // "Abraça" salvar imóvel: depois do salvamento normal, espelha no site
+  function embrulharSalvar(nome) {
+    var original = window[nome];
+    if (typeof original !== "function" || original.__syncSiteWrapped) return;
+    var novo = async function () {
+      var r = await original.apply(this, arguments);
+      var p = imovelMaisRecente();
+      if (p) await espelharNoSite(p);
+      return r;
+    };
+    novo.__syncSiteWrapped = true;
+    window[nome] = novo;
+  }
+
+  // "Abraça" capa/foto: depois de mudar foto, atualiza o imóvel no site
+  function embrulharFoto(nome) {
+    var original = window[nome];
+    if (typeof original !== "function" || original.__syncSiteWrapped) return;
+    var novo = async function (propId) {
+      var r = await original.apply(this, arguments);
+      var p = A(window.db && db.imoveis).find(function (x) { return x.id === propId; });
+      if (p) await espelharNoSite(p);
+      return r;
+    };
+    novo.__syncSiteWrapped = true;
+    window[nome] = novo;
+  }
+
+  // "Abraça" excluir: se o imóvel realmente saiu do CRM, sai do site também
+  function embrulharExcluir() {
+    var original = window.deleteImovel;
+    if (typeof original !== "function" || original.__syncSiteWrapped) return;
+    var novo = async function (id) {
+      var antes = A(window.db && db.imoveis).find(function (x) { return x.id === id; });
+      var qtdAntes = A(window.db && db.imoveis).length;
+      var r = await original.apply(this, arguments);
+      var qtdDepois = A(window.db && db.imoveis).length;
+      if (antes && qtdDepois < qtdAntes) await apagarDoSite(antes);
+      return r;
+    };
+    novo.__syncSiteWrapped = true;
+    window.deleteImovel = novo;
+  }
+
+  // Botão em Configurações para sincronizar/limpar quando quiser
+  function botaoConfig() {
+    var body = document.querySelector("#view-config .panel-body");
+    if (!body || document.getElementById("syncSiteFixBar")) return;
+    var div = document.createElement("div");
+    div.id = "syncSiteFixBar";
+    div.className = "crm-final-syncbar";
+    div.innerHTML =
+      '<span><b>Site público:</b> espelha finalidade, valor, fotos e remove sobras do site.</span>' +
+      '<button class="btn btn-sm" type="button" onclick="sincronizarSiteAgora(true)">Sincronizar site agora</button>';
+    body.insertBefore(div, body.firstChild);
+  }
+
+  function iniciar() {
+    embrulharSalvar("saveImovelGlobal");
+    embrulharSalvar("saveImovel");
+    embrulharFoto("setCoverPhoto");
+    embrulharFoto("deletePhoto");
+    embrulharExcluir();
+    botaoConfig();
+  }
+
+  // Os outros patches redefinem funções em momentos diferentes,
+  // então este patch se reaplica algumas vezes até "pegar" a versão final.
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", iniciar);
+  else iniciar();
+  window.addEventListener("load", function () {
+    setTimeout(iniciar, 1500);
+    setTimeout(iniciar, 3500);
+  });
+  var vezes = 0;
+  var timer = setInterval(function () {
+    iniciar();
+    if (++vezes > 10) clearInterval(timer);
+  }, 1200);
+})();
+</script>
 </html>
