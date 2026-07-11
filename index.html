@@ -6,11 +6,9 @@
   <meta name="theme-color" content="#edf9ff" />
   <meta name="description" content="Leads Imóveis: curadoria de imóveis para venda, temporada e aluguel anual em Florianópolis, Jurerê Internacional, Norte da Ilha e região." />
   <title>Leads Imóveis · Imóveis em Florianópolis</title>
-  <!-- Versão clean aplicada: sem bolinhas/ripple, opções diretas com ícones e layout alinhado. -->
 
   <link rel="icon" href="favicon.png" />
   <link rel="preload" href="hero-leads-floripa-final.webp" as="image" />
-  <link rel="preload" href="hero-leads-floripa-mobile.webp" as="image" media="(max-width: 760px)" />
   <link rel="preload" href="leads-logo-completa-v3.webp?v=20260710-3" as="image" />
   <link rel="preload" href="leads-monograma-v3.webp?v=20260710-3" as="image" />
 
@@ -45,7 +43,6 @@
       --radius-sm:12px;
       --safe:env(safe-area-inset-bottom,0px);
       --img-hero:url("hero-leads-floripa-final.webp");
-      --img-hero-mobile:url("hero-leads-floripa-mobile.webp");
       --img-lower:url("leads-praia-hero-final-otimizada.webp");
     }
 
@@ -67,7 +64,22 @@
     a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
       outline:2px solid var(--sky);outline-offset:3px;border-radius:6px;
     }
-    /* Efeitos de bolinhas/ripple removidos para visual clean. */
+
+    /* Base de ripple: todo botão/ícone clicável recebe o efeito translúcido */
+    .btn,.chip,.step-btn,.ai-float,.menu-btn,.nav button,.nav a,.drawer-nav button,.drawer-nav a,
+    .ai-search button,.ai-input-line button,.card-actions .btn{
+      position:relative;overflow:hidden;
+    }
+    .ripple-fx{
+      position:absolute;
+      border-radius:50%;
+      background:radial-gradient(circle,rgba(255,255,255,.68) 0%,rgba(223,248,255,.30) 55%,transparent 74%);
+      transform:scale(0);
+      opacity:1;
+      pointer-events:none;
+      animation:leadsRipple .55s ease-out forwards;
+    }
+    @keyframes leadsRipple{to{transform:scale(1);opacity:0}}
 
     /* =========================================================
        FUNDO — imagem 1 (topo / hero)
@@ -339,7 +351,7 @@
        ========================================================= */
     @media (max-width:620px){
       .shell{width:min(100% - 20px,1180px)}
-      .hero-bg{background-image:var(--img-hero-mobile);background-position:center top}
+      .hero-bg{background-position:center top}
       .hero{padding-bottom:30px}
       .hero:after{height:120px}
       .hero-logo{width:min(168px,54vw)}
@@ -360,184 +372,6 @@
     @media (prefers-reduced-motion:reduce){
       .hero-bg{animation:none!important}
     }
-  
-    /* =========================================================
-       PATCH CLEAN 2026-07-11 — VISÃO MAIS LIMPA
-       - Remove bolinhas/ripple
-       - Menu alinhado com ícones
-       - Opções diretas sem subdescrição
-       ========================================================= */
-    .ripple-fx{display:none!important}
-    .topbar{
-      height:74px;
-      justify-content:flex-start;
-      background:rgba(248,253,255,.86);
-      border-bottom:1px solid rgba(216,240,251,.72);
-      box-shadow:0 10px 32px rgba(4,12,22,.08);
-    }
-    .brand{
-      width:56px;
-      height:56px;
-      border-radius:18px;
-      box-shadow:0 10px 28px rgba(4,12,22,.12);
-    }
-    .nav-clean{
-      gap:6px;
-      align-items:center;
-    }
-    .nav-clean button,
-    .nav-clean a{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:7px;
-      min-width:auto;
-      height:42px;
-      padding:0 13px;
-      background:rgba(255,255,255,.58);
-      border:1px solid rgba(216,240,251,.92);
-      box-shadow:none;
-    }
-    .nav-clean button:hover,
-    .nav-clean a:hover{
-      background:#fff;
-      transform:translateY(-1px);
-    }
-    .nav-ico{
-      display:inline-grid;
-      place-items:center;
-      width:20px;
-      height:20px;
-      border-radius:8px;
-      background:#e9f8ff;
-      color:var(--navy);
-      font-size:12px;
-      font-weight:900;
-      line-height:1;
-    }
-    .hero-copy{
-      gap:12px;
-    }
-    .eyebrow{
-      box-shadow:none;
-    }
-    .section-title.clean-title{
-      align-items:center;
-      margin-bottom:16px;
-    }
-    .section-title.clean-title p,
-    .section-title p.clean-hidden,
-    #resultadoSub.clean-hidden{
-      display:none!important;
-    }
-    .step-grid{
-      grid-template-columns:repeat(auto-fill,minmax(142px,1fr));
-      gap:10px;
-    }
-    .step-btn.clean-option{
-      min-height:78px;
-      justify-content:center;
-      text-align:center;
-      padding:12px;
-      border-radius:20px;
-      background:rgba(255,255,255,.92);
-      box-shadow:0 10px 28px rgba(4,12,22,.10);
-    }
-    .step-btn.clean-option b{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:7px;
-      width:100%;
-      font-size:13px;
-      line-height:1.15;
-    }
-    .clean-icon{
-      display:grid;
-      place-items:center;
-      width:34px;
-      height:34px;
-      border-radius:14px;
-      background:linear-gradient(135deg,#eafaff,#dff8ff);
-      color:var(--navy);
-      font-size:18px;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
-    }
-    .step-actions{
-      justify-content:center;
-    }
-    .card{
-      border-radius:24px;
-      box-shadow:0 14px 38px rgba(4,12,22,.14);
-    }
-    .card-body{
-      padding:15px;
-    }
-    .card-body h3{
-      margin-bottom:8px;
-    }
-    .desc.clean-card-line{
-      min-height:0;
-      display:flex;
-      align-items:center;
-      gap:6px;
-      color:#395f75;
-      font-weight:700;
-    }
-    .desc.clean-long-desc{
-      display:none!important;
-    }
-    .meta{
-      gap:5px;
-      margin:9px 0;
-    }
-    .meta span{
-      display:inline-flex;
-      align-items:center;
-      gap:4px;
-      background:#f7fdff;
-    }
-    .card-actions{
-      margin-top:12px;
-    }
-    .ai-float.clean-ai-float{
-      width:auto;
-      min-width:92px;
-      height:48px;
-      padding:0 16px;
-      border-radius:999px;
-      animation:none!important;
-      font-size:12px;
-      letter-spacing:.02em;
-      box-shadow:0 14px 38px rgba(4,12,22,.22);
-    }
-    .drawer-nav-clean button{
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-    .drawer-nav-clean button span{
-      display:grid;
-      place-items:center;
-      width:28px;
-      height:28px;
-      border-radius:10px;
-      background:#dff8ff;
-      font-weight:900;
-    }
-    @media(max-width:980px){
-      .topbar{height:68px}
-      .nav-clean{display:none}
-      .step-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .step-btn.clean-option{min-height:72px}
-    }
-    @media(max-width:620px){
-      .step-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .clean-icon{width:30px;height:30px;border-radius:12px;font-size:16px}
-      .ai-float.clean-ai-float{min-width:78px;height:46px;right:12px}
-    }
-
   </style>
 </head>
 <body>
@@ -548,13 +382,12 @@
     <a class="brand" href="#inicio" aria-label="Leads Imóveis · início">
       <img class="brand-logo" src="leads-monograma-v3.webp?v=20260710-3" alt="Leads Imóveis" width="782" height="698" decoding="async" fetchpriority="high" />
     </a>
-    <nav class="nav nav-clean" aria-label="Navegação">
-      <button onclick="irPara('inicio')" aria-label="Início"><span class="nav-ico">⌂</span>Início</button>
-      <button onclick="escolherFinalidade('Venda')" aria-label="Venda"><span class="nav-ico">◆</span>Venda</button>
-      <button onclick="escolherFinalidade('Temporada')" aria-label="Temporada"><span class="nav-ico">☼</span>Temporada</button>
-      <button onclick="escolherFinalidade('Aluguel Anual')" aria-label="Aluguel anual"><span class="nav-ico">⌁</span>Anual</button>
-      <button onclick="focoCodigo()" aria-label="Buscar por código"><span class="nav-ico">#</span>Código</button>
-      <button onclick="irPara('contato')" aria-label="Contato"><span class="nav-ico">✆</span>Contato</button>
+    <nav class="nav" aria-label="Navegação">
+      <button onclick="escolherFinalidade('Venda')">Venda</button>
+      <button onclick="escolherFinalidade('Temporada')">Temporada</button>
+      <button onclick="escolherFinalidade('Aluguel Anual')">Anual</button>
+      <button onclick="focoCodigo()">Código</button>
+      <button onclick="irPara('contato')">Contato</button>
     </nav>
     <button class="menu-btn" onclick="abrirMenu()" aria-label="Abrir menu">☰</button>
   </header>
@@ -564,13 +397,13 @@
       <img src="leads-logo-completa-v3.webp?v=20260710-3" alt="Leads Imóveis" width="920" height="931" decoding="async" loading="lazy" />
       <button onclick="fecharMenu()" aria-label="Fechar menu">×</button>
     </div>
-    <div class="drawer-nav drawer-nav-clean">
-      <button onclick="fecharMenu(); irPara('inicio')"><span>⌂</span>Início</button>
-      <button onclick="fecharMenu(); escolherFinalidade('Venda')"><span>◆</span>Venda</button>
-      <button onclick="fecharMenu(); escolherFinalidade('Temporada')"><span>☼</span>Temporada</button>
-      <button onclick="fecharMenu(); escolherFinalidade('Aluguel Anual')"><span>⌁</span>Anual</button>
-      <button onclick="fecharMenu(); focoCodigo()"><span>#</span>Código</button>
-      <button onclick="fecharMenu(); irPara('contato')"><span>✆</span>Contato</button>
+    <div class="drawer-nav">
+      <button onclick="fecharMenu(); escolherFinalidade('Venda')">Venda</button>
+      <button onclick="fecharMenu(); escolherFinalidade('Temporada')">Temporada</button>
+      <button onclick="fecharMenu(); escolherFinalidade('Aluguel Anual')">Aluguel Anual</button>
+      <button onclick="fecharMenu(); focoCodigo()">Código do Imóvel</button>
+      <button onclick="fecharMenu(); irPara('bairros')">Localização</button>
+      <button onclick="fecharMenu(); irPara('contato')">Contato</button>
     </div>
   </aside>
 
@@ -611,7 +444,7 @@
 
     <section class="surface section" id="bairros">
       <div class="shell">
-        <div class="section-title clean-title"><div><small>Regiões</small><h2>Localização</h2></div></div>
+        <div class="section-title"><div><small>Passo 1</small><h2>Escolha a região</h2></div><p>Selecione onde deseja comprar, alugar ou passar temporada.</p></div>
         <div class="step-grid" id="bairrosGrid"></div>
         <div class="step-actions"><button class="btn ghost" onclick="limparFiltros()">Limpar filtros</button><button class="btn ghost" onclick="voltarEtapa()">Voltar ao topo</button></div>
       </div>
@@ -619,14 +452,14 @@
 
     <section class="surface section" id="tipos">
       <div class="shell">
-        <div class="section-title clean-title"><div><small>Categorias</small><h2>Tipo de imóvel</h2></div></div>
+        <div class="section-title"><div><small>Passo 2</small><h2>Tipo de imóvel</h2></div><p>Escolha a categoria ideal para receber uma vitrine mais precisa.</p></div>
         <div class="step-grid" id="tiposGrid"></div>
       </div>
     </section>
 
     <section class="surface section" id="imoveis">
       <div class="shell">
-        <div class="section-title clean-title"><div><small>Vitrine</small><h2 id="resultadoTitulo">Imóveis selecionados</h2></div><p id="resultadoSub" class="clean-hidden">Veja oportunidades publicadas e fale com um especialista.</p></div>
+        <div class="section-title"><div><small>Vitrine</small><h2 id="resultadoTitulo">Imóveis selecionados</h2></div><p id="resultadoSub">Veja oportunidades publicadas e fale com um especialista.</p></div>
         <div class="cards" id="imoveisGrid"></div>
       </div>
     </section>
@@ -659,7 +492,7 @@
     </section>
   </main>
 
-  <button class="ai-float clean-ai-float" onclick="abrirIA()" aria-label="Abrir Assistente Leads"><span>IA Leads</span></button>
+  <button class="ai-float" onclick="abrirIA()" aria-label="Abrir Assistente Leads"><span>IA</span></button>
   <aside class="ai-panel" id="aiPanel" aria-label="Assistente Leads">
     <div class="ai-panel-head"><b>Assistente Leads</b><button onclick="fecharIA()" aria-label="Fechar assistente">×</button></div>
     <div class="ai-panel-body">
@@ -845,35 +678,11 @@ function iniciarSincronizacaoCRM(){
   }
 }
 
-
-function iconeBairro(nome){
-  const q = normalizarTexto(nome);
-  if(q.includes('jurere')) return '◇';
-  if(q.includes('canas')) return '☼';
-  if(q.includes('ingles')) return '≋';
-  if(q.includes('campeche')) return '◌';
-  if(q.includes('lagoa')) return '≈';
-  if(q.includes('beira') || q.includes('centro')) return '▥';
-  return '⌖';
-}
-
-function iconeTipo(nome){
-  const q = normalizarTexto(nome);
-  if(q.includes('casa')) return '⌂';
-  if(q.includes('apart')) return '▣';
-  if(q.includes('cobertura')) return '△';
-  if(q.includes('terreno') || q.includes('lote')) return '▧';
-  if(q.includes('sala') || q.includes('comercial')) return '▥';
-  if(q.includes('pousada')) return '✦';
-  if(q.includes('piscina') || q.includes('mar')) return '☼';
-  return '◆';
-}
-
 function renderizarBairros(){
   const grid = byId('bairrosGrid');
   const select = byId('bairroSelect');
   if(!grid || !select) return;
-  grid.innerHTML = BAIRROS.map(b => `<button class="step-btn clean-option" onclick="escolherBairro('${escapeHTML(b)}')" aria-label="${escapeHTML(b)}"><b><span class="clean-icon">${iconeBairro(b)}</span><span>${escapeHTML(b)}</span></b></button>`).join('');
+  grid.innerHTML = BAIRROS.map(b => `<button class="step-btn" onclick="escolherBairro('${escapeHTML(b)}')"><b>${escapeHTML(b)}</b></button>`).join('');
   const current = select.value;
   select.innerHTML = '<option value="">Todos</option>' + BAIRROS.map(b => `<option value="${escapeHTML(b)}">${escapeHTML(b)}</option>`).join('');
   select.value = current || '';
@@ -885,7 +694,7 @@ function renderizarTipos(){
   const finalidade = estado.finalidade || 'Venda';
   const tipos = TIPOS[finalidade] || TIPOS.Venda;
   if(!grid || !select) return;
-  grid.innerHTML = tipos.map(t => `<button class="step-btn clean-option" onclick="escolherTipo('${escapeHTML(t)}')" aria-label="${escapeHTML(t)}"><b><span class="clean-icon">${iconeTipo(t)}</span><span>${escapeHTML(t)}</span></b></button>`).join('');
+  grid.innerHTML = tipos.map(t => `<button class="step-btn" onclick="escolherTipo('${escapeHTML(t)}')"><b>${escapeHTML(t)}</b></button>`).join('');
   const current = select.value;
   select.innerHTML = '<option value="">Todos</option>' + tipos.map(t => `<option value="${escapeHTML(t)}">${escapeHTML(t)}</option>`).join('');
   select.value = tipos.includes(current) ? current : '';
@@ -972,7 +781,7 @@ function renderizarImoveis(titulo){
       <div class="${imgClass}" ${imgStyle}><span class="code">${escapeHTML(p.codigo || 'LEADS')}</span><span class="tag">${escapeHTML(p.finalidade)}</span>${semFoto}</div>
       <div class="card-body">
         <h3>${escapeHTML(p.titulo)}</h3>
-        <p class="desc clean-card-line"><span>⌖</span>${escapeHTML(p.bairro)} · ${escapeHTML(p.tipo)}</p>
+        <p class="desc">${escapeHTML(p.bairro)} · ${escapeHTML(p.tipo)}</p>
         <div class="meta">
           ${p.area ? `<span>${escapeHTML(p.area)} m²</span>` : ''}
           ${p.dormitorios ? `<span>${escapeHTML(p.dormitorios)} dorm.</span>` : ''}
@@ -980,7 +789,7 @@ function renderizarImoveis(titulo){
           ${p.vagas ? `<span>${escapeHTML(p.vagas)} vagas</span>` : ''}
         </div>
         <div class="price">${money(p.valor)}</div>
-        <p class="desc clean-long-desc">${escapeHTML(p.descricao || '')}</p>
+        <p class="desc">${escapeHTML(p.descricao || 'Imóvel selecionado pela Leads Imóveis.')}</p>
         <div class="card-actions"><button class="btn whatsapp" onclick="abrirWhatsAppPorIndice(${idx})">Tenho interesse</button><button class="btn ghost" onclick="resumirImovelIAPorIndice(${idx})" aria-label="Resumo por IA">IA</button></div>
       </div>
     </article>`;
@@ -1074,8 +883,24 @@ function enviarContato(event){
   event.target.reset();
 }
 
-/* Efeito de bolinhas removido: função mantida como no-op para compatibilidade. */
-function iniciarEfeitoRipple(){ return false; }
+/* Efeito translúcido ao clicar em qualquer botão/ícone (delegação de evento:
+   funciona também para elementos criados depois, como os cards e chips). */
+function iniciarEfeitoRipple(){
+  const seletor = '.btn,.chip,.step-btn,.ai-float,.menu-btn,.nav button,.nav a,.drawer-nav button,.drawer-nav a,.ai-search button,.ai-input-line button,.card-actions .btn,.lg-nav,.lg-fechar,.lg-zap';
+  document.addEventListener('pointerdown', function(e){
+    const el = e.target.closest(seletor);
+    if(!el) return;
+    const rect = el.getBoundingClientRect();
+    const tamanho = Math.max(rect.width, rect.height) * 1.6;
+    const onda = document.createElement('span');
+    onda.className = 'ripple-fx';
+    onda.style.width = onda.style.height = tamanho + 'px';
+    onda.style.left = ((e.clientX - rect.left) - tamanho / 2) + 'px';
+    onda.style.top = ((e.clientY - rect.top) - tamanho / 2) + 'px';
+    el.appendChild(onda);
+    onda.addEventListener('animationend', () => onda.remove());
+  }, { passive:true });
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   carregarImoveisPublicos();
@@ -1083,7 +908,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderizarBairros();
   renderizarTipos();
   iniciarFrasesRotativas();
-  // iniciarEfeitoRipple removido para visual clean;
+  iniciarEfeitoRipple();
 });
 </script>
 <script>
