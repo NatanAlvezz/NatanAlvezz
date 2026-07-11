@@ -1,1219 +1,2386 @@
 
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#071422" />
-  <meta name="description" content="Leads Imóveis: imóveis para venda, temporada e aluguel anual em Florianópolis." />
-  <meta property="og:title" content="Leads Imóveis · Florianópolis" />
-  <meta property="og:description" content="Curadoria de imóveis para venda, temporada e aluguel anual em Florianópolis." />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="hero-leads-floripa-final.webp" />
+  <meta name="theme-color" content="#edf9ff" />
+  <meta name="description" content="Leads Imóveis: curadoria de imóveis para venda, temporada e aluguel anual em Florianópolis, Jurerê Internacional, Norte da Ilha e região." />
   <title>Leads Imóveis · Imóveis em Florianópolis</title>
 
   <link rel="icon" href="favicon.png" />
-  <link rel="preload" href="leads-logo-completa-v3.webp" as="image" />
-  <link rel="preload" href="leads-monograma-v3.webp" as="image" />
+  <link rel="preload" href="hero-leads-floripa-final.webp" as="image" />
+  <link rel="preload" href="hero-leads-floripa-mobile.webp" as="image" media="(max-width: 760px)" />
+  <link rel="preload" href="leads-logo.jpeg?v=20260709-master3" as="image" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
 
   <style>
-    :root {
-      --navy:#071422; --navy-2:#0d2438; --navy-3:#173e58;
-      --sky:#74d5ff; --sky-soft:#bdefff; --sky-pale:#e4f9ff;
-      --surface:#f7fdff; --surface-2:#edf8fc; --ink:#071422;
-      --ink-soft:#31566c; --muted:rgba(247,252,255,.76);
-      --shadow-lg:0 28px 80px rgba(0,0,0,.32);
-      --shadow-md:0 18px 46px rgba(4,12,22,.20);
-      --shadow-sm:0 10px 28px rgba(4,12,22,.15);
-      --safe-bottom:env(safe-area-inset-bottom,0px);
-      --hero-desktop:url("hero-leads-floripa-final.webp");
-      --hero-mobile:url("hero-leads-floripa-mobile.webp");
-      --lower-image:url("leads-praia-hero-final-otimizada.webp");
+    :root{
+      --navy:#071422;
+      --navy2:#0d2438;
+      --soft:#edf9ff;
+      --soft2:#f8fdff;
+      --baby:#bdefff;
+      --baby2:#dff8ff;
+      --blue:#74d5ff;
+      --line:rgba(120,205,238,.38);
+      --text:#f8fdff;
+      --muted:rgba(248,253,255,.72);
+      --ink:#071422;
+      --ink2:#315268;
+      --white:rgba(255,255,255,.92);
+      --glass:rgba(255,255,255,.14);
+      --glass2:rgba(255,255,255,.22);
+      --shadow:0 24px 80px rgba(0,0,0,.30);
+      --radius:26px;
+      --safe:env(safe-area-inset-bottom,0px);
     }
 
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
     html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-    body{min-height:100vh;overflow-x:hidden;color:#f7fcff;background:var(--navy);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
-    body.locked{overflow:hidden}
+    body{min-height:100vh;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:var(--text);background:#071422;overflow-x:hidden}
+    body.menu-open,body.ai-open{overflow:hidden}
     button,input,select,textarea{font:inherit}
     button{border:0;cursor:pointer}
     a{color:inherit;text-decoration:none}
-    img{display:block;max-width:100%}
-    button:disabled,input:disabled{cursor:not-allowed;opacity:.65}
-    a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--sky);outline-offset:3px}
-    .shell{width:min(1180px,calc(100% - 28px));margin-inline:auto}
-    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-
-    .topbar{position:fixed;inset:0 0 auto;z-index:80;min-height:78px;display:grid;grid-template-columns:60px minmax(0,1fr) 60px;align-items:center;gap:18px;padding:9px clamp(18px,3vw,48px);color:var(--ink);background:linear-gradient(135deg,rgba(248,253,255,.86),rgba(223,248,255,.58));border-bottom:1px solid rgba(255,255,255,.58);box-shadow:0 12px 36px rgba(4,12,22,.11);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);transition:.25s ease}
-    .topbar.scrolled{min-height:70px;background:linear-gradient(135deg,rgba(248,253,255,.96),rgba(223,248,255,.80));box-shadow:0 16px 42px rgba(4,12,22,.17)}
-    .brand{width:60px;height:60px;display:grid;place-items:center;border-radius:20px;background:linear-gradient(145deg,var(--navy),var(--navy-3));border:1px solid rgba(223,248,255,.32);box-shadow:var(--shadow-sm),inset 0 1px 0 rgba(255,255,255,.14);animation:floatLogo 5.5s ease-in-out infinite}
-    .brand img{width:43px;height:43px;object-fit:contain;filter:drop-shadow(0 6px 12px rgba(0,0,0,.3))}
-    @keyframes floatLogo{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-
-    .desktop-nav{justify-self:center;width:min(720px,calc(100vw - 220px));min-height:56px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:6px;border:1px solid rgba(255,255,255,.62);border-radius:999px;background:linear-gradient(135deg,rgba(255,255,255,.64),rgba(218,244,253,.36));box-shadow:0 14px 34px rgba(4,12,22,.10),inset 0 1px 0 rgba(255,255,255,.72);backdrop-filter:blur(20px) saturate(150%)}
-    .desktop-nav button,.desktop-nav a{min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 10px;border-radius:999px;color:#153448;background:transparent;font-size:clamp(11.5px,.86vw,13px);font-weight:850;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;transition:.22s ease}
-    .desktop-nav button:hover,.desktop-nav a:hover{color:#071422;background:linear-gradient(145deg,rgba(235,250,255,.98),rgba(141,225,255,.76));box-shadow:0 11px 24px rgba(45,137,174,.16);transform:translateY(-2px)}
-    .menu-button{display:none;justify-self:end;width:44px;height:44px;place-items:center;border-radius:15px;color:var(--ink);background:rgba(7,20,34,.08);font-size:21px}
-
-    .overlay{display:none;position:fixed;inset:0;z-index:110;background:rgba(0,0,0,.52);backdrop-filter:blur(3px)}
-    .overlay.visible{display:block}
-    .mobile-menu{position:fixed;top:0;right:min(-330px,-90vw);z-index:120;width:min(320px,90vw);height:100dvh;padding:18px;color:var(--ink);background:linear-gradient(155deg,rgba(248,253,255,.99),rgba(223,248,255,.96));box-shadow:-26px 0 70px rgba(0,0,0,.32);backdrop-filter:blur(22px);transition:right .28s ease}
-    .mobile-menu.open{right:0}
-    .mobile-menu-head{min-height:78px;display:flex;align-items:center;justify-content:space-between}
-    .mobile-menu-head img{width:120px;height:auto}
-    .icon-button{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;color:var(--navy);background:#e6f8ff;font-size:22px}
-    .mobile-nav{display:grid;gap:8px;margin-top:16px}
-    .mobile-nav button,.mobile-nav a{min-height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;color:#102f42;background:linear-gradient(145deg,rgba(255,255,255,.9),rgba(234,248,253,.75));border:1px solid rgba(118,183,211,.28);border-radius:17px;box-shadow:0 9px 22px rgba(4,12,22,.07);font-size:13px;font-weight:850}
-    .mobile-nav button::after,.mobile-nav a::after{content:"›";color:#39758f;font-size:20px}
-
-    .hero{position:relative;isolation:isolate;min-height:100svh;display:grid;align-items:center;padding:116px 0 72px;overflow:hidden;background:var(--navy)}
-    .hero-bg{position:absolute;inset:0;z-index:0;background-image:var(--hero-desktop);background-position:center 46%;background-size:cover;transform:scale(1.01);animation:heroZoom 28s ease-in-out infinite alternate}
-    .hero-bg::before{content:"";position:absolute;inset:0;background:linear-gradient(98deg,rgba(5,14,24,.93),rgba(7,20,34,.62) 48%,rgba(6,17,28,.28) 72%,rgba(5,14,24,.80)),linear-gradient(180deg,rgba(5,13,21,.16),rgba(5,13,21,.80))}
-    .hero::after{content:"";position:absolute;inset:auto 0 -2px;z-index:1;height:190px;background:linear-gradient(180deg,transparent,rgba(7,20,34,.38) 42%,var(--navy) 100%)}
-    @keyframes heroZoom{from{transform:scale(1.01)}to{transform:scale(1.055)}}
-    .hero-grid{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:34px;align-items:center}
-    .hero-copy{max-width:710px;display:flex;flex-direction:column;align-items:flex-start;gap:15px;animation:heroEntry .9s cubic-bezier(.22,.78,.28,1) both}
-    @keyframes heroEntry{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
-    .hero-logo{width:min(320px,48vw);filter:drop-shadow(0 20px 36px rgba(0,0,0,.46));animation:floatLogo 5.5s ease-in-out infinite}
-    .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;color:#eafcff;background:rgba(255,255,255,.10);border:1px solid rgba(189,239,255,.42);border-radius:999px;font-size:11px;font-weight:800;letter-spacing:1.25px;text-transform:uppercase;backdrop-filter:blur(12px)}
-    .phrase-panel{width:min(710px,100%);min-height:190px;display:flex;flex-direction:column;justify-content:center;gap:12px;padding:clamp(18px,2.4vw,28px);color:#fff;background:linear-gradient(135deg,rgba(255,255,255,.13),rgba(116,213,255,.055));border:1px solid rgba(189,239,255,.28);border-radius:28px;box-shadow:0 24px 58px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.16);backdrop-filter:blur(18px) saturate(145%);transition:.42s ease}
-    .phrase-panel.changing{opacity:.30;transform:translateY(8px) scale(.985);filter:blur(1px) saturate(1.15)}
-    .phrase-panel h1{font-size:clamp(36px,5.4vw,68px);line-height:1.02;letter-spacing:-2px;text-shadow:0 18px 44px rgba(0,0,0,.52)}
-    .phrase-panel p{max-width:600px;color:var(--muted);font-size:clamp(14px,1.5vw,17px);line-height:1.62}
-    .hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
-    .button{min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 19px;border-radius:999px;color:var(--navy);background:linear-gradient(135deg,#e3f9ff,#8ee1ff);box-shadow:0 14px 34px rgba(116,213,255,.22);font-size:13px;font-weight:900;transition:.22s ease}
-    .button:hover{transform:translateY(-2px);box-shadow:0 18px 40px rgba(116,213,255,.28)}
-    .button.secondary{color:#fff;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.23);box-shadow:none;backdrop-filter:blur(12px)}
-    .button.dark{color:#ecfbff;background:var(--navy);box-shadow:none}
-    .button.whatsapp{color:#063b1b;background:#e8fff1;box-shadow:none}
-    .quick-options{width:min(640px,100%);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:8px}
-    .quick-option{min-height:82px;padding:14px;text-align:left;color:#fff;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.20);border-radius:22px;backdrop-filter:blur(14px);transition:.22s ease}
-    .quick-option:hover{transform:translateY(-5px);background:rgba(223,248,255,.20);box-shadow:0 20px 46px rgba(0,0,0,.20)}
-    .quick-option strong,.quick-option span{display:block}.quick-option strong{margin-top:7px;font-size:13px}.quick-option span{margin-top:4px;color:rgba(255,255,255,.70);font-size:11px;line-height:1.35}
-
-    .assistant-card{padding:20px;color:var(--ink);background:rgba(248,253,255,.90);border:1px solid rgba(255,255,255,.50);border-radius:30px;box-shadow:var(--shadow-lg);backdrop-filter:blur(22px) saturate(140%);animation:assistantFloat 6.2s ease-in-out infinite}
-    @keyframes assistantFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-    .assistant-head{display:flex;gap:12px;align-items:center;margin-bottom:15px}.assistant-orb{width:48px;height:48px;display:grid;place-items:center;border-radius:18px;color:var(--sky-soft);background:linear-gradient(145deg,var(--navy),#29536d);box-shadow:0 13px 30px rgba(0,0,0,.2);font-weight:900}.assistant-head strong,.assistant-head span{display:block}.assistant-head strong{font-size:15px}.assistant-head span{margin-top:4px;color:#1f6749;font-size:10px;font-weight:900}
-    .assistant-search{display:flex;gap:8px;align-items:center;padding:9px;background:#fff;border:1px solid #d5effa;border-radius:21px}.assistant-search input{width:100%;min-width:0;padding:0 5px;color:var(--ink);background:transparent;border:0;outline:0;font-size:14px}.assistant-search button{width:42px;height:42px;display:grid;place-items:center;color:var(--navy);background:var(--sky-pale);border-radius:15px;font-weight:900}
-    .assistant-chips{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}.chip{padding:8px 10px;color:#17374a;background:#f0fbff;border:1px solid #d6eff9;border-radius:999px;font-size:11px;font-weight:800}.assistant-answer{min-height:94px;padding:13px;color:#31566c;background:#f8fdff;border:1px solid #daeff8;border-radius:19px;font-size:13px;line-height:1.5}.assistant-answer a{color:#0c5e83;font-weight:900;text-decoration:underline}
-
-    .main-content{position:relative;z-index:3;color:var(--ink);background:var(--surface)}
-    .search-section{padding:72px 0 34px;background:linear-gradient(180deg,var(--navy),#0b2437 14%,var(--surface) 100%)}
-    .search-box{padding:22px;background:rgba(248,253,255,.94);border:1px solid rgba(255,255,255,.62);border-radius:30px;box-shadow:var(--shadow-lg);backdrop-filter:blur(22px)}
-    .search-heading,.section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:18px}.section-kicker{display:block;margin-bottom:6px;color:#3b758f;font-size:11px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase}.search-heading h2,.section-heading h2{color:var(--ink);font-size:clamp(25px,4vw,40px);line-height:1.08;letter-spacing:-1px}.search-heading p,.section-heading p{max-width:620px;margin-top:8px;color:var(--ink-soft);font-size:14px;line-height:1.55}
-    .filter-grid{display:grid;grid-template-columns:1.05fr 1.1fr 1.1fr 1fr auto;gap:10px;align-items:end}.field label{display:block;margin:0 0 7px 3px;color:#40677d;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.7px}.field select,.field input{width:100%;min-height:48px;padding:0 14px;color:var(--ink);background:#fff;border:1px solid #d7edf6;border-radius:16px;outline:none}.field select:focus,.field input:focus{border-color:var(--sky);box-shadow:0 0 0 4px rgba(116,213,255,.16)}.filter-submit{min-height:48px;padding-inline:20px}.filter-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}.filter-actions button{color:#356178;background:transparent;font-size:12px;font-weight:800}.filter-status{color:#527487;font-size:12px}
-
-    .properties-section{padding:42px 0 80px;background:var(--surface)}.property-count{padding:10px 14px;color:#28536a;background:#eaf8fd;border:1px solid #d3edf7;border-radius:999px;font-size:12px;font-weight:900}.properties-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.property-card{min-width:0;overflow:hidden;background:#fff;border:1px solid #dceef5;border-radius:26px;box-shadow:0 15px 42px rgba(4,12,22,.11);opacity:0;transform:translateY(18px);transition:opacity .48s ease,transform .48s ease,box-shadow .24s ease}.property-card.revealed{opacity:1;transform:none}.property-card.revealed:hover{transform:translateY(-5px);box-shadow:0 23px 55px rgba(4,12,22,.17)}
-    .property-media{position:relative;aspect-ratio:16/10;overflow:hidden;background:linear-gradient(135deg,#dff4fc,#aecddd)}.property-media img{width:100%;height:100%;object-fit:cover;transition:transform .35s ease,opacity .18s ease}.property-card:hover .property-media img{transform:scale(1.035)}.property-purpose,.property-code,.photo-counter{position:absolute;z-index:2;padding:7px 10px;border-radius:999px;font-size:10px;font-weight:900;backdrop-filter:blur(10px)}.property-purpose{top:12px;left:12px;color:#eafcff;background:rgba(7,20,34,.78)}.property-code{top:12px;right:12px;color:var(--navy);background:rgba(241,251,255,.92)}.photo-counter{right:12px;bottom:12px;color:#fff;background:rgba(7,20,34,.68)}.gallery-arrow{position:absolute;top:50%;z-index:3;width:38px;height:38px;display:grid;place-items:center;color:#fff;background:rgba(7,20,34,.66);border:1px solid rgba(255,255,255,.26);border-radius:50%;transform:translateY(-50%);backdrop-filter:blur(8px)}.gallery-arrow.previous{left:10px}.gallery-arrow.next{right:10px}
-    .property-body{padding:18px}.property-location{display:flex;gap:6px;align-items:center;color:#527487;font-size:11px;font-weight:800}.property-body h3{margin-top:8px;color:var(--ink);font-size:19px;line-height:1.24}.property-description{display:-webkit-box;overflow:hidden;margin-top:9px;color:#527084;font-size:12.5px;line-height:1.5;-webkit-box-orient:vertical;-webkit-line-clamp:3}.property-details{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}.detail-pill{padding:7px 9px;color:#355d72;background:#f0f9fc;border:1px solid #dceff6;border-radius:999px;font-size:10.5px;font-weight:800}.property-bottom{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:17px}.property-price small,.property-price strong{display:block}.property-price small{color:#6a8798;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.7px}.property-price strong{margin-top:3px;color:var(--ink);font-size:18px}.card-actions{display:flex;gap:7px}.small-button{min-height:39px;display:inline-flex;align-items:center;justify-content:center;padding:0 12px;color:var(--navy);background:#e9f9ff;border:1px solid #d1edf8;border-radius:14px;font-size:11px;font-weight:900}.small-button.dark{color:#eafcff;background:var(--navy);border-color:var(--navy)}
-    .loading-state,.empty-state,.error-state{grid-column:1/-1;padding:42px 20px;text-align:center;color:#4a6f83;background:#fff;border:1px solid #dceef5;border-radius:24px;box-shadow:var(--shadow-sm)}.loading-spinner{width:38px;height:38px;margin:0 auto 14px;border:4px solid #dceff6;border-top-color:var(--navy-3);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
-
-    .contact-section{position:relative;padding:86px 0;overflow:hidden;color:#fff;background:var(--navy)}.contact-section::before{content:"";position:absolute;inset:0;background-image:linear-gradient(96deg,rgba(5,14,24,.94),rgba(7,20,34,.66),rgba(5,14,24,.84)),var(--lower-image);background-position:center;background-size:cover}.contact-grid{position:relative;z-index:2;display:grid;grid-template-columns:1fr .85fr;gap:28px;align-items:center}.contact-copy h2{max-width:650px;font-size:clamp(32px,5vw,56px);line-height:1.04;letter-spacing:-1.5px}.contact-copy p{max-width:610px;margin-top:14px;color:rgba(255,255,255,.74);line-height:1.6}.contact-card{padding:22px;color:var(--ink);background:rgba(248,253,255,.91);border:1px solid rgba(255,255,255,.50);border-radius:28px;box-shadow:var(--shadow-lg);backdrop-filter:blur(20px)}.contact-list{display:grid;gap:9px}.contact-item{padding:14px;background:#fff;border:1px solid #d8eef7;border-radius:17px}.contact-item small,.contact-item strong{display:block}.contact-item small{color:#6b8797;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.8px}.contact-item strong{margin-top:4px;color:var(--ink);font-size:13px;overflow-wrap:anywhere}
-    footer{padding:30px 0 calc(30px + var(--safe-bottom));color:rgba(255,255,255,.66);background:#04101b}.footer-content{display:flex;align-items:center;justify-content:space-between;gap:20px}.footer-brand{display:flex;align-items:center;gap:12px}.footer-brand img{width:54px;height:54px;object-fit:contain}.footer-brand strong,.footer-brand span{display:block}.footer-brand strong{color:#fff}.footer-brand span{margin-top:3px;font-size:12px}.footer-copy{font-size:12px;text-align:right}
-
-    .floating-ai{position:fixed;right:18px;bottom:calc(18px + var(--safe-bottom));z-index:90;width:68px;height:68px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--sky-soft);background:radial-gradient(circle at 30% 20%,rgba(189,239,255,.32),transparent 34%),linear-gradient(145deg,rgba(7,20,34,.98),rgba(40,83,109,.98));border:1px solid rgba(189,239,255,.42);border-radius:50%;box-shadow:0 22px 52px rgba(0,0,0,.38),0 0 0 7px rgba(116,213,255,.08);font-weight:900;animation:assistantButton 4.8s ease-in-out infinite;transition:.25s ease}.floating-ai:hover{filter:brightness(1.08);transform:translateY(-4px) scale(1.045)}@keyframes assistantButton{0%,100%{translate:0 0}50%{translate:0 -5px}}.floating-ai-symbol{color:#eafcff;font-size:20px;font-weight:950}.floating-ai-label{color:rgba(234,252,255,.82);font-size:9px;font-weight:900;letter-spacing:.8px;text-transform:uppercase}
-    .ai-panel{position:fixed;right:18px;bottom:calc(96px + var(--safe-bottom));z-index:100;width:min(430px,calc(100vw - 28px));max-height:min(700px,calc(100dvh - 116px));overflow:hidden;display:flex;flex-direction:column;color:var(--ink);background:linear-gradient(155deg,rgba(250,254,255,.97),rgba(224,246,255,.93));border:1px solid rgba(189,239,255,.58);border-radius:27px;box-shadow:0 36px 96px rgba(1,10,18,.42);backdrop-filter:blur(28px) saturate(155%);transform:translateY(18px) scale(.96);opacity:0;pointer-events:none;transition:.24s ease}.ai-panel.open{transform:none;opacity:1;pointer-events:auto}.ai-panel-head{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;color:#eafcff;background:radial-gradient(circle at 16% 15%,rgba(116,213,255,.24),transparent 35%),linear-gradient(135deg,rgba(7,20,34,.99),rgba(25,65,88,.97))}.lia-head{display:flex;align-items:center;gap:11px}.lia-avatar{width:46px;height:46px;display:grid;place-items:center;border-radius:16px;color:#f2fcff;background:linear-gradient(145deg,rgba(116,213,255,.26),rgba(255,255,255,.06));border:1px solid rgba(189,239,255,.34);font-size:20px;font-weight:950}.lia-head strong{display:block;font-size:14px}.lia-head span{display:flex;align-items:center;gap:6px;margin-top:5px;color:rgba(230,248,255,.72);font-size:10px}.lia-dot{width:7px;height:7px;border-radius:50%;background:#68e6a6;box-shadow:0 0 0 4px rgba(104,230,166,.12),0 0 12px rgba(104,230,166,.72)}.ai-panel-head button{width:38px;height:38px;display:grid;place-items:center;color:#fff;background:rgba(255,255,255,.10);border-radius:12px;font-size:19px}.ai-panel-body{display:flex;min-height:0;flex-direction:column;gap:10px;padding:13px;background:linear-gradient(180deg,rgba(248,253,255,.80),rgba(234,248,253,.94))}.lia-thread{min-height:260px;max-height:min(430px,52dvh);display:flex;flex-direction:column;gap:10px;overflow-y:auto;padding:7px 4px 13px;scroll-behavior:smooth}.lia-message{width:fit-content;max-width:88%;padding:12px 14px;border-radius:18px;font-size:13px;line-height:1.52;box-shadow:0 12px 28px rgba(4,12,22,.09);overflow-wrap:anywhere}.lia-message.ai{align-self:flex-start;color:#22485f;background:linear-gradient(145deg,rgba(255,255,255,.97),rgba(240,250,254,.94));border:1px solid rgba(116,188,219,.30);border-bottom-left-radius:7px}.lia-message.me{align-self:flex-end;color:#f2fbff;background:linear-gradient(145deg,#071422,#28536d);border-bottom-right-radius:7px}.lia-message.typing{display:inline-flex;gap:5px;min-width:66px}.typing-dot{width:7px;height:7px;border-radius:50%;background:#5d7d8e;animation:typing 1.05s infinite ease-in-out}.typing-dot:nth-child(2){animation-delay:.14s}.typing-dot:nth-child(3){animation-delay:.28s}@keyframes typing{0%,60%,100%{opacity:.35;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}.lia-recommendations{display:grid;gap:7px}.lia-recommendation{width:min(94%,330px);display:grid;gap:3px;padding:10px 12px;text-align:left;color:#234a60;background:rgba(255,255,255,.80);border:1px solid rgba(116,188,219,.28);border-radius:15px;box-shadow:0 9px 22px rgba(4,12,22,.07)}.lia-recommendation strong{font-size:12px}.lia-recommendation span{color:#628093;font-size:10.5px}.lia-recommendation em{color:#0b6a91;font-size:10px;font-style:normal;font-weight:900}
-
-    .gallery-modal{display:none;position:fixed;inset:0;z-index:200;padding:20px;align-items:center;justify-content:center;background:rgba(1,7,12,.92);backdrop-filter:blur(12px)}.gallery-modal.open{display:flex}.gallery-dialog{width:min(1040px,100%);max-height:calc(100dvh - 40px);display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden;color:#fff;background:#06131f;border:1px solid rgba(255,255,255,.18);border-radius:26px;box-shadow:var(--shadow-lg)}.gallery-modal-head,.gallery-modal-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px}.gallery-stage{position:relative;min-height:320px;display:grid;place-items:center;overflow:hidden;background:#02080d}.gallery-stage img{width:100%;height:min(70vh,680px);object-fit:contain}.modal-arrow{position:absolute;top:50%;width:48px;height:48px;display:grid;place-items:center;color:#fff;background:rgba(7,20,34,.72);border:1px solid rgba(255,255,255,.22);border-radius:50%;transform:translateY(-50%);font-size:22px}.modal-arrow.previous{left:14px}.modal-arrow.next{right:14px}.gallery-modal-foot{color:rgba(255,255,255,.72);font-size:12px}
-
-    @media(max-width:980px){.topbar{display:flex}.desktop-nav{display:none}.menu-button{display:grid;margin-left:auto}.hero-grid{grid-template-columns:1fr}.assistant-card{width:min(570px,100%)}.filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.properties-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.contact-grid{grid-template-columns:1fr}}
-    @media(max-width:700px){.hero-bg{background-image:var(--hero-mobile);background-position:center top;transform:none;animation:none}.topbar{min-height:70px;padding:7px 14px}.brand{width:54px;height:54px}.brand img{width:39px;height:39px}.hero{padding:104px 0 58px}.hero-logo{width:min(270px,74vw)}.phrase-panel{min-height:220px;padding:18px;border-radius:23px}.phrase-panel h1{font-size:clamp(32px,10.2vw,50px);letter-spacing:-1.35px}.quick-options{grid-template-columns:1fr}.quick-option{min-height:72px}.search-section{padding-top:58px}.search-box{padding:17px;border-radius:24px}.search-heading,.section-heading{align-items:flex-start;flex-direction:column}.filter-grid,.properties-grid{grid-template-columns:1fr}.property-card:hover{transform:none}.property-bottom{align-items:stretch;flex-direction:column}.card-actions{width:100%}.card-actions>*{flex:1}.footer-content{align-items:flex-start;flex-direction:column}.footer-copy{text-align:left}.floating-ai{right:10px;bottom:calc(12px + var(--safe-bottom));width:62px;height:62px}.ai-panel{right:8px;bottom:calc(80px + var(--safe-bottom));width:calc(100vw - 16px);max-height:calc(100dvh - 94px - var(--safe-bottom));border-radius:24px}.lia-thread{min-height:230px;max-height:calc(100dvh - 270px)}.gallery-modal{padding:8px}.gallery-dialog{max-height:calc(100dvh - 16px);border-radius:20px}.gallery-stage img{height:67vh}}
-    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}.hero-bg,.brand,.hero-logo,.assistant-card,.floating-ai,.hero-copy{animation:none!important}.property-card{opacity:1!important;transform:none!important}}
- /* ============================================================
-   CORREÇÃO DEFINITIVA · EFEITOS DE FLUTUAÇÃO NO COMPUTADOR
-   Mantém as animações ativas no desktop.
-============================================================ */
-
-@media (min-width: 981px) {
-  .brand,
-  .hero-logo {
-    animation: logoFloat 5.5s ease-in-out infinite !important;
-    will-change: transform;
-  }
-
-  .assistant-card {
-    animation: desktopAssistantFloat 6.2s ease-in-out infinite !important;
-    will-change: translate, transform;
-  }
-
-  .floating-ai {
-    animation: assistantFloat 4.8s ease-in-out infinite !important;
-    will-change: translate, transform;
-  }
-
-  .hero-copy {
-    animation: desktopHeroEntry 0.9s cubic-bezier(.22, .78, .28, 1) both !important;
-  }
-
-  .quick-option:hover {
-    transform: translateY(-5px) scale(1.015) !important;
-  }
-
-  .search-box:hover,
-  .contact-card:hover {
-    transform: translateY(-4px) !important;
-  }
-
-  .property-card.revealed:hover {
-    transform: translateY(-7px) scale(1.008) !important;
-  }
-}
-
-/* Flutuação suave da logo */
-@keyframes logoFloat {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
-
-  50% {
-    transform: translate3d(0, -7px, 0);
-  }
-}
-
-/* Flutuação da assistente lateral */
-@keyframes desktopAssistantFloat {
-  0%,
-  100% {
-    translate: 0 0;
-  }
-
-  50% {
-    translate: 0 -9px;
-  }
-}
-
-/* Flutuação do botão da Lia */
-@keyframes assistantFloat {
-  0%,
-  100% {
-    translate: 0 0;
-  }
-
-  50% {
-    translate: 0 -7px;
-  }
-} /* ============================================================
-   LEADS IMÓVEIS · GLASSMORPHISM PREMIUM
-   Transparência, profundidade e reflexo elegante
-============================================================ */
-
-/* Barra superior de vidro */
-.topbar {
-  background:
-    linear-gradient(
-      135deg,
-      rgba(248, 253, 255, 0.78),
-      rgba(213, 243, 253, 0.48)
-    ) !important;
-
-  border-bottom: 1px solid rgba(255, 255, 255, 0.68);
-
-  box-shadow:
-    0 16px 42px rgba(4, 12, 22, 0.13),
-    inset 0 1px 0 rgba(255, 255, 255, 0.82);
-
-  -webkit-backdrop-filter: blur(24px) saturate(165%);
-  backdrop-filter: blur(24px) saturate(165%);
-}
-
-/* Elementos principais com efeito de vidro */
-.hero-phrase-panel,
-.assistant-card,
-.search-box,
-.contact-card,
-.ai-panel,
-.property-card {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-
-  border: 1px solid rgba(255, 255, 255, 0.58);
-
-  box-shadow:
-    0 22px 58px rgba(4, 12, 22, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.72),
-    inset 0 -1px 0 rgba(116, 213, 255, 0.10);
-
-  -webkit-backdrop-filter: blur(22px) saturate(155%);
-  backdrop-filter: blur(22px) saturate(155%);
-
-  transition:
-    transform 0.32s ease,
-    box-shadow 0.32s ease,
-    border-color 0.32s ease,
-    background 0.32s ease;
-}
-
-/* Vidro escuro do painel principal */
-.hero-phrase-panel {
-  background:
-    radial-gradient(
-      circle at 10% 10%,
-      rgba(189, 239, 255, 0.16),
-      transparent 38%
-    ),
-    linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.14),
-      rgba(30, 86, 116, 0.08)
-    ) !important;
-
-  border-color: rgba(189, 239, 255, 0.34);
-}
-
-/* Vidro claro */
-.assistant-card,
-.search-box,
-.contact-card {
-  background:
-    radial-gradient(
-      circle at 10% 0%,
-      rgba(255, 255, 255, 0.92),
-      transparent 42%
-    ),
-    linear-gradient(
-      145deg,
-      rgba(248, 253, 255, 0.88),
-      rgba(221, 245, 253, 0.66)
-    ) !important;
-}
-
-/* Painel da Lia */
-.ai-panel {
-  background:
-    radial-gradient(
-      circle at 100% 0%,
-      rgba(116, 213, 255, 0.22),
-      transparent 38%
-    ),
-    linear-gradient(
-      155deg,
-      rgba(250, 254, 255, 0.93),
-      rgba(220, 245, 253, 0.86)
-    ) !important;
-
-  border-color: rgba(189, 239, 255, 0.72);
-}
-
-/* Cards dos imóveis com transparência sofisticada */
-.property-card {
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255, 255, 255, 0.94),
-      rgba(235, 249, 253, 0.82)
-    ) !important;
-
-  border-color: rgba(174, 221, 239, 0.52);
-}
-
-/* Garante que o conteúdo fique acima do reflexo */
-.assistant-card > *,
-.search-box > *,
-.contact-card > *,
-.ai-panel > *,
-.property-card > *,
-.hero-phrase-panel > * {
-  position: relative;
-  z-index: 2;
-}
-
-/* Reflexo de luz premium */
-.assistant-card::after,
-.search-box::after,
-.contact-card::after,
-.ai-panel::after,
-.property-card::after,
-.hero-phrase-panel::after {
-  content: "";
-  position: absolute;
-  top: -45%;
-  left: -75%;
-  z-index: 1;
-
-  width: 42%;
-  height: 190%;
-
-  pointer-events: none;
-
-  background:
-    linear-gradient(
-      105deg,
-      transparent 0%,
-      rgba(255, 255, 255, 0.04) 25%,
-      rgba(255, 255, 255, 0.36) 50%,
-      rgba(189, 239, 255, 0.15) 65%,
-      transparent 100%
-    );
-
-  filter: blur(2px);
-  transform: rotate(12deg);
-  opacity: 0;
-
-  transition:
-    left 0.85s cubic-bezier(.22, .78, .28, 1),
-    opacity 0.35s ease;
-}
-
-/* Brilho interno delicado */
-.property-card::before,
-.assistant-card::before,
-.search-box::before,
-.contact-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-
-  pointer-events: none;
-
-  background:
-    radial-gradient(
-      circle at 12% 0%,
-      rgba(255, 255, 255, 0.55),
-      transparent 30%
-    );
-
-  opacity: 0.62;
-}
-
-/* Profundidade e reflexo no computador */
-@media screen and (min-width: 981px) and (hover: hover) {
-
-  .assistant-card:hover,
-  .search-box:hover,
-  .contact-card:hover {
-    transform: translateY(-6px) scale(1.006);
-
-    border-color: rgba(189, 239, 255, 0.88);
-
-    box-shadow:
-      0 32px 82px rgba(4, 12, 22, 0.21),
-      0 0 42px rgba(116, 213, 255, 0.12),
-      inset 0 1px 0 rgba(255, 255, 255, 0.88);
-  }
-
-  .property-card.revealed:hover {
-    transform: translateY(-9px) scale(1.008) !important;
-
-    border-color: rgba(116, 188, 219, 0.68);
-
-    box-shadow:
-      0 30px 72px rgba(4, 12, 22, 0.20),
-      0 0 38px rgba(116, 213, 255, 0.10),
-      inset 0 1px 0 rgba(255, 255, 255, 0.90);
-  }
-
-  .hero-phrase-panel:hover {
-    border-color: rgba(189, 239, 255, 0.62);
-
-    box-shadow:
-      0 28px 72px rgba(0, 0, 0, 0.26),
-      0 0 42px rgba(116, 213, 255, 0.13),
-      inset 0 1px 0 rgba(255, 255, 255, 0.22);
-  }
-
-  .assistant-card:hover::after,
-  .search-box:hover::after,
-  .contact-card:hover::after,
-  .ai-panel:hover::after,
-  .property-card:hover::after,
-  .hero-phrase-panel:hover::after {
-    left: 135%;
-    opacity: 1;
-  }
-}
-
-/* Luz ambiente discreta na vitrine */
-.properties-section {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-}
-
-.properties-section::before {
-  content: "";
-  position: absolute;
-  top: 8%;
-  left: 50%;
-  z-index: -1;
-
-  width: min(900px, 90vw);
-  height: 520px;
-
-  pointer-events: none;
-
-  background:
-    radial-gradient(
-      ellipse,
-      rgba(116, 213, 255, 0.16),
-      transparent 68%
-    );
-
-  filter: blur(26px);
-  transform: translateX(-50%);
-}
-
-/* Luz suave atrás da caixa de busca */
-.search-section {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-}
-
-.search-section::after {
-  content: "";
-  position: absolute;
-  top: 18px;
-  left: 50%;
-  z-index: -1;
-
-  width: min(840px, 92vw);
-  height: 360px;
-
-  pointer-events: none;
-
-  background:
-    radial-gradient(
-      ellipse,
-      rgba(116, 213, 255, 0.19),
-      transparent 67%
-    );
-
-  filter: blur(30px);
-  transform: translateX(-50%);
-}
-
-/* Botões com acabamento de cristal */
-.button,
-.small-button,
-.chip {
-  position: relative;
-  overflow: hidden;
-
-  border: 1px solid rgba(255, 255, 255, 0.40);
-
-  box-shadow:
-    0 12px 28px rgba(4, 12, 22, 0.10),
-    inset 0 1px 0 rgba(255, 255, 255, 0.62);
-
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-}
-
-/* Animações reduzidas quando necessário */
-@media (prefers-reduced-motion: reduce) {
-  .assistant-card::after,
-  .search-box::after,
-  .contact-card::after,
-  .ai-panel::after,
-  .property-card::after,
-  .hero-phrase-panel::after {
-    display: none;
-  }
-}/* ============================================================
-   LEADS IMÓVEIS · IMAGENS DE FUNDO NO DESKTOP
-   Mantém o mobile intacto
-============================================================ */
-
-@media screen and (min-width: 701px) {
-
-  /* PRIMEIRA IMAGEM · FUNDO PRINCIPAL DO SITE */
-  .hero-background {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-
-    background-image:
-      url("hero-leads-floripa-final.webp") !important;
-
-    background-size: cover !important;
-    background-position: center 44% !important;
-    background-repeat: no-repeat !important;
-
-    filter:
-      brightness(1.02)
-      contrast(1.04)
-      saturate(1.08);
-
-    transform: scale(1.015);
-  }
-
-  /* Deixa a imagem visível sem prejudicar a leitura */
-  .hero-background::before {
-    background:
-      linear-gradient(
-        90deg,
-        rgba(5, 14, 24, 0.86) 0%,
-        rgba(7, 20, 34, 0.58) 42%,
-        rgba(7, 20, 34, 0.24) 70%,
-        rgba(5, 14, 24, 0.56) 100%
-      ),
-      linear-gradient(
-        180deg,
-        rgba(5, 13, 21, 0.08) 0%,
-        rgba(5, 13, 21, 0.28) 58%,
-        rgba(7, 20, 34, 0.82) 100%
-      ) !important;
-  }
-
-  /* Evita que o degradê inferior esconda a imagem */
-  .hero::after {
-    height: 150px !important;
-
-    background:
-      linear-gradient(
-        180deg,
-        transparent 0%,
-        rgba(7, 20, 34, 0.18) 46%,
-        #071422 100%
-      ) !important;
-  }
-
-  /* SEGUNDA IMAGEM · FUNDO DA ÁREA DE CONTATO */
-  .contact-section {
-    position: relative !important;
-    isolation: isolate !important;
-    min-height: 620px;
-    display: flex;
-    align-items: center;
-    background: #071422 !important;
-  }
-
-  .contact-section::before {
-    content: "" !important;
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-
-    position: absolute !important;
-    inset: 0 !important;
-    z-index: 0 !important;
-
-    background-image:
-      linear-gradient(
-        90deg,
-        rgba(5, 14, 24, 0.88) 0%,
-        rgba(7, 20, 34, 0.58) 48%,
-        rgba(5, 14, 24, 0.38) 72%,
-        rgba(5, 14, 24, 0.66) 100%
-      ),
-      url("leads-praia-hero-final-otimizada.webp") !important;
-
-    background-size: cover !important;
-    background-position: center 48% !important;
-    background-repeat: no-repeat !important;
-
-    filter:
-      brightness(1.03)
-      contrast(1.04)
-      saturate(1.08);
-  }
-
-  /* Mantém textos e cartão acima da imagem */
-  .contact-grid {
-    position: relative !important;
-    z-index: 2 !important;
-    width: 100%;
-  }
-
-  /* Profundidade elegante sobre as duas imagens */
-  .hero-copy,
-  .assistant-card,
-  .contact-copy,
-  .contact-card {
-    position: relative;
-    z-index: 3;
-  }
-}/* ============================================================
-   LEADS IMÓVEIS · CORREÇÃO FINAL DAS DUAS IMAGENS NO DESKTOP
-   Imagem 1: topo
-   Imagem 2: contato
-   Mobile permanece intacto
-============================================================ */
-
-@media screen and (min-width: 701px) {
-
-  /* ==========================================================
-     IMAGEM 1 · TOPO DO SITE
-     Aplicada também diretamente na seção como segurança.
-  ========================================================== */
-
-  .hero,
-  #inicio {
-    position: relative !important;
-    isolation: isolate !important;
-
-    background-color: #071422 !important;
-    background-image:
-      linear-gradient(
-        90deg,
-        rgba(5, 14, 24, 0.70) 0%,
-        rgba(7, 20, 34, 0.44) 45%,
-        rgba(7, 20, 34, 0.16) 72%,
-        rgba(5, 14, 24, 0.40) 100%
-      ),
-      url("hero-leads-floripa-final.webp?v=fundo-desktop-final") !important;
-
-    background-size: cover !important;
-    background-position: center 45% !important;
-    background-repeat: no-repeat !important;
-  }
-
-  /*
-    O site já teve os dois nomes abaixo.
-    Esta regra funciona com qualquer uma das versões.
-  */
-  .hero-bg,
-  .hero-background {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-
-    position: absolute !important;
-    inset: 0 !important;
-    z-index: 0 !important;
-
-    width: 100% !important;
-    height: 100% !important;
-
-    background-image:
-      url("hero-leads-floripa-final.webp?v=fundo-desktop-final") !important;
-
-    background-size: cover !important;
-    background-position: center 45% !important;
-    background-repeat: no-repeat !important;
-
-    pointer-events: none !important;
-
-    transform: scale(1.015);
-    animation: leadsDesktopBackground 26s ease-in-out infinite alternate !important;
-  }
-
-  /* Camada escura mais leve para não esconder a primeira imagem */
-  .hero-bg::before,
-  .hero-background::before {
-    content: "" !important;
-    position: absolute !important;
-    inset: 0 !important;
-
-    background:
-      linear-gradient(
-        90deg,
-        rgba(5, 14, 24, 0.72) 0%,
-        rgba(7, 20, 34, 0.46) 43%,
-        rgba(7, 20, 34, 0.13) 72%,
-        rgba(5, 14, 24, 0.40) 100%
-      ),
-      linear-gradient(
-        180deg,
-        rgba(5, 13, 21, 0.05) 0%,
-        rgba(5, 13, 21, 0.12) 58%,
-        rgba(7, 20, 34, 0.70) 100%
-      ) !important;
-
-    opacity: 1 !important;
-    pointer-events: none !important;
-  }
-
-  /* Conteúdo sempre acima da imagem */
-  .hero-grid,
-  .hero-copy,
-  .assistant-card {
-    position: relative !important;
-    z-index: 3 !important;
-  }
-
-  /* Transição inferior sem esconder a imagem */
-  .hero::after {
-    content: "" !important;
-    position: absolute !important;
-    right: 0 !important;
-    bottom: -2px !important;
-    left: 0 !important;
-    z-index: 2 !important;
-
-    height: 145px !important;
-
-    background:
-      linear-gradient(
-        180deg,
-        rgba(7, 20, 34, 0) 0%,
-        rgba(7, 20, 34, 0.12) 38%,
-        rgba(7, 20, 34, 0.52) 76%,
-        #071422 100%
-      ) !important;
-
-    pointer-events: none !important;
-  }
-
-  /* ==========================================================
-     IMAGEM 2 · SEÇÃO DE CONTATO
-  ========================================================== */
-
-  .contact-section {
-    position: relative !important;
-    isolation: isolate !important;
-    overflow: hidden !important;
-
-    min-height: 620px !important;
-
-    background-color: #071422 !important;
-    background-image:
-      linear-gradient(
-        90deg,
-        rgba(5, 14, 24, 0.76) 0%,
-        rgba(7, 20, 34, 0.44) 50%,
-        rgba(5, 14, 24, 0.28) 75%,
-        rgba(5, 14, 24, 0.50) 100%
-      ),
-      url("leads-praia-hero-final-otimizada.webp?v=fundo-desktop-final") !important;
-
-    background-size: cover !important;
-    background-position: center 48% !important;
-    background-repeat: no-repeat !important;
-    background-attachment: scroll !important;
-  }
-
-  /*
-    Retira a imagem duplicada do pseudo-elemento.
-    Ele fica apenas como camada de acabamento.
-  */
-  .contact-section::before {
-    content: "" !important;
-    position: absolute !important;
-    inset: 0 !important;
-    z-index: 0 !important;
-
-    background:
-      radial-gradient(
-        circle at 75% 24%,
-        rgba(189, 239, 255, 0.12),
-        transparent 34%
-      ),
-      linear-gradient(
-        180deg,
-        rgba(7, 20, 34, 0.04),
-        rgba(7, 20, 34, 0.28)
-      ) !important;
-
-    opacity: 1 !important;
-    pointer-events: none !important;
-  }
-
-  .contact-grid,
-  .contact-copy,
-  .contact-card {
-    position: relative !important;
-    z-index: 2 !important;
-  }
-}
-
-/* Movimento cinematográfico discreto da imagem superior */
-@keyframes leadsDesktopBackground {
-  0% {
-    transform: scale(1.015) translate3d(0, 0, 0);
-  }
-
-  100% {
-    transform: scale(1.055) translate3d(0.5%, -0.4%, 0);
-  }
-}</style>
+
+    .hero-bg{position:fixed;inset:0;z-index:-4;background:url("hero-leads-floripa-final.webp") center 48%/cover no-repeat;transform:scale(1);animation:bgMove 30s ease-in-out infinite alternate}
+    .hero-bg:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,15,25,.88),rgba(7,20,34,.58) 42%,rgba(5,15,25,.25) 70%,rgba(7,20,34,.76)),linear-gradient(180deg,rgba(5,13,21,.20),rgba(5,13,21,.74))}
+    .hero-bg:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 78% 18%,rgba(189,239,255,.32),transparent 34%),linear-gradient(120deg,transparent 0%,rgba(255,255,255,.12) 42%,transparent 67%);opacity:.55;animation:sweep 10s ease-in-out infinite}
+    @keyframes bgMove{from{transform:scale(1) translate3d(-.25%,-.15%,0)}to{transform:scale(1.025) translate3d(.25%,.15%,0)}}
+    @keyframes sweep{0%,62%{opacity:.10;transform:translateX(-12%)}78%{opacity:.42}100%{opacity:.12;transform:translateX(12%)}}
+
+    .topbar{position:fixed;top:0;left:0;right:0;z-index:80;height:82px;display:flex;align-items:center;gap:18px;padding:12px clamp(14px,4vw,54px);background:rgba(248,253,255,.78);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.38);box-shadow:0 12px 36px rgba(0,0,0,.10)}
+    .brand{display:flex;align-items:center;gap:12px;min-width:210px;color:var(--ink)}
+    .brand-logo{width:64px;height:64px;object-fit:contain;border-radius:18px;background:rgba(7,20,34,.92);box-shadow:0 10px 26px rgba(0,0,0,.16)}
+    .brand-text b{display:block;font-size:14px;letter-spacing:4px;line-height:1;color:#071422}.brand-text span{display:block;margin-top:5px;font-size:10px;letter-spacing:2.5px;color:#4b7085;text-transform:uppercase}
+    .nav{display:flex;align-items:center;gap:7px;margin-left:auto}.nav button,.nav a{height:38px;padding:0 13px;border-radius:999px;background:transparent;color:#18384d;font-size:12px;font-weight:800;letter-spacing:.2px}.nav button:hover,.nav a:hover{background:rgba(116,213,255,.18);color:#071422}
+    /* acesso interno removido do site público */.menu-btn{display:none;margin-left:auto;width:42px;height:42px;border-radius:14px;background:rgba(7,20,34,.06);color:var(--ink);font-size:19px}
+
+    .mobile-drawer{position:fixed;top:0;right:-330px;width:min(310px,88vw);height:100dvh;z-index:120;background:rgba(247,253,255,.95);backdrop-filter:blur(20px);box-shadow:-24px 0 60px rgba(0,0,0,.30);padding:18px;transition:.25s;color:var(--ink);display:flex;flex-direction:column;gap:14px}.mobile-drawer.open{right:0}.drawer-head{display:flex;align-items:center;justify-content:space-between}.drawer-head img{width:70px;height:70px;object-fit:contain;border-radius:18px;background:#071422}.drawer-head button{width:40px;height:40px;border-radius:14px;background:#e9f8ff;color:#071422;font-size:22px}.drawer-nav{display:grid;gap:8px;margin-top:16px}.drawer-nav button,.drawer-nav a{text-align:left;padding:14px;border-radius:18px;background:#f0fbff;color:#071422;font-weight:900;font-size:14px}
+    .backdrop{display:none;position:fixed;inset:0;z-index:110;background:rgba(0,0,0,.45)}.backdrop.show{display:block}
+
+    .shell{width:min(1180px,calc(100% - 28px));margin:auto}.hero{min-height:100dvh;padding:112px 0 48px;display:grid;align-items:center}.hero-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:24px;align-items:center}.hero-copy{max-width:720px}.hero-logo{width:min(320px,72vw);height:auto;display:block;margin-bottom:18px;filter:drop-shadow(0 18px 34px rgba(0,0,0,.30))}.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid rgba(189,239,255,.42);border-radius:999px;background:rgba(255,255,255,.10);color:#e9fbff;font-size:11px;font-weight:900;letter-spacing:.9px;text-transform:uppercase}.hero h1{font-size:clamp(34px,6vw,72px);line-height:.96;letter-spacing:-2.4px;font-weight:800;margin:16px 0 12px;text-shadow:0 16px 44px rgba(0,0,0,.45)}.hero p{font-size:clamp(14px,1.5vw,17px);line-height:1.55;color:var(--muted);max-width:590px}
+    .hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:12px 16px;background:linear-gradient(135deg,#dff8ff,#8ee1ff);color:#071422;font-size:13px;font-weight:900;box-shadow:0 14px 34px rgba(116,213,255,.24)}.btn.secondary{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.18);box-shadow:none}.btn.dark{background:#071422;color:#e9fbff;box-shadow:none}.btn.small{padding:9px 12px;font-size:12px}.btn.ghost{background:#f1fbff;color:#071422;box-shadow:none;border:1px solid #d8f2ff}.btn.whatsapp{background:#e9fff2;color:#063c1a}
+
+    .quick-choice{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:22px;max-width:620px}.choice{min-height:70px;border:1px solid rgba(255,255,255,.20);background:rgba(255,255,255,.11);backdrop-filter:blur(14px);color:#fff;border-radius:22px;padding:13px;text-align:left;transition:.18s}.choice:hover{background:rgba(223,248,255,.20);transform:translateY(-2px)}.choice i{font-style:normal;font-size:15px;opacity:.9}.choice b{display:block;margin-top:7px;font-size:13px}.choice span{display:block;margin-top:3px;color:rgba(255,255,255,.68);font-size:11px}
+
+    .smart-card{border:1px solid rgba(255,255,255,.30);background:rgba(248,253,255,.86);backdrop-filter:blur(22px);box-shadow:var(--shadow);border-radius:30px;padding:18px;color:var(--ink)}.smart-head{display:flex;gap:12px;align-items:center;margin-bottom:14px}.smart-orb{width:46px;height:46px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg,#071422,#29536d);color:#c9f3ff;font-weight:900;box-shadow:0 14px 34px rgba(0,0,0,.18)}.smart-head b{display:block;font-size:15px}.smart-head span{display:block;font-size:12px;color:#4f7184;margin-top:2px}.ai-search{display:flex;gap:8px;align-items:center;padding:9px;border:1px solid #d7f1ff;background:#fff;border-radius:22px}.ai-search input{flex:1;border:0;outline:0;min-width:0;font-size:14px;color:#071422}.ai-search button{width:40px;height:40px;border-radius:16px;background:#dff8ff;color:#071422;font-weight:900}.ai-chips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}.chip{border-radius:999px;background:#f0fbff;border:1px solid #d8f2ff;color:#17364a;padding:8px 10px;font-size:11px;font-weight:900}.ai-answer{min-height:86px;border-radius:20px;background:#f7fdff;border:1px solid #d8f2ff;padding:12px;color:#24475c;font-size:13px;line-height:1.45}.ai-answer b{color:#071422}.mini-list{margin-top:10px;display:grid;gap:7px}.mini-item{border:1px solid #dceff8;background:#fff;border-radius:16px;padding:10px}.mini-item b{display:block;font-size:12px;color:#071422}.mini-item span{display:block;font-size:11px;color:#567284;margin-top:2px}
+
+    .search-panel{margin-top:26px;border:1px solid rgba(255,255,255,.32);background:rgba(248,253,255,.82);backdrop-filter:blur(20px);border-radius:26px;padding:12px;box-shadow:0 20px 56px rgba(0,0,0,.18);display:grid;grid-template-columns:1.05fr 1.05fr 1.05fr .82fr auto;gap:8px}.field{position:relative}.field label{position:absolute;left:13px;top:7px;font-size:9px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;color:#6890a4}.field select,.field input{width:100%;height:52px;border:1px solid #d6eef8;background:#fff;color:#071422;border-radius:18px;padding:20px 12px 6px;outline:0;font-size:13px;font-weight:700}.search-panel .btn{height:52px;border-radius:18px;white-space:nowrap}
+
+    section{position:relative}.section{padding:56px 0}.surface{background:linear-gradient(180deg,#f7fdff,#eef9ff);color:var(--ink)}.surface .section-title h2{color:var(--ink)}.section-title{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:20px}.section-title small{display:block;color:#6490a5;text-transform:uppercase;font-weight:900;letter-spacing:1.6px;font-size:10px;margin-bottom:6px}.section-title h2{font-size:clamp(24px,3vw,38px);letter-spacing:-1px}.section-title p{color:#55778c;font-size:13px;max-width:470px;line-height:1.55}.step-area{display:none}.step-area.active{display:block}.step-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}.step-btn{border-radius:22px;padding:16px;background:#fff;border:1px solid #d7eef8;color:#071422;text-align:left;min-height:78px;box-shadow:0 10px 28px rgba(30,80,110,.08)}.step-btn b{display:block;font-size:14px}.step-btn span{display:block;margin-top:5px;color:#638395;font-size:12px}.step-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+
+    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}.card{background:#fff;border:1px solid #dbeff8;border-radius:26px;overflow:hidden;box-shadow:0 18px 50px rgba(14,55,82,.10);color:var(--ink)}.card-img{height:210px;background:radial-gradient(circle at 72% 20%,rgba(189,239,255,.62),transparent 28%),linear-gradient(135deg,#eafaff,#dff4fb 45%,#cadfec);background-size:cover;background-position:center;position:relative;overflow:hidden}.card-img.has-photo{background-size:cover;background-position:center}.card-img:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,20,34,.02),rgba(7,20,34,.62))}.card-img.no-img:before{content:"LEADS IMÓVEIS";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;color:rgba(7,20,34,.22);font-size:24px;font-weight:950;letter-spacing:.18em;text-align:center;width:100%;padding:0 18px}.no-photo-label{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:2;background:rgba(255,255,255,.90);color:#071422;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:900;white-space:nowrap}.code{position:absolute;left:12px;top:12px;z-index:2;background:rgba(255,255,255,.92);color:#071422;border-radius:999px;font-size:11px;font-weight:900;padding:7px 9px}.tag{position:absolute;right:12px;top:12px;z-index:2;background:rgba(223,248,255,.92);color:#071422;border-radius:999px;font-size:11px;font-weight:900;padding:7px 9px}.card-body{padding:15px}.card-body h3{font-size:16px;line-height:1.2;margin-bottom:7px}.meta{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.meta span{font-size:11px;color:#395f75;background:#f0fbff;border:1px solid #d9f0fa;border-radius:999px;padding:6px 8px}.price{font-size:19px;font-weight:950;margin:10px 0;color:#071422}.desc{color:#537389;font-size:12px;line-height:1.45;min-height:34px}.card-actions{display:flex;gap:8px;margin-top:13px}.card-actions .btn{flex:1}
+
+    .contact{background:linear-gradient(135deg,rgba(7,20,34,.96),rgba(15,48,72,.92));color:#fff}.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}.contact-card{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);border-radius:28px;padding:22px;backdrop-filter:blur(16px)}.contact-card h3{font-size:22px;margin-bottom:8px}.contact-card p{font-size:13px;line-height:1.6;color:rgba(255,255,255,.76)}.contact-lines{display:grid;gap:10px;margin-top:18px}.contact-line{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:10px;color:rgba(255,255,255,.82);font-size:13px}.contact-form{display:grid;gap:9px}.contact-form input,.contact-form textarea{width:100%;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.10);color:#fff;border-radius:18px;padding:13px;outline:0}.contact-form textarea{min-height:98px;resize:vertical}.contact-form input::placeholder,.contact-form textarea::placeholder{color:rgba(255,255,255,.56)}.hp{position:absolute;left:-9999px;opacity:0;height:0;width:0}
+
+    .ai-float{position:fixed;right:18px;bottom:calc(18px + var(--safe));z-index:90;width:58px;height:58px;border-radius:22px;background:linear-gradient(135deg,#dff8ff,#8ee1ff);color:#071422;box-shadow:0 20px 50px rgba(0,0,0,.25);font-weight:950;display:none}.ai-panel{position:fixed;right:18px;bottom:calc(88px + var(--safe));z-index:100;width:min(390px,calc(100vw - 24px));max-height:min(620px,82dvh);border-radius:28px;background:rgba(248,253,255,.96);color:#071422;box-shadow:0 30px 90px rgba(0,0,0,.34);border:1px solid rgba(255,255,255,.60);overflow:hidden;display:none}.ai-panel.open{display:block}.ai-panel-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #d8f2ff}.ai-panel-head b{font-size:14px}.ai-panel-head button{width:36px;height:36px;border-radius:14px;background:#edf9ff;color:#071422;font-size:20px}.ai-panel-body{padding:14px;display:grid;gap:10px}.ai-thread{max-height:270px;overflow:auto;display:grid;gap:8px}.bubble{border-radius:18px;padding:10px 12px;font-size:13px;line-height:1.42}.bubble.ai{background:#edf9ff;color:#264c62}.bubble.me{background:#071422;color:#fff;margin-left:28px}.ai-input-line{display:flex;gap:8px}.ai-input-line input{flex:1;min-width:0;border:1px solid #d8f2ff;background:#fff;border-radius:18px;padding:12px;outline:0}.ai-input-line button{width:46px;border-radius:18px;background:#dff8ff;color:#071422;font-weight:900}
+
+    footer{background:#f8fdff;color:#071422;padding:26px 0;border-top:1px solid #d9f0fa}footer .foot{display:flex;align-items:center;justify-content:space-between;gap:14px}footer img{width:92px;height:92px;object-fit:contain;border-radius:20px;background:#071422}footer p{font-size:12px;color:#55788f;line-height:1.5}footer a{font-size:12px;color:#55788f;text-decoration:underline;opacity:.75}
+
+    @media (max-width:980px){.topbar{height:74px;padding:10px 14px}.brand{min-width:0}.brand-logo{width:54px;height:54px}.brand-text b{font-size:12px}.brand-text span{font-size:9px}.nav{display:none}.menu-btn{display:grid;place-items:center}.hero{padding-top:92px;min-height:auto}.hero-grid{grid-template-columns:1fr}.hero-logo{width:min(260px,70vw);margin:0 auto 14px}.hero-copy{text-align:center;margin:auto}.hero p{margin:auto}.hero-actions{justify-content:center}.quick-choice{grid-template-columns:repeat(2,1fr);margin-inline:auto}.smart-card{max-width:560px;margin:auto}.search-panel{grid-template-columns:1fr 1fr}.search-panel .btn{grid-column:1/-1}.section{padding:42px 0}.contact-grid{grid-template-columns:1fr}.ai-float{display:grid;place-items:center}.ai-panel{right:12px;bottom:calc(82px + var(--safe))}.section-title{display:block}.section-title p{margin-top:8px}.card-img{height:190px}}
+    @media (max-width:620px){.shell{width:min(100% - 20px,1180px)}.hero{padding-bottom:28px}.hero h1{font-size:38px;letter-spacing:-1.2px}.hero p{font-size:13px}.hero-actions .btn{width:100%}.quick-choice{grid-template-columns:1fr}.choice{min-height:56px;padding:12px}.search-panel{grid-template-columns:1fr;padding:10px}.field select,.field input,.search-panel .btn{height:50px}.step-grid,.cards{grid-template-columns:1fr}.contact-card{padding:18px;border-radius:24px}footer .foot{display:block;text-align:center}footer img{margin-bottom:12px}.brand-text{display:none}.smart-card{padding:14px;border-radius:24px}.hero-bg{background-image:url("hero-leads-floripa-mobile.webp");background-position:center top}.ai-chips .chip{padding:7px 8px;font-size:10px}}
+    @media (prefers-reduced-motion:reduce){.hero-bg,.hero-bg:after{animation:none!important}}
+
+
+    /* ULTRA PREMIUM: logo arredondada, sem nome no header e IA futurista */
+    .topbar{height:96px;background:rgba(248,253,255,.72);border-bottom:1px solid rgba(203,242,255,.72)}
+    .brand{min-width:0;width:auto;gap:0}.brand-text{display:none!important}
+    .brand-logo{width:82px!important;height:82px!important;border-radius:30px!important;object-fit:contain!important;background:rgba(5,12,20,.98)!important;padding:8px!important;border:1px solid rgba(214,247,255,.72);box-shadow:0 18px 46px rgba(0,0,0,.24),0 0 0 8px rgba(223,248,255,.08),inset 0 1px 0 rgba(255,255,255,.20)!important}
+    .hero-logo{width:min(410px,76vw)!important;border-radius:46px;background:rgba(5,12,20,.76);border:1px solid rgba(218,248,255,.50);box-shadow:0 28px 80px rgba(0,0,0,.46),0 0 0 10px rgba(223,248,255,.06);object-fit:contain!important;padding:16px!important}
+    .drawer-head img{width:84px!important;height:84px!important;border-radius:30px!important;object-fit:contain!important;padding:8px!important;border:1px solid #d8f2ff;box-shadow:0 14px 36px rgba(0,0,0,.20);background:#071422}
+    footer img{width:104px!important;height:104px!important;border-radius:34px!important;object-fit:contain!important;padding:10px!important;border:1px solid #d8f2ff;box-shadow:0 14px 36px rgba(7,20,34,.14);background:#071422}
+    .smart-card{border:1px solid rgba(211,246,255,.74);background:rgba(248,253,255,.90);box-shadow:0 28px 90px rgba(0,0,0,.34),0 0 0 1px rgba(255,255,255,.45)}
+    .smart-orb{position:relative;width:50px!important;height:50px!important;border-radius:50%!important;background:radial-gradient(circle at 35% 28%,#ffffff 0,#dff8ff 27%,#84dcff 54%,#16364c 100%)!important;color:#071422!important;font-size:20px!important;box-shadow:0 18px 50px rgba(116,213,255,.42),inset 0 1px 0 rgba(255,255,255,.8)!important;overflow:hidden}
+    .smart-orb::after{content:"";position:absolute;inset:7px;border-radius:50%;border:1px solid rgba(255,255,255,.78);opacity:.75}
+    .ai-search{border-color:#c8eefc;box-shadow:0 10px 26px rgba(116,213,255,.10)}
+    .ai-search button,.ai-input-line button{background:linear-gradient(135deg,#eafaff,#98e5ff)!important;color:#071422!important;border:1px solid #caeffd;box-shadow:0 8px 22px rgba(116,213,255,.20)}
+    .ai-float{display:grid!important;place-items:center;width:64px!important;height:64px!important;border-radius:50%!important;background:radial-gradient(circle at 35% 28%,#ffffff 0,#dff8ff 24%,#81dcff 55%,#092033 100%)!important;border:1px solid rgba(222,248,255,.74);box-shadow:0 26px 70px rgba(0,0,0,.34),0 0 38px rgba(116,213,255,.42)!important;color:#071422!important;font-size:23px!important}
+    .ai-float span{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.26);border:1px solid rgba(255,255,255,.62)}
+    .ai-panel{border:1px solid rgba(202,239,253,.92);box-shadow:0 36px 100px rgba(0,0,0,.40),0 0 42px rgba(116,213,255,.18)}
+    .hero h1{text-shadow:0 18px 54px rgba(0,0,0,.58)}
+    .frase-rotativa{display:inline-block;transition:opacity .45s ease, transform .45s ease;will-change:opacity,transform}
+    .frase-rotativa.trocando,.frase-apoio.trocando{opacity:0;transform:translateY(8px)}
+    .frase-apoio{min-height:26px}
+    @media (max-width:980px){.topbar{height:82px}.brand-logo{width:66px!important;height:66px!important;border-radius:24px!important}.hero-logo{width:min(320px,78vw)!important;border-radius:36px}.hero{padding-top:100px}.ai-float{width:60px!important;height:60px!important}}
+    @media (max-width:620px){.brand-logo{width:60px!important;height:60px!important}.hero-logo{width:min(292px,80vw)!important;border-radius:32px;margin-bottom:12px}.topbar{height:78px}.hero h1{font-size:34px}.ai-float{right:14px;bottom:calc(16px + var(--safe));width:58px!important;height:58px!important}}
+
+
+
+    /* DETALHE FINAL: assinatura tipográfica sofisticada da marca */
+    .brand-signature{
+      display:inline-flex;
+      flex-direction:column;
+      align-items:center;
+      gap:4px;
+      margin:0 0 14px;
+      padding:10px 18px 9px;
+      border-radius:999px;
+      background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(223,248,255,.06));
+      border:1px solid rgba(218,248,255,.45);
+      box-shadow:0 16px 44px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.18);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+    }
+    .brand-signature strong{
+      display:block;
+      font-family:Georgia,'Times New Roman',serif;
+      font-size:clamp(18px,2.1vw,31px);
+      line-height:1;
+      font-weight:500;
+      letter-spacing:.28em;
+      color:#f7fcff;
+      text-shadow:0 12px 34px rgba(0,0,0,.44),0 0 22px rgba(189,239,255,.28);
+      text-transform:uppercase;
+    }
+    .brand-signature span{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color:#dff8ff;
+      font-size:10px;
+      line-height:1;
+      font-weight:800;
+      letter-spacing:.55em;
+      text-transform:uppercase;
+      opacity:.92;
+    }
+    .brand-signature span::before,
+    .brand-signature span::after{
+      content:"";
+      width:38px;
+      height:1px;
+      background:linear-gradient(90deg,transparent,rgba(223,248,255,.75),transparent);
+    }
+    .brand-signature .accent-dot{
+      width:5px;
+      height:5px;
+      border-radius:50%;
+      background:#bdefff;
+      box-shadow:0 0 22px rgba(189,239,255,.9);
+      margin-top:2px;
+    }
+    @media (max-width:620px){
+      .brand-signature{padding:9px 14px 8px;margin-bottom:11px;max-width:92vw}
+      .brand-signature strong{font-size:18px;letter-spacing:.22em}
+      .brand-signature span{font-size:9px;letter-spacing:.38em;gap:7px}
+      .brand-signature span::before,.brand-signature span::after{width:24px}
+    }
+
+
+    /* ORGANIZAÇÃO FINAL DAS IMAGENS: logo sem corte e cards sem usar fundo do site */
+    img.brand-logo,
+    img.hero-logo,
+    .drawer-head img,
+    footer img{
+      object-fit:contain!important;
+    }
+    .hero-bg{
+      background-position:center center!important;
+    }
+    .card-img.no-img{
+      background-image:radial-gradient(circle at 72% 20%,rgba(189,239,255,.62),transparent 28%),linear-gradient(135deg,#eafaff,#dff4fb 45%,#cadfec)!important;
+    }
+    .card-img.no-img:after{
+      background:linear-gradient(180deg,rgba(7,20,34,.02),rgba(7,20,34,.58))!important;
+    }
+
+
+    /* VERSÃO PREMIUM 2: logo menor, transparente e integrada ao fundo */
+    .hero-copy{max-width:650px!important;}
+    .hero-logo{
+      width:min(238px,54vw)!important;
+      max-height:238px!important;
+      height:auto!important;
+      object-fit:contain!important;
+      padding:12px!important;
+      margin:0 0 16px!important;
+      border-radius:34px!important;
+      background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.045))!important;
+      border:1px solid rgba(223,248,255,.42)!important;
+      backdrop-filter:blur(16px) saturate(138%)!important;
+      -webkit-backdrop-filter:blur(16px) saturate(138%)!important;
+      box-shadow:0 22px 68px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.18)!important;
+      opacity:.94;
+      filter:drop-shadow(0 12px 28px rgba(0,0,0,.38))!important;
+    }
+    .brand-signature{display:none!important;}
+    .brand-logo{
+      width:68px!important;
+      height:68px!important;
+      border-radius:23px!important;
+      object-fit:contain!important;
+      padding:7px!important;
+      background:linear-gradient(135deg,rgba(7,20,34,.22),rgba(255,255,255,.16))!important;
+      border:1px solid rgba(7,20,34,.12)!important;
+      backdrop-filter:blur(12px)!important;
+      -webkit-backdrop-filter:blur(12px)!important;
+    }
+    .topbar{height:88px!important;background:rgba(248,253,255,.62)!important;}
+    .hero h1{font-size:clamp(30px,5.3vw,62px)!important;letter-spacing:-1.8px!important;margin-top:14px!important;}
+    .hero p{max-width:560px!important;}
+    .hero-bg{background-position:center center!important;filter:saturate(1.06) contrast(1.02);}
+    .hero-bg:before{
+      background:linear-gradient(90deg,rgba(5,15,25,.78),rgba(7,20,34,.48) 42%,rgba(5,15,25,.20) 70%,rgba(7,20,34,.68)),
+                 linear-gradient(180deg,rgba(5,13,21,.10),rgba(5,13,21,.64))!important;
+    }
+    .search-panel,.smart-card{background:rgba(248,253,255,.80)!important;}
+    .card-img.no-img{
+      background-image:radial-gradient(circle at 72% 20%,rgba(189,239,255,.62),transparent 28%),linear-gradient(135deg,#eafaff,#dff4fb 45%,#cadfec)!important;
+      background-size:cover!important;
+      background-position:center!important;
+    }
+    .card-img.no-img:before{content:none!important;}
+    .no-photo-label{background:rgba(255,255,255,.92)!important;}
+    @media (max-width:980px){
+      .hero-logo{width:min(190px,58vw)!important;max-height:190px!important;margin:0 auto 14px!important;border-radius:30px!important;}
+      .brand-logo{width:60px!important;height:60px!important;border-radius:20px!important;}
+      .topbar{height:78px!important;}
+    }
+    @media (max-width:620px){
+      .hero-logo{width:min(165px,56vw)!important;max-height:165px!important;border-radius:26px!important;padding:10px!important;}
+      .hero h1{font-size:32px!important;}
+    }
+
+
+    /* ÍCONES FLUTUANTES PREMIUM: inspiração visual de cards flutuantes, sem copiar layout externo */
+    .hero{position:relative;overflow:hidden;}
+    .floating-luxury-icons{
+      position:absolute;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    .lux-icon{
+      position:absolute;
+      min-width:104px;
+      min-height:58px;
+      padding:10px 13px;
+      border-radius:22px;
+      display:flex;
+      align-items:center;
+      gap:9px;
+      color:#f7fcff;
+      background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(223,248,255,.055));
+      border:1px solid rgba(223,248,255,.34);
+      box-shadow:0 20px 58px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.18);
+      backdrop-filter:blur(16px) saturate(136%);
+      -webkit-backdrop-filter:blur(16px) saturate(136%);
+      opacity:.86;
+      animation:luxFloat 8.6s ease-in-out infinite;
+    }
+    .lux-icon i{
+      width:34px;
+      height:34px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      background:radial-gradient(circle at 35% 20%,rgba(255,255,255,.9),rgba(189,239,255,.36) 42%,rgba(7,20,34,.30));
+      border:1px solid rgba(255,255,255,.38);
+      box-shadow:0 0 22px rgba(116,213,255,.24);
+      font-style:normal;
+      font-size:16px;
+      flex:0 0 auto;
+    }
+    .lux-icon b{
+      display:block;
+      font-size:11px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      line-height:1.05;
+      color:#ffffff;
+      white-space:nowrap;
+    }
+    .lux-icon span{
+      display:block;
+      margin-top:3px;
+      font-size:10px;
+      color:rgba(247,252,255,.70);
+      white-space:nowrap;
+    }
+    .lux-icon.one{left:4%;top:20%;animation-delay:-.6s;}
+    .lux-icon.two{right:6%;top:18%;animation-delay:-2.8s;}
+    .lux-icon.three{left:8%;bottom:18%;animation-delay:-4.4s;}
+    .lux-icon.four{right:4%;bottom:22%;animation-delay:-1.4s;}
+    .lux-icon.five{left:42%;top:12%;animation-delay:-5.2s;transform:scale(.92);}
+    .lux-icon.six{right:22%;bottom:8%;animation-delay:-3.6s;transform:scale(.88);}
+    .lux-orb{
+      position:absolute;
+      border-radius:50%;
+      background:radial-gradient(circle,rgba(189,239,255,.30),rgba(116,213,255,.10) 36%,transparent 68%);
+      filter:blur(.2px);
+      opacity:.55;
+      animation:orbDrift 12s ease-in-out infinite alternate;
+    }
+    .lux-orb.a{width:170px;height:170px;left:26%;top:18%;}
+    .lux-orb.b{width:220px;height:220px;right:16%;top:48%;animation-delay:-3s;}
+    .lux-orb.c{width:140px;height:140px;left:62%;top:8%;animation-delay:-6s;}
+    @keyframes luxFloat{
+      0%,100%{transform:translate3d(0,0,0) rotate(-1deg)}
+      50%{transform:translate3d(0,-16px,0) rotate(1.2deg)}
+    }
+    @keyframes orbDrift{
+      from{transform:translate3d(-10px,4px,0) scale(.96)}
+      to{transform:translate3d(12px,-12px,0) scale(1.08)}
+    }
+    .hero-grid{position:relative;z-index:2;}
+    .hero::after{
+      content:"";
+      position:absolute;
+      inset:auto 0 0 0;
+      height:180px;
+      background:linear-gradient(180deg,transparent,rgba(247,253,255,.18));
+      pointer-events:none;
+      z-index:1;
+    }
+    .choice,.smart-card,.search-panel{position:relative;z-index:3;}
+    .choice{
+      border-color:rgba(223,248,255,.30)!important;
+      box-shadow:0 16px 42px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.10);
+    }
+    .choice i{
+      width:28px;
+      height:28px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      background:rgba(223,248,255,.14);
+      border:1px solid rgba(223,248,255,.22);
+      margin-bottom:2px;
+    }
+    @media (max-width:1180px){
+      .lux-icon.five,.lux-icon.six{display:none;}
+      .lux-icon.one{left:2%;top:18%;transform:scale(.86)}
+      .lux-icon.two{right:2%;top:18%;transform:scale(.86)}
+      .lux-icon.three{left:2%;bottom:14%;transform:scale(.82)}
+      .lux-icon.four{right:2%;bottom:14%;transform:scale(.82)}
+    }
+    @media (max-width:980px){
+      .floating-luxury-icons{display:none;}
+      .hero{overflow:hidden;}
+    }
+
+
+    /* CORREÇÃO FINAL 09/07: logo completa e cards sem foto sem puxar imagem de fundo */
+    .brand-logo,
+    .drawer-head img,
+    .hero-logo,
+    footer img{
+      object-fit:contain!important;
+      object-position:center!important;
+      background:#071422!important;
+    }
+    .hero-logo{
+      width:min(270px,62vw)!important;
+      max-height:none!important;
+      aspect-ratio:1/1!important;
+      padding:10px!important;
+      border-radius:34px!important;
+    }
+    .brand-logo{
+      width:70px!important;
+      height:70px!important;
+      padding:5px!important;
+      border-radius:22px!important;
+    }
+    .drawer-head img,
+    footer img{
+      padding:6px!important;
+    }
+    .card-img.no-img{
+      background-image:radial-gradient(circle at 72% 20%,rgba(189,239,255,.62),transparent 28%),linear-gradient(135deg,#eafaff,#dff4fb 45%,#cadfec)!important;
+      background-size:cover!important;
+      background-position:center!important;
+    }
+    .card-img.no-img:before{
+      content:"LEADS IMÓVEIS"!important;
+      position:absolute!important;
+      left:50%!important;
+      top:50%!important;
+      transform:translate(-50%,-50%)!important;
+      z-index:1!important;
+      color:rgba(7,20,34,.24)!important;
+      font-size:24px!important;
+      font-weight:950!important;
+      letter-spacing:.18em!important;
+      text-align:center!important;
+      width:100%!important;
+      padding:0 18px!important;
+    }
+    @media (max-width:980px){
+      .hero-logo{width:min(230px,68vw)!important;}
+      .brand-logo{width:62px!important;height:62px!important;}
+    }
+    @media (max-width:620px){
+      .hero-logo{width:min(190px,70vw)!important;border-radius:28px!important;}
+      .brand-logo{width:58px!important;height:58px!important;border-radius:20px!important;}
+    }
+
+
+    /* AJUSTE MASTER DESIGN 09/07: sem logo grande, nome flutuante elegante e layout simétrico */
+    .hero-grid{
+      grid-template-columns:minmax(0,1fr) minmax(278px,318px)!important;
+      gap:20px 22px!important;
+      align-items:center!important;
+    }
+    .hero-copy{
+      max-width:680px!important;
+      padding-top:8px;
+    }
+    .hero-logo{
+      display:none!important;
+    }
+    .hero-wordmark{
+      position:relative;
+      display:inline-flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:8px;
+      margin:0 0 18px;
+      padding:18px 24px 17px;
+      border-radius:30px;
+      background:linear-gradient(135deg,rgba(255,255,255,.17),rgba(223,248,255,.055));
+      border:1px solid rgba(223,248,255,.42);
+      box-shadow:0 24px 72px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.20),0 0 42px rgba(116,213,255,.12);
+      backdrop-filter:blur(18px) saturate(142%);
+      -webkit-backdrop-filter:blur(18px) saturate(142%);
+      animation:wordmarkFloat 7s ease-in-out infinite;
+      overflow:hidden;
+    }
+    .hero-wordmark::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(115deg,transparent 0%,rgba(255,255,255,.18) 44%,transparent 70%);
+      transform:translateX(-120%);
+      animation:wordmarkShine 9s ease-in-out infinite;
+      pointer-events:none;
+    }
+    .hero-wordmark .wordmark-kicker{
+      position:relative;
+      z-index:1;
+      font-size:10px;
+      font-weight:900;
+      letter-spacing:.26em;
+      text-transform:uppercase;
+      color:#dff8ff;
+      opacity:.95;
+      text-shadow:0 8px 22px rgba(0,0,0,.34);
+    }
+    .hero-wordmark strong{
+      position:relative;
+      z-index:1;
+      display:block;
+      font-family:Georgia,'Times New Roman',serif;
+      font-size:clamp(34px,5.4vw,76px);
+      line-height:.92;
+      font-weight:500;
+      letter-spacing:-.045em;
+      color:#ffffff;
+      text-shadow:0 18px 48px rgba(0,0,0,.58),0 0 24px rgba(189,239,255,.24);
+      white-space:nowrap;
+    }
+    .hero-wordmark i{
+      position:relative;
+      z-index:1;
+      display:block;
+      width:min(280px,62vw);
+      height:1px;
+      background:linear-gradient(90deg,#bdefff,rgba(223,248,255,.52),transparent);
+      box-shadow:0 0 22px rgba(189,239,255,.62);
+    }
+    @keyframes wordmarkFloat{
+      0%,100%{transform:translate3d(0,0,0)}
+      50%{transform:translate3d(0,-9px,0)}
+    }
+    @keyframes wordmarkShine{
+      0%,58%{transform:translateX(-120%);opacity:0}
+      68%{opacity:.85}
+      86%,100%{transform:translateX(120%);opacity:0}
+    }
+    .smart-card{
+      max-width:318px!important;
+      width:100%!important;
+      justify-self:end!important;
+      padding:15px!important;
+      border-radius:26px!important;
+    }
+    .smart-head{
+      margin-bottom:10px!important;
+    }
+    .smart-orb{
+      width:42px!important;
+      height:42px!important;
+      font-size:17px!important;
+      flex:0 0 auto;
+    }
+    .smart-head b{font-size:13px!important;}
+    .smart-head span{font-size:11px!important;}
+    .ai-search{padding:7px!important;border-radius:18px!important;}
+    .ai-search button{width:36px!important;height:36px!important;border-radius:14px!important;}
+    .ai-search input{font-size:12px!important;}
+    .chip{font-size:10px!important;padding:7px 8px!important;}
+    .ai-answer{min-height:74px!important;border-radius:18px!important;font-size:12px!important;padding:10px!important;}
+    .mini-item{padding:9px!important;border-radius:14px!important;}
+    .mini-item b{font-size:11px!important;}
+    .mini-item span{font-size:10px!important;}
+    .search-panel{
+      grid-column:1/-1!important;
+      width:min(100%,1040px)!important;
+      margin:14px auto 0!important;
+      grid-template-columns:1fr 1fr 1fr .82fr auto!important;
+      align-items:stretch!important;
+      padding:12px!important;
+      border-radius:28px!important;
+    }
+    .quick-choice{
+      max-width:640px!important;
+      grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    }
+    .floating-luxury-icons{opacity:.82;}
+    .lux-icon{transform-origin:center;}
+    .lux-icon.one{left:3.5%!important;top:24%!important;}
+    .lux-icon.two{right:3.5%!important;top:22%!important;}
+    .lux-icon.three{left:4.5%!important;bottom:18%!important;}
+    .lux-icon.four{right:3.5%!important;bottom:20%!important;}
+    @media (max-width:980px){
+      .hero-grid{grid-template-columns:1fr!important;gap:18px!important;}
+      .hero-copy{text-align:center!important;margin:auto!important;max-width:720px!important;}
+      .hero-wordmark{align-items:center!important;margin:0 auto 16px!important;padding:15px 18px 14px!important;border-radius:26px!important;}
+      .hero-wordmark strong{font-size:clamp(34px,9vw,58px)!important;white-space:normal!important;text-align:center;}
+      .hero-wordmark .wordmark-kicker{text-align:center;font-size:9px!important;letter-spacing:.18em!important;}
+      .smart-card{justify-self:center!important;max-width:440px!important;}
+      .quick-choice{grid-template-columns:repeat(2,minmax(0,1fr))!important;max-width:560px!important;}
+      .search-panel{grid-template-columns:1fr 1fr!important;max-width:720px!important;}
+      .search-panel .btn{grid-column:1/-1!important;}
+    }
+    @media (max-width:620px){
+      .hero-wordmark{width:100%;max-width:360px;padding:14px 14px 13px!important;border-radius:24px!important;}
+      .hero-wordmark strong{font-size:clamp(31px,11vw,46px)!important;}
+      .hero-wordmark .wordmark-kicker{font-size:8px!important;letter-spacing:.12em!important;}
+      .quick-choice{grid-template-columns:1fr!important;}
+      .search-panel{grid-template-columns:1fr!important;padding:10px!important;border-radius:22px!important;}
+      .smart-card{max-width:100%!important;}
+    }
+
+
+    /* REFINO FINAL MASTER: logo pequena mais nítida, wordmark elegante e IA lateral mais fina */
+    .brand-logo,
+    .drawer-head img,
+    footer img{
+      display:block!important;
+      object-fit:contain!important;
+      object-position:center!important;
+      image-rendering:auto!important;
+      transform:translateZ(0);
+      backface-visibility:hidden;
+      filter:contrast(1.08) saturate(1.06) drop-shadow(0 10px 24px rgba(0,0,0,.20))!important;
+    }
+    .brand-logo{
+      width:64px!important;
+      height:64px!important;
+      padding:5px!important;
+      border-radius:22px!important;
+      background:linear-gradient(135deg,rgba(7,20,34,.32),rgba(255,255,255,.18))!important;
+      border:1px solid rgba(223,248,255,.42)!important;
+      box-shadow:0 14px 36px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.22)!important;
+    }
+    .drawer-head img{
+      width:74px!important;
+      height:74px!important;
+      padding:6px!important;
+      border-radius:24px!important;
+      background:#071422!important;
+    }
+    footer img{
+      width:88px!important;
+      height:88px!important;
+      padding:7px!important;
+      border-radius:28px!important;
+      background:#071422!important;
+    }
+    .topbar{
+      height:82px!important;
+      padding-top:9px!important;
+      padding-bottom:9px!important;
+    }
+    .hero-grid{
+      grid-template-columns:minmax(0,1fr) minmax(248px,292px)!important;
+      gap:18px 22px!important;
+    }
+    .smart-card{
+      max-width:292px!important;
+      justify-self:end!important;
+      padding:14px!important;
+      border-radius:24px!important;
+    }
+    .smart-head{gap:9px!important;}
+    .smart-orb{width:39px!important;height:39px!important;font-size:16px!important;border-radius:50%!important;}
+    .smart-head b{font-size:12.5px!important;}
+    .smart-head span{font-size:10.5px!important;}
+    .ai-chips{gap:5px!important;margin:9px 0!important;}
+    .chip{font-size:9.5px!important;padding:6px 7px!important;}
+    .ai-answer{font-size:11.5px!important;line-height:1.42!important;min-height:68px!important;}
+    .hero-wordmark{
+      padding:18px 26px 17px!important;
+      border-radius:32px!important;
+      margin-bottom:17px!important;
+      box-shadow:0 26px 78px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.22), 0 0 46px rgba(116,213,255,.14)!important;
+    }
+    .hero-wordmark strong{
+      font-family:Georgia,'Times New Roman',serif!important;
+      font-size:clamp(38px,5.7vw,82px)!important;
+      font-weight:500!important;
+      letter-spacing:-.055em!important;
+      text-rendering:geometricPrecision;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    .hero-wordmark .wordmark-kicker{
+      font-size:9.5px!important;
+      letter-spacing:.30em!important;
+    }
+    .hero-logo{display:none!important;}
+    .search-panel{
+      grid-column:1/-1!important;
+      width:min(100%,1040px)!important;
+      margin:12px auto 0!important;
+    }
+    @media (max-width:980px){
+      .brand-logo{width:58px!important;height:58px!important;border-radius:20px!important;padding:5px!important;}
+      .topbar{height:76px!important;}
+      .hero-grid{grid-template-columns:1fr!important;}
+      .smart-card{max-width:430px!important;justify-self:center!important;}
+      .hero-wordmark{align-items:center!important;text-align:center!important;margin-left:auto!important;margin-right:auto!important;}
+      .hero-wordmark strong{font-size:clamp(34px,9vw,58px)!important;white-space:normal!important;}
+    }
+    @media (max-width:620px){
+      .brand-logo{width:54px!important;height:54px!important;border-radius:18px!important;padding:4px!important;}
+      .topbar{height:72px!important;}
+      .hero-wordmark{max-width:360px!important;width:100%!important;padding:14px 14px 13px!important;border-radius:24px!important;}
+      .hero-wordmark strong{font-size:clamp(32px,11vw,46px)!important;}
+      .smart-card{max-width:100%!important;}
+      footer img{width:78px!important;height:78px!important;}
+    }
+
+
+    /* REFINO REAL PREMIUM: nome menor, fino, sem frase de curadoria */
+    .hero-wordmark{
+      padding:14px 22px 13px!important;
+      margin:0 0 16px!important;
+      border-radius:28px!important;
+      background:linear-gradient(135deg,rgba(255,255,255,.125),rgba(223,248,255,.035))!important;
+      border:1px solid rgba(223,248,255,.30)!important;
+      box-shadow:0 20px 62px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.16), 0 0 34px rgba(116,213,255,.08)!important;
+      align-items:flex-start!important;
+    }
+    .hero-wordmark .wordmark-kicker{
+      display:none!important;
+    }
+    .hero-wordmark strong{
+      font-family:Georgia,'Times New Roman',serif!important;
+      font-size:clamp(30px,4.25vw,58px)!important;
+      line-height:1!important;
+      font-weight:400!important;
+      letter-spacing:.012em!important;
+      color:rgba(255,255,255,.96)!important;
+      text-shadow:0 16px 42px rgba(0,0,0,.50),0 0 18px rgba(189,239,255,.16)!important;
+      white-space:nowrap!important;
+    }
+    .hero-wordmark i{
+      width:min(210px,46vw)!important;
+      height:1px!important;
+      background:linear-gradient(90deg,transparent,rgba(223,248,255,.82),transparent)!important;
+      opacity:.86!important;
+    }
+    .hero h1{
+      font-size:clamp(29px,4.7vw,56px)!important;
+      letter-spacing:-1.25px!important;
+    }
+    @media (max-width:980px){
+      .hero-wordmark{
+        align-items:center!important;
+        padding:13px 18px 12px!important;
+        margin:0 auto 15px!important;
+      }
+      .hero-wordmark strong{
+        font-size:clamp(28px,7.4vw,46px)!important;
+        white-space:normal!important;
+        text-align:center!important;
+      }
+      .hero-wordmark i{width:min(190px,52vw)!important;}
+    }
+    @media (max-width:620px){
+      .hero-wordmark{
+        width:auto!important;
+        max-width:92vw!important;
+        padding:12px 16px 11px!important;
+        border-radius:22px!important;
+      }
+      .hero-wordmark strong{
+        font-size:clamp(27px,8.8vw,39px)!important;
+        letter-spacing:.006em!important;
+      }
+      .hero h1{font-size:30px!important;}
+    }
+
+
+    /* AJUSTE FINAL: símbolos flutuantes menores, arredondados e simétricos */
+    .lux-icon.one{
+      display:none!important;
+    }
+    .lux-icon{
+      width:86px!important;
+      min-width:86px!important;
+      height:86px!important;
+      min-height:86px!important;
+      padding:8px!important;
+      border-radius:50%!important;
+      flex-direction:column!important;
+      justify-content:center!important;
+      align-items:center!important;
+      gap:5px!important;
+      text-align:center!important;
+      background:radial-gradient(circle at 34% 22%,rgba(255,255,255,.28),rgba(223,248,255,.10) 38%,rgba(7,20,34,.26) 100%)!important;
+      border:1px solid rgba(223,248,255,.38)!important;
+      box-shadow:0 18px 50px rgba(0,0,0,.22),0 0 24px rgba(116,213,255,.12),inset 0 1px 0 rgba(255,255,255,.18)!important;
+      backdrop-filter:blur(16px) saturate(142%)!important;
+      -webkit-backdrop-filter:blur(16px) saturate(142%)!important;
+      opacity:.82!important;
+    }
+    .lux-icon i{
+      width:30px!important;
+      height:30px!important;
+      border-radius:50%!important;
+      font-size:13px!important;
+      background:radial-gradient(circle at 35% 22%,rgba(255,255,255,.92),rgba(189,239,255,.40) 48%,rgba(7,20,34,.18))!important;
+      border:1px solid rgba(255,255,255,.42)!important;
+      box-shadow:0 0 18px rgba(116,213,255,.20)!important;
+    }
+    .lux-icon b{
+      font-size:8.4px!important;
+      line-height:1.02!important;
+      letter-spacing:.105em!important;
+      white-space:normal!important;
+      max-width:72px!important;
+    }
+    .lux-icon span{
+      margin-top:1px!important;
+      font-size:7.5px!important;
+      line-height:1.05!important;
+      letter-spacing:.035em!important;
+      white-space:normal!important;
+      max-width:74px!important;
+      color:rgba(247,252,255,.72)!important;
+    }
+    .lux-icon.two{right:5.2%!important;top:20%!important;}
+    .lux-icon.three{left:5.2%!important;bottom:21%!important;}
+    .lux-icon.four{right:5.2%!important;bottom:21%!important;}
+    .lux-icon.five{left:46%!important;top:11%!important;transform:scale(.90)!important;}
+    .lux-icon.six{right:23%!important;bottom:9%!important;transform:scale(.86)!important;}
+    @media (max-width:1180px){
+      .lux-icon{width:76px!important;min-width:76px!important;height:76px!important;min-height:76px!important;padding:7px!important;}
+      .lux-icon b{font-size:7.7px!important;max-width:64px!important;}
+      .lux-icon span{font-size:6.9px!important;max-width:66px!important;}
+      .lux-icon.two{right:2.4%!important;top:20%!important;}
+      .lux-icon.three{left:2.4%!important;bottom:17%!important;}
+      .lux-icon.four{right:2.4%!important;bottom:17%!important;}
+    }
+
+
+  
+
+    /* ACABAMENTO ALTO LUXO: IA flutuante + barra superior mais fina e futurista */
+    .topbar{
+      height:66px!important;
+      padding:5px clamp(12px,3.2vw,42px)!important;
+      gap:14px!important;
+      background:linear-gradient(135deg,rgba(248,253,255,.52),rgba(223,248,255,.28))!important;
+      border-bottom:1px solid rgba(223,248,255,.44)!important;
+      box-shadow:0 10px 32px rgba(0,0,0,.085), inset 0 1px 0 rgba(255,255,255,.32)!important;
+      backdrop-filter:blur(22px) saturate(145%)!important;
+      -webkit-backdrop-filter:blur(22px) saturate(145%)!important;
+    }
+    .brand-logo{
+      width:52px!important;
+      height:52px!important;
+      padding:4px!important;
+      border-radius:18px!important;
+      filter:contrast(1.10) saturate(1.06) drop-shadow(0 8px 18px rgba(0,0,0,.18))!important;
+    }
+    .nav button,
+    .nav a{
+      height:32px!important;
+      padding:0 11px!important;
+      font-size:11px!important;
+      letter-spacing:.18px!important;
+    }
+    .menu-btn{
+      width:36px!important;
+      height:36px!important;
+      border-radius:13px!important;
+      font-size:17px!important;
+      background:rgba(7,20,34,.055)!important;
+    }
+    .hero{
+      padding-top:86px!important;
+    }
+    .ai-float{
+      display:grid!important;
+      place-items:center!important;
+      width:66px!important;
+      height:66px!important;
+      right:18px!important;
+      bottom:calc(18px + var(--safe))!important;
+      border-radius:50%!important;
+      background:radial-gradient(circle at 34% 22%,rgba(255,255,255,.96),rgba(223,248,255,.72) 28%,rgba(120,219,255,.42) 55%,rgba(7,20,34,.94) 100%)!important;
+      border:1px solid rgba(223,248,255,.56)!important;
+      color:#071422!important;
+      box-shadow:0 22px 62px rgba(0,0,0,.30),0 0 34px rgba(116,213,255,.30),inset 0 1px 0 rgba(255,255,255,.62)!important;
+      animation:iaRoyalFloat 7.2s ease-in-out infinite!important;
+      transform-origin:center!important;
+      overflow:visible!important;
+    }
+    .ai-float::before{
+      content:"";
+      position:absolute;
+      inset:-8px;
+      border-radius:50%;
+      background:radial-gradient(circle,rgba(189,239,255,.22),transparent 67%);
+      opacity:.78;
+      animation:iaRoyalGlow 4.8s ease-in-out infinite!important;
+      pointer-events:none;
+    }
+    .ai-float span{
+      position:relative!important;
+      z-index:2!important;
+      display:grid!important;
+      place-items:center!important;
+      width:43px!important;
+      height:43px!important;
+      border-radius:50%!important;
+      background:rgba(255,255,255,.30)!important;
+      border:1px solid rgba(255,255,255,.62)!important;
+      color:#071422!important;
+      font-size:14px!important;
+      line-height:1!important;
+      font-weight:950!important;
+      letter-spacing:.04em!important;
+      text-shadow:0 1px 0 rgba(255,255,255,.40)!important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.50),0 0 18px rgba(116,213,255,.16)!important;
+    }
+    @keyframes iaRoyalFloat{
+      0%,100%{transform:translate3d(0,0,0) rotate(-1.2deg) scale(1)}
+      50%{transform:translate3d(0,-14px,0) rotate(1.2deg) scale(1.025)}
+    }
+    @keyframes iaRoyalGlow{
+      0%,100%{opacity:.48;transform:scale(.94)}
+      50%{opacity:.88;transform:scale(1.08)}
+    }
+    .ai-panel{
+      width:min(360px,calc(100vw - 22px))!important;
+      right:16px!important;
+      bottom:calc(88px + var(--safe))!important;
+      border-radius:26px!important;
+    }
+    @media (max-width:980px){
+      .topbar{
+        height:62px!important;
+        padding:5px 12px!important;
+      }
+      .brand-logo{
+        width:50px!important;
+        height:50px!important;
+        border-radius:17px!important;
+        padding:4px!important;
+      }
+      .hero{padding-top:76px!important;}
+      .ai-float{
+        width:62px!important;
+        height:62px!important;
+        right:14px!important;
+        bottom:calc(15px + var(--safe))!important;
+      }
+      .ai-float span{
+        width:40px!important;
+        height:40px!important;
+        font-size:13px!important;
+      }
+      .ai-panel{bottom:calc(82px + var(--safe))!important;right:10px!important;}
+    }
+    @media (max-width:620px){
+      .topbar{
+        height:58px!important;
+        padding:4px 10px!important;
+      }
+      .brand-logo{
+        width:46px!important;
+        height:46px!important;
+        border-radius:16px!important;
+        padding:3px!important;
+      }
+      .menu-btn{
+        width:34px!important;
+        height:34px!important;
+      }
+      .hero{padding-top:70px!important;}
+      .ai-float{
+        width:58px!important;
+        height:58px!important;
+        right:12px!important;
+      }
+      .ai-float span{
+        width:37px!important;
+        height:37px!important;
+        font-size:12px!important;
+      }
+    }
+
+
+    /* REFINO FINAL PREMIUM: logo maior, mais nítida e layout sem conflito com IA */
+    .topbar{
+      height:74px!important;
+      padding:6px clamp(12px,3.2vw,40px)!important;
+      gap:14px!important;
+      background:linear-gradient(135deg,rgba(248,253,255,.54),rgba(223,248,255,.26))!important;
+      border-bottom:1px solid rgba(223,248,255,.40)!important;
+      box-shadow:0 12px 36px rgba(0,0,0,.09), inset 0 1px 0 rgba(255,255,255,.30)!important;
+    }
+    .brand{
+      position:relative!important;
+      z-index:4!important;
+      padding-top:0!important;
+    }
+    .brand-logo,
+    .drawer-head img,
+    footer img{
+      image-rendering:auto!important;
+      filter:contrast(1.12) saturate(1.08) brightness(1.02) drop-shadow(0 12px 24px rgba(0,0,0,.18))!important;
+      object-fit:contain!important;
+    }
+    .brand-logo{
+      width:72px!important;
+      height:72px!important;
+      padding:6px!important;
+      border-radius:24px!important;
+      background:linear-gradient(135deg,rgba(8,18,28,.28),rgba(255,255,255,.18))!important;
+      border:1px solid rgba(255,255,255,.38)!important;
+      box-shadow:0 18px 44px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.24)!important;
+      transform:translateY(-3px)!important;
+      backdrop-filter:blur(12px) saturate(138%)!important;
+      -webkit-backdrop-filter:blur(12px) saturate(138%)!important;
+    }
+    .hero{
+      padding-top:96px!important;
+    }
+    .hero-grid{
+      grid-template-columns:minmax(0,1fr) 314px!important;
+      gap:28px!important;
+      align-items:start!important;
+    }
+    .hero-copy{
+      max-width:690px!important;
+      padding-top:4px!important;
+    }
+    .hero-wordmark{
+      margin:-6px 0 16px!important;
+      padding:15px 22px 14px!important;
+      border-radius:30px!important;
+      box-shadow:0 22px 64px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.17), 0 0 32px rgba(116,213,255,.08)!important;
+    }
+    .smart-card{
+      width:min(100%,314px)!important;
+      justify-self:end!important;
+      margin-top:26px!important;
+      padding:14px!important;
+      border-radius:26px!important;
+    }
+    .smart-head{margin-bottom:10px!important;}
+    .ai-float{
+      right:16px!important;
+      bottom:calc(16px + var(--safe))!important;
+      width:64px!important;
+      height:64px!important;
+    }
+    .ai-panel{
+      bottom:calc(84px + var(--safe))!important;
+    }
+    footer img{
+      width:94px!important;
+      height:94px!important;
+      border-radius:28px!important;
+      padding:8px!important;
+    }
+    @media (max-width:980px){
+      .topbar{height:70px!important;padding:6px 12px!important;}
+      .brand-logo{width:66px!important;height:66px!important;border-radius:22px!important;padding:5px!important;transform:translateY(-2px)!important;}
+      .hero{padding-top:88px!important;}
+      .hero-grid{grid-template-columns:1fr!important;gap:18px!important;align-items:center!important;}
+      .hero-copy{max-width:720px!important;margin:auto!important;}
+      .hero-wordmark{margin:0 auto 16px!important;}
+      .smart-card{width:min(100%,420px)!important;max-width:420px!important;justify-self:center!important;margin-top:4px!important;}
+      footer img{width:88px!important;height:88px!important;}
+    }
+    @media (max-width:620px){
+      .topbar{height:64px!important;padding:5px 10px!important;}
+      .brand-logo{width:60px!important;height:60px!important;border-radius:20px!important;padding:4px!important;transform:translateY(-1px)!important;}
+      .hero{padding-top:82px!important;}
+      .hero-wordmark{max-width:92vw!important;padding:12px 16px 12px!important;}
+      .smart-card{width:100%!important;max-width:100%!important;}
+      .ai-float{width:58px!important;height:58px!important;right:12px!important;bottom:calc(14px + var(--safe))!important;}
+      footer img{width:82px!important;height:82px!important;border-radius:24px!important;}
+    }
+
+
+
+    /* FUNDO PREMIUM 4K NA PARTE DE BAIXO: mais vida ao rolar o site */
+    :root{
+      --bottom-bg-image:url("https://www.bossajurerehotel.com.br/wp-content/uploads/2020/12/Praia-de-Santo-Antonio-de-Lisboa.jpg");
+    }
+
+    .surface{
+      position:relative!important;
+      isolation:isolate!important;
+      background:
+        linear-gradient(180deg,rgba(7,20,34,.88),rgba(7,20,34,.74)),
+        var(--bottom-bg-image) center center/cover no-repeat fixed!important;
+      color:#f8fdff!important;
+      overflow:hidden!important;
+    }
+
+    .surface::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:-2;
+      background:
+        radial-gradient(circle at 18% 12%,rgba(189,239,255,.30),transparent 34%),
+        radial-gradient(circle at 82% 26%,rgba(255,255,255,.16),transparent 36%),
+        linear-gradient(120deg,rgba(7,20,34,.72),rgba(12,40,62,.38),rgba(7,20,34,.84));
+      pointer-events:none;
+    }
+
+    .surface::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:-1;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,0) 22%,rgba(255,255,255,.035) 100%);
+      backdrop-filter:saturate(122%);
+      -webkit-backdrop-filter:saturate(122%);
+      pointer-events:none;
+    }
+
+    .surface .section-title small{
+      color:#bdefff!important;
+      text-shadow:0 10px 24px rgba(0,0,0,.35)!important;
+    }
+
+    .surface .section-title h2{
+      color:#ffffff!important;
+      text-shadow:0 18px 44px rgba(0,0,0,.55)!important;
+    }
+
+    .surface .section-title p{
+      color:rgba(248,253,255,.78)!important;
+      text-shadow:0 12px 30px rgba(0,0,0,.42)!important;
+    }
+
+    .step-btn,
+    .card{
+      background:rgba(255,255,255,.90)!important;
+      border:1px solid rgba(223,248,255,.56)!important;
+      box-shadow:0 24px 70px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.40)!important;
+      backdrop-filter:blur(14px) saturate(135%)!important;
+      -webkit-backdrop-filter:blur(14px) saturate(135%)!important;
+    }
+
+    .step-btn:hover,
+    .card:hover{
+      transform:translateY(-2px);
+      box-shadow:0 30px 82px rgba(0,0,0,.28), 0 0 34px rgba(116,213,255,.12)!important;
+    }
+
+    .step-actions .btn.ghost{
+      background:rgba(255,255,255,.90)!important;
+      border:1px solid rgba(223,248,255,.62)!important;
+      color:#071422!important;
+      box-shadow:0 14px 36px rgba(0,0,0,.16)!important;
+    }
+
+    #bairros.surface{
+      padding-top:68px!important;
+    }
+
+    #imoveis.surface{
+      padding-bottom:76px!important;
+    }
+
+    @media (max-width:980px){
+      .surface{
+        background:
+          linear-gradient(180deg,rgba(7,20,34,.86),rgba(7,20,34,.76)),
+          var(--bottom-bg-image) center center/cover no-repeat!important;
+      }
+    }
+
+    @media (max-width:620px){
+      .surface{
+        background:
+          linear-gradient(180deg,rgba(7,20,34,.90),rgba(7,20,34,.80)),
+          var(--bottom-bg-image) center top/cover no-repeat!important;
+      }
+      #bairros.surface{
+        padding-top:48px!important;
+      }
+      #imoveis.surface{
+        padding-bottom:54px!important;
+      }
+    }
+
+
+
+    /* CONEXÃO ENTRE AS DUAS IMAGENS: topo + parte de baixo, preenchendo os espaços vazios */
+    :root{
+      --top-bg-image:url("hero-leads-floripa-final.webp");
+      --bottom-bg-image:url("https://www.bossajurerehotel.com.br/wp-content/uploads/2020/12/Praia-de-Santo-Antonio-de-Lisboa.jpg");
+    }
+
+    .hero-bg{
+      background-image:var(--top-bg-image)!important;
+      background-position:center 44%!important;
+      background-size:cover!important;
+    }
+
+    .hero{
+      position:relative!important;
+      overflow:hidden!important;
+    }
+
+    .hero::before{
+      content:"";
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:0;
+      height:180px;
+      z-index:1;
+      pointer-events:none;
+      background:
+        linear-gradient(180deg,rgba(7,20,34,0) 0%,rgba(7,20,34,.14) 26%,rgba(7,20,34,.46) 62%,rgba(7,20,34,.88) 100%);
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:-2px;
+      height:120px;
+      z-index:2;
+      pointer-events:none;
+      background:
+        linear-gradient(180deg,rgba(7,20,34,0),rgba(7,20,34,.82) 78%,rgba(7,20,34,.94));
+      opacity:1!important;
+    }
+
+    .hero-grid,
+    .choice,
+    .smart-card,
+    .search-panel{
+      position:relative!important;
+      z-index:3!important;
+    }
+
+    .surface{
+      margin-top:0!important;
+      background:
+        linear-gradient(180deg,rgba(7,20,34,.90),rgba(7,20,34,.76)),
+        var(--bottom-bg-image) center center/cover no-repeat fixed!important;
+      border-top:1px solid rgba(223,248,255,.10)!important;
+    }
+
+    #bairros.surface{
+      padding-top:74px!important;
+    }
+
+    #bairros.surface .shell,
+    #tipos.surface .shell,
+    #imoveis.surface .shell{
+      position:relative;
+      z-index:2;
+    }
+
+    #bairros.surface .section-title,
+    #tipos.surface .section-title,
+    #imoveis.surface .section-title{
+      margin-bottom:24px!important;
+    }
+
+    footer{
+      position:relative!important;
+      background:
+        linear-gradient(180deg,rgba(7,20,34,.88),rgba(7,20,34,.94)),
+        var(--bottom-bg-image) center bottom/cover no-repeat!important;
+      color:#f8fdff!important;
+      border-top:1px solid rgba(223,248,255,.10)!important;
+    }
+    footer p,
+    footer a{
+      color:rgba(248,253,255,.76)!important;
+    }
+
+    @media (max-width:980px){
+      .hero::before{height:140px!important;}
+      .hero::after{height:96px!important;}
+      .surface{
+        background:
+          linear-gradient(180deg,rgba(7,20,34,.90),rgba(7,20,34,.78)),
+          var(--bottom-bg-image) center center/cover no-repeat!important;
+      }
+    }
+
+    @media (max-width:620px){
+      .hero-bg{
+        background-image:url("hero-leads-floripa-mobile.webp")!important;
+        background-position:center top!important;
+      }
+      .hero::before{height:118px!important;}
+      .hero::after{height:84px!important;}
+      #bairros.surface{padding-top:54px!important;}
+      .surface{
+        background:
+          linear-gradient(180deg,rgba(7,20,34,.92),rgba(7,20,34,.80)),
+          var(--bottom-bg-image) center top/cover no-repeat!important;
+      }
+    }
+
+
+
+    /* OPÇÃO CINEMATOGRÁFICA FINAL: trocar barcos por praia de Jurerê, areia branca e mar elegante */
+    :root{
+      --bottom-bg-image:url("https://commons.wikimedia.org/wiki/Special:FilePath/Praia%20de%20Jurer%C3%AA%20Internacional%20(cropped).JPG");
+    }
+
+    .surface{
+      background:
+        linear-gradient(180deg,rgba(7,20,34,.92),rgba(7,20,34,.72)),
+        var(--bottom-bg-image) center center/cover no-repeat fixed!important;
+    }
+
+    .surface::before{
+      background:
+        radial-gradient(circle at 16% 10%,rgba(189,239,255,.34),transparent 33%),
+        radial-gradient(circle at 84% 18%,rgba(255,255,255,.18),transparent 32%),
+        linear-gradient(180deg,rgba(7,20,34,.08),rgba(7,20,34,.22) 28%,rgba(7,20,34,.54) 68%,rgba(7,20,34,.82) 100%)!important;
+    }
+
+    .surface::after{
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,0) 18%,rgba(255,255,255,.03) 100%),
+        radial-gradient(circle at center,rgba(255,255,255,.05),transparent 66%)!important;
+    }
+
+    #bairros.surface,
+    #tipos.surface,
+    #imoveis.surface{
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.08), inset 0 120px 160px rgba(7,20,34,.10)!important;
+    }
+
+    .step-btn,
+    .card,
+    .step-actions .btn.ghost{
+      backdrop-filter:blur(16px) saturate(138%)!important;
+      -webkit-backdrop-filter:blur(16px) saturate(138%)!important;
+      box-shadow:0 26px 80px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.44), 0 0 24px rgba(116,213,255,.08)!important;
+    }
+
+    footer{
+      position:relative!important;
+      overflow:hidden!important;
+      background:
+        linear-gradient(180deg,rgba(7,20,34,.76),rgba(7,20,34,.95) 54%,rgba(5,12,20,.98) 100%),
+        var(--bottom-bg-image) center bottom/cover no-repeat!important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.08)!important;
+    }
+
+    footer::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.04),transparent 24%),
+        radial-gradient(circle at 20% 18%,rgba(189,239,255,.16),transparent 32%),
+        radial-gradient(circle at 78% 24%,rgba(255,255,255,.10),transparent 24%);
+      opacity:.95;
+    }
+
+    footer .foot,
+    footer .shell{
+      position:relative;
+      z-index:2;
+    }
+
+    footer img{
+      box-shadow:0 16px 42px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.22), 0 0 28px rgba(116,213,255,.10)!important;
+    }
+
+    @media (max-width:980px){
+      .surface{
+        background:
+          linear-gradient(180deg,rgba(7,20,34,.92),rgba(7,20,34,.76)),
+          var(--bottom-bg-image) center center/cover no-repeat!important;
+      }
+    }
+
+    @media (max-width:620px){
+      .surface{
+        background:
+          linear-gradient(180deg,rgba(7,20,34,.94),rgba(7,20,34,.82)),
+          var(--bottom-bg-image) center top/cover no-repeat!important;
+      }
+      footer{
+        background:
+          linear-gradient(180deg,rgba(7,20,34,.80),rgba(5,12,20,.98)),
+          var(--bottom-bg-image) center bottom/cover no-repeat!important;
+      }
+    }
+
+
+
+    /* FINALIZAÇÃO MASTER: nova imagem 4K + logo LEADS IMÓVEIS vetorizada/flutuante */
+    :root{
+      --bottom-bg-image:url("leads-praia-hero-final.png?v=20260709-final");
+      --hero-brand-image:url("leads-praia-hero-final.png?v=20260709-final");
+    }
+
+    /* Mantém o fundo original do topo, mas usa a nova imagem tratada nas partes inferiores */
+    .surface{
+      background:
+        linear-gradient(180deg,rgba(7,20,34,.92),rgba(7,20,34,.74)),
+        var(--bottom-bg-image) center center/cover no-repeat fixed!important;
+    }
+
+    footer{
+      background:
+        linear-gradient(180deg,rgba(7,20,34,.78),rgba(7,20,34,.96) 58%,rgba(5,12,20,.99) 100%),
+        var(--bottom-bg-image) center bottom/cover no-repeat!important;
+    }
+
+    /* Remove qualquer assinatura antiga */
+    .hero-wordmark{
+      display:none!important;
+    }
+
+    /* Nova assinatura em formato vetorizado, baseada na logo enviada */
+    .hero-logo-mark{
+      position:relative!important;
+      display:inline-flex!important;
+      flex-direction:column!important;
+      align-items:center!important;
+      justify-content:center!important;
+      gap:10px!important;
+      margin:-4px 0 16px!important;
+      padding:18px 28px 16px!important;
+      border-radius:30px!important;
+      color:#f8fdff!important;
+      background:linear-gradient(135deg,rgba(255,255,255,.10),rgba(223,248,255,.035))!important;
+      border:1px solid rgba(255,255,255,.22)!important;
+      box-shadow:
+        0 26px 78px rgba(0,0,0,.30),
+        inset 0 1px 0 rgba(255,255,255,.20),
+        0 0 42px rgba(116,213,255,.10)!important;
+      backdrop-filter:blur(15px) saturate(132%)!important;
+      -webkit-backdrop-filter:blur(15px) saturate(132%)!important;
+      animation:leadsLogoFloat 7.8s ease-in-out infinite!important;
+      transform-origin:center!important;
+    }
+
+    .hero-logo-mark::before{
+      content:"";
+      position:absolute;
+      inset:-1px;
+      border-radius:inherit;
+      pointer-events:none;
+      background:
+        linear-gradient(120deg,transparent 0%,rgba(255,255,255,.16) 44%,transparent 72%),
+        radial-gradient(circle at 50% 0%,rgba(189,239,255,.18),transparent 56%);
+      opacity:.80;
+      mix-blend-mode:screen;
+    }
+
+    .hero-logo-mark strong{
+      position:relative;
+      z-index:2;
+      display:block;
+      font-family:"Times New Roman", Georgia, serif!important;
+      font-size:clamp(40px,6.2vw,84px)!important;
+      line-height:.82!important;
+      font-weight:400!important;
+      letter-spacing:.28em!important;
+      color:#ffffff!important;
+      text-transform:uppercase!important;
+      text-rendering:geometricPrecision!important;
+      -webkit-font-smoothing:antialiased!important;
+      -moz-osx-font-smoothing:grayscale!important;
+      text-shadow:
+        0 2px 0 rgba(255,255,255,.20),
+        0 16px 36px rgba(0,0,0,.58),
+        0 0 22px rgba(223,248,255,.16)!important;
+      filter:drop-shadow(0 6px 10px rgba(0,0,0,.22))!important;
+    }
+
+    .hero-logo-mark span{
+      position:relative;
+      z-index:2;
+      display:flex!important;
+      align-items:center!important;
+      justify-content:center!important;
+      gap:18px!important;
+      width:100%!important;
+      margin-top:2px!important;
+    }
+
+    .hero-logo-mark span i{
+      display:block!important;
+      width:96px!important;
+      max-width:17vw!important;
+      height:1px!important;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.86),transparent)!important;
+      box-shadow:0 0 18px rgba(223,248,255,.30)!important;
+    }
+
+    .hero-logo-mark span b{
+      display:block!important;
+      font-size:clamp(13px,1.35vw,20px)!important;
+      line-height:1!important;
+      font-weight:500!important;
+      letter-spacing:.62em!important;
+      color:rgba(255,255,255,.94)!important;
+      text-transform:uppercase!important;
+      text-shadow:0 9px 22px rgba(0,0,0,.48),0 0 16px rgba(223,248,255,.14)!important;
+    }
+
+    @keyframes leadsLogoFloat{
+      0%,100%{transform:translate3d(0,0,0) scale(1);}
+      50%{transform:translate3d(0,-12px,0) scale(1.012);}
+    }
+
+    /* Fundo inferior mais cinematográfico usando a nova imagem */
+    #bairros.surface,
+    #tipos.surface,
+    #imoveis.surface{
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.08),
+        inset 0 140px 180px rgba(7,20,34,.16),
+        inset 0 -110px 160px rgba(7,20,34,.18)!important;
+    }
+
+    .surface::before{
+      background:
+        radial-gradient(circle at 16% 10%,rgba(189,239,255,.30),transparent 32%),
+        radial-gradient(circle at 84% 18%,rgba(255,255,255,.15),transparent 31%),
+        linear-gradient(180deg,rgba(7,20,34,.06),rgba(7,20,34,.24) 28%,rgba(7,20,34,.58) 70%,rgba(7,20,34,.84) 100%)!important;
+    }
+
+    .step-btn,
+    .card{
+      background:rgba(255,255,255,.91)!important;
+      border:1px solid rgba(223,248,255,.58)!important;
+      box-shadow:0 28px 86px rgba(0,0,0,.23), inset 0 1px 0 rgba(255,255,255,.46), 0 0 26px rgba(116,213,255,.08)!important;
+      backdrop-filter:blur(16px) saturate(138%)!important;
+      -webkit-backdrop-filter:blur(16px) saturate(138%)!important;
+    }
+
+    @media (max-width:980px){
+      .surface{
+        background:
+          linear-gradient(180deg,rgba(7,20,34,.92),rgba(7,20,34,.78)),
+          var(--bottom-bg-image) center center/cover no-repeat!important;
+      }
+      .hero-logo-mark{
+        margin:0 auto 16px!important;
+        padding:16px 22px 15px!important;
+        border-radius:28px!important;
+      }
+      .hero-logo-mark strong{
+        font-size:clamp(36px,9.6vw,62px)!important;
+        letter-spacing:.20em!important;
+      }
+      .hero-logo-mark span{
+        gap:12px!important;
+      }
+      .hero-logo-mark span i{
+        width:66px!important;
+      }
+      .hero-logo-mark span b{
+        font-size:12px!important;
+        letter-spacing:.46em!important;
+      }
+    }
+
+    @media (max-width:620px){
+      .surface{
+        background:
+          linear-gradient(180deg,rgba(7,20,34,.94),rgba(7,20,34,.82)),
+          var(--bottom-bg-image) center top/cover no-repeat!important;
+      }
+      .hero-logo-mark{
+        width:auto!important;
+        max-width:94vw!important;
+        padding:14px 17px 13px!important;
+        border-radius:24px!important;
+      }
+      .hero-logo-mark strong{
+        font-size:clamp(31px,11vw,44px)!important;
+        letter-spacing:.15em!important;
+      }
+      .hero-logo-mark span{
+        gap:8px!important;
+      }
+      .hero-logo-mark span i{
+        width:38px!important;
+      }
+      .hero-logo-mark span b{
+        font-size:10px!important;
+        letter-spacing:.34em!important;
+      }
+    }
+
+</style>
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="#inicio" aria-label="Leads Imóveis - início"><img src="leads-monograma-v3.webp" alt="Leads Imóveis" /></a>
-    <nav class="desktop-nav" aria-label="Navegação principal">
-      <button type="button" data-purpose="Venda">Venda</button>
-      <button type="button" data-purpose="Temporada">Temporada</button>
-      <button type="button" data-purpose="Aluguel Anual">Aluguel anual</button>
-      <button type="button" data-focus-code>Código</button>
-      <a href="#contato">Contato</a>
+  <div class="hero-bg" aria-hidden="true"></div>
+  <div class="backdrop" id="backdrop" onclick="fecharMenu();fecharIA()"></div>
+
+  <header class="topbar" aria-label="Menu principal">
+    <a class="brand" href="#inicio" aria-label="Leads Imóveis">
+      <img class="brand-logo" src="leads-logo.jpeg?v=20260709-master3" alt="Leads Imóveis" width="128" height="128" decoding="async" fetchpriority="high" />
+    </a>
+    <nav class="nav" aria-label="Navegação">
+      <button onclick="escolherFinalidade('Venda')">Venda</button>
+      <button onclick="escolherFinalidade('Temporada')">Temporada</button>
+      <button onclick="escolherFinalidade('Aluguel Anual')">Anual</button>
+      <button onclick="focoCodigo()">Código</button>
+      <button onclick="irPara('contato')">Contato</button>
     </nav>
-    <button class="menu-button" id="openMenu" type="button" aria-label="Abrir menu">☰</button>
+    <button class="menu-btn" onclick="abrirMenu()" aria-label="Abrir menu">☰</button>
   </header>
 
-  <div class="overlay" id="overlay"></div>
-  <aside class="mobile-menu" id="mobileMenu" aria-hidden="true">
-    <div class="mobile-menu-head"><img src="leads-logo-completa-v3.webp" alt="Leads Imóveis" /><button class="icon-button" id="closeMenu" type="button">×</button></div>
-    <nav class="mobile-nav">
-      <button type="button" data-purpose="Venda">Venda</button>
-      <button type="button" data-purpose="Temporada">Temporada</button>
-      <button type="button" data-purpose="Aluguel Anual">Aluguel anual</button>
-      <button type="button" data-focus-code>Código do imóvel</button>
-      <button type="button" data-scroll-search>Localização</button>
-      <a href="#contato">Contato</a>
-    </nav>
+  <aside class="mobile-drawer" id="drawer" aria-label="Menu lateral">
+    <div class="drawer-head"><img src="leads-logo.jpeg?v=20260709-master3" alt="Leads Imóveis" width="148" height="148" decoding="async" /><button onclick="fecharMenu()">×</button></div>
+    <div class="drawer-nav">
+      <button onclick="fecharMenu(); escolherFinalidade('Venda')">Venda</button>
+      <button onclick="fecharMenu(); escolherFinalidade('Temporada')">Temporada</button>
+      <button onclick="fecharMenu(); escolherFinalidade('Aluguel Anual')">Aluguel Anual</button>
+      <button onclick="fecharMenu(); focoCodigo()">Código do Imóvel</button>
+      <button onclick="fecharMenu(); irPara('bairros')">Localização</button>
+      <button onclick="fecharMenu(); irPara('contato')">Contato</button>
+    </div>
   </aside>
 
-  <main>
-    <section class="hero" id="inicio">
-      <div class="hero-bg" aria-hidden="true"></div>
+  <main id="inicio">
+    <section class="hero">
+
+      <div class="floating-luxury-icons" aria-hidden="true">
+        <span class="lux-orb a"></span>
+        <span class="lux-orb b"></span>
+        <span class="lux-orb c"></span>
+        <div class="lux-icon two"><i>✦</i><div><b>Alto padrão</b><span>Vista mar · selecionados</span></div></div>
+        <div class="lux-icon three"><i>⌖</i><div><b>Jurerê</b><span>localização nobre</span></div></div>
+        <div class="lux-icon four"><i>☼</i><div><b>Temporada</b><span>verão em Floripa</span></div></div>
+        <div class="lux-icon five"><i>IA</i><div><b>Busca IA</b><span>resposta rápida</span></div></div>
+        <div class="lux-icon six"><i>#</i><div><b>Código</b><span>busca direta</span></div></div>
+      </div>
       <div class="shell hero-grid">
         <div class="hero-copy">
-          <img class="hero-logo" src="leads-logo-completa-v3.webp" alt="Leads Imóveis" />
+          <div class="hero-logo-mark" aria-label="LEADS IMÓVEIS">
+            <strong>LEADS</strong>
+            <span><i aria-hidden="true"></i><b>IMÓVEIS</b><i aria-hidden="true"></i></span>
+          </div>
           <span class="eyebrow">Florianópolis · Jurerê · Norte da Ilha</span>
-          <div class="phrase-panel" id="phrasePanel" aria-live="polite">
-            <h1 id="phraseTitle">Seu próximo imóvel pode ser o começo da sua melhor fase.</h1>
-            <p id="phraseCopy">Comprar, vender ou alugar fica mais simples quando você encontra o lugar certo e o atendimento certo.</p>
-          </div>
+          <h1><span id="fraseRotativa" class="frase-rotativa">Viva seu próximo imóvel em Florianópolis.</span></h1>
+          <p id="fraseApoio" class="frase-apoio">Escolha a região, o tipo de imóvel e receba uma curadoria direta da Leads Imóveis.</p>
           <div class="hero-actions">
-            <button class="button" type="button" data-scroll-search>Ver imóveis</button>
-            <a class="button secondary" href="https://wa.me/5548991115992?text=Olá%2C%20vim%20pelo%20site%20da%20Leads%20Imóveis%20e%20gostaria%20de%20falar%20com%20um%20especialista." target="_blank" rel="noopener noreferrer">Falar com especialista</a>
+            <button class="btn" onclick="escolherFinalidade('Venda')">Ver imóveis</button>
+            <button class="btn secondary" onclick="abrirWhatsApp()">Falar com especialista</button>
           </div>
-          <div class="quick-options">
-            <button class="quick-option" type="button" data-purpose="Venda"><span>⌂</span><strong>Comprar</strong><span>Casas e apartamentos selecionados.</span></button>
-            <button class="quick-option" type="button" data-purpose="Temporada"><span>☀</span><strong>Temporada</strong><span>Opções para viver Floripa de perto.</span></button>
-            <button class="quick-option" type="button" data-purpose="Aluguel Anual"><span>⌂</span><strong>Aluguel anual</strong><span>Imóveis para morar o ano inteiro.</span></button>
+          <div class="quick-choice" aria-label="Opções rápidas">
+            <button class="choice" onclick="escolherFinalidade('Venda')"><i>⌂</i><b>Venda</b><span>Comprar em Floripa</span></button>
+            <button class="choice" onclick="escolherFinalidade('Temporada')"><i>☼</i><b>Temporada</b><span>Verão e férias</span></button>
+            <button class="choice" onclick="escolherFinalidade('Aluguel Anual')"><i>▣</i><b>Anual</b><span>Morar na ilha</span></button>
+            <button class="choice" onclick="focoCodigo()"><i>#</i><b>Código</b><span>Busca direta</span></button>
+            <button class="choice" onclick="irPara('bairros')"><i>⌖</i><b>Localização</b><span>Bairros premium</span></button>
+            <button class="choice" onclick="irPara('contato')"><i>↗</i><b>Contato</b><span>Atendimento rápido</span></button>
           </div>
         </div>
 
-        <section class="assistant-card" aria-labelledby="assistantTitle">
-          <div class="assistant-head"><div class="assistant-orb">IA</div><div><strong id="assistantTitle">Lia · Assistente virtual</strong><span>Online · atendimento inteligente</span></div></div>
-          <form class="assistant-search" id="heroAssistantForm"><label class="sr-only" for="heroAssistantInput">Digite o imóvel que procura</label><input id="heroAssistantInput" type="search" autocomplete="off" placeholder="Ex.: casa em Jurerê" /><button type="submit">➜</button></form>
-          <div class="assistant-chips" id="heroChips"></div>
-          <div class="assistant-answer" id="heroAnswer" aria-live="polite">Olá! Eu sou a Lia. Conte o que você procura e eu ajudo a encontrar as melhores opções publicadas.</div>
-        </section>
+        <aside class="smart-card" aria-label="Busca inteligente">
+          <div class="smart-head"><div class="smart-orb" aria-hidden="true">✦</div><div><b>Assistente Leads</b><span>Busca inteligente gratuita</span></div></div>
+          <form class="ai-search" onsubmit="enviarPerguntaIA(event, 'hero')">
+            <input id="heroAiInput" autocomplete="off" placeholder="Ex: casa em Jurerê com piscina" />
+            <button type="submit">➜</button>
+          </form>
+          <div class="ai-chips" id="heroAiChips"></div>
+          <div class="ai-answer" id="heroAiAnswer">Digite o que procura ou toque em uma sugestão. Eu filtro os imóveis e te levo direto para o WhatsApp.</div>
+          <div class="mini-list" id="heroAiMiniList"></div>
+        </aside>
+
+        <div class="search-panel" aria-label="Busca de imóveis">
+          <div class="field"><label>Objetivo</label><select id="finalidadeSelect" onchange="escolherFinalidade(this.value, false)"><option value="">Escolher</option><option>Venda</option><option>Temporada</option><option>Aluguel Anual</option></select></div>
+          <div class="field"><label>Bairro</label><select id="bairroSelect" onchange="escolherBairro(this.value, false)"><option value="">Todos</option></select></div>
+          <div class="field"><label>Tipo</label><select id="tipoSelect" onchange="escolherTipo(this.value, false)"><option value="">Todos</option></select></div>
+          <div class="field"><label>Código</label><input id="codigoBusca" placeholder="Ex: 102" onkeydown="if(event.key==='Enter'){buscarPorCodigo();}" /></div>
+          <button class="btn dark" onclick="filtrarImoveis()">Buscar</button>
+        </div>
       </div>
     </section>
 
-    <div class="main-content">
-      <section class="search-section" id="buscar">
-        <div class="shell"><div class="search-box">
-          <div class="search-heading"><div><span class="section-kicker">Busca inteligente</span><h2>Encontre o imóvel ideal</h2><p>Filtre por finalidade, bairro, tipo ou código do imóvel.</p></div></div>
-          <form id="filterForm"><div class="filter-grid">
-            <div class="field"><label for="purposeFilter">Objetivo</label><select id="purposeFilter"><option value="">Todos</option><option value="Venda">Venda</option><option value="Temporada">Temporada</option><option value="Aluguel Anual">Aluguel anual</option></select></div>
-            <div class="field"><label for="neighborhoodFilter">Bairro</label><select id="neighborhoodFilter"><option value="">Todos</option></select></div>
-            <div class="field"><label for="typeFilter">Tipo</label><select id="typeFilter"><option value="">Todos</option></select></div>
-            <div class="field"><label for="codeFilter">Código</label><input id="codeFilter" type="search" autocomplete="off" placeholder="Ex.: LI-1234" /></div>
-            <button class="button dark filter-submit" type="submit">Buscar</button>
-          </div></form>
-          <div class="filter-actions"><button id="clearFilters" type="button">Limpar filtros</button><span class="filter-status" id="connectionStatus" aria-live="polite">Conectando ao banco de imóveis…</span></div>
-        </div></div>
-      </section>
+    <section class="surface section" id="bairros">
+      <div class="shell">
+        <div class="section-title"><div><small>Passo 1</small><h2>Escolha a região</h2></div><p>Selecione onde deseja comprar, alugar ou passar temporada.</p></div>
+        <div class="step-area active" id="bairrosArea"><div class="step-grid" id="bairrosGrid"></div></div>
+        <div class="step-actions"><button class="btn ghost" onclick="limparFiltros()">Limpar filtros</button><button class="btn ghost" onclick="voltarEtapa()">Voltar</button></div>
+      </div>
+    </section>
 
-      <section class="properties-section" id="imoveis">
-        <div class="shell">
-          <div class="section-heading"><div><span class="section-kicker">Vitrine</span><h2>Imóveis selecionados</h2><p>Veja as oportunidades publicadas no CRM e fale diretamente com a Leads Imóveis.</p></div><span class="property-count" id="propertyCount">0 imóveis</span></div>
-          <div class="properties-grid" id="propertiesGrid" aria-live="polite"><div class="loading-state"><div class="loading-spinner"></div>Carregando imóveis publicados…</div></div>
-        </div>
-      </section>
+    <section class="surface section" id="tipos">
+      <div class="shell">
+        <div class="section-title"><div><small>Passo 2</small><h2>Tipo de imóvel</h2></div><p>Escolha a categoria ideal para receber uma vitrine mais precisa.</p></div>
+        <div class="step-area active"><div class="step-grid" id="tiposGrid"></div></div>
+      </div>
+    </section>
 
-      <section class="contact-section" id="contato">
-        <div class="shell contact-grid">
-          <div class="contact-copy"><span class="eyebrow">Atendimento Leads Imóveis</span><h2>Seu próximo endereço começa com uma conversa.</h2><p>Fale com um especialista para comprar, anunciar, alugar ou encontrar uma opção de temporada em Florianópolis.</p><div class="hero-actions"><a class="button whatsapp" href="https://wa.me/5548991115992?text=Olá%2C%20vim%20pelo%20site%20da%20Leads%20Imóveis." target="_blank" rel="noopener noreferrer">Abrir WhatsApp</a></div></div>
-          <div class="contact-card"><div class="contact-list">
-            <a class="contact-item" href="https://wa.me/5548991115992" target="_blank" rel="noopener noreferrer"><small>WhatsApp</small><strong>(48) 99111-5992</strong></a>
-            <a class="contact-item" href="mailto:leadsimoveisoficial@gmail.com"><small>E-mail</small><strong>leadsimoveisoficial@gmail.com</strong></a>
-            <div class="contact-item"><small>Região</small><strong>Florianópolis / Santa Catarina</strong></div>
-            <div class="contact-item"><small>Endereço</small><strong>Av. dos Búzios · Jurerê Internacional · Florianópolis/SC</strong></div>
-          </div></div>
+    <section class="surface section" id="imoveis">
+      <div class="shell">
+        <div class="section-title"><div><small>Vitrine</small><h2 id="resultadoTitulo">Imóveis selecionados</h2></div><p id="resultadoSub">Veja oportunidades publicadas e fale com um especialista.</p></div>
+        <div class="cards" id="imoveisGrid"></div>
+      </div>
+    </section>
+
+    <section class="contact section" id="contato">
+      <div class="shell contact-grid">
+        <div class="contact-card">
+          <small class="eyebrow">Contato</small>
+          <h3>Atendimento Leads Imóveis</h3>
+          <p>Fale com um especialista para venda, temporada ou aluguel anual em Florianópolis.</p>
+          <div class="contact-lines">
+            <div class="contact-line"><span>WhatsApp</span><b>(48) 99111-5992</b></div>
+            <div class="contact-line"><span>E-mail</span><b>leadsimoveisoficial@gmail.com</b></div>
+            <div class="contact-line"><span>Região</span><b>Florianópolis/SC</b></div>
+            <div class="contact-line"><span>Endereço</span><b>Av. dos Búzios · Jurerê Internacional · Florianópolis/SC</b></div>
+          </div>
+          <div class="hero-actions"><button class="btn" onclick="abrirWhatsApp()">Falar com especialista</button></div>
         </div>
-      </section>
-    </div>
+        <div class="contact-card">
+          <h3>Mensagem rápida</h3>
+          <form class="contact-form" onsubmit="enviarContato(event)">
+            <input class="hp" type="text" id="empresa_oculta" autocomplete="off" tabindex="-1" />
+            <input id="contatoNome" maxlength="80" placeholder="Nome" required />
+            <input id="contatoTelefone" maxlength="20" placeholder="WhatsApp" required />
+            <textarea id="contatoMensagem" maxlength="500" placeholder="O que você procura?" required></textarea>
+            <button class="btn" type="submit">Enviar pelo WhatsApp</button>
+          </form>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <footer><div class="shell footer-content"><div class="footer-brand"><img src="leads-monograma-v3.webp" alt="Leads Imóveis" /><div><strong>Leads Imóveis</strong><span>Conectando sonhos. Realizando histórias.</span></div></div><div class="footer-copy">© <span id="currentYear"></span> Leads Imóveis · Florianópolis/SC</div></div></footer>
-
-  <button class="floating-ai" id="openAi" type="button" aria-label="Abrir Lia"><span class="floating-ai-symbol">L</span><span class="floating-ai-label">Lia</span></button>
-  <aside class="ai-panel" id="aiPanel" aria-hidden="true">
-    <div class="ai-panel-head"><div class="lia-head"><div class="lia-avatar">L</div><div><strong>Lia · Assistente virtual</strong><span><i class="lia-dot"></i>Online · atendimento inteligente</span></div></div><button id="closeAi" type="button">×</button></div>
-    <div class="ai-panel-body"><div class="lia-thread" id="liaThread" aria-live="polite"><div class="lia-message ai" id="panelAnswer">Olá! Eu sou a Lia. Conte o que você procura em Florianópolis.</div></div><form class="assistant-search" id="panelAssistantForm"><label class="sr-only" for="panelAssistantInput">Digite o imóvel que procura</label><input id="panelAssistantInput" type="search" autocomplete="off" placeholder="Converse com a Lia…" /><button type="submit">➜</button></form><div class="assistant-chips" id="panelChips"></div></div>
+  <button class="ai-float" onclick="abrirIA()" aria-label="Abrir Assistente Leads"><span>IA</span></button>
+  <aside class="ai-panel" id="aiPanel" aria-label="Assistente Leads">
+    <div class="ai-panel-head"><b>Assistente Leads</b><button onclick="fecharIA()">×</button></div>
+    <div class="ai-panel-body">
+      <div class="ai-thread" id="aiThread"><div class="bubble ai">Olá! Me diga bairro, tipo, finalidade ou código. Ex: “apartamento em Jurerê”.</div></div>
+      <div class="ai-chips" id="panelAiChips"></div>
+      <form class="ai-input-line" onsubmit="enviarPerguntaIA(event, 'panel')"><input id="panelAiInput" placeholder="Digite sua busca" /><button>➜</button></form>
+    </div>
   </aside>
 
-  <div class="gallery-modal" id="galleryModal" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="gallery-dialog"><div class="gallery-modal-head"><strong id="galleryTitle">Galeria do imóvel</strong><button class="icon-button" id="closeGallery" type="button">×</button></div><div class="gallery-stage" id="galleryStage"><button class="modal-arrow previous" id="galleryPrevious" type="button">‹</button><img id="galleryImage" src="" alt="Foto do imóvel" /><button class="modal-arrow next" id="galleryNext" type="button">›</button></div><div class="gallery-modal-foot"><span id="galleryCounter">1 de 1</span><span>Use as setas ou deslize para o lado.</span></div></div>
-  </div>
+  <footer>
+    <div class="shell foot">
+      <img src="leads-logo.jpeg?v=20260709-master3" alt="Leads Imóveis" width="176" height="176" decoding="async" />
+      <p><b>Leads Imóveis</b><br />Conectando sonhos. Realizando histórias.<br />Av. dos Búzios · Jurerê Internacional · Florianópolis/SC</p>
+    </div>
+  </footer>
 
-  <script>
-    "use strict";
+<script>
+'use strict';
 
-    const SUPABASE_URL = "https://zyfbgydbwsvbaogbxzrd.supabase.co";
-    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_AP670pbIpkD_KleT7VaQ3Q_BTsBh8yh";
-    const WHATSAPP_NUMBER = "5548991115992";
-    const LIA_ENDPOINT = `${SUPABASE_URL}/functions/v1/site-ai-assistant`;
+const LEADS_SUPABASE_URL_DIRETO = 'https://zyfbgydbwsvbaogbxzrd.supabase.co';
+const LEADS_SUPABASE_KEY_DIRETO = 'sb_publishable_AP670pbIpkD_KleT7VaQ3Q_BTsBh8yh';
 
-    const state = {
-      properties: [], filtered: [], cardPhotoIndex: new Map(),
-      galleryProperty: null, galleryIndex: 0, loading: false,
-      refreshTimer: null, source: "", lastSignature: ""
-    };
-    window.leadsSiteState = state;
+async function buscarImoveisViaRestDireto(){
+  const select = 'code,title,purpose,neighborhood,type,price,area,bedrooms,suites,parking,description,photos,image_url,is_public,status,updated_at';
+  const url = `${LEADS_SUPABASE_URL_DIRETO}/rest/v1/public_properties?select=${select}&is_public=eq.true&status=eq.Publicado&order=updated_at.desc&limit=120&_=${Date.now()}`;
 
-    const phrases = [
-      ["Seu próximo imóvel pode ser o começo da sua melhor fase.","Comprar, vender ou alugar fica mais simples quando você encontra o lugar certo e o atendimento certo."],
-      ["O endereço certo transforma planos em realidade.","A Leads Imóveis aproxima você das melhores oportunidades para morar, investir ou recomeçar em Florianópolis."],
-      ["Toda grande mudança começa com uma escolha bem feita.","Encontre um imóvel que combine com seus objetivos, seu estilo de vida e o momento que você está vivendo."],
-      ["Seu novo lar pode estar mais perto do que imagina.","Explore imóveis para venda e locação com informações claras, fotos reais e atendimento humanizado."],
-      ["Mais do que paredes, escolha onde sua história vai acontecer.","O imóvel ideal cria espaço para novos planos, conquistas e momentos que ficam para sempre."],
-      ["A melhor oportunidade é aquela que combina com você.","Conte o que procura e deixe a Leads Imóveis ajudar a transformar sua busca em uma decisão segura."],
-      ["Morar bem começa com uma busca feita com atenção.","Localização, conforto e propósito se encontram quando cada detalhe da escolha é realmente considerado."],
-      ["Seu próximo capítulo merece um endereço especial.","Descubra casas e apartamentos selecionados para viver o melhor de Florianópolis."],
-      ["O imóvel certo muda a rotina e amplia possibilidades.","Encontre espaços preparados para acompanhar seus planos de hoje e seus sonhos de amanhã."],
-      ["Comprar com confiança começa com informação de qualidade.","Compare opções, conheça os detalhes e converse com quem entende o mercado imobiliário da região."],
-      ["Alugar bem é encontrar praticidade sem abrir mão do conforto.","Veja opções de aluguel anual para viver Florianópolis com segurança, tranquilidade e conveniência."],
-      ["A locação ideal combina prazo, localização e estilo de vida.","Escolha um imóvel que faça sentido para sua rotina e permita aproveitar melhor cada dia."],
-      ["Seu imóvel também pode se transformar em uma grande oportunidade.","Anuncie para venda ou locação com apresentação profissional e atendimento próximo do início ao fim."],
-      ["Vender bem é apresentar valor antes mesmo da visita.","Fotos, descrição e divulgação estratégica ajudam seu imóvel a chegar às pessoas certas."],
-      ["Um bom negócio imobiliário começa com confiança.","Atendimento transparente e informações organizadas tornam cada decisão mais tranquila."],
-      ["O futuro que você imagina pode ter um novo endereço.","Encontre o espaço certo para transformar intenção em conquista e planejamento em realidade."],
-      ["A casa certa faz você sentir que chegou ao lugar certo.","Cada detalhe importa quando o objetivo é encontrar conforto, segurança e qualidade de vida."],
-      ["Investir em imóveis é investir em possibilidades.","Conheça oportunidades alinhadas ao seu perfil e tome decisões com mais clareza."],
-      ["Florianópolis pode ser o cenário da sua próxima conquista.","Viva perto do mar, dos serviços e das regiões que mais combinam com o seu momento."],
-      ["Sua próxima mudança pode começar hoje.","Pesquise por bairro, tipo ou finalidade e descubra imóveis publicados em tempo real."],
-      ["Escolher bem hoje é viver melhor amanhã.","Uma boa decisão imobiliária une planejamento, informação e uma oportunidade que faça sentido."],
-      ["O imóvel perfeito não é igual para todos. É certo para você.","Conte suas prioridades e encontre opções realmente próximas do que deseja."],
-      ["Grandes histórias começam quando encontramos o nosso lugar.","A Leads Imóveis conecta pessoas, imóveis e oportunidades em Florianópolis."],
-      ["Seu sonho merece uma busca feita com dedicação.","Do primeiro contato à escolha final, cada etapa pode ser leve, organizada e segura."],
-      ["Um novo endereço pode renovar toda a sua vida.","Encontre ambientes que inspirem bem-estar, liberdade e novos planos."],
-      ["A vista certa pode mudar a forma como você vive.","Descubra imóveis próximos ao mar e às melhores regiões de Florianópolis."],
-      ["Quando o imóvel combina com você, a decisão fica mais clara.","Nossa curadoria ajuda a reduzir a busca e destacar oportunidades realmente relevantes."],
-      ["Toda chave entregue representa uma nova conquista.","Venda, compra e locação podem ser experiências positivas quando existe cuidado em cada detalhe."],
-      ["Seu imóvel merece ser visto pelas pessoas certas.","Uma apresentação profissional aumenta a confiança e valoriza cada oportunidade de venda ou locação."],
-      ["A Leads Imóveis aproxima você do lugar que procura.","Tecnologia, atendimento humano e conhecimento local para tornar sua jornada imobiliária mais simples."]
-    ];
-
-    const suggestions = ["Casa em Jurerê","Temporada com piscina","Apartamento anual","Imóvel para venda","Falar no WhatsApp"];
-    const $ = id => document.getElementById(id);
-    const normalizeText = value => String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-    const escapeHtml = value => String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
-
-    function safeImageUrl(value) {
-      if (typeof value !== "string") return "";
-      const url = value.trim().replace(/["'<>]/g, "");
-      if (/^https:\/\//i.test(url)) return url;
-      if (/^data:image\/(png|jpeg|jpg|webp|gif);base64,/i.test(url)) return url;
-      if (/^[a-z0-9_./-]+\.(png|jpe?g|webp|gif)(\?.*)?$/i.test(url)) return url;
-      return "";
+  const resposta = await fetch(url, {
+    method: 'GET',
+    headers: {
+      apikey: LEADS_SUPABASE_KEY_DIRETO,
+      Authorization: `Bearer ${LEADS_SUPABASE_KEY_DIRETO}`,
+      Accept: 'application/json'
     }
+  });
 
-    function extractPhotoUrl(item) {
-      if (!item) return "";
-      if (typeof item === "string") {
-        const text = item.trim();
-        if (!text) return "";
-        if ((text.startsWith("[") && text.endsWith("]")) || (text.startsWith("{") && text.endsWith("}"))) {
-          try { return extractPhotoUrl(JSON.parse(text)); } catch (_) { return safeImageUrl(text); }
-        }
-        return safeImageUrl(text);
+  if(!resposta.ok){
+    const texto = await resposta.text().catch(() => '');
+    throw new Error(`REST Supabase falhou: ${resposta.status} ${texto}`);
+  }
+
+  const data = await resposta.json();
+  return Array.isArray(data) ? data : [];
+}
+
+
+const WHATSAPP_NUMERO = '5548991115992';
+const BAIRROS = ['Jurerê Internacional','Jurerê','Canasvieiras','Ingleses','Campeche','Lagoa da Conceição','Beira-Mar Norte','Centro','Outros Bairros'];
+const TIPOS = {
+  'Venda':['Casas','Apartamentos','Coberturas','Terrenos','Lotes','Salas Comerciais','Pousadas','Imóveis de Alto Padrão'],
+  'Temporada':['Casas de temporada','Apartamentos de temporada','Coberturas','Casas com piscina','Imóveis próximos ao mar'],
+  'Aluguel Anual':['Casas','Apartamentos','Coberturas','Salas Comerciais','Imóveis mobiliados']
+};
+
+
+const FRASES_CLIENTE = [
+  {titulo:'Viva seu próximo imóvel em Florianópolis.', apoio:'Escolha a região, o tipo de imóvel e receba uma curadoria direta da Leads Imóveis.'},
+  {titulo:'Seu novo endereço começa com uma escolha simples.', apoio:'Venda, temporada ou aluguel anual: encontre o caminho mais rápido.'},
+  {titulo:'Morar bem é decidir com clareza.', apoio:'Filtre por bairro, tipo ou código e fale com um especialista.'},
+  {titulo:'A casa certa muda a rotina inteira.', apoio:'Descubra imóveis selecionados para viver melhor em Florianópolis.'},
+  {titulo:'Jurerê espera o seu próximo capítulo.', apoio:'Encontre opções premium para compra, aluguel ou temporada.'},
+  {titulo:'O imóvel ideal combina com seu momento.', apoio:'A Leads Imóveis guia você até a melhor escolha.'},
+  {titulo:'Mais que um imóvel, um novo estilo de vida.', apoio:'Explore bairros premium e fale direto pelo WhatsApp.'},
+  {titulo:'Seu verão pode começar no endereço certo.', apoio:'Veja imóveis para temporada próximos ao mar.'},
+  {titulo:'Alugue com praticidade, escolha com segurança.', apoio:'Use a busca rápida e encontre opções anuais em Florianópolis.'},
+  {titulo:'Comprar bem começa por uma boa curadoria.', apoio:'Selecione bairro e tipo para ver imóveis alinhados ao seu perfil.'},
+  {titulo:'O próximo passo pode ser morar melhor.', apoio:'Encontre oportunidades em Jurerê, Norte da Ilha e região.'},
+  {titulo:'Cada detalhe aproxima você do imóvel certo.', apoio:'Busque por código, bairro ou fale com a Assistente Leads.'},
+  {titulo:'Escolha o lugar onde sua história vai acontecer.', apoio:'Veja imóveis selecionados para viver, investir ou descansar.'},
+  {titulo:'A localização certa valoriza sua vida.', apoio:'Descubra imóveis nas regiões mais desejadas de Florianópolis.'},
+  {titulo:'Seu imóvel ideal pode estar a um clique.', apoio:'Navegue rápido, veja opções e chame um especialista.'},
+  {titulo:'Conforto, localização e decisão inteligente.', apoio:'A Leads Imóveis simplifica sua busca por imóveis premium.'},
+  {titulo:'O endereço dos seus planos está mais perto.', apoio:'Comece pela finalidade e encontre opções sob medida.'},
+  {titulo:'Invista onde viver bem faz sentido.', apoio:'Conheça imóveis em bairros estratégicos de Florianópolis.'},
+  {titulo:'Uma boa escolha começa com boa orientação.', apoio:'Use a IA local do site para encontrar opções rapidamente.'},
+  {titulo:'Encontre seu imóvel com leveza e precisão.', apoio:'Poucos cliques, opções claras e atendimento direto.'}
+];
+let indiceFraseAtual = 0;
+let timerFraseRotativa = null;
+
+function trocarFraseCliente(){
+  const tituloEl = byId('fraseRotativa');
+  const apoioEl = byId('fraseApoio');
+  if(!tituloEl || !apoioEl || !Array.isArray(FRASES_CLIENTE) || !FRASES_CLIENTE.length) return;
+  tituloEl.classList.add('trocando');
+  apoioEl.classList.add('trocando');
+  setTimeout(() => {
+    indiceFraseAtual = (indiceFraseAtual + 1) % FRASES_CLIENTE.length;
+    const frase = FRASES_CLIENTE[indiceFraseAtual];
+    tituloEl.textContent = frase.titulo;
+    apoioEl.textContent = frase.apoio;
+    tituloEl.classList.remove('trocando');
+    apoioEl.classList.remove('trocando');
+  }, 460);
+}
+
+function iniciarFrasesRotativas(){
+  if(timerFraseRotativa) clearTimeout(timerFraseRotativa);
+  const agenda = () => {
+    const tempo = 2400 + Math.floor(Math.random() * 3600); // troca entre 2,4s e 6s
+    timerFraseRotativa = setTimeout(() => {
+      trocarFraseCliente();
+      agenda();
+    }, tempo);
+  };
+  agenda();
+}
+
+const estado = { finalidade:'', bairro:'', tipo:'', imoveis:[], resultado:[], etapa:'inicio' };
+
+const demoImoveis = [];
+
+function escapeHTML(valor){
+  return String(valor ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function normalizarTexto(s){ return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim(); }
+function money(v){ const n=Number(v)||0; return n > 0 ? n.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}) : 'Consulte'; }
+function safeImageUrl(url){
+  const u = String(url || '').trim();
+  if(!u) return '';
+  if(/^[a-z0-9_\-./]+\.(png|jpe?g|webp|gif)$/i.test(u)) return u.replace(/[\"'<>]/g,'');
+  if(/^https:\/\//i.test(u)) return u.replace(/[\"'<>]/g,'');
+  if(/^data:image\/(png|jpeg|jpg|webp);base64,/i.test(u)) return u;
+  return '';
+}
+function byId(id){ return document.getElementById(id); }
+function irPara(id){ const el=byId(id); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
+
+function normalizarImovel(p){
+  const fotos = Array.isArray(p.photos) ? p.photos : Array.isArray(p.fotos) ? p.fotos : Array.isArray(p.images) ? p.images : [];
+  return {
+    codigo: p.code || p.codigo || p.property_code || '',
+    titulo: p.title || p.titulo || 'Imóvel Leads Imóveis',
+    finalidade: p.purpose || p.finalidade || p.modalidade || 'Venda',
+    bairro: p.neighborhood || p.bairro || 'Florianópolis',
+    tipo: p.type || p.tipo || 'Imóveis de Alto Padrão',
+    valor: p.price ?? p.valor ?? 0,
+    area: p.area ?? p.area_m2 ?? 0,
+    dormitorios: p.bedrooms ?? p.dormitorios ?? p.quartos ?? 0,
+    suites: p.suites ?? 0,
+    vagas: p.parking ?? p.vagas ?? 0,
+    descricao: p.description || p.descricao || p.descricao_comercial || '',
+    foto: p.image_url || p.foto || fotos[0] || '', 
+    status: p.status || 'Publicado',
+    is_public: p.is_public !== false
+  };
+}
+
+async function carregarImoveisPublicos(){
+  let lista = [];
+  let erroCarregamento = '';
+
+  try{
+    const client = window.supabaseClient || window.leadsSupabaseClient || null;
+
+    if(client){
+      const { data, error } = await client
+        .from('public_properties')
+        .select('code,title,purpose,neighborhood,type,price,area,bedrooms,suites,parking,description,photos,image_url,is_public,status,updated_at')
+        .eq('is_public', true)
+        .eq('status', 'Publicado')
+        .order('updated_at', { ascending:false })
+        .limit(120);
+
+      if(error){
+        console.error('Erro Supabase JS:', error);
+        erroCarregamento = 'Erro ao carregar pelo Supabase JS. Tentando conexão direta.';
+      } else if(Array.isArray(data)){
+        lista = data.map(normalizarImovel).filter(p => p.is_public && p.status === 'Publicado');
       }
-      if (Array.isArray(item)) {
-        for (const entry of item) { const url = extractPhotoUrl(entry); if (url) return url; }
-        return "";
-      }
-      if (typeof item === "object") return safeImageUrl(item.url || item.src || item.publicUrl || item.public_url || item.image_url || item.file_url || item.photo_url || item.path || "");
-      return "";
     }
 
-    function normalizePhotos(raw) {
-      const sources = [raw.photos,raw.fotos,raw.images,raw.gallery,raw.photo_urls,raw.imagens];
-      const result = [];
-      for (let source of sources) {
-        if (!source) continue;
-        if (typeof source === "string") { try { source = JSON.parse(source); } catch (_) { source = [source]; } }
-        if (!Array.isArray(source)) source = [source];
-        for (const item of source) { const url = extractPhotoUrl(item); if (url && !result.includes(url)) result.push(url); }
-      }
-      for (const candidate of [raw.image_url,raw.cover_url,raw.cover,raw.foto,raw.photo,raw.main_photo,raw.thumbnail_url]) {
-        const url = extractPhotoUrl(candidate); if (url && !result.includes(url)) result.unshift(url);
-      }
-      return result.slice(0,20);
+    if(!lista.length){
+      const dataRest = await buscarImoveisViaRestDireto();
+      lista = dataRest.map(normalizarImovel).filter(p => p.is_public && p.status === 'Publicado');
     }
 
-    function firstValue(object, keys, fallback="") {
-      for (const key of keys) { const value = object?.[key]; if (value !== undefined && value !== null && value !== "") return value; }
-      return fallback;
-    }
+  } catch(e) {
+    console.error('Falha ao carregar imóveis públicos:', e);
+    erroCarregamento = 'Não foi possível buscar imóveis publicados do CRM agora.';
+  }
 
-    function numberValue(value) {
-      if (typeof value === "number" && Number.isFinite(value)) return value;
-      const normalized = String(value ?? "").replace(/[^0-9,.-]/g,"").replace(/\.(?=\d{3}(?:\D|$))/g,"").replace(",",".");
-      const parsed = Number(normalized); return Number.isFinite(parsed) ? parsed : 0;
-    }
+  estado.imoveis = lista;
+  estado.erroCarregamento = erroCarregamento;
 
-    function normalizePurpose(value) {
-      const text = normalizeText(value);
-      if (text.includes("tempor")) return "Temporada";
-      if (text.includes("anual") || text.includes("locacao") || text.includes("aluguel")) return "Aluguel Anual";
-      if (text.includes("vend")) return "Venda";
-      return String(value || "Venda").trim();
-    }
+  filtrarImoveis(false);
+  renderizarBairros();
+  renderizarTipos();
+  sugestoesRapidasIA();
+}
 
-    function normalizeProperty(raw,index) {
-      return {
-        id:String(firstValue(raw,["id","uuid","property_id","code"],`property-${index}`)),
-        code:String(firstValue(raw,["code","codigo","property_code","reference","ref"],"")).trim(),
-        title:String(firstValue(raw,["title","titulo","name","nome"],"Imóvel Leads Imóveis")).trim(),
-        purpose:normalizePurpose(firstValue(raw,["purpose","finalidade","modalidade","transaction_type"],"Venda")),
-        neighborhood:String(firstValue(raw,["neighborhood","bairro","district","location"],"Florianópolis")).trim(),
-        type:String(firstValue(raw,["property_type","type","tipo","category"],"Imóvel")).trim(),
-        price:numberValue(firstValue(raw,["price","valor","sale_price","rent_price","daily_price"],0)),
-        area:numberValue(firstValue(raw,["area","area_m2","total_area","private_area"],0)),
-        bedrooms:numberValue(firstValue(raw,["bedrooms","dormitorios","quartos","rooms"],0)),
-        suites:numberValue(firstValue(raw,["suites","suite"],0)),
-        parking:numberValue(firstValue(raw,["parking","parking_spaces","vagas","garage"],0)),
-        bathrooms:numberValue(firstValue(raw,["bathrooms","banheiros","baths"],0)),
-        description:String(firstValue(raw,["description","descricao","commercial_description","descricao_comercial"],"Fale com a Leads Imóveis para receber informações completas sobre esta oportunidade.")).trim(),
-        photos:normalizePhotos(raw),
-        updatedAt:firstValue(raw,["updated_at","created_at"],"")
-      };
-    }
+function iniciarSincronizacaoCRM(){
+  try{
+    const client = window.supabaseClient || window.leadsSupabaseClient || null;
+    if(!client || !client.channel) return;
+    if(window.__leadsRealtimeIniciado) return;
+    window.__leadsRealtimeIniciado = true;
 
-    async function restGet(path) {
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-        method:"GET", mode:"cors", cache:"no-store", credentials:"omit",
-        headers:{ apikey:SUPABASE_PUBLISHABLE_KEY, Authorization:`Bearer ${SUPABASE_PUBLISHABLE_KEY}`, Accept:"application/json", Prefer:"count=exact", "Cache-Control":"no-cache", Pragma:"no-cache" }
+    client
+      .channel('site-public-properties-sync')
+      .on('postgres_changes', { event:'*', schema:'public', table:'properties' }, () => {
+        carregarImoveisPublicos();
+      })
+      .subscribe();
+  } catch(e){
+    console.warn('Realtime CRM não iniciado:', e);
+  }
+}
+
+function renderizarBairros(){
+  const grid = byId('bairrosGrid');
+  const select = byId('bairroSelect');
+  if(!grid || !select) return;
+  grid.innerHTML = BAIRROS.map(b => `<button class="step-btn" onclick="escolherBairro('${escapeHTML(b)}')"><b>${escapeHTML(b)}</b><span>Ver imóveis na região</span></button>`).join('');
+  const current = select.value;
+  select.innerHTML = '<option value="">Todos</option>' + BAIRROS.map(b => `<option value="${escapeHTML(b)}">${escapeHTML(b)}</option>`).join('');
+  select.value = current || '';
+}
+
+function renderizarTipos(){
+  const grid = byId('tiposGrid');
+  const select = byId('tipoSelect');
+  const finalidade = estado.finalidade || 'Venda';
+  const tipos = TIPOS[finalidade] || TIPOS.Venda;
+  if(!grid || !select) return;
+  grid.innerHTML = tipos.map(t => `<button class="step-btn" onclick="escolherTipo('${escapeHTML(t)}')"><b>${escapeHTML(t)}</b><span>Filtrar por categoria</span></button>`).join('');
+  const current = select.value;
+  select.innerHTML = '<option value="">Todos</option>' + tipos.map(t => `<option value="${escapeHTML(t)}">${escapeHTML(t)}</option>`).join('');
+  select.value = tipos.includes(current) ? current : '';
+}
+
+function escolherFinalidade(finalidade, scroll=true){
+  estado.finalidade = finalidade || '';
+  byId('finalidadeSelect').value = estado.finalidade;
+  estado.tipo = '';
+  byId('tipoSelect').value = '';
+  renderizarTipos();
+  filtrarImoveis(false);
+  if(scroll) irPara('bairros');
+}
+function escolherBairro(bairro, scroll=true){
+  estado.bairro = bairro || '';
+  byId('bairroSelect').value = estado.bairro;
+  filtrarImoveis(false);
+  if(scroll) irPara('tipos');
+}
+function escolherTipo(tipo, scroll=true){
+  estado.tipo = tipo || '';
+  byId('tipoSelect').value = estado.tipo;
+  filtrarImoveis(false);
+  if(scroll) irPara('imoveis');
+}
+function limparFiltros(){
+  estado.finalidade=''; estado.bairro=''; estado.tipo='';
+  byId('finalidadeSelect').value=''; byId('bairroSelect').value=''; byId('tipoSelect').value=''; byId('codigoBusca').value='';
+  renderizarTipos(); filtrarImoveis(); irPara('imoveis');
+}
+function voltarEtapa(){ irPara('inicio'); }
+function focoCodigo(){ byId('codigoBusca')?.focus(); irPara('inicio'); }
+
+function filtrarImoveis(scroll=true){
+  estado.finalidade = byId('finalidadeSelect')?.value || estado.finalidade;
+  estado.bairro = byId('bairroSelect')?.value || estado.bairro;
+  estado.tipo = byId('tipoSelect')?.value || estado.tipo;
+  estado.resultado = estado.imoveis.filter(p => {
+    const okFinalidade = !estado.finalidade || normalizarTexto(p.finalidade).includes(normalizarTexto(estado.finalidade));
+    const okBairro = !estado.bairro || normalizarTexto(p.bairro) === normalizarTexto(estado.bairro) || (estado.bairro === 'Outros Bairros' && !BAIRROS.slice(0,-1).some(b => normalizarTexto(b) === normalizarTexto(p.bairro)));
+    const okTipo = !estado.tipo || normalizarTexto(p.tipo).includes(normalizarTexto(estado.tipo)) || normalizarTexto(estado.tipo).includes(normalizarTexto(p.tipo));
+    return okFinalidade && okBairro && okTipo && p.is_public && p.status === 'Publicado';
+  });
+  renderizarImoveis();
+  if(scroll) irPara('imoveis');
+}
+
+function buscarPorCodigo(){
+  const codigo = normalizarTexto(byId('codigoBusca')?.value || '');
+  if(!codigo){ irPara('inicio'); return; }
+  const item = estado.imoveis.find(p => normalizarTexto(p.codigo) === codigo || normalizarTexto(p.codigo).includes(codigo));
+  if(item){ estado.resultado = [item]; renderizarImoveis('Resultado para código ' + item.codigo); irPara('imoveis'); }
+  else {
+    estado.resultado = [];
+    renderizarImoveis('Código não encontrado');
+    byId('resultadoSub').innerHTML = 'Não encontramos esse código. Fale com um especialista para confirmar disponibilidade.';
+    irPara('imoveis');
+  }
+}
+
+function renderizarImoveis(titulo){
+  const grid = byId('imoveisGrid');
+  const total = estado.resultado.length;
+  byId('resultadoTitulo').textContent = titulo || (total ? `${total} imóveis selecionados` : 'Nenhum imóvel encontrado');
+  byId('resultadoSub').textContent = total ? 'Escolha uma opção e fale com um especialista pelo WhatsApp.' : 'Ajuste os filtros, busque pelo código cod-01 ou fale com a equipe para confirmar disponibilidade.';
+  if(!total){
+    const temFiltro = !!(estado.finalidade || estado.bairro || estado.tipo || (byId('codigoBusca')?.value || '').trim());
+    const msgErro = estado.erroCarregamento ? `<p class="desc">${escapeHTML(estado.erroCarregamento)}</p>` : '';
+    const tituloVazio = temFiltro ? 'Nenhum imóvel publicado com esse filtro' : 'Nenhum imóvel publicado ainda';
+    const textoVazio = temFiltro
+      ? 'Ajuste os filtros ou fale com a equipe para receber uma curadoria.'
+      : 'Assim que o administrador ou corretor publicar um imóvel no CRM, ele aparecerá automaticamente aqui no site.';
+    grid.innerHTML = `<div class="card"><div class="card-body"><h3>${tituloVazio}</h3><p class="desc">${textoVazio}</p>${msgErro}<div class="card-actions"><button class="btn whatsapp" onclick="abrirWhatsApp()">Chamar no WhatsApp</button></div></div></div>`;
+    return;
+  }
+  grid.innerHTML = estado.resultado.map((p, idx) => {
+    const img = safeImageUrl(p.foto);
+    const imgStyle = img ? `style="background-image:url('${img}')"` : '';
+    const imgClass = img ? 'card-img has-photo' : 'card-img no-img';
+    const semFoto = img ? '' : '<span class="no-photo-label">Imagem do imóvel em breve</span>';
+    return `
+    <article class="card">
+      <div class="${imgClass}" ${imgStyle}><span class="code">${escapeHTML(p.codigo || 'LEADS')}</span><span class="tag">${escapeHTML(p.finalidade)}</span>${semFoto}</div>
+      <div class="card-body">
+        <h3>${escapeHTML(p.titulo)}</h3>
+        <p class="desc">${escapeHTML(p.bairro)} · ${escapeHTML(p.tipo)}</p>
+        <div class="meta">
+          ${p.area ? `<span>${escapeHTML(p.area)} m²</span>` : ''}
+          ${p.dormitorios ? `<span>${escapeHTML(p.dormitorios)} dorm.</span>` : ''}
+          ${p.suites ? `<span>${escapeHTML(p.suites)} suítes</span>` : ''}
+          ${p.vagas ? `<span>${escapeHTML(p.vagas)} vagas</span>` : ''}
+        </div>
+        <div class="price">${money(p.valor)}</div>
+        <p class="desc">${escapeHTML(p.descricao || 'Imóvel selecionado pela Leads Imóveis.')}</p>
+        <div class="card-actions"><button class="btn whatsapp" onclick="abrirWhatsAppPorIndice(${idx})">Tenho interesse</button><button class="btn ghost" onclick="resumirImovelIAPorIndice(${idx})">IA</button></div>
+      </div>
+    </article>`;
+  }).join('');
+}
+
+function abrirWhatsApp(imovel){
+  let msg = 'Olá, quero falar com um especialista da Leads Imóveis.';
+  if(imovel && imovel.titulo) msg = `Olá, tenho interesse neste imóvel da Leads Imóveis: ${imovel.titulo} - ${imovel.bairro}.`;
+  window.open(`https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
+}
+function abrirWhatsAppPorIndice(idx){ abrirWhatsApp(estado.resultado[idx]); }
+
+function abrirMenu(){ byId('drawer').classList.add('open'); byId('backdrop').classList.add('show'); document.body.classList.add('menu-open'); }
+function fecharMenu(){ byId('drawer').classList.remove('open'); if(!byId('aiPanel').classList.contains('open')) byId('backdrop').classList.remove('show'); document.body.classList.remove('menu-open'); }
+function abrirIA(){ byId('aiPanel').classList.add('open'); byId('backdrop').classList.add('show'); document.body.classList.add('ai-open'); setTimeout(()=>byId('panelAiInput')?.focus(),120); }
+function fecharIA(){ byId('aiPanel').classList.remove('open'); if(!byId('drawer').classList.contains('open')) byId('backdrop').classList.remove('show'); document.body.classList.remove('ai-open'); }
+
+function sugestoesRapidasIA(){
+  const chips = ['Casa em Jurerê','Temporada com piscina','Apartamento anual','Código do imóvel','Falar no WhatsApp'];
+  const html = chips.map(c => `<button class="chip" onclick="buscarComIA('${escapeHTML(c)}')">${escapeHTML(c)}</button>`).join('');
+  if(byId('heroAiChips')) byId('heroAiChips').innerHTML = html;
+  if(byId('panelAiChips')) byId('panelAiChips').innerHTML = html;
+}
+
+function enviarPerguntaIA(event, origem){
+  event.preventDefault();
+  const input = origem === 'hero' ? byId('heroAiInput') : byId('panelAiInput');
+  const texto = input.value.trim();
+  if(!texto) return;
+  input.value = '';
+  buscarComIA(texto, origem);
+}
+
+function buscarComIA(texto, origem='hero'){
+  const resp = responderIA(texto);
+  renderizarRespostaIA(texto, resp, origem);
+}
+
+function responderIA(texto){
+  const q = normalizarTexto(texto);
+  if(q.includes('whatsapp') || q.includes('falar') || q.includes('especialista')) return {texto:'Posso te levar direto para um especialista da Leads Imóveis pelo WhatsApp.', acao:'whatsapp', itens:[]};
+  const codigo = estado.imoveis.find(p => q.includes(normalizarTexto(p.codigo)) && p.codigo);
+  if(codigo) return {texto:`Encontrei o imóvel ${codigo.codigo}: ${codigo.titulo}, em ${codigo.bairro}.`, acao:'imovel', itens:[codigo]};
+  let finalidade = '';
+  if(q.includes('temporada') || q.includes('ferias') || q.includes('verao')) finalidade='Temporada';
+  else if(q.includes('anual') || q.includes('aluguel') || q.includes('morar')) finalidade='Aluguel Anual';
+  else if(q.includes('venda') || q.includes('comprar') || q.includes('compra')) finalidade='Venda';
+  const bairro = BAIRROS.find(b => q.includes(normalizarTexto(b).split(' ')[0]) || q.includes(normalizarTexto(b)) ) || '';
+  const todosTipos = [...new Set(Object.values(TIPOS).flat())];
+  const tipo = todosTipos.find(t => q.includes(normalizarTexto(t).split(' ')[0]) || q.includes(normalizarTexto(t))) || '';
+  const itens = estado.imoveis.filter(p => (!finalidade || normalizarTexto(p.finalidade).includes(normalizarTexto(finalidade))) && (!bairro || normalizarTexto(p.bairro).includes(normalizarTexto(bairro))) && (!tipo || normalizarTexto(p.tipo).includes(normalizarTexto(tipo)) || normalizarTexto(tipo).includes(normalizarTexto(p.tipo)))).slice(0,3);
+  if(itens.length) return {texto:`Separei ${itens.length} opção${itens.length>1?'ões':''} para você. Quer falar com um especialista?`, acao:'filtro', itens, finalidade, bairro, tipo};
+  return {texto:'Não encontrei uma opção exata agora. Posso te direcionar para um especialista e buscar uma curadoria personalizada.', acao:'whatsapp', itens:[]};
+}
+
+function renderizarRespostaIA(pergunta, resp, origem='hero'){
+  if(resp.finalidade){ estado.finalidade=resp.finalidade; byId('finalidadeSelect').value=resp.finalidade; renderizarTipos(); }
+  if(resp.bairro){ estado.bairro=resp.bairro; byId('bairroSelect').value=resp.bairro; }
+  if(resp.tipo){ estado.tipo=resp.tipo; byId('tipoSelect').value=resp.tipo; }
+  if(resp.itens && resp.itens.length){ estado.resultado = resp.itens; renderizarImoveis('Sugestões do Assistente Leads'); }
+  const mini = (resp.itens || []).map(p => `<div class="mini-item"><b>${escapeHTML(p.titulo)}</b><span>${escapeHTML(p.bairro)} · ${money(p.valor)}</span></div>`).join('');
+  const action = resp.acao === 'whatsapp' ? `<button class="btn small whatsapp" onclick="abrirWhatsApp()">Chamar no WhatsApp</button>` : `<button class="btn small" onclick="irPara('imoveis')">Ver imóveis</button>`;
+  if(origem === 'hero'){
+    byId('heroAiAnswer').innerHTML = `<b>Assistente Leads:</b> ${escapeHTML(resp.texto)}<div style="margin-top:10px">${action}</div>`;
+    byId('heroAiMiniList').innerHTML = mini;
+  }
+  const thread = byId('aiThread');
+  if(thread){
+    thread.insertAdjacentHTML('beforeend', `<div class="bubble me">${escapeHTML(pergunta)}</div><div class="bubble ai">${escapeHTML(resp.texto)}<div style="margin-top:8px">${action}</div></div>`);
+    thread.scrollTop = thread.scrollHeight;
+  }
+}
+
+function resumirImovelIA(imovel){
+  if(!imovel) return;
+  abrirIA();
+  renderizarRespostaIA('Resumo do imóvel', {texto:`${imovel.titulo}, em ${imovel.bairro}. ${money(imovel.valor)}. Boa opção para ${imovel.finalidade.toLowerCase()}.`, acao:'imovel', itens:[imovel]}, 'panel');
+}
+function resumirImovelIAPorIndice(idx){ resumirImovelIA(estado.resultado[idx]); }
+
+function enviarContato(event){
+  event.preventDefault();
+  if(byId('empresa_oculta').value) return;
+  const nome = byId('contatoNome').value.trim().slice(0,80);
+  const tel = byId('contatoTelefone').value.trim().slice(0,20);
+  const msg = byId('contatoMensagem').value.trim().slice(0,500);
+  if(!nome || !tel || !msg) return;
+  const texto = `Olá, sou ${nome}. Meu WhatsApp é ${tel}. ${msg}`;
+  window.open(`https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(texto)}`, '_blank', 'noopener');
+  event.target.reset();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  carregarImoveisPublicos();
+  iniciarSincronizacaoCRM();
+  renderizarBairros();
+  renderizarTipos();
+  iniciarFrasesRotativas();
+});
+</script>
+<script>
+(function(){
+  'use strict';
+  window.money = function(v){
+    var n = Number(v) || 0;
+    return n > 0
+      ? n.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0})
+      : 'Consulte';
+  };
+  var timer = null;
+  window.iniciarSincronizacaoCRM = function(){
+    if(window.__leadsRealtimeOK) return;
+    var c = window.supabaseClient || window.leadsSupabaseClient;
+    if(!c || typeof c.channel !== 'function') return;
+    window.__leadsRealtimeOK = true;
+    c.channel('site-crm-properties-sync')
+     .on('postgres_changes',
+         { event:'*', schema:'public', table:'crm_properties' },
+         function(){
+           clearTimeout(timer);
+           timer = setTimeout(window.carregarImoveisPublicos, 400);
+         })
+     .subscribe(function(s){ console.log('[Leads] Realtime:', s); });
+  };
+  function aplicar(){
+    setTimeout(function(){
+      if(typeof window.carregarImoveisPublicos === 'function') window.carregarImoveisPublicos();
+      window.iniciarSincronizacaoCRM();
+    }, 300);
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', aplicar, { once:true });
+  } else { aplicar(); }
+})();
+</script>
+<script>
+/* ============================================================
+ * Leads Imóveis · Galeria (patch autocontido)
+ * Galeria de fotos: modal, setas, swipe, miniaturas.
+ *
+ * O que faz:
+ *   · Clicar na foto de um card abre a galeria em tela cheia
+ *   · Setas ‹ › no desktop, arrastar (swipe) no celular
+ *   · Teclado: ← → para navegar, Esc para fechar
+ *   · Miniaturas embaixo
+ *   · Botão de WhatsApp dentro da galeria
+ * ============================================================ */
+(function () {
+  'use strict';
+
+  var URL_SB = window.LEADS_SUPABASE_URL || 'https://zyfbgydbwsvbaogbxzrd.supabase.co';
+  var KEY_SB = window.LEADS_SUPABASE_ANON_KEY || 'sb_publishable_AP670pbIpkD_KleT7VaQ3Q_BTsBh8yh';
+  var ZAP = '5548991115992';
+
+  var fotosPorCodigo = {};   // code -> [url, url, ...]
+  var atual = { fotos: [], i: 0, imovel: null };
+
+  /* ---------- Estilos ---------- */
+  var css = document.createElement('style');
+  css.textContent = [
+    '.lg-overlay{position:fixed;inset:0;z-index:9999;background:rgba(8,10,14,.94);',
+    '  display:none;flex-direction:column;align-items:center;justify-content:center;',
+    '  backdrop-filter:blur(6px);animation:lgIn .18s ease}',
+    '.lg-overlay.aberto{display:flex}',
+    '@keyframes lgIn{from{opacity:0}to{opacity:1}}',
+    '.lg-palco{position:relative;width:min(1100px,94vw);height:min(72vh,640px);',
+    '  display:flex;align-items:center;justify-content:center}',
+    '.lg-img{max-width:100%;max-height:100%;border-radius:14px;object-fit:contain;',
+    '  box-shadow:0 24px 70px rgba(0,0,0,.6);user-select:none;-webkit-user-drag:none}',
+    '.lg-nav{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;',
+    '  border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(20,24,32,.7);',
+    '  color:#fff;font-size:26px;line-height:1;cursor:pointer;display:flex;',
+    '  align-items:center;justify-content:center;transition:.15s}',
+    '.lg-nav:hover{background:rgba(40,46,60,.95);transform:translateY(-50%) scale(1.06)}',
+    '.lg-prev{left:-8px}.lg-next{right:-8px}',
+    '@media(max-width:820px){.lg-prev{left:4px}.lg-next{right:4px}.lg-nav{width:40px;height:40px;font-size:22px}}',
+    '.lg-fechar{position:absolute;top:18px;right:20px;width:44px;height:44px;border-radius:50%;',
+    '  border:1px solid rgba(255,255,255,.25);background:rgba(20,24,32,.7);color:#fff;',
+    '  font-size:22px;cursor:pointer;z-index:2}',
+    '.lg-topo{position:absolute;top:20px;left:24px;color:#e9edf5;font-size:14px;letter-spacing:.4px}',
+    '.lg-topo b{display:block;font-size:17px;margin-top:2px;font-weight:600}',
+    '.lg-conta{margin-top:14px;color:#aeb6c4;font-size:13px;letter-spacing:1px}',
+    '.lg-thumbs{display:flex;gap:8px;margin-top:14px;padding:0 12px;max-width:94vw;',
+    '  overflow-x:auto;scrollbar-width:thin}',
+    '.lg-thumb{width:76px;height:56px;border-radius:8px;object-fit:cover;cursor:pointer;',
+    '  opacity:.45;border:2px solid transparent;transition:.15s;flex:0 0 auto}',
+    '.lg-thumb:hover{opacity:.8}',
+    '.lg-thumb.on{opacity:1;border-color:#c8a35a}',
+    '.lg-zap{margin-top:16px;padding:12px 26px;border-radius:999px;border:none;cursor:pointer;',
+    '  background:#25D366;color:#06210f;font-weight:700;font-size:15px;letter-spacing:.3px}',
+    '.lg-zap:hover{filter:brightness(1.08)}',
+    '.card-img.has-photo{cursor:zoom-in;position:relative}',
+    '.lg-badge{position:absolute;right:10px;bottom:10px;z-index:3;background:rgba(10,12,18,.78);',
+    '  color:#fff;font-size:12px;padding:5px 11px;border-radius:999px;letter-spacing:.5px;',
+    '  pointer-events:none}',
+    'body.lg-travado{overflow:hidden}'
+  ].join('');
+  document.head.appendChild(css);
+
+  /* ---------- Estrutura ---------- */
+  var ov = document.createElement('div');
+  ov.className = 'lg-overlay';
+  ov.setAttribute('role', 'dialog');
+  ov.setAttribute('aria-modal', 'true');
+  ov.innerHTML =
+    '<div class="lg-topo"><span id="lgCodigo"></span><b id="lgTitulo"></b></div>' +
+    '<button class="lg-fechar" id="lgFechar" aria-label="Fechar galeria">✕</button>' +
+    '<div class="lg-palco">' +
+      '<button class="lg-nav lg-prev" id="lgPrev" aria-label="Foto anterior">‹</button>' +
+      '<img class="lg-img" id="lgImg" alt="Foto do imóvel">' +
+      '<button class="lg-nav lg-next" id="lgNext" aria-label="Próxima foto">›</button>' +
+    '</div>' +
+    '<div class="lg-conta" id="lgConta"></div>' +
+    '<div class="lg-thumbs" id="lgThumbs"></div>' +
+    '<button class="lg-zap" id="lgZap">Tenho interesse neste imóvel</button>';
+  document.body.appendChild(ov);
+
+  var el = function (id) { return document.getElementById(id); };
+
+  /* ---------- Buscar as fotos da view ---------- */
+  async function carregarFotos() {
+    try {
+      var r = await fetch(
+        URL_SB + '/rest/v1/public_properties?select=code,photos,image_url',
+        { headers: { apikey: KEY_SB, Authorization: 'Bearer ' + KEY_SB } }
+      );
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      var linhas = await r.json();
+
+      linhas.forEach(function (p) {
+        var lista = Array.isArray(p.photos) ? p.photos.slice() : [];
+        if (p.image_url && lista.indexOf(p.image_url) === -1) lista.unshift(p.image_url);
+        fotosPorCodigo[p.code] = lista.filter(Boolean);
       });
-      const text = await response.text();
-      let data = [];
-      try { data = text ? JSON.parse(text) : []; } catch (_) {}
-      if (!response.ok) {
-        const message = data?.message || data?.hint || text || `HTTP ${response.status}`;
-        throw new Error(message);
+
+      marcarCards();
+    } catch (e) {
+      console.warn('[Galeria] não foi possível carregar as fotos.', e);
+    }
+  }
+
+  /* ---------- Marcar os cards que têm mais de uma foto ---------- */
+  function marcarCards() {
+    document.querySelectorAll('.card-img.has-photo').forEach(function (div) {
+      var spanCode = div.querySelector('.code');
+      if (!spanCode) return;
+      var code = spanCode.textContent.trim();
+      var fotos = fotosPorCodigo[code] || [];
+      if (fotos.length < 1) return;
+
+      div.dataset.lgCode = code;
+
+      if (fotos.length > 1 && !div.querySelector('.lg-badge')) {
+        var b = document.createElement('span');
+        b.className = 'lg-badge';
+        b.textContent = '📷 ' + fotos.length + ' fotos';
+        div.appendChild(b);
       }
-      return Array.isArray(data) ? data : [];
+    });
+  }
+
+  /* ---------- Abrir / navegar ---------- */
+  function abrir(code) {
+    var fotos = fotosPorCodigo[code] || [];
+    if (!fotos.length) return;
+
+    var lista = (window.estado && window.estado.resultado) || [];
+    atual.imovel = lista.filter(function (p) { return p.codigo === code; })[0] || null;
+    atual.fotos = fotos;
+    atual.i = 0;
+
+    el('lgCodigo').textContent = code;
+    el('lgTitulo').textContent = atual.imovel ? atual.imovel.titulo : '';
+
+    montarThumbs();
+    mostrar(0);
+    ov.classList.add('aberto');
+    document.body.classList.add('lg-travado');
+  }
+
+  function fechar() {
+    ov.classList.remove('aberto');
+    document.body.classList.remove('lg-travado');
+  }
+
+  function mostrar(i) {
+    if (!atual.fotos.length) return;
+    atual.i = (i + atual.fotos.length) % atual.fotos.length;
+    el('lgImg').src = atual.fotos[atual.i];
+    el('lgConta').textContent = (atual.i + 1) + ' / ' + atual.fotos.length;
+
+    var mostrarSetas = atual.fotos.length > 1 ? 'flex' : 'none';
+    el('lgPrev').style.display = mostrarSetas;
+    el('lgNext').style.display = mostrarSetas;
+
+    var thumbs = el('lgThumbs').children;
+    for (var k = 0; k < thumbs.length; k++) {
+      thumbs[k].classList.toggle('on', k === atual.i);
     }
+  }
 
-    async function fetchPublishedProperties() {
-      const attempts = [
-        { source:"public_properties", path:"public_properties?select=*&order=updated_at.desc&limit=1000" },
-        { source:"properties", path:"properties?select=*&is_public=eq.true&status=eq.Publicado&order=updated_at.desc&limit=1000" },
-        { source:"properties-sem-ordem", path:"properties?select=*&is_public=eq.true&status=eq.Publicado&limit=1000" }
-      ];
-      const errors = [];
-      let successfulEmpty = false;
-      for (const attempt of attempts) {
-        try {
-          const data = await restGet(attempt.path);
-          console.log(`[Leads] ${attempt.source}: ${data.length} registro(s)`, data.map(r => r.code || r.codigo || r.id || "?"));
-          if (data.length) { state.source = attempt.source; return data; }
-          successfulEmpty = true;
-        } catch (error) {
-          console.warn(`[Leads] Falha em ${attempt.source}:`, error);
-          errors.push(`${attempt.source}: ${error.message}`);
-        }
-      }
-      if (successfulEmpty) return [];
-      throw new Error(errors.join(" | ") || "Nenhuma consulta pública respondeu.");
-    }
+  function montarThumbs() {
+    var box = el('lgThumbs');
+    box.innerHTML = '';
+    if (atual.fotos.length < 2) return;
+    atual.fotos.forEach(function (src, k) {
+      var t = document.createElement('img');
+      t.className = 'lg-thumb';
+      t.src = src;
+      t.alt = 'Foto ' + (k + 1);
+      t.addEventListener('click', function () { mostrar(k); });
+      box.appendChild(t);
+    });
+  }
 
-    function setStatus(message,error=false) { const el=$("connectionStatus"); el.textContent=message; el.style.color=error?"#9a3040":"#527487"; }
+  /* ---------- Eventos ---------- */
+  document.addEventListener('click', function (e) {
+    var alvo = e.target.closest('.card-img.has-photo');
+    if (alvo && alvo.dataset.lgCode) { abrir(alvo.dataset.lgCode); }
+  });
 
-    function buildSignature(rawList) {
-      return JSON.stringify(rawList.map(r => {
-        const photos = r?.photos ?? r?.fotos ?? r?.images ?? r?.imagens ?? r?.gallery ?? "";
-        const photoMark = Array.isArray(photos) ? photos.length : String(photos).length;
-        return [ r?.id ?? r?.uuid ?? r?.code ?? "", r?.updated_at ?? r?.created_at ?? "", photoMark ];
-      }));
-    }
+  el('lgFechar').addEventListener('click', fechar);
+  el('lgPrev').addEventListener('click', function () { mostrar(atual.i - 1); });
+  el('lgNext').addEventListener('click', function () { mostrar(atual.i + 1); });
 
-    async function loadProperties({silent=false}={}) {
-      if (state.loading) return;
-      state.loading=true;
-      if (!silent) $("propertiesGrid").innerHTML='<div class="loading-state"><div class="loading-spinner"></div>Carregando imóveis publicados…</div>';
-      try {
-        const raw = await fetchPublishedProperties();
-        const signature = buildSignature(raw);
-        // Em atualizações automáticas, se nada mudou não reconstrói a vitrine (evita "piscada").
-        if (silent && signature === state.lastSignature && state.properties.length) {
-          return;
-        }
-        state.lastSignature = signature;
-        state.properties = raw.map(normalizeProperty).sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)));
-        populateFilters();
-        applyFilters({scroll:false});
-        if (state.properties.length) setStatus(`Supabase conectado · ${state.properties.length} imóvel(is) publicado(s).`);
-        else setStatus("Supabase conectado, mas nenhum imóvel público foi liberado para o site.",true);
-      } catch (error) {
-        console.error("[Leads] Falha definitiva ao carregar imóveis:",error);
-        if (!silent) {
-          state.properties=[]; state.filtered=[]; updateCount(0);
-          $("propertiesGrid").innerHTML=`<div class="error-state"><strong>Não foi possível carregar os imóveis.</strong><br>${escapeHtml(error.message)}<br><small>Verifique as permissões de leitura anônima no Supabase.</small></div>`;
-          setStatus("Falha ao consultar os imóveis públicos.",true);
-        }
-      } finally { state.loading=false; }
-    }
+  ov.addEventListener('click', function (e) { if (e.target === ov) fechar(); });
 
-    function unique(values){return [...new Set(values.map(v=>String(v||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR"))}
-    function updateSelect(select,values){const current=select.value;const first=select.options[0]?.outerHTML||'<option value="">Todos</option>';select.innerHTML=first+values.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");if([...select.options].some(o=>o.value===current))select.value=current}
-    function populateFilters(){updateSelect($("neighborhoodFilter"),unique(state.properties.map(p=>p.neighborhood)));updateSelect($("typeFilter"),unique(state.properties.map(p=>p.type)))}
-    function currentFilters(){return{purpose:normalizeText($("purposeFilter").value),neighborhood:normalizeText($("neighborhoodFilter").value),type:normalizeText($("typeFilter").value),code:normalizeText($("codeFilter").value)}}
-    function applyFilters({scroll=true}={}){const f=currentFilters();state.filtered=state.properties.filter(p=>{if(f.purpose&&normalizeText(p.purpose)!==f.purpose)return false;if(f.neighborhood&&normalizeText(p.neighborhood)!==f.neighborhood)return false;if(f.type&&normalizeText(p.type)!==f.type)return false;if(f.code&&!normalizeText(`${p.code} ${p.title} ${p.neighborhood}`).includes(f.code))return false;return true});renderProperties();if(scroll)$("imoveis").scrollIntoView({behavior:"smooth",block:"start"})}
-    function updateCount(count){$("propertyCount").textContent=`${count} ${count===1?"imóvel":"imóveis"}`}
-    function detail(text){const span=document.createElement("span");span.className="detail-pill";span.textContent=text;return span}
-    function formatMoney(value,purpose){if(!value)return"Consulte o valor";const formatted=new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0}).format(value);if(purpose==="Temporada")return`${formatted} / diária`;if(purpose==="Aluguel Anual")return`${formatted} / mês`;return formatted}
-    function whatsappUrl(p){const text=["Olá, vim pelo site da Leads Imóveis.",`Tenho interesse no imóvel: ${p.title}.`,p.code?`Código: ${p.code}.`:"",`Finalidade: ${p.purpose}.`,`Bairro: ${p.neighborhood}.`].filter(Boolean).join(" ");return`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`}
+  document.addEventListener('keydown', function (e) {
+    if (!ov.classList.contains('aberto')) return;
+    if (e.key === 'Escape') fechar();
+    if (e.key === 'ArrowLeft') mostrar(atual.i - 1);
+    if (e.key === 'ArrowRight') mostrar(atual.i + 1);
+  });
 
-    function renderProperties(){const grid=$("propertiesGrid");grid.innerHTML="";updateCount(state.filtered.length);if(!state.filtered.length){grid.innerHTML='<div class="empty-state"><strong>Nenhum imóvel encontrado.</strong><br>Tente limpar os filtros ou fale com um especialista.</div>';return}const fragment=document.createDocumentFragment();state.filtered.forEach((p,index)=>fragment.appendChild(createCard(p,index)));grid.appendChild(fragment);requestAnimationFrame(()=>document.querySelectorAll(".property-card").forEach((card,index)=>setTimeout(()=>card.classList.add("revealed"),Math.min(index*55,250))))}
-    window.renderProperties=renderProperties;
+  el('lgZap').addEventListener('click', function () {
+    var p = atual.imovel;
+    var msg = p
+      ? 'Olá! Tenho interesse no imóvel ' + p.codigo + ' - ' + p.titulo +
+        '.\nBairro: ' + p.bairro + '\nFinalidade: ' + p.finalidade
+      : 'Olá, quero falar com um especialista da Leads Imóveis.';
+    window.open('https://wa.me/' + ZAP + '?text=' + encodeURIComponent(msg), '_blank', 'noopener');
+  });
 
-    function createCard(p,index){const article=document.createElement("article");article.className="property-card";article.dataset.propertyId=p.id;
-      const startIndex=Math.min(state.cardPhotoIndex.get(p.id)||0,Math.max(0,p.photos.length-1));
-      const media=document.createElement("div");media.className="property-media";const image=document.createElement("img");image.loading="lazy";image.decoding="async";image.alt=p.title;image.src=p.photos[startIndex]||"hero-leads-floripa-final.webp";image.onerror=()=>{image.onerror=null;image.src="hero-leads-floripa-final.webp"};image.onclick=()=>openGallery(p,state.cardPhotoIndex.get(p.id)||0);media.appendChild(image);
-      const purpose=document.createElement("span");purpose.className="property-purpose";purpose.textContent=p.purpose;media.appendChild(purpose);if(p.code){const code=document.createElement("span");code.className="property-code";code.textContent=p.code;media.appendChild(code)}
-      if(p.photos.length>1){const prev=document.createElement("button");prev.className="gallery-arrow previous";prev.type="button";prev.textContent="‹";prev.onclick=e=>{e.stopPropagation();changeCardPhoto(p,article,-1)};const next=document.createElement("button");next.className="gallery-arrow next";next.type="button";next.textContent="›";next.onclick=e=>{e.stopPropagation();changeCardPhoto(p,article,1)};const counter=document.createElement("span");counter.className="photo-counter";counter.textContent=`${startIndex+1} / ${p.photos.length}`;media.append(prev,next,counter)}
-      let touchX=0;media.addEventListener("touchstart",e=>touchX=e.changedTouches[0]?.clientX||0,{passive:true});media.addEventListener("touchend",e=>{if(p.photos.length<2)return;const delta=(e.changedTouches[0]?.clientX||0)-touchX;if(Math.abs(delta)>45)changeCardPhoto(p,article,delta>0?-1:1)},{passive:true});
-      const body=document.createElement("div");body.className="property-body";const loc=document.createElement("div");loc.className="property-location";loc.textContent=`⌖ ${p.neighborhood} · ${p.type}`;const title=document.createElement("h3");title.textContent=p.title;const desc=document.createElement("p");desc.className="property-description";desc.textContent=p.description;const details=document.createElement("div");details.className="property-details";if(p.bedrooms)details.appendChild(detail(`${p.bedrooms} dormitório${p.bedrooms===1?"":"s"}`));if(p.suites)details.appendChild(detail(`${p.suites} suíte${p.suites===1?"":"s"}`));if(p.bathrooms)details.appendChild(detail(`${p.bathrooms} banheiro${p.bathrooms===1?"":"s"}`));if(p.parking)details.appendChild(detail(`${p.parking} vaga${p.parking===1?"":"s"}`));if(p.area)details.appendChild(detail(`${p.area} m²`));
-      const bottom=document.createElement("div");bottom.className="property-bottom";const price=document.createElement("div");price.className="property-price";price.innerHTML=`<small>Valor</small><strong>${escapeHtml(formatMoney(p.price,p.purpose))}</strong>`;const actions=document.createElement("div");actions.className="card-actions";if(p.photos.length){const gallery=document.createElement("button");gallery.className="small-button";gallery.type="button";gallery.textContent="Ver fotos";gallery.onclick=()=>openGallery(p,state.cardPhotoIndex.get(p.id)||0);actions.appendChild(gallery)}const wa=document.createElement("a");wa.className="small-button dark";wa.href=whatsappUrl(p);wa.target="_blank";wa.rel="noopener noreferrer";wa.textContent="Tenho interesse";actions.appendChild(wa);bottom.append(price,actions);body.append(loc,title,desc,details,bottom);article.append(media,body);return article}
+  /* Swipe no celular */
+  var x0 = null;
+  var palco = document.querySelector('.lg-palco');
+  palco.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+  palco.addEventListener('touchend', function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 45) mostrar(atual.i + (dx < 0 ? 1 : -1));
+    x0 = null;
+  }, { passive: true });
 
-    function changeCardPhoto(p,card,direction){if(!p.photos.length)return;const current=state.cardPhotoIndex.get(p.id)||0;const next=(current+direction+p.photos.length)%p.photos.length;state.cardPhotoIndex.set(p.id,next);const img=card.querySelector(".property-media img");const counter=card.querySelector(".photo-counter");img.style.opacity=".55";setTimeout(()=>{img.src=p.photos[next];img.style.opacity="1"},100);if(counter)counter.textContent=`${next+1} / ${p.photos.length}`}
-    function openGallery(p,index=0){if(!p.photos.length)return;state.galleryProperty=p;state.galleryIndex=Math.max(0,Math.min(index,p.photos.length-1));updateGallery();$("galleryModal").classList.add("open");$("galleryModal").setAttribute("aria-hidden","false");document.body.classList.add("locked")}
-    function closeGallery(){$("galleryModal").classList.remove("open");$("galleryModal").setAttribute("aria-hidden","true");state.galleryProperty=null;syncLock()}
-    function moveGallery(direction){const p=state.galleryProperty;if(!p?.photos.length)return;state.galleryIndex=(state.galleryIndex+direction+p.photos.length)%p.photos.length;updateGallery()}
-    function updateGallery(){const p=state.galleryProperty;if(!p)return;$("galleryTitle").textContent=p.code?`${p.title} · ${p.code}`:p.title;$("galleryImage").src=p.photos[state.galleryIndex];$("galleryImage").alt=`${p.title} - foto ${state.galleryIndex+1}`;$("galleryCounter").textContent=`${state.galleryIndex+1} de ${p.photos.length}`;const multi=p.photos.length>1;$("galleryPrevious").hidden=!multi;$("galleryNext").hidden=!multi}
+  /* Os cards são redesenhados a cada filtro: reaplicar o marcador */
+  var obs = new MutationObserver(function () { marcarCards(); });
+  var grid = document.getElementById('imoveisGrid');
+  if (grid) obs.observe(grid, { childList: true });
 
-    function openMenu(){$("mobileMenu").classList.add("open");$("overlay").classList.add("visible");document.body.classList.add("locked")}
-    function closeMenu(){$("mobileMenu").classList.remove("open");$("overlay").classList.remove("visible");syncLock()}
-    function openAi(){$("aiPanel").classList.add("open");$("aiPanel").setAttribute("aria-hidden","false");setTimeout(()=>$("panelAssistantInput").focus(),180)}
-    function closeAi(){$("aiPanel").classList.remove("open");$("aiPanel").setAttribute("aria-hidden","true")}
-    function syncLock(){document.body.classList.toggle("locked",$("mobileMenu").classList.contains("open")||$("galleryModal").classList.contains("open"))}
-    function setPurpose(purpose){$("purposeFilter").value=purpose;applyFilters({scroll:true});closeMenu()}
-    function scrollSearch(){closeMenu();$("buscar").scrollIntoView({behavior:"smooth",block:"start"})}
-    function focusCode(){scrollSearch();setTimeout(()=>$("codeFilter").focus(),450)}
-
-    function renderChips(){const html=suggestions.map(s=>`<button class="chip" type="button" data-query="${escapeHtml(s)}">${escapeHtml(s)}</button>`).join("");$("heroChips").innerHTML=html;$("panelChips").innerHTML=html}
-    function localMatches(message){const query=normalizeText(message);const ignored=new Set(["quero","procuro","preciso","para","uma","com","imovel","imoveis","favor","ola"]);const words=query.split(/\s+/).filter(w=>w.length>=3&&!ignored.has(w));return state.properties.map(p=>{const text=normalizeText([p.code,p.title,p.purpose,p.neighborhood,p.type,p.description].join(" "));let score=0;words.forEach(w=>{if(text.includes(w))score+=2});if(p.code&&query.includes(normalizeText(p.code)))score+=20;if(p.neighborhood&&query.includes(normalizeText(p.neighborhood)))score+=8;return{p,score}}).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,4).map(x=>x.p)}
-    function addMessage(role,text,typing=false){const bubble=document.createElement("div");bubble.className=`lia-message ${role}`;if(typing){bubble.classList.add("typing");for(let i=0;i<3;i++){const dot=document.createElement("span");dot.className="typing-dot";bubble.appendChild(dot)}}else bubble.textContent=text;$("liaThread").appendChild(bubble);$("liaThread").scrollTop=$("liaThread").scrollHeight;return bubble}
-    function renderRecommendations(items){if(!items.length)return;const wrap=document.createElement("div");wrap.className="lia-recommendations";items.forEach(p=>{const btn=document.createElement("button");btn.type="button";btn.className="lia-recommendation";btn.innerHTML=`<strong>${escapeHtml(p.title)}</strong><span>${escapeHtml([p.code,p.neighborhood,p.type].filter(Boolean).join(" · "))}</span><em>${escapeHtml(formatMoney(p.price,p.purpose))}</em>`;btn.onclick=()=>{state.filtered=[p];renderProperties();$("imoveis").scrollIntoView({behavior:"smooth"})};wrap.appendChild(btn)});$("liaThread").appendChild(wrap);$("liaThread").scrollTop=$("liaThread").scrollHeight}
-
-    let liaSending=false;
-    async function sendLia(message,target="hero"){
-      const clean=String(message||"").trim().slice(0,3000);if(!clean||liaSending)return;liaSending=true;addMessage("me",clean);const typing=addMessage("ai","",true);$("heroAnswer").textContent="Estou analisando sua mensagem…";
-      try{
-        const response=await fetch(LIA_ENDPOINT,{method:"POST",mode:"cors",cache:"no-store",headers:{"Content-Type":"application/json","x-site-session":localStorage.getItem("leads_lia_session")||crypto.randomUUID?.()||String(Date.now())},body:JSON.stringify({message:clean,source:"leadsimoveis.com.br",page:location.href})});
-        const data=await response.json().catch(()=>({}));if(!response.ok||data.ok===false)throw new Error(data.message||`HTTP ${response.status}`);typing.remove();const reply=String(data.reply||data.message||"Posso ajudar você a encontrar o imóvel ideal.");$("heroAnswer").textContent=reply;addMessage("ai",reply);const codes=Array.isArray(data.recommendedCodes)?data.recommendedCodes.map(normalizeText):[];const recs=codes.length?state.properties.filter(p=>codes.includes(normalizeText(p.code))).slice(0,4):localMatches(clean);renderRecommendations(recs);
-      }catch(error){console.warn("[Lia] Modo local:",error);typing.remove();const matches=localMatches(clean);const reply=matches.length?`Encontrei ${matches.length} ${matches.length===1?"opção relacionada":"opções relacionadas"}. Toque em uma delas para ver os detalhes.`:"Não encontrei uma correspondência exata. Conte o bairro, o tipo de imóvel e se procura compra, aluguel anual ou temporada.";$("heroAnswer").textContent=reply;addMessage("ai",reply);renderRecommendations(matches)}
-      finally{liaSending=false;$("heroAssistantInput").value="";$("panelAssistantInput").value=""}
-    }
-
-    function startPhrases(){let current=0;const panel=$("phrasePanel");setInterval(()=>{if(document.hidden)return;let next=current;while(next===current)next=Math.floor(Math.random()*phrases.length);panel.classList.add("changing");setTimeout(()=>{current=next;$("phraseTitle").textContent=phrases[current][0];$("phraseCopy").textContent=phrases[current][1];panel.classList.remove("changing")},420)},3500)}
-    function startRefresh(){
-      if(state.refreshTimer) clearInterval(state.refreshTimer);
-      state.refreshTimer=setInterval(()=>{
-        if(!document.hidden&&navigator.onLine) loadProperties({silent:true});
-      },15000);
-      document.addEventListener("visibilitychange",()=>{
-        if(!document.hidden&&navigator.onLine) loadProperties({silent:true});
-      });
-    }
-
-    function bindEvents(){
-      $("openMenu").onclick=openMenu;$("closeMenu").onclick=closeMenu;$("overlay").onclick=closeMenu;$("openAi").onclick=()=>$("aiPanel").classList.contains("open")?closeAi():openAi();$("closeAi").onclick=closeAi;$("closeGallery").onclick=closeGallery;$("galleryPrevious").onclick=()=>moveGallery(-1);$("galleryNext").onclick=()=>moveGallery(1);$("galleryModal").onclick=e=>{if(e.target===$("galleryModal"))closeGallery()};
-      let galleryTouch=0;$("galleryStage").addEventListener("touchstart",e=>galleryTouch=e.changedTouches[0]?.clientX||0,{passive:true});$("galleryStage").addEventListener("touchend",e=>{const delta=(e.changedTouches[0]?.clientX||0)-galleryTouch;if(Math.abs(delta)>50)moveGallery(delta>0?-1:1)},{passive:true});
-      document.querySelectorAll("[data-purpose]").forEach(el=>el.onclick=()=>setPurpose(el.dataset.purpose));document.querySelectorAll("[data-scroll-search]").forEach(el=>el.onclick=scrollSearch);document.querySelectorAll("[data-focus-code]").forEach(el=>el.onclick=focusCode);
-      $("filterForm").onsubmit=e=>{e.preventDefault();applyFilters({scroll:true})};$("clearFilters").onclick=()=>{$("filterForm").reset();applyFilters({scroll:false})};["purposeFilter","neighborhoodFilter","typeFilter"].forEach(id=>$(id).onchange=()=>applyFilters({scroll:false}));
-      $("heroAssistantForm").onsubmit=e=>{e.preventDefault();sendLia($("heroAssistantInput").value,"hero")};$("panelAssistantForm").onsubmit=e=>{e.preventDefault();sendLia($("panelAssistantInput").value,"panel")};document.addEventListener("click",e=>{const chip=e.target.closest("[data-query]");if(chip)sendLia(chip.dataset.query,"panel")});
-      document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeMenu();closeAi();closeGallery()}if($("galleryModal").classList.contains("open")){if(e.key==="ArrowLeft")moveGallery(-1);if(e.key==="ArrowRight")moveGallery(1)}});
-      window.addEventListener("scroll",()=>document.querySelector(".topbar")?.classList.toggle("scrolled",scrollY>18),{passive:true});window.addEventListener("online",()=>loadProperties({silent:true}));window.addEventListener("offline",()=>setStatus("Sem internet. Exibindo os dados já carregados.",true));
-    }
-
-    async function init(){
-      $("currentYear").textContent=new Date().getFullYear();renderChips();bindEvents();startPhrases();await loadProperties();startRefresh();
-      const hour=new Date().getHours();const greeting=hour<12?"Bom dia":hour<18?"Boa tarde":"Boa noite";$("panelAnswer").textContent=`${greeting}! Eu sou a Lia. Conte o que você procura em Florianópolis.`;$("heroAnswer").textContent=`${greeting}! Escreva o que procura como se estivesse conversando com uma pessoa.`;
-    }
-
-    window.addEventListener("DOMContentLoaded",init);
-  </script>
+  /* ---------- Início ---------- */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', carregarFotos, { once: true });
+  } else {
+    carregarFotos();
+  }
+})();
+</script>
 </body>
 </html>
