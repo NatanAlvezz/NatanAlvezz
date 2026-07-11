@@ -513,6 +513,120 @@
   .hero-phrase-panel::after {
     display: none;
   }
+}/* ============================================================
+   LEADS IMÓVEIS · IMAGENS DE FUNDO NO DESKTOP
+   Mantém o mobile intacto
+============================================================ */
+
+@media screen and (min-width: 701px) {
+
+  /* PRIMEIRA IMAGEM · FUNDO PRINCIPAL DO SITE */
+  .hero-background {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+
+    background-image:
+      url("hero-leads-floripa-final.webp") !important;
+
+    background-size: cover !important;
+    background-position: center 44% !important;
+    background-repeat: no-repeat !important;
+
+    filter:
+      brightness(1.02)
+      contrast(1.04)
+      saturate(1.08);
+
+    transform: scale(1.015);
+  }
+
+  /* Deixa a imagem visível sem prejudicar a leitura */
+  .hero-background::before {
+    background:
+      linear-gradient(
+        90deg,
+        rgba(5, 14, 24, 0.86) 0%,
+        rgba(7, 20, 34, 0.58) 42%,
+        rgba(7, 20, 34, 0.24) 70%,
+        rgba(5, 14, 24, 0.56) 100%
+      ),
+      linear-gradient(
+        180deg,
+        rgba(5, 13, 21, 0.08) 0%,
+        rgba(5, 13, 21, 0.28) 58%,
+        rgba(7, 20, 34, 0.82) 100%
+      ) !important;
+  }
+
+  /* Evita que o degradê inferior esconda a imagem */
+  .hero::after {
+    height: 150px !important;
+
+    background:
+      linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(7, 20, 34, 0.18) 46%,
+        #071422 100%
+      ) !important;
+  }
+
+  /* SEGUNDA IMAGEM · FUNDO DA ÁREA DE CONTATO */
+  .contact-section {
+    position: relative !important;
+    isolation: isolate !important;
+    min-height: 620px;
+    display: flex;
+    align-items: center;
+    background: #071422 !important;
+  }
+
+  .contact-section::before {
+    content: "" !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 0 !important;
+
+    background-image:
+      linear-gradient(
+        90deg,
+        rgba(5, 14, 24, 0.88) 0%,
+        rgba(7, 20, 34, 0.58) 48%,
+        rgba(5, 14, 24, 0.38) 72%,
+        rgba(5, 14, 24, 0.66) 100%
+      ),
+      url("leads-praia-hero-final-otimizada.webp") !important;
+
+    background-size: cover !important;
+    background-position: center 48% !important;
+    background-repeat: no-repeat !important;
+
+    filter:
+      brightness(1.03)
+      contrast(1.04)
+      saturate(1.08);
+  }
+
+  /* Mantém textos e cartão acima da imagem */
+  .contact-grid {
+    position: relative !important;
+    z-index: 2 !important;
+    width: 100%;
+  }
+
+  /* Profundidade elegante sobre as duas imagens */
+  .hero-copy,
+  .assistant-card,
+  .contact-copy,
+  .contact-card {
+    position: relative;
+    z-index: 3;
+  }
 }</style>
 </head>
 <body>
