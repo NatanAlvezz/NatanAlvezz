@@ -11,6 +11,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#050506" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Leads Imóveis CRM IA" />
 
   <title>Leads Imóveis · CRM Copiloto IA</title>
@@ -1840,6 +1841,133 @@
       return data;
     }
 
+
+    // ============================================================
+    // FOTOS NORMALIZADAS — aceita URL string, objeto, base64 e campos do Supabase
+    // Corrige erro: Cannot create property 'cover' on string
+    // ============================================================
+    function normalizePhotoItem(photo, index = 0) {
+      if (!photo) return null;
+
+      if (typeof photo === "string") {
+        const url = photo.trim();
+        if (!url) return null;
+        return {
+          id: `foto_url_${index}_${Math.random().toString(36).slice(2)}`,
+          name: "foto-imovel.jpg",
+          url,
+          src: url,
+          data: url,
+          image_url: url,
+          publicUrl: url,
+          preview: url,
+          cover: index === 0,
+          isCover: index === 0,
+          created: Date.now()
+        };
+      }
+
+      if (typeof photo === "object") {
+        const url =
+          photo.data ||
+          photo.url ||
+          photo.src ||
+          photo.image_url ||
+          photo.publicUrl ||
+          photo.preview ||
+          photo.cover_image ||
+          photo.coverImage ||
+          photo.thumbnail ||
+          photo.foto ||
+          photo.image ||
+          "";
+
+        if (!url) return null;
+
+        return {
+          ...photo,
+          id: photo.id || `foto_obj_${index}_${Math.random().toString(36).slice(2)}`,
+          name: photo.name || "foto-imovel.jpg",
+          url,
+          src: url,
+          data: url,
+          image_url: url,
+          publicUrl: url,
+          preview: url,
+          cover: Boolean(photo.cover || photo.isCover || index === 0),
+          isCover: Boolean(photo.cover || photo.isCover || index === 0),
+          created: photo.created || Date.now()
+        };
+      }
+
+      return null;
+    }
+
+    function normalizePhotoArray(value) {
+      if (!value) return [];
+
+      if (Array.isArray(value)) {
+        return value.map((photo, index) => normalizePhotoItem(photo, index)).filter(Boolean).slice(0, 10);
+      }
+
+      if (typeof value === "string") {
+        const text = value.trim();
+        if (!text) return [];
+        try {
+          const parsed = JSON.parse(text);
+          if (Array.isArray(parsed)) {
+            return parsed.map((photo, index) => normalizePhotoItem(photo, index)).filter(Boolean).slice(0, 10);
+          }
+        } catch (_) {}
+        return [normalizePhotoItem(text, 0)].filter(Boolean);
+      }
+
+      if (typeof value === "object") {
+        return [normalizePhotoItem(value, 0)].filter(Boolean);
+      }
+
+      return [];
+    }
+
+    function getPhotoUrl(photo) {
+      if (!photo) return "";
+      if (typeof photo === "string") return photo;
+      return photo.data || photo.url || photo.src || photo.image_url || photo.publicUrl || photo.preview || photo.cover_image || photo.coverImage || photo.thumbnail || photo.foto || photo.image || "";
+    }
+
+    function getPropertyPhotos(property) {
+      const list = normalizePhotoArray(
+        property?.photos ||
+        property?.fotos ||
+        property?.images ||
+        property?.imageUrls ||
+        property?.gallery ||
+        []
+      );
+
+      if (list.length) return list;
+
+      return normalizePhotoArray(
+        property?.image_url ||
+        property?.cover_image ||
+        property?.coverImage ||
+        property?.image ||
+        property?.photo ||
+        property?.foto ||
+        property?.thumbnail ||
+        ""
+      );
+    }
+
+    function getPropertyPhotoUrls(property) {
+      return getPropertyPhotos(property).map(getPhotoUrl).filter(Boolean).slice(0, 10);
+    }
+
+    function getPropertyMainImage(property) {
+      const urls = getPropertyPhotoUrls(property);
+      return urls[0] || property?.image_url || property?.cover_image || property?.coverImage || property?.image || property?.photo || property?.foto || property?.thumbnail || "";
+    }
+
     function normalizeDB(data) {
       const base = seedData();
 
@@ -1850,9 +1978,48 @@
       data.tarefas = Array.isArray(data.tarefas) ? data.tarefas : [];
       data.chat = Array.isArray(data.chat) ? data.chat : [];
 
-      data.imoveis.forEach(p => {
-        if (!Array.isArray(p.photos)) p.photos = [];
-        if (p.photos.length && !p.photos.some(f => f.cover)) p.photos[0].cover = true;
+      data.imoveis = data.imoveis.map((p) => {
+        p = p && typeof p === "object" ? p : {};
+
+        const photos = getPropertyPhotos(p);
+        const mainImage = getPropertyMainImage({ ...p, photos });
+
+        if (photos.length && !photos.some((f) => f.cover)) {
+          photos[0].cover = true;
+          photos[0].isCover = true;
+        }
+
+        return {
+          ...p,
+          code: p.code || p.codigo || p.cod || "",
+          codigo: p.codigo || p.code || p.cod || "",
+          titulo: p.titulo || p.title || "Imóvel captado",
+          title: p.title || p.titulo || "Imóvel captado",
+          bairro: p.bairro || p.neighborhood || "",
+          neighborhood: p.neighborhood || p.bairro || "",
+          finalidade: p.finalidade || p.purpose || p.capture_type || "Venda",
+          purpose: p.purpose || p.finalidade || p.capture_type || "Venda",
+          tipo: p.tipo || p.type || "Imóvel",
+          type: p.type || p.tipo || "Imóvel",
+          valor: Number(p.valor || p.price || 0),
+          price: Number(p.price || p.valor || 0),
+          dormitorios: Number(p.dormitorios || p.bedrooms || 0),
+          bedrooms: Number(p.bedrooms || p.dormitorios || 0),
+          vagas: Number(p.vagas || p.parking || 0),
+          parking: Number(p.parking || p.vagas || 0),
+          etapa: p.etapa || p.status || "Captação",
+          status: p.status || p.etapa || "Captação",
+          publicarSite: Boolean(p.publicarSite || p.is_public || p.status === "Publicado" || p.etapa === "Publicado"),
+          is_public: Boolean(p.is_public || p.publicarSite || p.status === "Publicado" || p.etapa === "Publicado"),
+          photos,
+          fotos: photos,
+          image_url: p.image_url || mainImage,
+          cover_image: p.cover_image || mainImage,
+          coverImage: p.coverImage || mainImage,
+          image: p.image || mainImage,
+          foto: p.foto || mainImage,
+          thumbnail: p.thumbnail || mainImage
+        };
       });
 
       return data;
@@ -1872,16 +2039,37 @@
     function getCloudSafeDB() {
       const copy = JSON.parse(JSON.stringify(db));
 
-      copy.imoveis = (copy.imoveis || []).map(p => ({
-        ...p,
-        photos: (p.photos || []).map(f => ({
-          id: f.id,
-          name: f.name,
-          cover: !!f.cover,
-          created: f.created || Date.now(),
-          localOnly: true
-        }))
-      }));
+      copy.imoveis = (copy.imoveis || []).map((p) => {
+        const photos = getPropertyPhotos(p).map((f, idx) => {
+          const url = getPhotoUrl(f);
+          return {
+            id: f.id || `foto_${idx}`,
+            name: f.name || "foto-imovel.jpg",
+            url,
+            data: url,
+            image_url: url,
+            publicUrl: url,
+            path: f.path || "",
+            cover: Boolean(f.cover || idx === 0),
+            isCover: Boolean(f.isCover || f.cover || idx === 0),
+            created: f.created || Date.now()
+          };
+        }).filter((f) => getPhotoUrl(f));
+
+        const mainImage = getPropertyMainImage({ ...p, photos });
+
+        return {
+          ...p,
+          photos,
+          fotos: photos,
+          image_url: p.image_url || mainImage,
+          cover_image: p.cover_image || mainImage,
+          coverImage: p.coverImage || mainImage,
+          image: p.image || mainImage,
+          foto: p.foto || mainImage,
+          thumbnail: p.thumbnail || mainImage
+        };
+      });
 
       copy.chat = (copy.chat || []).slice(-12);
 
@@ -2013,15 +2201,24 @@
 
           const localPhotosMap = {};
           (db.imoveis || []).forEach(p => {
-            localPhotosMap[p.id] = Array.isArray(p.photos) ? p.photos.filter(f => f.data) : [];
+            localPhotosMap[p.id] = getPropertyPhotos(p).filter(f => getPhotoUrl(f));
           });
 
           db = cloudData;
 
           db.imoveis.forEach(p => {
+            const cloudPhotos = getPropertyPhotos(p);
             const localPhotos = localPhotosMap[p.id] || [];
-            if (localPhotos.length) p.photos = localPhotos;
-            else p.photos = Array.isArray(p.photos) ? p.photos.filter(f => f.data) : [];
+            const chosenPhotos = cloudPhotos.length ? cloudPhotos : localPhotos;
+            p.photos = chosenPhotos;
+            p.fotos = chosenPhotos;
+            const mainImage = getPropertyMainImage(p);
+            p.image_url = p.image_url || mainImage;
+            p.cover_image = p.cover_image || mainImage;
+            p.coverImage = p.coverImage || mainImage;
+            p.image = p.image || mainImage;
+            p.foto = p.foto || mainImage;
+            p.thumbnail = p.thumbnail || mainImage;
           });
 
           safeLocalSave(db);
@@ -2070,13 +2267,23 @@
 
           const oldPhotos = {};
           (db.imoveis || []).forEach(p => {
-            oldPhotos[p.id] = Array.isArray(p.photos) ? p.photos.filter(f => f.data) : [];
+            oldPhotos[p.id] = getPropertyPhotos(p).filter(f => getPhotoUrl(f));
           });
 
           db = normalizeDB(next);
 
           db.imoveis.forEach(p => {
-            p.photos = oldPhotos[p.id] || [];
+            const cloudPhotos = getPropertyPhotos(p);
+            const keepPhotos = cloudPhotos.length ? cloudPhotos : (oldPhotos[p.id] || []);
+            p.photos = keepPhotos;
+            p.fotos = keepPhotos;
+            const mainImage = getPropertyMainImage(p);
+            p.image_url = p.image_url || mainImage;
+            p.cover_image = p.cover_image || mainImage;
+            p.coverImage = p.coverImage || mainImage;
+            p.image = p.image || mainImage;
+            p.foto = p.foto || mainImage;
+            p.thumbnail = p.thumbnail || mainImage;
           });
 
           safeLocalSave(db);
@@ -2148,15 +2355,16 @@
     }
 
     function getCoverPhoto(p) {
-      const photos = Array.isArray(p?.photos) ? p.photos.filter(f => f.data) : [];
+      const photos = getPropertyPhotos(p);
       return photos.find(f => f.cover) || photos[0] || null;
     }
 
     function photoStyle(p) {
       const cover = getCoverPhoto(p);
+      const url = getPhotoUrl(cover) || getPropertyMainImage(p);
 
-      if (cover?.data) {
-        return `background-image:url("${cover.data}")`;
+      if (url) {
+        return `background-image:url("${url}")`;
       }
 
       return "";
@@ -2208,7 +2416,7 @@
     async function readSelectedPhotos(existingPhotos = []) {
       const input = document.getElementById("p_fotos");
       const files = Array.from(input?.files || []);
-      const photos = Array.isArray(existingPhotos) ? existingPhotos.filter(f => f.data) : [];
+      const photos = normalizePhotoArray(existingPhotos);
 
       if (!files.length) return photos;
 
@@ -2244,7 +2452,7 @@
     }
 
     function renderPhotoGrid(p) {
-      const photos = Array.isArray(p?.photos) ? p.photos.filter(f => f.data) : [];
+      const photos = getPropertyPhotos(p);
 
       if (!photos.length) {
         return `<div class="empty" style="margin-top:12px">Nenhuma foto adicionada ainda.</div>`;
@@ -2255,7 +2463,7 @@
           ${photos.map(f => `
             <div class="photo-item">
               ${f.cover ? `<div class="cover-badge">CAPA</div>` : ""}
-              <div class="photo-img" style="background-image:url('${f.data}')"></div>
+              <div class="photo-img" style="background-image:url('${getPhotoUrl(f)}')"></div>
               <div class="photo-actions">
                 <button class="btn btn-sm btn-ghost" type="button" onclick="setCoverPhoto('${p.id}', '${f.id}')">Capa</button>
                 <button class="btn btn-sm btn-danger" type="button" onclick="deletePhoto('${p.id}', '${f.id}')">Excluir</button>
@@ -8559,7 +8767,7 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
 
   var ADMIN_EMAIL = "leadsimoveisoficial@gmail.com";
   var TEAM_TABLE = "crm_properties";
-  var PUBLIC_TABLE = "public_properties";
+  var PUBLIC_TABLE = "properties";
   var BOOTED = false;
   var LOAD_TIMER = null;
 
@@ -8589,8 +8797,29 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
   function userName(){ var p=profile(); return (p&&p.full_name) || (db&&db.settings&&db.settings.user) || (email()?String(email()).split("@")[0]:"Corretor"); }
   function setStatus(msg){ var el=document.getElementById("crmFinalSyncStatus"); if(el) el.innerHTML=msg; }
 
-  function photoSrcFinal(photo){ return photo && (photo.data || photo.url || photo.publicUrl || photo.cover_image || ""); }
-  function photosFinal(p){ return A(p && p.photos).filter(function(f){ return !!photoSrcFinal(f); }).slice(0,10); }
+  function photoSrcFinal(photo){
+    if(!photo) return "";
+    if(typeof photo === "string") return photo;
+    return photo.data || photo.url || photo.src || photo.publicUrl || photo.image_url || photo.cover_image || photo.coverImage || photo.preview || photo.thumbnail || photo.foto || photo.image || "";
+  }
+  function photosFinal(p){
+    var raw = [];
+    if(p){ raw = A(p.photos).length ? A(p.photos) : (A(p.fotos).length ? A(p.fotos) : (A(p.images).length ? A(p.images) : [])); }
+    var list = raw.map(function(f,idx){
+      if(typeof f === "string") return { id:"foto_url_"+idx, name:"foto-imovel.jpg", url:f, data:f, publicUrl:f, cover:idx===0, created:Date.now() };
+      if(f && typeof f === "object") {
+        var src = photoSrcFinal(f);
+        return src ? Object.assign({}, f, { url:src, data:src, publicUrl:src, image_url:src, cover:!!f.cover || idx===0 }) : null;
+      }
+      return null;
+    }).filter(function(f){ return !!photoSrcFinal(f); }).slice(0,10);
+    if(!list.length && p){
+      var single = p.image_url || p.cover_image || p.coverImage || p.image || p.foto || p.thumbnail || "";
+      if(single) list = [{ id:"foto_principal", name:"foto-imovel.jpg", url:single, data:single, publicUrl:single, image_url:single, cover:true, created:Date.now() }];
+    }
+    if(list.length && !list.some(function(f){ return !!f.cover; })) list[0].cover = true;
+    return list;
+  }
   function coverFinal(p){ var ph=photosFinal(p); return ph.find(function(f){return !!f.cover;}) || ph[0] || null; }
   function bgFinal(photo){ var src=photoSrcFinal(photo); return src ? "linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.72)),url('" + String(src).replace(/'/g,"%27") + "')" : ""; }
   function coverImage(p){ var c=coverFinal(p); return photoSrcFinal(c) || ""; }
@@ -8609,7 +8838,9 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     var captador = p.captadorNome || p.captured_by_name || userName();
     var editor = userName();
     return {
-      id: p.id || ("imv_" + t + "_" + Math.floor(Math.random()*9999)),
+      id: p.id || p.source_crm_id || ("imv_" + t + "_" + Math.floor(Math.random()*9999)),
+      code: p.code || p.codigo || p.cod || "",
+      codigo: p.codigo || p.code || p.cod || "",
       titulo: p.titulo || p.title || "Imóvel captado",
       finalidade: p.finalidade || p.purpose || p.negocio || "Venda",
       tipo: p.tipo || p.type || "Casa",
@@ -8770,26 +9001,46 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     if(!p || !p.publicarSite) return;
     var c = client();
     if(!c) return;
+
     try{
-      await c.from(PUBLIC_TABLE).upsert({
-        id:String(p.id),
-        owner_id: uuid() || null,
-        title:p.titulo,
-        type:p.tipo,
-        neighborhood:p.bairro,
-        city:p.cidade || "Florianópolis",
-        price:Number(p.valor || 0),
-        area:Number(p.area || 0),
-        bedrooms:Number(p.dormitorios || 0),
-        suites:Number(p.suites || 0),
-        parking:Number(p.vagas || 0),
-        description:p.proximaAcao || "Imóvel selecionado pela Leads Imóveis.",
-        cover_image:coverImage(p),
-        status:p.publicarSite ? "Publicado" : "Rascunho",
-        is_public:!!p.publicarSite,
-        data:{ finalidade:p.finalidade, tipo:p.tipo, bairro:p.bairro, cidade:p.cidade },
-        updated_at:new Date().toISOString()
-      }, { onConflict:"id" });
+      p = normalize(p);
+      var photos = photosFinal(p);
+      var photoUrls = photos.map(photoSrcFinal).filter(Boolean).slice(0,10);
+      var mainImage = coverImage(p) || photoUrls[0] || p.image_url || p.cover_image || "";
+      var code = p.code || p.codigo || (String(p.id || "").startsWith("LI-") ? String(p.id) : "LI-" + String(p.id || Date.now()).replace(/[^A-Za-z0-9]/g, "").slice(-8).toUpperCase());
+
+      var payload = {
+        code: code,
+        title: p.titulo,
+        purpose: p.finalidade || "Venda",
+        neighborhood: p.bairro,
+        type: p.tipo,
+        price: Number(p.valor || 0),
+        area: Number(p.area || 0),
+        bedrooms: Number(p.dormitorios || 0),
+        suites: Number(p.suites || 0),
+        parking: Number(p.vagas || 0),
+        description: p.proximaAcao || "Imóvel selecionado pela Leads Imóveis.",
+        photos: photoUrls,
+        image_url: mainImage || null,
+        status: "Publicado",
+        is_public: true,
+        source_crm_id: String(p.id || ""),
+        updated_at: new Date().toISOString()
+      };
+
+      var busca = await c.from(PUBLIC_TABLE).select("id,photos,image_url").eq("code", code).maybeSingle();
+      if(busca.error) throw busca.error;
+
+      if(busca.data && busca.data.id){
+        if((!payload.photos || !payload.photos.length) && Array.isArray(busca.data.photos) && busca.data.photos.length) payload.photos = busca.data.photos;
+        if(!payload.image_url && busca.data.image_url) payload.image_url = busca.data.image_url;
+        var upd = await c.from(PUBLIC_TABLE).update(payload).eq("id", busca.data.id);
+        if(upd.error) throw upd.error;
+      }else{
+        var ins = await c.from(PUBLIC_TABLE).insert(payload);
+        if(ins.error) throw ins.error;
+      }
     }catch(e){ console.warn("Publicação no site ignorada:", e); }
   }
 
@@ -9179,8 +9430,29 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     try{ if(typeof db !== "undefined" && db) return db; }catch(_e){}
     return window.db || { imoveis:[], clientes:[], tarefas:[], settings:{} };
   }
-  function srcFoto(f){ return f && (f.data || f.url || f.publicUrl || f.cover_image || ""); }
-  function fotos(p){ return A(p && p.photos).filter(function(f){ return !!srcFoto(f); }).slice(0, MAX_FOTOS); }
+  function srcFoto(f){
+    if(!f) return "";
+    if(typeof f === "string") return f;
+    return f.data || f.url || f.src || f.publicUrl || f.image_url || f.cover_image || f.coverImage || f.preview || f.thumbnail || f.foto || f.image || "";
+  }
+  function fotos(p){
+    var raw = [];
+    if(p){ raw = A(p.photos).length ? A(p.photos) : (A(p.fotos).length ? A(p.fotos) : (A(p.images).length ? A(p.images) : [])); }
+    var lista = raw.map(function(f,idx){
+      if(typeof f === "string") return { id:"foto_url_"+idx, name:"foto-imovel.jpg", url:f, data:f, publicUrl:f, image_url:f, cover:idx===0, created:Date.now() };
+      if(f && typeof f === "object"){
+        var src = srcFoto(f);
+        return src ? Object.assign({}, f, { url:src, data:src, publicUrl:src, image_url:src, cover:!!f.cover || idx===0 }) : null;
+      }
+      return null;
+    }).filter(function(f){ return !!srcFoto(f); }).slice(0, MAX_FOTOS);
+    if(!lista.length && p){
+      var single = p.image_url || p.cover_image || p.coverImage || p.image || p.foto || p.thumbnail || "";
+      if(single) lista = [{ id:"foto_principal", name:"foto-imovel.jpg", url:single, data:single, publicUrl:single, image_url:single, cover:true, created:Date.now() }];
+    }
+    if(lista.length && !lista.some(function(f){ return !!f.cover; })) lista[0].cover = true;
+    return lista;
+  }
   function dinheiro(v){
     try{ if(typeof money === "function") return money(v); }catch(_e){}
     var n = Number(v) || 0;
@@ -9530,6 +9802,7 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
 (function(){
   window.limparCachePesadoFotosV105 = function(){
     try{
+      localStorage.removeItem("leads_imoveis_premium_ia_v105_leve_estavel");
       localStorage.removeItem("leads_imoveis_premium_ia_v7_estavel");
       localStorage.removeItem("leads_imoveis_premium_ia_v5");
       localStorage.removeItem("leads_imoveis_premium_ia_v4");
