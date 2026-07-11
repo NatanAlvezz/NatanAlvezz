@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1683,6 +1684,328 @@
         transform: none !important;
       }
     }
+  
+    /* ============================================================
+       LIA · CHAT PREMIUM EMBUTIDO NO SITE
+       Sem arquivo externo e sem dependência do CRM.
+    ============================================================ */
+    .floating-ai {
+      width: 68px;
+      height: 68px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(189, 239, 255, 0.32), transparent 34%),
+        linear-gradient(145deg, rgba(7, 20, 34, 0.98), rgba(40, 83, 109, 0.98));
+      border: 1px solid rgba(189, 239, 255, 0.42);
+      box-shadow:
+        0 22px 52px rgba(0, 0, 0, 0.38),
+        0 0 0 7px rgba(116, 213, 255, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+      transition: transform 0.26s ease, box-shadow 0.26s ease, filter 0.26s ease;
+    }
+
+    .floating-ai:hover,
+    .floating-ai:focus-visible {
+      transform: translateY(-4px) scale(1.045);
+      filter: brightness(1.08);
+      box-shadow:
+        0 28px 64px rgba(0, 0, 0, 0.42),
+        0 0 0 9px rgba(116, 213, 255, 0.12),
+        0 0 34px rgba(116, 213, 255, 0.24);
+    }
+
+    .floating-ai-symbol {
+      color: #eafcff;
+      font-size: 20px;
+      font-weight: 950;
+      line-height: 1;
+    }
+
+    .floating-ai-label {
+      color: rgba(234, 252, 255, 0.82);
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+
+    .ai-panel {
+      width: min(430px, calc(100vw - 28px));
+      max-height: min(700px, calc(100dvh - 116px));
+      background:
+        linear-gradient(155deg, rgba(250, 254, 255, 0.96), rgba(224, 246, 255, 0.91));
+      border: 1px solid rgba(189, 239, 255, 0.58);
+      box-shadow:
+        0 36px 96px rgba(1, 10, 18, 0.42),
+        0 0 0 1px rgba(255, 255, 255, 0.38) inset;
+      -webkit-backdrop-filter: blur(28px) saturate(155%);
+      backdrop-filter: blur(28px) saturate(155%);
+    }
+
+    .ai-panel-head {
+      min-height: 76px;
+      padding: 13px 14px;
+      background:
+        radial-gradient(circle at 16% 15%, rgba(116, 213, 255, 0.24), transparent 35%),
+        linear-gradient(135deg, rgba(7, 20, 34, 0.99), rgba(25, 65, 88, 0.97));
+      border-bottom: 1px solid rgba(189, 239, 255, 0.18);
+    }
+
+    .lia-head-identity {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .lia-avatar {
+      width: 46px;
+      height: 46px;
+      flex: 0 0 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      color: #f2fcff;
+      background:
+        linear-gradient(145deg, rgba(116, 213, 255, 0.26), rgba(255, 255, 255, 0.06));
+      border: 1px solid rgba(189, 239, 255, 0.34);
+      box-shadow:
+        0 12px 28px rgba(0, 0, 0, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.16);
+      font-size: 20px;
+      font-weight: 950;
+    }
+
+    .lia-head-copy {
+      min-width: 0;
+      display: grid;
+      gap: 5px;
+    }
+
+    .lia-head-copy strong {
+      overflow: hidden;
+      color: #f4fcff;
+      font-size: 14px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .lia-status-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(230, 248, 255, 0.72);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .lia-status-dot {
+      width: 7px;
+      height: 7px;
+      flex: 0 0 7px;
+      border-radius: 50%;
+      background: #68e6a6;
+      box-shadow: 0 0 0 4px rgba(104, 230, 166, 0.12), 0 0 12px rgba(104, 230, 166, 0.72);
+    }
+
+    .ai-panel-head #closeAi {
+      flex: 0 0 38px;
+      width: 38px;
+      height: 38px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.08);
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .ai-panel-head #closeAi:hover {
+      transform: rotate(5deg) scale(1.05);
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .ai-panel-body {
+      position: relative;
+      gap: 10px;
+      padding: 13px;
+      background:
+        radial-gradient(circle at 100% 0%, rgba(116, 213, 255, 0.11), transparent 38%),
+        linear-gradient(180deg, rgba(248, 253, 255, 0.78), rgba(234, 248, 253, 0.92));
+    }
+
+    .lia-thread {
+      min-height: 260px;
+      max-height: min(430px, 52dvh);
+      gap: 10px;
+      padding: 7px 4px 13px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(55, 106, 132, 0.30) transparent;
+    }
+
+    .lia-thread::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .lia-thread::-webkit-scrollbar-thumb {
+      background: rgba(55, 106, 132, 0.28);
+      border-radius: 999px;
+    }
+
+    .lia-message {
+      max-width: 88%;
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.52;
+      box-shadow: 0 12px 28px rgba(4, 12, 22, 0.09);
+    }
+
+    .lia-message.ai {
+      color: #22485f;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.97), rgba(240, 250, 254, 0.94));
+      border: 1px solid rgba(116, 188, 219, 0.30);
+    }
+
+    .lia-message.me {
+      background:
+        radial-gradient(circle at 80% 10%, rgba(116, 213, 255, 0.24), transparent 40%),
+        linear-gradient(145deg, #071422, #28536d);
+    }
+
+    .lia-message.typing {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      min-width: 66px;
+      min-height: 42px;
+      letter-spacing: 0;
+    }
+
+    .lia-typing-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #5d7d8e;
+      animation: liaTypingBounce 1.05s infinite ease-in-out;
+    }
+
+    .lia-typing-dot:nth-child(2) { animation-delay: 0.14s; }
+    .lia-typing-dot:nth-child(3) { animation-delay: 0.28s; }
+
+    @keyframes liaTypingBounce {
+      0%, 60%, 100% { opacity: 0.35; transform: translateY(0); }
+      30% { opacity: 1; transform: translateY(-4px); }
+    }
+
+    .ai-panel .assistant-search {
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(116, 188, 219, 0.32);
+      box-shadow:
+        0 -14px 30px rgba(234, 248, 253, 0.82),
+        0 12px 28px rgba(4, 12, 22, 0.09);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+    }
+
+    .ai-panel .assistant-search input {
+      min-height: 42px;
+      font-size: 13.5px;
+    }
+
+    .ai-panel .assistant-search button {
+      background: linear-gradient(145deg, #dff7ff, #9de5ff);
+      box-shadow: 0 8px 20px rgba(76, 172, 210, 0.20);
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+
+    .ai-panel .assistant-search button:hover {
+      transform: translateX(2px) scale(1.04);
+      filter: brightness(1.05);
+    }
+
+    .lia-recommendations {
+      width: 100%;
+      display: grid;
+      gap: 7px;
+      margin: 2px 0 4px;
+    }
+
+    .lia-recommendation {
+      width: min(94%, 330px);
+      display: grid;
+      gap: 3px;
+      align-self: flex-start;
+      padding: 10px 12px;
+      text-align: left;
+      color: #234a60;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(116, 188, 219, 0.28);
+      border-radius: 15px;
+      box-shadow: 0 9px 22px rgba(4, 12, 22, 0.07);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .lia-recommendation:hover {
+      transform: translateY(-2px);
+      background: #fff;
+      box-shadow: 0 14px 30px rgba(4, 12, 22, 0.11);
+    }
+
+    .lia-recommendation strong {
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .lia-recommendation span {
+      color: #628093;
+      font-size: 10.5px;
+    }
+
+    .lia-recommendation em {
+      color: #0b6a91;
+      font-size: 10px;
+      font-style: normal;
+      font-weight: 900;
+    }
+
+    .lia-notice {
+      align-self: center;
+      padding: 5px 9px;
+      color: #6c8796;
+      background: rgba(255, 255, 255, 0.52);
+      border-radius: 999px;
+      font-size: 9.5px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 700px) {
+      .floating-ai {
+        width: 62px;
+        height: 62px;
+      }
+
+      .ai-panel {
+        right: 8px;
+        bottom: calc(78px + var(--safe-bottom));
+        width: calc(100vw - 16px);
+        max-height: calc(100dvh - 92px - var(--safe-bottom));
+        border-radius: 24px;
+      }
+
+      .lia-thread {
+        min-height: 230px;
+        max-height: calc(100dvh - 270px);
+      }
+    }
+
   </style>
 </head>
 
@@ -1903,11 +2226,20 @@
     </div>
   </footer>
 
-  <button class="floating-ai" id="openAi" type="button" aria-label="Abrir Assistente Leads" aria-controls="aiPanel" aria-expanded="false">IA</button>
+  <button class="floating-ai" id="openAi" type="button" aria-label="Abrir Lia, assistente virtual" aria-controls="aiPanel" aria-expanded="false">
+    <span class="floating-ai-symbol" aria-hidden="true">L</span>
+    <span class="floating-ai-label">Lia</span>
+  </button>
 
   <aside class="ai-panel" id="aiPanel" aria-hidden="true">
     <div class="ai-panel-head">
-      <div><strong>Lia · Assistente virtual</strong><span class="lia-online">Online</span></div>
+      <div class="lia-head-identity">
+        <div class="lia-avatar" aria-hidden="true">L</div>
+        <div class="lia-head-copy">
+          <strong>Lia · Assistente virtual</strong>
+          <span class="lia-status-row"><i class="lia-status-dot" aria-hidden="true"></i> Online · atendimento inteligente</span>
+        </div>
+      </div>
       <button id="closeAi" type="button" aria-label="Fechar assistente">×</button>
     </div>
     <div class="ai-panel-body">
@@ -3027,6 +3359,463 @@
 
     window.addEventListener("DOMContentLoaded", initializeSite);
   </script>
-  <script src="site-chat-lia.js?v=20260711-3"></script>
+
+  <script>
+    (() => {
+      "use strict";
+
+      if (window.__liaSiteChatLoaded) return;
+      window.__liaSiteChatLoaded = true;
+
+      const ENDPOINT =
+        "https://zyfbgydbwsvbaogbxzrd.supabase.co/functions/v1/site-ai-assistant";
+      const SESSION_KEY = "leads_lia_session_v3";
+      const CONVERSATION_KEY = "leads_lia_conversation_v3";
+
+      let sending = false;
+      const byIdLia = (id) => document.getElementById(id);
+
+      function normalizeLiaText(value) {
+        return String(value ?? "")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .trim();
+      }
+
+      function createLiaToken() {
+        if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+
+        return [
+          Date.now().toString(36),
+          Math.random().toString(36).slice(2),
+          Math.random().toString(36).slice(2)
+        ].join("-");
+      }
+
+      function getLiaSessionToken() {
+        let token = localStorage.getItem(SESSION_KEY);
+
+        if (!token || token.length < 16) {
+          token = createLiaToken();
+          localStorage.setItem(SESSION_KEY, token);
+        }
+
+        return token;
+      }
+
+      function getLiaConversationId() {
+        return localStorage.getItem(CONVERSATION_KEY) || "";
+      }
+
+      function saveLiaSession(data) {
+        if (data?.sessionToken) {
+          localStorage.setItem(SESSION_KEY, String(data.sessionToken));
+        }
+
+        if (data?.conversationId) {
+          localStorage.setItem(
+            CONVERSATION_KEY,
+            String(data.conversationId)
+          );
+        }
+      }
+
+      function greetingByFloripaTime() {
+        try {
+          const hour = Number(
+            new Intl.DateTimeFormat("pt-BR", {
+              timeZone: "America/Sao_Paulo",
+              hour: "2-digit",
+              hour12: false
+            }).format(new Date())
+          );
+
+          if (hour >= 5 && hour < 12) return "Bom dia";
+          if (hour >= 12 && hour < 18) return "Boa tarde";
+          return "Boa noite";
+        } catch (_) {
+          const hour = new Date().getHours();
+          if (hour >= 5 && hour < 12) return "Bom dia";
+          if (hour >= 12 && hour < 18) return "Boa tarde";
+          return "Boa noite";
+        }
+      }
+
+      function setLiaDisabled(disabled) {
+        ["heroAssistantInput", "panelAssistantInput"].forEach((id) => {
+          const input = byIdLia(id);
+          if (input) input.disabled = disabled;
+        });
+
+        ["heroAssistantForm", "panelAssistantForm"].forEach((id) => {
+          const button = byIdLia(id)?.querySelector('button[type="submit"]');
+          if (!button) return;
+          button.disabled = disabled;
+          button.setAttribute("aria-busy", disabled ? "true" : "false");
+        });
+      }
+
+      function scrollLiaThread() {
+        const thread = byIdLia("liaThread");
+        if (!thread) return;
+
+        requestAnimationFrame(() => {
+          thread.scrollTop = thread.scrollHeight;
+        });
+      }
+
+      function addLiaMessage(role, text, options = {}) {
+        const thread = byIdLia("liaThread");
+        if (!thread) return null;
+
+        const bubble = document.createElement("div");
+        bubble.className = `lia-message ${role === "me" ? "me" : "ai"}`;
+
+        if (options.typing) {
+          bubble.classList.add("typing");
+          bubble.setAttribute("aria-label", "Lia está digitando");
+
+          for (let index = 0; index < 3; index += 1) {
+            const dot = document.createElement("span");
+            dot.className = "lia-typing-dot";
+            bubble.appendChild(dot);
+          }
+        } else {
+          bubble.textContent = String(text ?? "");
+        }
+
+        thread.appendChild(bubble);
+        scrollLiaThread();
+        return bubble;
+      }
+
+      function addLiaNotice(text) {
+        const thread = byIdLia("liaThread");
+        if (!thread) return;
+
+        const notice = document.createElement("span");
+        notice.className = "lia-notice";
+        notice.textContent = text;
+        thread.appendChild(notice);
+        scrollLiaThread();
+      }
+
+      function setLiaHeroAnswer(text, loading = false) {
+        const answer = byIdLia("heroAnswer");
+        if (!answer) return;
+
+        answer.textContent = String(text ?? "");
+
+        if (loading) {
+          const dots = document.createElement("span");
+          dots.setAttribute("aria-label", "Lia está digitando");
+          dots.textContent = " •••";
+          answer.appendChild(dots);
+        }
+      }
+
+      function getPublicProperties() {
+        const siteState = window.leadsSiteState;
+        return Array.isArray(siteState?.properties)
+          ? siteState.properties
+          : [];
+      }
+
+      function findPropertiesByCodes(codes) {
+        if (!Array.isArray(codes)) return [];
+
+        const normalizedCodes = codes
+          .map(normalizeLiaText)
+          .filter(Boolean);
+
+        if (!normalizedCodes.length) return [];
+
+        return getPublicProperties()
+          .filter((property) => {
+            const code = normalizeLiaText(property.code);
+            return code && normalizedCodes.some(
+              (candidate) =>
+                candidate === code ||
+                candidate.includes(code) ||
+                code.includes(candidate)
+            );
+          })
+          .slice(0, 4);
+      }
+
+      function formatLiaPrice(value, purpose) {
+        const number = Number(value);
+        if (!Number.isFinite(number) || number <= 0) return "Consulte";
+
+        const formatted = number.toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+          maximumFractionDigits: 0
+        });
+
+        if (purpose === "Aluguel Anual") return `${formatted}/mês`;
+        if (purpose === "Temporada") return `${formatted}/diária`;
+        return formatted;
+      }
+
+      function renderLiaRecommendations(properties) {
+        if (!properties.length) return;
+
+        const thread = byIdLia("liaThread");
+        if (!thread) return;
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "lia-recommendations";
+
+        properties.forEach((property) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "lia-recommendation";
+
+          const title = document.createElement("strong");
+          title.textContent = property.title || "Imóvel Leads Imóveis";
+
+          const location = document.createElement("span");
+          location.textContent = [
+            property.code,
+            property.neighborhood,
+            property.type
+          ].filter(Boolean).join(" · ");
+
+          const price = document.createElement("em");
+          price.textContent = formatLiaPrice(property.price, property.purpose);
+
+          button.append(title, location, price);
+
+          button.addEventListener("click", () => {
+            const siteState = window.leadsSiteState;
+
+            if (siteState) {
+              siteState.filtered = [property];
+            }
+
+            if (typeof window.renderProperties === "function") {
+              window.renderProperties();
+            }
+
+            document.getElementById("imoveis")?.scrollIntoView({
+              behavior: "smooth",
+              block: "start"
+            });
+          });
+
+          wrapper.appendChild(button);
+        });
+
+        thread.appendChild(wrapper);
+        scrollLiaThread();
+      }
+
+      function findLocalMatches(message) {
+        const query = normalizeLiaText(message);
+        const properties = getPublicProperties();
+        if (!query || !properties.length) return [];
+
+        const ignored = new Set([
+          "quero", "procuro", "preciso", "para", "uma", "um", "com",
+          "imovel", "imoveis", "apartamento", "casa", "favor", "ola"
+        ]);
+
+        const words = query
+          .split(/\s+/)
+          .filter((word) => word.length >= 3 && !ignored.has(word));
+
+        return properties
+          .map((property) => {
+            const searchable = normalizeLiaText([
+              property.code,
+              property.title,
+              property.purpose,
+              property.neighborhood,
+              property.type,
+              property.description
+            ].join(" "));
+
+            let score = 0;
+
+            words.forEach((word) => {
+              if (searchable.includes(word)) score += 2;
+            });
+
+            const code = normalizeLiaText(property.code);
+            if (code && query.includes(code)) score += 20;
+
+            const neighborhood = normalizeLiaText(property.neighborhood);
+            if (neighborhood && query.includes(neighborhood)) score += 8;
+
+            return { property, score };
+          })
+          .filter((item) => item.score > 0)
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 4)
+          .map((item) => item.property);
+      }
+
+      async function requestLiaAssistant(message) {
+        const sessionToken = getLiaSessionToken();
+        const conversationId = getLiaConversationId();
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 35000);
+
+        try {
+          const response = await fetch(ENDPOINT, {
+            method: "POST",
+            mode: "cors",
+            cache: "no-store",
+            credentials: "omit",
+            signal: controller.signal,
+            headers: {
+              "Content-Type": "application/json",
+              "x-site-session": sessionToken
+            },
+            body: JSON.stringify({
+              message,
+              sessionToken,
+              conversationId: conversationId || undefined,
+              source: "leadsimoveis.com.br",
+              page: location.href
+            })
+          });
+
+          const data = await response.json().catch(() => ({}));
+
+          if (!response.ok || data?.ok === false) {
+            throw new Error(
+              data?.message || `Falha na Lia (${response.status})`
+            );
+          }
+
+          saveLiaSession(data);
+          return data;
+        } finally {
+          clearTimeout(timeout);
+        }
+      }
+
+      function localLiaFallback(message, target) {
+        const matches = findLocalMatches(message);
+        const greeting = matches.length
+          ? `Encontrei ${matches.length} ${matches.length === 1 ? "opção relacionada" : "opções relacionadas"} à sua busca. Toque em uma delas para ver os detalhes.`
+          : "Não consegui falar com meu serviço inteligente neste instante, mas continuo aqui. Conte o bairro, o tipo de imóvel e se procura compra, aluguel anual ou temporada.";
+
+        setLiaHeroAnswer(greeting);
+        addLiaMessage("ai", greeting);
+
+        if (matches.length) {
+          renderLiaRecommendations(matches);
+        }
+
+        addLiaNotice("Modo local ativado — a conversa continua nesta janela.");
+      }
+
+      async function sendLiaMessage(message, target = "hero") {
+        const cleanMessage = String(message ?? "").trim().slice(0, 3000);
+        if (!cleanMessage || sending) return;
+
+        sending = true;
+        setLiaDisabled(true);
+        addLiaMessage("me", cleanMessage);
+
+        const typingBubble = addLiaMessage("ai", "", { typing: true });
+
+        if (target === "hero") {
+          setLiaHeroAnswer("Estou analisando sua mensagem com atenção…", true);
+        }
+
+        try {
+          const data = await requestLiaAssistant(cleanMessage);
+          typingBubble?.remove();
+
+          const reply = String(
+            data?.reply ||
+            data?.message ||
+            "Posso continuar ajudando você a encontrar o imóvel ideal."
+          ).trim();
+
+          setLiaHeroAnswer(reply);
+          addLiaMessage("ai", reply);
+
+          const recommendations = findPropertiesByCodes(
+            data?.recommendedCodes
+          );
+
+          if (recommendations.length) {
+            renderLiaRecommendations(recommendations);
+          }
+        } catch (error) {
+          console.warn("Lia: Edge Function indisponível; modo local.", error);
+          typingBubble?.remove();
+          localLiaFallback(cleanMessage, target);
+        } finally {
+          sending = false;
+          setLiaDisabled(false);
+
+          const heroInput = byIdLia("heroAssistantInput");
+          const panelInput = byIdLia("panelAssistantInput");
+
+          if (heroInput) heroInput.value = "";
+          if (panelInput) panelInput.value = "";
+
+          const focusTarget =
+            target === "panel" ? panelInput : heroInput;
+          focusTarget?.focus();
+        }
+      }
+
+      function initializeEmbeddedLia() {
+        const greeting = greetingByFloripaTime();
+        const initialText =
+          `${greeting}! Eu sou a Lia, assistente virtual da Leads Imóveis. ` +
+          "Converse comigo sobre compra, venda, aluguel anual ou temporada em Florianópolis.";
+
+        const panelAnswer = byIdLia("panelAnswer");
+        if (panelAnswer) panelAnswer.textContent = initialText;
+
+        setLiaHeroAnswer(
+          `${greeting}! Escreva o que procura como se estivesse conversando com uma pessoa.`
+        );
+
+        const heroInput = byIdLia("heroAssistantInput");
+        if (heroInput) {
+          heroInput.placeholder =
+            "Ex.: apartamento de 2 quartos nos Ingleses";
+          heroInput.maxLength = 3000;
+        }
+
+        const panelInput = byIdLia("panelAssistantInput");
+        if (panelInput) {
+          panelInput.placeholder = "Converse com a Lia…";
+          panelInput.maxLength = 3000;
+        }
+
+        getLiaSessionToken();
+
+        console.log(
+          "Leads Imóveis: Lia embutida no index.html, sem arquivo externo."
+        );
+      }
+
+      window.LiaSiteChat = Object.freeze({
+        send: sendLiaMessage
+      });
+
+      if (document.readyState === "loading") {
+        document.addEventListener(
+          "DOMContentLoaded",
+          initializeEmbeddedLia,
+          { once: true }
+        );
+      } else {
+        initializeEmbeddedLia();
+      }
+    })();
+  </script>
+
 </body>
 </html>
