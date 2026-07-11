@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1062,7 +1063,7 @@
     async function restGet(path) {
       const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
         method:"GET", mode:"cors", cache:"no-store", credentials:"omit",
-        headers:{ apikey:SUPABASE_PUBLISHABLE_KEY, Accept:"application/json", Prefer:"count=exact" }
+        headers:{ apikey:SUPABASE_PUBLISHABLE_KEY, Authorization:`Bearer ${SUPABASE_PUBLISHABLE_KEY}`, Accept:"application/json", Prefer:"count=exact", "Cache-Control":"no-cache", Pragma:"no-cache" }
       });
       const text = await response.text();
       let data = [];
@@ -1076,16 +1077,16 @@
 
     async function fetchPublishedProperties() {
       const attempts = [
-        { source:"public_properties", path:"public_properties?select=*&order=updated_at.desc" },
-        { source:"properties", path:"properties?select=*&is_public=eq.true&status=eq.Publicado&order=updated_at.desc" },
-        { source:"properties-sem-ordem", path:"properties?select=*&is_public=eq.true&status=eq.Publicado" }
+        { source:"public_properties", path:"public_properties?select=*&order=updated_at.desc&limit=1000" },
+        { source:"properties", path:"properties?select=*&is_public=eq.true&status=eq.Publicado&order=updated_at.desc&limit=1000" },
+        { source:"properties-sem-ordem", path:"properties?select=*&is_public=eq.true&status=eq.Publicado&limit=1000" }
       ];
       const errors = [];
       let successfulEmpty = false;
       for (const attempt of attempts) {
         try {
           const data = await restGet(attempt.path);
-          console.log(`[Leads] ${attempt.source}:`, data.length, "registro(s)");
+          console.log(`[Leads] ${attempt.source}: ${data.length} registro(s)`, data.map(r => r.code || r.codigo || r.id || "?"));
           if (data.length) { state.source = attempt.source; return data; }
           successfulEmpty = true;
         } catch (error) {
@@ -1100,10 +1101,11 @@
     function setStatus(message,error=false) { const el=$("connectionStatus"); el.textContent=message; el.style.color=error?"#9a3040":"#527487"; }
 
     function buildSignature(rawList) {
-      return JSON.stringify(rawList.map(r => [
-        r?.id ?? r?.uuid ?? r?.code ?? "",
-        r?.updated_at ?? r?.created_at ?? ""
-      ]));
+      return JSON.stringify(rawList.map(r => {
+        const photos = r?.photos ?? r?.fotos ?? r?.images ?? r?.imagens ?? r?.gallery ?? "";
+        const photoMark = Array.isArray(photos) ? photos.length : String(photos).length;
+        return [ r?.id ?? r?.uuid ?? r?.code ?? "", r?.updated_at ?? r?.created_at ?? "", photoMark ];
+      }));
     }
 
     async function loadProperties({silent=false}={}) {
@@ -1190,7 +1192,7 @@
       if(state.refreshTimer) clearInterval(state.refreshTimer);
       state.refreshTimer=setInterval(()=>{
         if(!document.hidden&&navigator.onLine) loadProperties({silent:true});
-      },30000);
+      },15000);
       document.addEventListener("visibilitychange",()=>{
         if(!document.hidden&&navigator.onLine) loadProperties({silent:true});
       });
