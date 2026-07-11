@@ -1,832 +1,288 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
+<!-- ============================================================
+     LEADS IMÓVEIS · CORREÇÃO FINAL "PUBLICAR TUDO NO SITE"
+     ------------------------------------------------------------
+     COMO USAR:
+     1. Abra o arquivo do CRM (o mesmo do print, ex.: index.html do CRM).
+     2. Apague estas 3 linhas que estão perto do final (elas dão erro 404):
+           <script src="crm-leads-realtime.js?v=20260711-1"></script>
+           <script src="crm-realtime-ui-fix.js?v=20260711-1"></script>
+           <script src="crm-central-leads.js?v=20260711-2"></script>
+        (pode apagar as 3; se preferir manter a primeira, apague pelo menos
+         as duas que dão 404: crm-realtime-ui-fix.js e crm-central-leads.js)
+     3. COLE ESTE BLOCO INTEIRO logo antes da tag </body>,
+        DEPOIS de todos os outros <script>. Ele precisa ser o ÚLTIMO.
+     4. Salve e suba o arquivo. Pronto.
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-config.js"></script>
+     O QUE ESTE BLOCO FAZ:
+     - Todo imóvel captado já entra como PUBLICADO no site (automático).
+     - O campo "Publicar no site?" passa a vir como "Sim" por padrão.
+     - DESLIGA a faxina que apagava imóveis do site ao salvar/editar.
+     - O imóvel só sai do site quando você EXCLUIR de propósito no CRM.
+     - Não mexe em leads, fotos, IA, temas nem em mais nada.
+============================================================ -->
+<script id="leadsPublicarTudoFinal2026">
+(function () {
+  "use strict";
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#050506" />
+  var TABELA_SITE = "properties";   // tabela real que o site lê (via public_properties)
+  var CHAVE = "source_crm_id";      // liga o imóvel do CRM ao do site
 
-  <title>Entrar · Leads Imóveis CRM</title>
+  function cli() { return window.supabaseClient || window.leadsSupabaseClient || null; }
+  function A(v) { return Array.isArray(v) ? v : []; }
+  function aviso(m) { try { if (typeof toast === "function") toast(m); } catch (_) {} console.log("[PublicarTudo]", m); }
 
-  <style>
-    :root {
-      --gold: #d8b56d;
-      --gold2: #fff0be;
-      --txt: #f8f5ef;
-      --mut: #b8b4aa;
-      --red: #ef6a6a;
-      --green: #65d679;
-      --bg-url: url("https://raw.githubusercontent.com/NatanAlvezz/NatanAlvezz/main/midia/bg-floripa.jpg.jpg?v=200");
-    }
+  // ---------------------------------------------------------
+  // 1) NEUTRALIZA A FAXINA DESTRUTIVA DO PATCH ANTERIOR
+  //    O patch antigo criava window.leadsSincronizarSite, que apagava
+  //    imóveis do site. Aqui trocamos por uma versão que NÃO apaga nada
+  //    (só reenvia os publicados). Assim o botão antigo fica seguro.
+  // ---------------------------------------------------------
+  function finalidadeSite(v) {
+    var t = String(v || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    if (t.indexOf("tempor") >= 0 || t.indexOf("verao") >= 0) return "Temporada";
+    if (t.indexOf("anual") >= 0 || t.indexOf("aluguel") >= 0 || t.indexOf("locac") >= 0) return "Aluguel Anual";
+    return "Venda";
+  }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
+  function fotoSrc(f) {
+    if (!f) return "";
+    if (typeof f === "string") return f;
+    return f.url || f.publicUrl || f.data || f.src || f.image_url || "";
+  }
 
-    body {
-      min-height: 100vh;
-      min-height: 100dvh;
-      color: var(--txt);
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-      background:
-        linear-gradient(90deg, rgba(0,0,0,.30) 0%, rgba(0,0,0,.18) 42%, rgba(0,0,0,.78) 100%),
-        var(--bg-url) center center / cover no-repeat fixed;
-      overflow-x: hidden;
-    }
+  function fotosParaSite(p) {
+    var lista = A(p.photos).map(fotoSrc).filter(Boolean);
+    var urls = lista.filter(function (u) { return /^https?:\/\//i.test(u); });
+    return (urls.length ? urls : lista).slice(0, 10);
+  }
 
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(circle at 18% 18%, rgba(216,181,109,.18), transparent 28%),
-        radial-gradient(circle at 82% 22%, rgba(255,255,255,.08), transparent 22%);
-      pointer-events: none;
-      z-index: 0;
-    }
+  function codigo(p) {
+    if (p.code) return String(p.code);
+    if (p.codigo) return String(p.codigo);
+    var id = String(p.id || Date.now());
+    if (id.indexOf("LI-") === 0) return id;
+    return "LI-" + id.replace(/[^A-Za-z0-9]/g, "").slice(-8).toUpperCase();
+  }
 
-    .page {
-      position: relative;
-      z-index: 1;
-      min-height: 100vh;
-      min-height: 100dvh;
-      display: grid;
-      grid-template-columns: minmax(240px, 360px) minmax(360px, 430px);
-      align-items: center;
-      justify-content: space-between;
-      gap: clamp(50px, 14vw, 260px);
-      padding: 34px 5vw;
-    }
+  function linhaSite(p) {
+    var fotos = fotosParaSite(p);
+    return {
+      code: codigo(p),
+      title: p.titulo || p.title || "Imóvel Leads Imóveis",
+      purpose: finalidadeSite(p.finalidade || p.purpose),
+      neighborhood: p.bairro || p.neighborhood || "Florianópolis",
+      type: p.tipo || p.type || "Imóvel",
+      price: Number(p.valor || p.price || 0),
+      area: Number(p.area || 0),
+      bedrooms: Number(p.dormitorios || p.bedrooms || 0),
+      suites: Number(p.suites || 0),
+      parking: Number(p.vagas || p.parking || 0),
+      description: p.proximaAcao || p.description || "Imóvel selecionado pela Leads Imóveis.",
+      photos: fotos,
+      image_url: fotos[0] || null,
+      status: "Publicado",
+      is_public: true,
+      source_crm_id: String(p.id || ""),
+      updated_at: new Date().toISOString()
+    };
+  }
 
-    .brand-side {
-      max-width: 360px;
-    }
+  // Envia/atualiza 1 imóvel no site. NUNCA remove (a menos que seja exclusão real).
+  async function espelhar(p) {
+    var c = cli();
+    if (!c || !p || !p.id) return false;
+    try {
+      var linha = linhaSite(p);
 
-    .logo-circle {
-      width: 245px;
-      height: 245px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-      background: rgba(0,0,0,.34);
-      border: 1px solid rgba(216,181,109,.48);
-      box-shadow: 0 24px 60px rgba(0,0,0,.70);
-      overflow: hidden;
-      margin-bottom: 22px;
-    }
+      var achado = await c.from(TABELA_SITE).select("id").eq(CHAVE, linha.source_crm_id).maybeSingle();
+      if (achado.error) throw achado.error;
 
-    .logo-circle img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      border-radius: 50%;
-      display: block;
-      filter: brightness(1.18) contrast(1.08);
-    }
-
-    .badge {
-      display: inline-flex;
-      border: 1px solid rgba(216,181,109,.38);
-      background: rgba(216,181,109,.11);
-      color: #ffedc2;
-      border-radius: 999px;
-      padding: 8px 12px;
-      font-size: 11px;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: .6px;
-      margin-bottom: 14px;
-    }
-
-    h1 {
-      font-size: clamp(28px, 3vw, 44px);
-      line-height: 1.02;
-      letter-spacing: -1px;
-      text-shadow: 0 14px 34px rgba(0,0,0,.65);
-      margin-bottom: 14px;
-    }
-
-    .brand-side p {
-      color: var(--mut);
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .security-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 22px;
-    }
-
-    .security-item {
-      padding: 9px 11px;
-      border-radius: 999px;
-      background: rgba(0,0,0,.28);
-      border: 1px solid rgba(255,255,255,.12);
-      color: #e9e2d4;
-      font-size: 12px;
-    }
-
-    .security-item b {
-      color: var(--gold);
-    }
-
-    .login-card {
-      width: 100%;
-      max-width: 430px;
-      border: 1px solid rgba(216,181,109,.42);
-      background:
-        radial-gradient(circle at 50% 0, rgba(216,181,109,.18), transparent 42%),
-        linear-gradient(145deg, rgba(10,11,15,.84), rgba(4,5,7,.76));
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-      border-radius: 30px;
-      box-shadow: 0 30px 100px rgba(0,0,0,.65);
-      padding: 32px;
-    }
-
-    .mini-logo {
-      width: 82px;
-      height: 82px;
-      border-radius: 50%;
-      margin: 0 auto 16px;
-      padding: 8px;
-      background: rgba(0,0,0,.36);
-      border: 1px solid rgba(216,181,109,.50);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      box-shadow: 0 12px 30px rgba(0,0,0,.45);
-    }
-
-    .mini-logo img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      border-radius: 50%;
-    }
-
-    .login-card h2 {
-      text-align: center;
-      font-size: 27px;
-      line-height: 1.08;
-      letter-spacing: -1px;
-      margin-bottom: 12px;
-    }
-
-    .gold-line {
-      width: 92px;
-      height: 1px;
-      margin: 15px auto;
-      background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    }
-
-    .sub {
-      text-align: center;
-      color: var(--mut);
-      font-size: 14px;
-      line-height: 1.45;
-      margin-bottom: 20px;
-    }
-
-    .tabs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      background: rgba(0,0,0,.30);
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 17px;
-      padding: 5px;
-      margin-bottom: 18px;
-    }
-
-    .tabs button {
-      border: 0;
-      background: transparent;
-      color: var(--mut);
-      border-radius: 13px;
-      padding: 11px;
-      font-weight: 900;
-      cursor: pointer;
-    }
-
-    .tabs button.active {
-      background: linear-gradient(135deg, rgba(216,181,109,.36), rgba(216,181,109,.10));
-      color: #fff2cb;
-    }
-
-    .msg {
-      display: none;
-      margin: 12px 0 16px;
-      border-radius: 14px;
-      padding: 12px;
-      font-size: 13px;
-      line-height: 1.45;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.045);
-    }
-
-    .msg.show {
-      display: block;
-    }
-
-    .msg.error {
-      color: #ffd6d6;
-      border-color: rgba(239,106,106,.36);
-      background: rgba(239,106,106,.10);
-    }
-
-    .msg.ok {
-      color: #dfffe2;
-      border-color: rgba(101,214,121,.36);
-      background: rgba(101,214,121,.10);
-    }
-
-    .msg.warn {
-      color: #fff0c0;
-      border-color: rgba(216,181,109,.36);
-      background: rgba(216,181,109,.10);
-    }
-
-    .field {
-      margin-bottom: 14px;
-    }
-
-    .field label {
-      display: block;
-      font-size: 12px;
-      font-weight: 900;
-      color: #eee6d8;
-      margin-bottom: 8px;
-    }
-
-    .input-wrap {
-      position: relative;
-    }
-
-    .input-icon {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--gold);
-      font-size: 17px;
-      pointer-events: none;
-    }
-
-    input {
-      width: 100%;
-      border: 1px solid rgba(255,255,255,.15);
-      background: rgba(0,0,0,.28);
-      color: var(--txt);
-      border-radius: 15px;
-      padding: 15px 46px;
-      outline: none;
-      font: inherit;
-      font-size: 15px;
-    }
-
-    input::placeholder {
-      color: rgba(255,255,255,.38);
-    }
-
-    input:focus {
-      border-color: rgba(216,181,109,.58);
-      box-shadow: 0 0 0 3px rgba(216,181,109,.10);
-    }
-
-    .eye {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 34px;
-      height: 34px;
-      border-radius: 10px;
-      border: 0;
-      background: transparent;
-      color: rgba(255,255,255,.70);
-      cursor: pointer;
-    }
-
-    .row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin: 8px 0 16px;
-      font-size: 13px;
-      color: var(--mut);
-    }
-
-    .remember {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-    }
-
-    .remember input {
-      width: 18px;
-      height: 18px;
-      padding: 0;
-      accent-color: var(--gold);
-    }
-
-    .link {
-      border: 0;
-      background: transparent;
-      color: var(--gold);
-      font-weight: 700;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    .btn {
-      width: 100%;
-      min-height: 52px;
-      border-radius: 15px;
-      font-weight: 1000;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      cursor: pointer;
-    }
-
-    .btn:disabled {
-      opacity: .55;
-      cursor: wait;
-    }
-
-    .btn-gold {
-      border: 1px solid rgba(255,226,169,.72);
-      background: linear-gradient(135deg, #f0cd82, #c99843 52%, #ffd98c);
-      color: #171005;
-      box-shadow: 0 16px 36px rgba(0,0,0,.34);
-    }
-
-    .btn-outline {
-      margin-top: 12px;
-      border: 1px solid rgba(216,181,109,.40);
-      background: rgba(0,0,0,.20);
-      color: #ffdf9a;
-    }
-
-    .safe-note {
-      margin-top: 18px;
-      padding-top: 18px;
-      border-top: 1px solid rgba(255,255,255,.09);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--mut);
-      font-size: 13px;
-      line-height: 1.4;
-    }
-
-    .safe-note b {
-      color: var(--gold);
-    }
-
-    .footer {
-      position: absolute;
-      left: 5vw;
-      right: 5vw;
-      bottom: 16px;
-      text-align: center;
-      color: rgba(255,255,255,.45);
-      font-size: 12px;
-    }
-
-    @media (max-width: 980px) {
-      body {
-        background:
-          linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.82)),
-          var(--bg-url) center center / cover no-repeat scroll;
+      if (!achado.data) {
+        achado = await c.from(TABELA_SITE).select("id").eq("code", linha.code).maybeSingle();
+        if (achado.error) throw achado.error;
       }
 
-      .page {
-        grid-template-columns: 1fr;
-        justify-content: center;
-        gap: 18px;
-        padding: 18px;
+      if (achado.data && achado.data.id) {
+        var upd = await c.from(TABELA_SITE).update(linha).eq("id", achado.data.id);
+        if (upd.error) throw upd.error;
+      } else {
+        var ins = await c.from(TABELA_SITE).insert(linha);
+        if (ins.error) throw ins.error;
       }
-
-      .brand-side {
-        max-width: 100%;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .logo-circle {
-        width: 205px;
-        height: 205px;
-        margin-bottom: 12px;
-      }
-
-      h1 {
-        font-size: 25px;
-      }
-
-      .brand-side p {
-        font-size: 13px;
-      }
-
-      .security-row {
-        justify-content: center;
-        margin-top: 14px;
-      }
-
-      .login-card {
-        max-width: 100%;
-        padding: 22px 18px;
-        border-radius: 24px;
-      }
-
-      .mini-logo {
-        width: 72px;
-        height: 72px;
-      }
-
-      .login-card h2 {
-        font-size: 23px;
-      }
-
-      input,
-      button {
-        font-size: 16px;
-      }
-
-      .footer {
-        position: static;
-        margin-top: 8px;
-      }
+      return true;
+    } catch (e) {
+      console.error("[PublicarTudo] erro ao espelhar:", e);
+      aviso("Falha ao publicar no site. Verifique a tabela 'properties' e as permissões (RLS) no Supabase.");
+      return false;
     }
+  }
 
-    @media (max-width: 520px) {
-      .security-row {
-        display: none;
-      }
-
-      .brand-side p {
-        display: none;
-      }
-
-      .logo-circle {
-        width: 175px;
-        height: 175px;
-      }
-
-      h1 {
-        font-size: 22px;
-      }
-
-      .row {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 8px;
-      }
+  // Remove do site — SÓ é chamada quando o imóvel é excluído de verdade no CRM.
+  async function removerDoSite(p) {
+    var c = cli();
+    if (!c || !p) return;
+    try {
+      var id = String(p.id || "");
+      var code = codigo(p);
+      if (id) await c.from(TABELA_SITE).delete().eq(CHAVE, id);
+      if (code) await c.from(TABELA_SITE).delete().eq("code", code);
+    } catch (e) {
+      console.error("[PublicarTudo] erro ao remover:", e);
     }
-  </style>
-</head>
+  }
 
-<body>
-  <main class="page">
-    <section class="brand-side">
-      <div class="logo-circle">
-        <img src="https://raw.githubusercontent.com/NatanAlvezz/NatanAlvezz/main/midia/logo-leads.png.jpeg?v=200" alt="Leads Imóveis" />
-      </div>
-
-      <div class="badge">CRM exclusivo para corretores aprovados</div>
-
-      <h1>Venda com foco, presença e inteligência.</h1>
-
-      <p>
-        Uma central imobiliária premium para organizar leads, imóveis, fotos,
-        follow-up, captação e conversas com apoio de IA.
-      </p>
-
-      <div class="security-row">
-        <div class="security-item"><b>◈</b> Plataforma segura</div>
-        <div class="security-item"><b>⌁</b> Dados protegidos</div>
-        <div class="security-item"><b>☁</b> Acesso 24/7</div>
-      </div>
-    </section>
-
-    <section class="login-card">
-      <div class="mini-logo">
-        <img src="https://raw.githubusercontent.com/NatanAlvezz/NatanAlvezz/main/midia/logo-leads.png.jpeg?v=200" alt="Leads Imóveis" />
-      </div>
-
-      <h2>Bem-vindo ao<br />CRM Leads Imóveis</h2>
-
-      <div class="gold-line"></div>
-
-      <p class="sub">
-        Acesso exclusivo para corretores aprovados.
-        Entre com suas credenciais para continuar.
-      </p>
-
-      <div class="tabs">
-        <button id="tabLogin" class="active" type="button" onclick="setMode('login')">Entrar</button>
-        <button id="tabSignup" type="button" onclick="setMode('signup')">Solicitar acesso</button>
-      </div>
-
-      <div id="message" class="msg"></div>
-
-      <form onsubmit="handleAuth(event)">
-        <div class="field" id="nameField" style="display:none">
-          <label>Nome completo</label>
-          <div class="input-wrap">
-            <span class="input-icon">♙</span>
-            <input id="fullName" autocomplete="name" placeholder="Nome do corretor" />
-          </div>
-        </div>
-
-        <div class="field">
-          <label>E-mail</label>
-          <div class="input-wrap">
-            <span class="input-icon">✉</span>
-            <input id="email" type="email" autocomplete="email" placeholder="seu@email.com" required />
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Senha</label>
-          <div class="input-wrap">
-            <span class="input-icon">⌕</span>
-            <input id="password" type="password" autocomplete="current-password" placeholder="Digite sua senha" required />
-            <button class="eye" type="button" onclick="togglePassword()">◉</button>
-          </div>
-        </div>
-
-        <div class="row">
-          <label class="remember">
-            <input id="rememberMe" type="checkbox" checked />
-            Lembrar-me
-          </label>
-
-          <button class="link" type="button" onclick="resetPassword()">Esqueci minha senha</button>
-        </div>
-
-        <button class="btn btn-gold" id="submitBtn" type="submit">
-          ENTRAR →
-        </button>
-
-        <button class="btn btn-outline" type="button" onclick="setMode('signup')">
-          SOLICITAR ACESSO ♙+
-        </button>
-      </form>
-
-      <div class="safe-note">
-        <span>🛡</span>
-        <span>Sistema protegido com <b>acesso aprovado</b> pelo administrador.</span>
-      </div>
-    </section>
-
-    <div class="footer">
-      © 2026 Leads Imóveis. Todos os direitos reservados.
-    </div>
-  </main>
-
-  <script>
-    "use strict";
-
-    let mode = "login";
-
-    const ADMIN_EMAIL = "leadsimoveisoficial@gmail.com";
-    const params = new URLSearchParams(location.search);
-    const reason = params.get("reason");
-
-    window.addEventListener("load", async () => {
-      if (reason === "pending") showMessage("Seu acesso foi solicitado. Aguarde aprovação do administrador.", "warn");
-      if (reason === "inactive") showMessage("Seu usuário está inativo. Fale com o administrador.", "error");
-      if (reason === "login") showMessage("Entre novamente para acessar o CRM.", "warn");
-      if (reason === "profile") showMessage("Não foi possível validar seu perfil. Fale com o administrador.", "error");
-      if (reason === "supabase") showMessage("Supabase não carregou corretamente. Verifique o arquivo supabase-config.js.", "error");
-
-      const savedEmail = localStorage.getItem("leads_login_email");
-      if (savedEmail) document.getElementById("email").value = savedEmail;
-
-      const client = await waitSupabaseClient(false);
-
-      if (client) {
-        const { data } = await client.auth.getSession();
-
-        if (data?.session) {
-          const ok = await checkApproved(data.session.user.id);
-
-          if (ok) location.href = "crm.html";
-        }
-      }
-    });
-
-    function setMode(next) {
-      mode = next;
-
-      document.getElementById("tabLogin").classList.toggle("active", mode === "login");
-      document.getElementById("tabSignup").classList.toggle("active", mode === "signup");
-      document.getElementById("nameField").style.display = mode === "signup" ? "block" : "none";
-
-      const btn = document.getElementById("submitBtn");
-      btn.innerHTML = mode === "signup" ? "SOLICITAR ACESSO →" : "ENTRAR →";
-
-      clearMessage();
+  // Publica TODOS os imóveis do CRM no site (sem apagar sobras).
+  async function publicarTodos(mostrar) {
+    var c = cli();
+    if (!c) { if (mostrar) aviso("Supabase ainda carregando. Tente de novo em instantes."); return; }
+    var lista = A(window.db && db.imoveis);
+    var ok = 0;
+    for (var i = 0; i < lista.length; i++) {
+      var feito = await espelhar(lista[i]);
+      if (feito) ok++;
     }
+    if (mostrar) aviso("Site atualizado: " + ok + " imóvel(is) publicado(s). Nenhum foi apagado.");
+  }
 
-    async function waitSupabaseClient(showError = true) {
-      for (let i = 0; i < 50; i++) {
-        if (window.supabaseClient) return window.supabaseClient;
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
+  // Substitui a função destrutiva antiga por esta versão segura.
+  window.leadsSincronizarSite = function (mostrar) { return publicarTodos(mostrar); };
+  window.leadsPublicarTodosNoSite = publicarTodos;
 
-      if (showError) showMessage("Supabase não carregou. Verifique o arquivo supabase-config.js.", "error");
-      return null;
-    }
+  // ---------------------------------------------------------
+  // 2) MARCA TODO IMÓVEL COMO PUBLICADO AO SALVAR
+  //    "Abraça" as funções de salvar já existentes, força
+  //    publicarSite = true e espelha no site automaticamente.
+  // ---------------------------------------------------------
+  function maisRecente() {
+    return A(window.db && db.imoveis).slice().sort(function (a, b) {
+      return (Number(b.updated) || 0) - (Number(a.updated) || 0);
+    })[0] || null;
+  }
 
-    function showMessage(text, type = "ok") {
-      const el = document.getElementById("message");
-      el.textContent = text;
-      el.className = "msg show " + type;
-    }
+  function forcarPublicado(p) {
+    if (!p) return;
+    p.publicarSite = true;
+    p.is_public = true;
+    // não força a etapa para "Publicado" para não bagunçar seu funil de captação,
+    // mas garante que o site receba (is_public/publicarSite já bastam).
+  }
 
-    function clearMessage() {
-      const el = document.getElementById("message");
-      el.textContent = "";
-      el.className = "msg";
-    }
-
-    function togglePassword() {
-      const input = document.getElementById("password");
-      input.type = input.type === "password" ? "text" : "password";
-    }
-
-    async function checkApproved(userId) {
-      const client = await waitSupabaseClient();
-      if (!client) return false;
-
-      const { data: profile, error } = await client
-        .from("user_profiles")
-        .select("*")
-        .eq("id", userId)
-        .maybeSingle();
-
-      if (error) {
-        console.error(error);
-        return false;
-      }
-
-      return !!(profile && profile.approved && profile.active);
-    }
-
-    async function handleAuth(event) {
-      event.preventDefault();
-
-      const client = await waitSupabaseClient();
-      if (!client) return;
-
-      const email = document.getElementById("email").value.trim().toLowerCase();
-      const password = document.getElementById("password").value;
-      const fullName = document.getElementById("fullName").value.trim();
-      const submitBtn = document.getElementById("submitBtn");
-
-      clearMessage();
-      submitBtn.disabled = true;
-      submitBtn.textContent = mode === "signup" ? "Solicitando..." : "Entrando...";
-
+  function abracarSalvar(nome) {
+    var orig = window[nome];
+    if (typeof orig !== "function" || orig.__pubWrap) return;
+    var novo = async function () {
+      var r = await orig.apply(this, arguments);
       try {
-        if (document.getElementById("rememberMe").checked) {
-          localStorage.setItem("leads_login_email", email);
-        } else {
-          localStorage.removeItem("leads_login_email");
-        }
+        var p = maisRecente();
+        if (p) { forcarPublicado(p); await espelhar(p); if (typeof safeLocalSave === "function") safeLocalSave(db); }
+      } catch (e) { console.error(e); }
+      return r;
+    };
+    novo.__pubWrap = true;
+    window[nome] = novo;
+  }
 
-        if (mode === "signup") {
-          if (!fullName) {
-            showMessage("Digite o nome completo do corretor.", "error");
-            return;
-          }
+  function abracarFoto(nome) {
+    var orig = window[nome];
+    if (typeof orig !== "function" || orig.__pubWrap) return;
+    var novo = async function (propId) {
+      var r = await orig.apply(this, arguments);
+      try {
+        var p = A(window.db && db.imoveis).find(function (x) { return x.id === propId; });
+        if (p) { forcarPublicado(p); await espelhar(p); }
+      } catch (e) { console.error(e); }
+      return r;
+    };
+    novo.__pubWrap = true;
+    window[nome] = novo;
+  }
 
-          const { data, error } = await client.auth.signUp({
-            email,
-            password,
-            options: {
-              data: {
-                full_name: fullName
-              }
-            }
+  // Exclusão real → aí sim remove do site.
+  function abracarExcluir() {
+    var orig = window.deleteImovel;
+    if (typeof orig !== "function" || orig.__pubWrap) return;
+    var novo = async function (id) {
+      var antes = A(window.db && db.imoveis).find(function (x) { return x.id === id; });
+      var qtdAntes = A(window.db && db.imoveis).length;
+      var r = await orig.apply(this, arguments);
+      var qtdDepois = A(window.db && db.imoveis).length;
+      try { if (antes && qtdDepois < qtdAntes) await removerDoSite(antes); } catch (e) { console.error(e); }
+      return r;
+    };
+    novo.__pubWrap = true;
+    window.deleteImovel = novo;
+  }
+
+  // ---------------------------------------------------------
+  // 3) DEIXA O CAMPO "PUBLICAR NO SITE?" COM "SIM" POR PADRÃO
+  //    Ao abrir o cadastro de um imóvel novo, seleciona "Sim".
+  // ---------------------------------------------------------
+  function abracarModal() {
+    var orig = window.openImovelModal;
+    if (typeof orig !== "function" || orig.__pubWrap) return;
+    var novo = function () {
+      var r = orig.apply(this, arguments);
+      try {
+        setTimeout(function () {
+          var sel = document.getElementById("p_publicar");
+          if (!sel) return;
+          // Só mexe se for imóvel novo (nenhuma opção "sim" já selecionada).
+          var jaSim = Array.prototype.some.call(sel.options, function (o) {
+            return o.value === "sim" && o.selected;
           });
-
-          if (error) {
-            showMessage(error.message || "Erro ao solicitar acesso.", "error");
-            return;
-          }
-
-          if (data?.user) {
-            try {
-              await client.from("user_profiles").upsert({
-                id: data.user.id,
-                email,
-                full_name: fullName,
-                role: email === ADMIN_EMAIL ? "admin" : "corretor",
-                approved: email === ADMIN_EMAIL,
-                active: true
-              });
-            } catch (e) {
-              console.warn("Perfil será criado pelo trigger ou manualmente.", e);
-            }
-          }
-
-          await client.auth.signOut();
-
-          showMessage("Acesso solicitado. Agora o administrador precisa aprovar este corretor no Supabase.", "warn");
-          setMode("login");
-          return;
-        }
-
-        const { data, error } = await client.auth.signInWithPassword({
-          email,
-          password
-        });
-
-        if (error) {
-          showMessage("Login ou senha incorretos.", "error");
-          return;
-        }
-
-        let approved = await checkApproved(data.user.id);
-
-        if (!approved && email === ADMIN_EMAIL) {
-          try {
-            await client.from("user_profiles").upsert({
-              id: data.user.id,
-              email,
-              full_name: data.user.user_metadata?.full_name || "Administrador",
-              role: "admin",
-              approved: true,
-              active: true
+          var ehNovo = !(currentEdit && currentEdit.id);
+          if (ehNovo || !jaSim) {
+            Array.prototype.forEach.call(sel.options, function (o) {
+              o.selected = (o.value === "sim");
             });
-
-            approved = true;
-          } catch (e) {
-            console.warn(e);
           }
-        }
+        }, 60);
+      } catch (e) { console.error(e); }
+      return r;
+    };
+    novo.__pubWrap = true;
+    window.openImovelModal = novo;
+  }
 
-        if (!approved) {
-          await client.auth.signOut();
-          showMessage("Seu acesso ainda não foi aprovado pelo administrador.", "warn");
-          return;
-        }
+  // ---------------------------------------------------------
+  // 4) BOTÃO SEGURO EM CONFIGURAÇÕES
+  // ---------------------------------------------------------
+  function botao() {
+    var body = document.querySelector("#view-config .panel-body");
+    if (!body || document.getElementById("publicarTudoBar")) return;
+    var div = document.createElement("div");
+    div.id = "publicarTudoBar";
+    div.className = "crm-final-syncbar";
+    div.innerHTML =
+      '<span><b>Site público:</b> publica TODOS os imóveis do CRM. Este botão nunca apaga imóveis.</span>' +
+      '<button class="btn btn-sm" type="button" onclick="leadsPublicarTodosNoSite(true)">Publicar todos no site agora</button>';
+    body.insertBefore(div, body.firstChild);
+  }
 
-        location.href = "crm.html";
-      } catch (e) {
-        console.error(e);
-        showMessage("Erro inesperado. Tente novamente.", "error");
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = mode === "signup" ? "SOLICITAR ACESSO →" : "ENTRAR →";
-      }
-    }
+  function aplicar() {
+    abracarSalvar("saveImovelGlobal");
+    abracarSalvar("saveImovel");
+    abracarFoto("setCoverPhoto");
+    abracarFoto("deletePhoto");
+    abracarExcluir();
+    abracarModal();
+    botao();
+  }
 
-    async function resetPassword() {
-      const client = await waitSupabaseClient();
-      if (!client) return;
+  // Reaplica algumas vezes porque outros patches redefinem as funções
+  // em momentos diferentes; assim garantimos que a nossa versão "pega".
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", aplicar);
+  else aplicar();
+  window.addEventListener("load", function () {
+    setTimeout(aplicar, 1500);
+    setTimeout(aplicar, 3500);
+    setTimeout(aplicar, 6000);
+  });
+  var n = 0, t = setInterval(function () { aplicar(); if (++n > 12) clearInterval(t); }, 1200);
 
-      const email = document.getElementById("email").value.trim().toLowerCase();
-
-      if (!email) {
-        showMessage("Digite seu e-mail para recuperar a senha.", "warn");
-        return;
-      }
-
-      const redirectTo = location.origin + "/login.html";
-
-      const { error } = await client.auth.resetPasswordForEmail(email, {
-        redirectTo
-      });
-
-      if (error) {
-        showMessage("Não foi possível enviar recuperação agora.", "error");
-        return;
-      }
-
-      showMessage("Enviamos um link de recuperação para seu e-mail.", "ok");
-    }
-  </script>
-</body>
-</html>
+  // Ao carregar tudo, publica os imóveis que já existem no CRM (uma vez).
+  window.addEventListener("load", function () {
+    setTimeout(function () { publicarTodos(false); }, 5000);
+  });
+})();
+</script>
