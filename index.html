@@ -194,7 +194,326 @@
   50% {
     translate: 0 -7px;
   }
-} </style>
+} /* ============================================================
+   LEADS IMÓVEIS · GLASSMORPHISM PREMIUM
+   Transparência, profundidade e reflexo elegante
+============================================================ */
+
+/* Barra superior de vidro */
+.topbar {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(248, 253, 255, 0.78),
+      rgba(213, 243, 253, 0.48)
+    ) !important;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.68);
+
+  box-shadow:
+    0 16px 42px rgba(4, 12, 22, 0.13),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+
+  -webkit-backdrop-filter: blur(24px) saturate(165%);
+  backdrop-filter: blur(24px) saturate(165%);
+}
+
+/* Elementos principais com efeito de vidro */
+.hero-phrase-panel,
+.assistant-card,
+.search-box,
+.contact-card,
+.ai-panel,
+.property-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+
+  border: 1px solid rgba(255, 255, 255, 0.58);
+
+  box-shadow:
+    0 22px 58px rgba(4, 12, 22, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    inset 0 -1px 0 rgba(116, 213, 255, 0.10);
+
+  -webkit-backdrop-filter: blur(22px) saturate(155%);
+  backdrop-filter: blur(22px) saturate(155%);
+
+  transition:
+    transform 0.32s ease,
+    box-shadow 0.32s ease,
+    border-color 0.32s ease,
+    background 0.32s ease;
+}
+
+/* Vidro escuro do painel principal */
+.hero-phrase-panel {
+  background:
+    radial-gradient(
+      circle at 10% 10%,
+      rgba(189, 239, 255, 0.16),
+      transparent 38%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.14),
+      rgba(30, 86, 116, 0.08)
+    ) !important;
+
+  border-color: rgba(189, 239, 255, 0.34);
+}
+
+/* Vidro claro */
+.assistant-card,
+.search-box,
+.contact-card {
+  background:
+    radial-gradient(
+      circle at 10% 0%,
+      rgba(255, 255, 255, 0.92),
+      transparent 42%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(248, 253, 255, 0.88),
+      rgba(221, 245, 253, 0.66)
+    ) !important;
+}
+
+/* Painel da Lia */
+.ai-panel {
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(116, 213, 255, 0.22),
+      transparent 38%
+    ),
+    linear-gradient(
+      155deg,
+      rgba(250, 254, 255, 0.93),
+      rgba(220, 245, 253, 0.86)
+    ) !important;
+
+  border-color: rgba(189, 239, 255, 0.72);
+}
+
+/* Cards dos imóveis com transparência sofisticada */
+.property-card {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.94),
+      rgba(235, 249, 253, 0.82)
+    ) !important;
+
+  border-color: rgba(174, 221, 239, 0.52);
+}
+
+/* Garante que o conteúdo fique acima do reflexo */
+.assistant-card > *,
+.search-box > *,
+.contact-card > *,
+.ai-panel > *,
+.property-card > *,
+.hero-phrase-panel > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Reflexo de luz premium */
+.assistant-card::after,
+.search-box::after,
+.contact-card::after,
+.ai-panel::after,
+.property-card::after,
+.hero-phrase-panel::after {
+  content: "";
+  position: absolute;
+  top: -45%;
+  left: -75%;
+  z-index: 1;
+
+  width: 42%;
+  height: 190%;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      105deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.04) 25%,
+      rgba(255, 255, 255, 0.36) 50%,
+      rgba(189, 239, 255, 0.15) 65%,
+      transparent 100%
+    );
+
+  filter: blur(2px);
+  transform: rotate(12deg);
+  opacity: 0;
+
+  transition:
+    left 0.85s cubic-bezier(.22, .78, .28, 1),
+    opacity 0.35s ease;
+}
+
+/* Brilho interno delicado */
+.property-card::before,
+.assistant-card::before,
+.search-box::before,
+.contact-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      circle at 12% 0%,
+      rgba(255, 255, 255, 0.55),
+      transparent 30%
+    );
+
+  opacity: 0.62;
+}
+
+/* Profundidade e reflexo no computador */
+@media screen and (min-width: 981px) and (hover: hover) {
+
+  .assistant-card:hover,
+  .search-box:hover,
+  .contact-card:hover {
+    transform: translateY(-6px) scale(1.006);
+
+    border-color: rgba(189, 239, 255, 0.88);
+
+    box-shadow:
+      0 32px 82px rgba(4, 12, 22, 0.21),
+      0 0 42px rgba(116, 213, 255, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.88);
+  }
+
+  .property-card.revealed:hover {
+    transform: translateY(-9px) scale(1.008) !important;
+
+    border-color: rgba(116, 188, 219, 0.68);
+
+    box-shadow:
+      0 30px 72px rgba(4, 12, 22, 0.20),
+      0 0 38px rgba(116, 213, 255, 0.10),
+      inset 0 1px 0 rgba(255, 255, 255, 0.90);
+  }
+
+  .hero-phrase-panel:hover {
+    border-color: rgba(189, 239, 255, 0.62);
+
+    box-shadow:
+      0 28px 72px rgba(0, 0, 0, 0.26),
+      0 0 42px rgba(116, 213, 255, 0.13),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  }
+
+  .assistant-card:hover::after,
+  .search-box:hover::after,
+  .contact-card:hover::after,
+  .ai-panel:hover::after,
+  .property-card:hover::after,
+  .hero-phrase-panel:hover::after {
+    left: 135%;
+    opacity: 1;
+  }
+}
+
+/* Luz ambiente discreta na vitrine */
+.properties-section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.properties-section::before {
+  content: "";
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  z-index: -1;
+
+  width: min(900px, 90vw);
+  height: 520px;
+
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      ellipse,
+      rgba(116, 213, 255, 0.16),
+      transparent 68%
+    );
+
+  filter: blur(26px);
+  transform: translateX(-50%);
+}
+
+/* Luz suave atrás da caixa de busca */
+.search-section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.search-section::after {
+  content: "";
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  z-index: -1;
+
+  width: min(840px, 92vw);
+  height: 360px;
+
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      ellipse,
+      rgba(116, 213, 255, 0.19),
+      transparent 67%
+    );
+
+  filter: blur(30px);
+  transform: translateX(-50%);
+}
+
+/* Botões com acabamento de cristal */
+.button,
+.small-button,
+.chip {
+  position: relative;
+  overflow: hidden;
+
+  border: 1px solid rgba(255, 255, 255, 0.40);
+
+  box-shadow:
+    0 12px 28px rgba(4, 12, 22, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.62);
+
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+/* Animações reduzidas quando necessário */
+@media (prefers-reduced-motion: reduce) {
+  .assistant-card::after,
+  .search-box::after,
+  .contact-card::after,
+  .ai-panel::after,
+  .property-card::after,
+  .hero-phrase-panel::after {
+    display: none;
+  }
+}</style>
 </head>
 <body>
   <header class="topbar">
