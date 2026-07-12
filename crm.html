@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1290,7 +1291,7 @@
         height: 66px;
         z-index: 128;
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(6, 1fr);
         gap: 5px;
         padding: 7px;
         border: 1px solid rgba(216,181,109,.25);
@@ -1681,6 +1682,19 @@
     const TYPES = ["Casa", "Casa em Condomínio", "Apartamento", "Cobertura", "Terreno", "Sala Comercial", "Sobrado"];
 
     let db = loadDB();
+
+    // Ponte de compatibilidade: os patches antigos consultam window.db.
+    // Sem esta ponte, galeria, sincronização e dados da equipe podem enxergar uma base vazia.
+    try {
+      Object.defineProperty(window, "db", {
+        configurable: true,
+        get: function () { return db; },
+        set: function (value) { db = value; }
+      });
+    } catch (_) {
+      window.db = db;
+    }
+
     let cloudReady = false;
     let cloudUserId = null;
     let saveTimer = null;
@@ -9020,7 +9034,7 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
         bedrooms: Number(p.dormitorios || 0),
         suites: Number(p.suites || 0),
         parking: Number(p.vagas || 0),
-        description: p.proximaAcao || "Imóvel selecionado pela Leads Imóveis.",
+        description: p.description || p.descricao || "Imóvel selecionado pela Leads Imóveis.",
         photos: photoUrls,
         image_url: mainImage || null,
         status: "Publicado",
@@ -9413,7 +9427,7 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
   }
 </style>
 
-<script id="leadsCrmGaleriaV105AntiTravamento">
+<script id="leadsCrmGaleriaV105AntiTravamentoJS">
 (function(){
   "use strict";
 
@@ -9864,7 +9878,11 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
   }
 
   function publicado(p) {
-    return !!(p.publicarSite || p.is_public || p.etapa === "Publicado" || p.status === "Publicado");
+    if (!p || typeof p !== "object") return false;
+    var temFlagExplicita = Object.prototype.hasOwnProperty.call(p, "publicarSite") ||
+      Object.prototype.hasOwnProperty.call(p, "is_public");
+    if (temFlagExplicita) return p.publicarSite === true || p.is_public === true;
+    return p.etapa === "Publicado" || p.status === "Publicado";
   }
 
   function codigo(p) {
@@ -9888,7 +9906,7 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
       bedrooms: Number(p.dormitorios || p.bedrooms || 0),
       suites: Number(p.suites || 0),
       parking: Number(p.vagas || p.parking || 0),
-      description: p.proximaAcao || p.description || "Imóvel selecionado pela Leads Imóveis.",
+      description: p.description || p.descricao || "Imóvel selecionado pela Leads Imóveis.",
       photos: fotos,
       image_url: fotos[0] || null,
       status: "Publicado",
@@ -10075,7 +10093,807 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
 })();
 </script>
 
-<script src="crm-central-leads.js?v=20260711-2"></script>
+<script id="leadsCentralIntegradaFinal20260712">
+/* Leads Imóveis · Central de atendimentos integrada
+   Sem dependência dos antigos crm-realtime-ui-fix.js e crm-central-leads.js. */
+(function () {
+  "use strict";
+
+  if (window.__LEADS_CENTRAL_INTEGRADA_V1__) return;
+  window.__LEADS_CENTRAL_INTEGRADA_V1__ = true;
+
+  const VERSION = "20260712-1";
+  const VIEW_NAME = "atendimentos";
+  const VIEW_ID = "view-atendimentos";
+  const POLL_MS = 30000;
+  const HEARTBEAT_MS = 25000;
+  const PRESENCE_CHANNEL = "leads-crm-agentes-online-v2";
+  const CLOSED = new Set(["fechado", "sem_interesse", "perdido"]);
+
+  const STATUS = {
+    novo: ["Novo lead", "novo"],
+    disponivel: ["Disponível", "disponivel"],
+    em_atendimento: ["Em atendimento", "atendimento"],
+    aguardando_cliente: ["Aguardando cliente", "aguardando"],
+    visita_agendada: ["Visita agendada", "visita"],
+    proposta_enviada: ["Proposta enviada", "proposta"],
+    quase_fechado: ["Quase fechado", "quase"],
+    fechado: ["Fechado", "fechado"],
+    sem_interesse: ["Sem interesse", "sem-interesse"],
+    perdido: ["Perdido", "perdido"],
+    pausado: ["Pausado", "pausado"]
+  };
+
+  const PRIORITY = {
+    baixa: "Baixa",
+    normal: "Normal",
+    alta: "Alta",
+    urgente: "Urgente"
+  };
+
+  const LEAD_FIELDS = [
+    "id", "name", "phone", "email", "intent", "neighborhood", "budget",
+    "property_type", "bedrooms", "consent_to_contact", "status", "lead_status",
+    "priority", "summary", "assigned_user_id", "assigned_at", "first_contact_at",
+    "last_contact_at", "last_activity_at", "next_follow_up_at", "visit_scheduled_at",
+    "proposal_sent_at", "closed_at", "lost_reason", "released_at", "release_reason",
+    "transferred_at", "previous_assigned_user_id", "created_at", "updated_at"
+  ].join(",");
+
+  const PROFILE_FIELDS = [
+    "id", "email", "full_name", "avatar_data", "avatar_url", "role", "approved",
+    "active", "last_seen_at", "presence_status", "current_site_lead_id"
+  ].join(",");
+
+  const state = {
+    client: null,
+    session: null,
+    user: null,
+    profile: null,
+    isAdmin: false,
+    leads: [],
+    profiles: [],
+    profileMap: new Map(),
+    presenceMap: new Map(),
+    channels: [],
+    loading: false,
+    ready: false,
+    poll: null,
+    heartbeat: null,
+    knownLeadIds: new Set(),
+    firstLoad: true
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (value) => String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+  const digits = (value) => String(value || "").replace(/\D/g, "");
+  const norm = (value) => String(value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+
+  function roleIsAdmin(role) {
+    return ["admin", "administrator", "owner", "gestor"].includes(norm(role));
+  }
+
+  function statusOf(lead) {
+    if (lead && STATUS[lead.lead_status]) return lead.lead_status;
+    if (lead && !lead.assigned_user_id && ["new", "qualified"].includes(lead.status)) return "disponivel";
+    if (lead && ["assigned", "contacted"].includes(lead.status)) return "em_atendimento";
+    return "novo";
+  }
+
+  function priorityOf(lead) {
+    return PRIORITY[lead && lead.priority] ? lead.priority : "normal";
+  }
+
+  function isAvailable(lead) {
+    return !lead.assigned_user_id && ["novo", "disponivel"].includes(statusOf(lead));
+  }
+
+  function isMine(lead) {
+    return Boolean(state.user && lead.assigned_user_id === state.user.id);
+  }
+
+  function canManage(lead) {
+    return state.isAdmin || isMine(lead);
+  }
+
+  function dateText(value) {
+    if (!value) return "—";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "—";
+    return new Intl.DateTimeFormat("pt-BR", {
+      timeZone: "America/Sao_Paulo",
+      day: "2-digit", month: "2-digit", year: "2-digit",
+      hour: "2-digit", minute: "2-digit"
+    }).format(date);
+  }
+
+  function relative(value) {
+    if (!value) return "sem registro";
+    const ms = new Date(value).getTime();
+    if (!Number.isFinite(ms)) return "sem registro";
+    const minutes = Math.max(0, Math.floor((Date.now() - ms) / 60000));
+    if (minutes < 1) return "agora";
+    if (minutes < 60) return `há ${minutes} min`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `há ${hours} h`;
+    const days = Math.floor(hours / 24);
+    return `há ${days} dia${days === 1 ? "" : "s"}`;
+  }
+
+  function profileName(id) {
+    const p = state.profileMap.get(id);
+    return p ? (p.full_name || p.email || "Corretor") : "Não atribuído";
+  }
+
+  function initials(name) {
+    const words = String(name || "C").trim().split(/\s+/).filter(Boolean);
+    return ((words[0] && words[0][0]) || "C") + (words.length > 1 ? words[words.length - 1][0] : "");
+  }
+
+  function avatar(profile, large) {
+    const name = profile ? (profile.full_name || profile.email || "Corretor") : "Corretor";
+    const src = profile ? (profile.avatar_data || profile.avatar_url || "") : "";
+    const cls = large ? " cl-avatar-lg" : "";
+    if (src) return `<span class="cl-avatar${cls}"><img src="${esc(src)}" alt="${esc(name)}"></span>`;
+    return `<span class="cl-avatar${cls}">${esc(initials(name).toUpperCase())}</span>`;
+  }
+
+  function attention(lead) {
+    const now = Date.now();
+    const created = new Date(lead.created_at || 0).getTime();
+    const assigned = new Date(lead.assigned_at || 0).getTime();
+    const activity = new Date(lead.last_activity_at || lead.updated_at || lead.created_at || 0).getTime();
+    const status = statusOf(lead);
+    if (isAvailable(lead) && created && now - created > 5 * 60000) return ["urgent", "Aguardando corretor há mais de 5 min"];
+    if (lead.assigned_user_id && !lead.first_contact_at && assigned && now - assigned > 10 * 60000) return ["urgent", "Primeiro contato atrasado"];
+    if (!CLOSED.has(status) && activity && now - activity > 24 * 3600000) return ["warning", "Sem movimentação há mais de 24 h"];
+    return ["ok", "Atendimento acompanhado"];
+  }
+
+  function notify(title, message, type) {
+    let root = $("clToastContainer");
+    if (!root) {
+      root = document.createElement("div");
+      root.id = "clToastContainer";
+      document.body.appendChild(root);
+    }
+    const item = document.createElement("div");
+    item.className = `cl-toast cl-toast-${type || "info"}`;
+    item.innerHTML = `<strong>${esc(title)}</strong><p>${esc(message)}</p>`;
+    root.prepend(item);
+    window.setTimeout(() => item.remove(), 5200);
+  }
+
+  function injectStyles() {
+    if ($("leads-central-integrada-css")) return;
+    const style = document.createElement("style");
+    style.id = "leads-central-integrada-css";
+    style.textContent = `
+      .cl-shell{display:grid;gap:16px}.cl-hero,.cl-panel{border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,rgba(255,255,255,.052),rgba(255,255,255,.015));box-shadow:var(--shadow);overflow:hidden}
+      .cl-hero{padding:18px;border-color:rgba(216,181,109,.28);background:radial-gradient(circle at 88% 0,rgba(216,181,109,.17),transparent 36%),linear-gradient(145deg,rgba(255,255,255,.052),rgba(255,255,255,.015))}
+      .cl-hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}.cl-hero h1{font-size:22px}.cl-hero p{color:var(--mut);font-size:12px;line-height:1.5;margin-top:6px}
+      .cl-live{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(101,214,121,.3);background:rgba(101,214,121,.08);color:#d6ffdc;border-radius:999px;padding:7px 10px;font-size:10px;font-weight:900;white-space:nowrap}.cl-live:before{content:"";width:7px;height:7px;border-radius:50%;background:#65d679;box-shadow:0 0 12px rgba(101,214,121,.8)}
+      .cl-kpis{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:10px;margin-top:15px}.cl-kpi{border:1px solid rgba(255,255,255,.09);background:rgba(0,0,0,.16);border-radius:15px;padding:12px}.cl-kpi small{display:block;color:var(--mut);font-size:9px;text-transform:uppercase;letter-spacing:.55px}.cl-kpi strong{display:block;font-size:25px;margin-top:5px}.cl-kpi span{display:block;color:var(--mut);font-size:10px;margin-top:3px}
+      .cl-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 17px;border-bottom:1px solid rgba(255,255,255,.08)}.cl-panel-head h2{font-size:14px;text-transform:uppercase;letter-spacing:.7px}.cl-panel-head p{font-size:11px;color:var(--mut);margin-top:4px}.cl-panel-body{padding:15px}
+      .cl-filters{display:grid;grid-template-columns:minmax(190px,1.4fr) repeat(3,minmax(140px,.7fr)) auto;gap:9px;margin-bottom:12px}.cl-filters input,.cl-filters select,.cl-filters button{min-height:42px;font-size:12px}
+      .cl-table-wrap{overflow:auto;border:1px solid rgba(255,255,255,.08);border-radius:15px}.cl-table{width:100%;border-collapse:collapse;min-width:1040px}.cl-table th{position:sticky;top:0;z-index:2;background:#111216;color:var(--mut);text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.55px;padding:10px;border-bottom:1px solid rgba(255,255,255,.09)}.cl-table td{padding:11px 10px;border-bottom:1px solid rgba(255,255,255,.065);vertical-align:top;font-size:11px}.cl-table tbody tr:hover{background:rgba(216,181,109,.045)}.cl-row-urgent{box-shadow:inset 3px 0 0 #ef6a6a}.cl-row-warning{box-shadow:inset 3px 0 0 #ffbd69}
+      .cl-lead{display:flex;gap:9px;min-width:185px}.cl-lead-initial{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;flex:0 0 auto;background:linear-gradient(135deg,rgba(216,181,109,.35),rgba(255,255,255,.05));border:1px solid rgba(216,181,109,.35);color:#fff2ca;font-weight:900}.cl-lead b{display:block;font-size:12px}.cl-lead small,.cl-muted{display:block;color:var(--mut);font-size:9px;line-height:1.45;margin-top:3px}.cl-summary{max-width:250px;line-height:1.4;color:#ddd6ca}
+      .cl-status,.cl-priority,.cl-presence{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:5px 8px;border:1px solid rgba(255,255,255,.13);font-size:9px;font-weight:900;white-space:nowrap}.cl-status:before,.cl-presence:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}.cl-status-novo{color:#f3f0e9;background:rgba(255,255,255,.06)}.cl-status-disponivel{color:#bff7c8;background:rgba(101,214,121,.09);border-color:rgba(101,214,121,.28)}.cl-status-atendimento{color:#cfe0ff;background:rgba(93,147,255,.1);border-color:rgba(93,147,255,.32)}.cl-status-aguardando{color:#ffe2b5;background:rgba(255,164,65,.11);border-color:rgba(255,164,65,.32)}.cl-status-visita{color:#e3ceff;background:rgba(168,104,255,.11)}.cl-status-proposta{color:#fff0ad;background:rgba(255,218,79,.1)}.cl-status-quase{color:#ffe5a2;background:rgba(216,181,109,.16);border-color:rgba(216,181,109,.48)}.cl-status-fechado{color:#b9ffc4;background:rgba(47,184,74,.13)}.cl-status-sem-interesse,.cl-status-perdido{color:#ffd1d1;background:rgba(239,106,106,.11)}.cl-status-pausado{color:#d1d1d1;background:rgba(150,150,150,.1)}
+      .cl-priority{padding:4px 7px}.cl-priority-urgente{color:#ffd1d1;background:rgba(239,106,106,.12)}.cl-priority-alta{color:#ffe2ad;background:rgba(255,189,105,.1)}.cl-priority-normal{color:#e7e2d8;background:rgba(255,255,255,.05)}.cl-priority-baixa{color:#cfd8e5;background:rgba(120,140,165,.1)}
+      .cl-actions{display:flex;flex-wrap:wrap;gap:5px;min-width:205px}.cl-actions .btn{padding:7px 8px!important;font-size:9px!important}.cl-agent{display:flex;align-items:center;gap:7px;min-width:145px}.cl-avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;overflow:hidden;flex:0 0 auto;background:linear-gradient(135deg,#3b3b3b,#c3b58b);color:#090909;border:1px solid rgba(216,181,109,.42);font-size:9px;font-weight:900}.cl-avatar img{width:100%;height:100%;object-fit:cover}.cl-avatar-lg{width:42px;height:42px;font-size:12px}.cl-agent b{font-size:10px}.cl-agent small{display:block;color:var(--mut);font-size:8px;margin-top:2px}
+      .cl-agents{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}.cl-agent-card{border:1px solid rgba(255,255,255,.09);background:rgba(0,0,0,.14);border-radius:15px;padding:12px;display:flex;gap:10px;align-items:center}.cl-agent-card>div:nth-child(2){min-width:0;flex:1}.cl-agent-card b{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cl-agent-card small{display:block;color:var(--mut);font-size:9px;margin-top:3px}.cl-presence-online{color:#baffc5;background:rgba(101,214,121,.08)}.cl-presence-em_atendimento{color:#cfe0ff;background:rgba(93,147,255,.09)}.cl-presence-ausente{color:#ffe0ae;background:rgba(255,189,105,.08)}.cl-presence-offline{color:#aaa;background:rgba(255,255,255,.04)}
+      .cl-empty{padding:30px;text-align:center;color:var(--mut);border:1px dashed rgba(255,255,255,.12);border-radius:14px}.cl-empty strong{display:block;color:#eee;margin-bottom:5px}
+      #clModal{position:fixed;inset:0;z-index:1000;display:none;place-items:center;padding:18px;background:rgba(0,0,0,.78);backdrop-filter:blur(5px)}#clModal.open{display:grid}.cl-modal-card{width:min(620px,96vw);max-height:88vh;overflow:hidden;border:1px solid rgba(216,181,109,.3);border-radius:20px;background:linear-gradient(145deg,#111216,#08090b);box-shadow:0 30px 100px rgba(0,0,0,.75)}.cl-modal-head,.cl-modal-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08)}.cl-modal-foot{border-top:1px solid rgba(255,255,255,.08);border-bottom:0;justify-content:flex-end;flex-wrap:wrap}.cl-modal-body{padding:16px;max-height:62vh;overflow:auto}.cl-field{margin-bottom:12px}.cl-field label{display:block;color:var(--mut);font-size:10px;text-transform:uppercase;font-weight:800;letter-spacing:.55px;margin-bottom:6px}.cl-field textarea{min-height:95px;resize:vertical}.cl-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.cl-detail{border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px;background:rgba(255,255,255,.025)}.cl-detail small{display:block;color:var(--mut);font-size:9px;text-transform:uppercase}.cl-detail b{display:block;font-size:11px;margin-top:4px;word-break:break-word}
+      #clToastContainer{position:fixed;left:270px;top:90px;z-index:1200;width:min(370px,calc(100vw - 660px));display:grid;gap:8px}.cl-toast{border:1px solid rgba(216,181,109,.3);border-radius:14px;padding:11px 12px;background:rgba(13,14,16,.97);box-shadow:0 16px 38px rgba(0,0,0,.35);animation:clIn .18s ease}.cl-toast strong{display:block;font-size:11px}.cl-toast p{font-size:10px;color:var(--mut);margin-top:3px;line-height:1.4}.cl-toast-error{border-color:rgba(239,106,106,.5)}.cl-toast-success{border-color:rgba(101,214,121,.42)}@keyframes clIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+      #clQuickButton{display:inline-flex;align-items:center;gap:6px;position:relative!important;inset:auto!important;min-height:31px;padding:6px 8px!important;border-radius:10px!important;border:1px solid rgba(216,181,109,.34)!important;background:rgba(216,181,109,.1)!important;color:#fff0c8!important;font-size:9px!important;box-shadow:none!important}.cl-count{min-width:19px;height:19px;border-radius:999px;display:grid;place-items:center;padding:0 5px;background:var(--gold);color:#171006;font-weight:900}
+      @media(max-width:1180px) and (min-width:981px){#clToastContainer{left:102px;width:min(370px,calc(100vw - 470px))}}
+      @media(max-width:980px){.cl-kpis{grid-template-columns:repeat(2,1fr)}.cl-filters{grid-template-columns:1fr 1fr}.cl-filters>*:first-child{grid-column:1/-1}.cl-table-wrap{border:0;overflow:visible}.cl-table{min-width:0;display:block}.cl-table thead{display:none}.cl-table tbody{display:grid;gap:10px}.cl-table tr{display:grid;border:1px solid rgba(255,255,255,.09);border-radius:15px;padding:11px;background:rgba(255,255,255,.02)}.cl-table td{display:block;border:0;padding:5px}.cl-actions{min-width:0}.cl-summary{max-width:none}.cl-agents{grid-template-columns:1fr}.cl-hero-top{display:block}.cl-live{margin-top:10px}#clToastContainer{left:12px;right:12px;top:auto;bottom:calc(92px + env(safe-area-inset-bottom,0px));width:auto}.cl-detail-grid{grid-template-columns:1fr}.cl-panel-head{align-items:flex-start}.cl-panel-head .btn{flex:0 0 auto}}
+      @media(max-width:560px){.cl-filters{grid-template-columns:1fr}.cl-filters>*:first-child{grid-column:auto}.cl-kpis{grid-template-columns:1fr 1fr}.cl-kpi strong{font-size:21px}}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function navButton(mobile) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.view = VIEW_NAME;
+    button.innerHTML = mobile ? "<i>◎</i>Atend." : "◎ <span>Atendimentos</span>";
+    button.addEventListener("click", () => openCentral());
+    return button;
+  }
+
+  function injectNavigation() {
+    const desktop = $("nav");
+    if (desktop && !desktop.querySelector(`[data-view="${VIEW_NAME}"]`)) {
+      const button = navButton(false);
+      const leadsButton = desktop.querySelector('[data-view="leads"]');
+      if (leadsButton && leadsButton.nextSibling) desktop.insertBefore(button, leadsButton.nextSibling);
+      else desktop.appendChild(button);
+    }
+
+    const mobile = $("mobileNav");
+    if (mobile && !mobile.querySelector(`[data-view="${VIEW_NAME}"]`)) {
+      const report = mobile.querySelector('[data-view="relatorios"]');
+      if (report) report.style.display = "none";
+      const button = navButton(true);
+      const config = mobile.querySelector('[data-view="config"]');
+      if (config) mobile.insertBefore(button, config);
+      else mobile.appendChild(button);
+    }
+  }
+
+  function injectQuickButton() {
+    if ($("clQuickButton")) return;
+    const aiHead = document.querySelector(".ai-head");
+    if (!aiHead) return;
+    const online = aiHead.querySelector(".online");
+    const button = document.createElement("button");
+    button.id = "clQuickButton";
+    button.type = "button";
+    button.title = "Abrir Central de Atendimentos";
+    button.innerHTML = `Leads <span class="cl-count" id="clQuickCount">0</span>`;
+    button.addEventListener("click", openCentral);
+    if (online) aiHead.insertBefore(button, online);
+    else aiHead.appendChild(button);
+  }
+
+  function injectView() {
+    if ($(VIEW_ID)) return;
+    const content = document.querySelector(".content");
+    if (!content) return;
+    const view = document.createElement("div");
+    view.className = "view";
+    view.id = VIEW_ID;
+    view.innerHTML = `
+      <div class="cl-shell">
+        <section class="cl-hero">
+          <div class="cl-hero-top"><div><h1>Central de Atendimentos</h1><p id="clHeroText">Leads recebidos pelo site, responsáveis e andamento comercial em tempo real.</p></div><span class="cl-live" id="clRealtimeStatus">Conectando...</span></div>
+          <div class="cl-kpis" id="clKpis"></div>
+        </section>
+        <section class="cl-panel">
+          <div class="cl-panel-head"><div><h2>Fila comercial</h2><p>O primeiro corretor que assumir recebe o lead de forma atômica.</p></div><button class="btn btn-sm btn-ghost" id="clRefresh" type="button">Atualizar</button></div>
+          <div class="cl-panel-body">
+            <div class="cl-filters">
+              <input id="clSearch" placeholder="Buscar nome, telefone, bairro...">
+              <select id="clStatus"><option value="">Todos os status</option></select>
+              <select id="clAgent"><option value="">Todos os corretores</option><option value="unassigned">Não atribuídos</option></select>
+              <select id="clPriority"><option value="">Todas as prioridades</option></select>
+              <button class="btn btn-sm btn-ghost" id="clClear" type="button">Limpar</button>
+            </div>
+            <div id="clLeadTable"><div class="cl-empty"><strong>Carregando atendimentos...</strong>Aguarde a conexão com o Supabase.</div></div>
+          </div>
+        </section>
+        <section class="cl-panel">
+          <div class="cl-panel-head"><div><h2>Corretores online</h2><p>Presença atual e último sinal recebido.</p></div><span class="sync-chip" id="clAgentCount">0 online</span></div>
+          <div class="cl-panel-body"><div class="cl-agents" id="clAgents"></div></div>
+        </section>
+      </div>`;
+    content.appendChild(view);
+
+    Object.entries(STATUS).forEach(([value, meta]) => {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = meta[0];
+      $("clStatus").appendChild(option);
+    });
+    Object.entries(PRIORITY).forEach(([value, label]) => {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = label;
+      $("clPriority").appendChild(option);
+    });
+
+    $("clRefresh").addEventListener("click", () => refreshAll(true));
+    $("clClear").addEventListener("click", () => {
+      ["clSearch", "clStatus", "clAgent", "clPriority"].forEach((id) => { if ($(id)) $(id).value = ""; });
+      renderLeads();
+    });
+    $("clSearch").addEventListener("input", renderLeads);
+    ["clStatus", "clAgent", "clPriority"].forEach((id) => $(id).addEventListener("change", renderLeads));
+    $("clLeadTable").addEventListener("click", handleAction);
+  }
+
+  function injectModal() {
+    if ($("clModal")) return;
+    const modal = document.createElement("div");
+    modal.id = "clModal";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.innerHTML = `<div class="cl-modal-card"><div class="cl-modal-head"><h3 id="clModalTitle">Atendimento</h3><button class="x" id="clModalX" type="button">×</button></div><div class="cl-modal-body" id="clModalBody"></div><div class="cl-modal-foot" id="clModalFoot"></div></div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener("click", (event) => { if (event.target === modal || event.target.closest("[data-cl-close]")) closeModal(); });
+    $("clModalX").addEventListener("click", closeModal);
+  }
+
+  function openModal(title, body, foot) {
+    injectModal();
+    $("clModalTitle").textContent = title;
+    $("clModalBody").innerHTML = body;
+    $("clModalFoot").innerHTML = foot || `<button class="btn btn-sm btn-ghost" type="button" data-cl-close>Fechar</button>`;
+    $("clModal").classList.add("open");
+  }
+
+  function closeModal() {
+    const modal = $("clModal");
+    if (modal) modal.classList.remove("open");
+  }
+
+  function openCentral() {
+    injectNavigation();
+    injectView();
+    injectQuickButton();
+    if (typeof window.switchView === "function") window.switchView(VIEW_NAME);
+    else document.querySelectorAll(".view").forEach((view) => view.classList.toggle("active", view.id === VIEW_ID));
+    document.querySelectorAll("#nav button,#mobileNav button").forEach((button) => button.classList.toggle("active", button.dataset.view === VIEW_NAME));
+    refreshAll(false);
+  }
+  window.leadsOpenCentral = openCentral;
+
+  async function waitForClient() {
+    if (window.__LEADS_AUTH_READY__ && typeof window.__LEADS_AUTH_READY__.then === "function") {
+      try { await window.__LEADS_AUTH_READY__; } catch (_) {}
+    }
+    for (let i = 0; i < 80 && !window.supabaseClient; i += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    return window.supabaseClient || null;
+  }
+
+  async function loadIdentity() {
+    state.client = await waitForClient();
+    if (!state.client) throw new Error("Supabase não foi carregado.");
+    const result = await state.client.auth.getSession();
+    if (result.error) throw result.error;
+    if (!result.data || !result.data.session || !result.data.session.user) throw new Error("Usuário não autenticado.");
+    state.session = result.data.session;
+    state.user = result.data.session.user;
+
+    let profile = null;
+    try {
+      const res = await state.client.from("user_profiles").select(PROFILE_FIELDS).eq("id", state.user.id).maybeSingle();
+      if (!res.error) profile = res.data;
+    } catch (_) {}
+    state.profile = profile || {
+      id: state.user.id,
+      email: state.user.email || "",
+      full_name: (state.user.user_metadata && (state.user.user_metadata.full_name || state.user.user_metadata.name)) || String(state.user.email || "corretor").split("@")[0],
+      role: window.__LEADS_CURRENT_USER_ROLE__ || "corretor",
+      approved: true,
+      active: true
+    };
+    state.isAdmin = roleIsAdmin(state.profile.role || window.__LEADS_CURRENT_USER_ROLE__);
+    $("clHeroText").textContent = state.isAdmin
+      ? "Visão administrativa completa dos leads, responsáveis e andamento comercial em tempo real."
+      : "Veja os leads disponíveis e os atendimentos atribuídos a você.";
+  }
+
+  async function loadProfiles() {
+    let data = null;
+    let error = null;
+    try {
+      const rpc = await state.client.rpc("list_crm_agents");
+      data = rpc.data;
+      error = rpc.error;
+    } catch (err) { error = err; }
+
+    if (error) {
+      try {
+        const fallback = await state.client.from("user_profiles").select(PROFILE_FIELDS).order("full_name", { ascending: true });
+        data = fallback.data;
+        error = fallback.error;
+      } catch (err) { error = err; }
+    }
+
+    const list = Array.isArray(data) ? data.filter((p) => p && p.active !== false && p.approved !== false) : [];
+    if (!list.some((p) => p.id === state.user.id)) list.unshift(state.profile);
+    state.profiles = list;
+    state.profileMap = new Map(list.map((p) => [p.id, p]));
+
+    const select = $("clAgent");
+    const old = select.value;
+    select.innerHTML = `<option value="">${state.isAdmin ? "Todos os corretores" : "Meus e disponíveis"}</option><option value="unassigned">Não atribuídos</option>`;
+    list.forEach((p) => {
+      const option = document.createElement("option");
+      option.value = p.id;
+      option.textContent = p.full_name || p.email || "Corretor";
+      select.appendChild(option);
+    });
+    if ([...select.options].some((o) => o.value === old)) select.value = old;
+  }
+
+  async function loadLeads() {
+    let response = await state.client.from("site_leads").select(LEAD_FIELDS).order("created_at", { ascending: false }).limit(500);
+    if (response.error && /column|does not exist|schema cache/i.test(response.error.message || "")) {
+      response = await state.client.from("site_leads").select("*").order("created_at", { ascending: false }).limit(500);
+    }
+    if (response.error) throw response.error;
+    state.leads = Array.isArray(response.data) ? response.data : [];
+  }
+
+  function filteredLeads() {
+    const q = norm($("clSearch").value);
+    const status = $("clStatus").value;
+    const agent = $("clAgent").value;
+    const priority = $("clPriority").value;
+    return state.leads.filter((lead) => {
+      const haystack = norm([lead.name, lead.phone, lead.email, lead.intent, lead.neighborhood, lead.budget, lead.property_type, lead.summary, profileName(lead.assigned_user_id)].filter(Boolean).join(" "));
+      if (q && !haystack.includes(q)) return false;
+      if (status && statusOf(lead) !== status) return false;
+      if (priority && priorityOf(lead) !== priority) return false;
+      if (agent === "unassigned" && lead.assigned_user_id) return false;
+      if (agent && agent !== "unassigned" && lead.assigned_user_id !== agent) return false;
+      return true;
+    });
+  }
+
+  function statusBadge(lead) {
+    const key = statusOf(lead);
+    const meta = STATUS[key] || STATUS.novo;
+    return `<span class="cl-status cl-status-${meta[1]}">${esc(meta[0])}</span>`;
+  }
+
+  function priorityBadge(lead) {
+    const key = priorityOf(lead);
+    return `<span class="cl-priority cl-priority-${key}">${esc(PRIORITY[key])}</span>`;
+  }
+
+  function agentCell(lead) {
+    const profile = state.profileMap.get(lead.assigned_user_id);
+    if (!profile) return `<span class="cl-muted">Fila da equipe</span>`;
+    return `<div class="cl-agent">${avatar(profile)}<div><b>${esc(profile.full_name || profile.email || "Corretor")}</b><small>${esc(presenceLabel(profile))}</small></div></div>`;
+  }
+
+  function rowActions(lead) {
+    const buttons = [];
+    if (isAvailable(lead)) buttons.push(`<button class="btn btn-sm btn-green" data-cl-action="claim" data-lead-id="${esc(lead.id)}">Assumir</button>`);
+    buttons.push(`<button class="btn btn-sm btn-ghost" data-cl-action="details" data-lead-id="${esc(lead.id)}">Detalhes</button>`);
+    const phone = digits(lead.phone);
+    if (phone) buttons.push(`<button class="btn btn-sm btn-green" data-cl-action="whatsapp" data-lead-id="${esc(lead.id)}">WhatsApp</button>`);
+    if (canManage(lead) && lead.assigned_user_id) {
+      buttons.push(`<button class="btn btn-sm" data-cl-action="contact" data-lead-id="${esc(lead.id)}">Contato</button>`);
+      buttons.push(`<button class="btn btn-sm btn-ghost" data-cl-action="status" data-lead-id="${esc(lead.id)}">Status</button>`);
+      buttons.push(`<button class="btn btn-sm btn-ghost" data-cl-action="note" data-lead-id="${esc(lead.id)}">Nota</button>`);
+      buttons.push(`<button class="btn btn-sm btn-ghost" data-cl-action="transfer" data-lead-id="${esc(lead.id)}">Transferir</button>`);
+      buttons.push(`<button class="btn btn-sm btn-danger" data-cl-action="release" data-lead-id="${esc(lead.id)}">Liberar</button>`);
+    }
+    if (state.isAdmin && CLOSED.has(statusOf(lead))) buttons.push(`<button class="btn btn-sm" data-cl-action="reopen" data-lead-id="${esc(lead.id)}">Reabrir</button>`);
+    return `<div class="cl-actions">${buttons.join("")}</div>`;
+  }
+
+  function renderKpis() {
+    const total = state.leads.length;
+    const available = state.leads.filter(isAvailable).length;
+    const mine = state.leads.filter(isMine).length;
+    const active = state.leads.filter((l) => !CLOSED.has(statusOf(l))).length;
+    const urgent = state.leads.filter((l) => attention(l)[0] === "urgent").length;
+    $("clKpis").innerHTML = [
+      ["Total de leads", total, "Base visível para seu perfil"],
+      ["Disponíveis", available, "Aguardando atendimento"],
+      [state.isAdmin ? "Atribuídos" : "Meus leads", state.isAdmin ? state.leads.filter((l) => l.assigned_user_id).length : mine, "Com responsável"],
+      ["Em andamento", active, "Ainda não encerrados"],
+      ["Atenção imediata", urgent, "Prazo comercial vencido"]
+    ].map((item) => `<div class="cl-kpi"><small>${esc(item[0])}</small><strong>${item[1]}</strong><span>${esc(item[2])}</span></div>`).join("");
+    const quick = $("clQuickCount");
+    if (quick) quick.textContent = String(available);
+  }
+
+  function renderLeads() {
+    const root = $("clLeadTable");
+    if (!root) return;
+    const list = filteredLeads();
+    if (!list.length) {
+      root.innerHTML = `<div class="cl-empty"><strong>Nenhum lead encontrado.</strong>Ajuste os filtros ou aguarde um novo contato do site.</div>`;
+      return;
+    }
+    root.innerHTML = `<div class="cl-table-wrap"><table class="cl-table"><thead><tr><th>Lead</th><th>Interesse</th><th>Status</th><th>Prioridade</th><th>Responsável</th><th>Última atividade</th><th>Ações</th></tr></thead><tbody>${list.map((lead) => {
+      const att = attention(lead);
+      const rowClass = att[0] === "urgent" ? "cl-row-urgent" : att[0] === "warning" ? "cl-row-warning" : "";
+      return `<tr class="${rowClass}"><td><div class="cl-lead"><span class="cl-lead-initial">${esc(initials(lead.name || "L").toUpperCase())}</span><div><b>${esc(lead.name || "Novo interessado")}</b><small>${esc(lead.phone || lead.email || "Contato não informado")}</small><small>${esc(att[1])}</small></div></div></td><td><div class="cl-summary">${esc(lead.summary || lead.intent || "Em qualificação")}</div><span class="cl-muted">${esc([lead.property_type, lead.neighborhood, lead.budget].filter(Boolean).join(" · "))}</span></td><td>${statusBadge(lead)}</td><td>${priorityBadge(lead)}</td><td>${agentCell(lead)}</td><td>${esc(relative(lead.last_activity_at || lead.updated_at || lead.created_at))}<span class="cl-muted">${esc(dateText(lead.created_at))}</span></td><td>${rowActions(lead)}</td></tr>`;
+    }).join("")}</tbody></table></div>`;
+  }
+
+  function persistentOnline(profile) {
+    const seen = new Date(profile.last_seen_at || 0).getTime();
+    return seen && Date.now() - seen < 70000;
+  }
+
+  function presenceEntry(profile) {
+    return state.presenceMap.get(profile.id) || null;
+  }
+
+  function presenceValue(profile) {
+    const live = presenceEntry(profile);
+    if (live && live.status) return live.status;
+    if (persistentOnline(profile)) return profile.presence_status || "online";
+    return "offline";
+  }
+
+  function presenceLabel(profile) {
+    const value = presenceValue(profile);
+    return ({ online: "Online", em_atendimento: "Em atendimento", ausente: "Ausente", offline: "Offline" })[value] || "Offline";
+  }
+
+  function renderAgents() {
+    const root = $("clAgents");
+    if (!root) return;
+    const list = state.profiles.slice().sort((a, b) => {
+      const ao = presenceValue(a) === "offline" ? 1 : 0;
+      const bo = presenceValue(b) === "offline" ? 1 : 0;
+      return ao - bo || String(a.full_name || a.email).localeCompare(String(b.full_name || b.email), "pt-BR");
+    });
+    const onlineCount = list.filter((p) => presenceValue(p) !== "offline").length;
+    $("clAgentCount").textContent = `${onlineCount} online`;
+    if (!list.length) {
+      root.innerHTML = `<div class="cl-empty"><strong>Nenhum perfil disponível.</strong>Execute a função list_crm_agents no Supabase.</div>`;
+      return;
+    }
+    root.innerHTML = list.map((profile) => {
+      const value = presenceValue(profile);
+      const assigned = state.leads.filter((l) => l.assigned_user_id === profile.id && !CLOSED.has(statusOf(l))).length;
+      return `<div class="cl-agent-card">${avatar(profile, true)}<div><b>${esc(profile.full_name || profile.email || "Corretor")}</b><small>${assigned} atendimento${assigned === 1 ? "" : "s"} ativo${assigned === 1 ? "" : "s"}</small><small>Último sinal: ${esc(relative(profile.last_seen_at))}</small></div><span class="cl-presence cl-presence-${esc(value)}">${esc(presenceLabel(profile))}</span></div>`;
+    }).join("");
+  }
+
+  function checkNewLeads() {
+    const current = new Set(state.leads.map((lead) => String(lead.id)));
+    if (!state.firstLoad) {
+      state.leads.forEach((lead) => {
+        if (!state.knownLeadIds.has(String(lead.id))) notify("Novo lead recebido", `${lead.name || "Novo interessado"} entrou pelo site.`, "success");
+      });
+    }
+    state.knownLeadIds = current;
+    state.firstLoad = false;
+  }
+
+  async function refreshAll(showMessage) {
+    if (!state.ready || state.loading || !state.client) return;
+    state.loading = true;
+    try {
+      await Promise.all([loadProfiles(), loadLeads()]);
+      checkNewLeads();
+      renderKpis();
+      renderLeads();
+      renderAgents();
+      if (showMessage) notify("CRM atualizado", "Leads e corretores foram recarregados.", "success");
+    } catch (error) {
+      console.error("Central de Atendimentos:", error);
+      const root = $("clLeadTable");
+      if (root) root.innerHTML = `<div class="cl-empty"><strong>Central indisponível</strong>${esc(error.message || "Falha ao consultar o Supabase.")}</div>`;
+      if (showMessage) notify("Falha ao atualizar", error.message || "Erro de conexão.", "error");
+    } finally {
+      state.loading = false;
+    }
+  }
+
+  async function rpc(name, args, successMessage) {
+    const response = await state.client.rpc(name, args || {});
+    if (response.error) throw response.error;
+    const data = response.data;
+    if (data && data.ok === false) throw new Error(data.message || data.error || "Operação recusada.");
+    if (successMessage) notify(successMessage, (data && data.message) || "Operação concluída.", "success");
+    await refreshAll(false);
+    return data;
+  }
+
+  function findLead(id) {
+    return state.leads.find((lead) => String(lead.id) === String(id));
+  }
+
+  function transferOptions(currentId) {
+    return state.profiles.filter((p) => p.id !== currentId).map((p) => `<option value="${esc(p.id)}">${esc(p.full_name || p.email || "Corretor")} — ${esc(presenceLabel(p))}</option>`).join("");
+  }
+
+  async function handleAction(event) {
+    const button = event.target.closest("[data-cl-action]");
+    if (!button) return;
+    const lead = findLead(button.dataset.leadId);
+    if (!lead) return;
+    const action = button.dataset.clAction;
+
+    if (action === "claim") {
+      button.disabled = true;
+      const old = button.textContent;
+      button.textContent = "Assumindo...";
+      try {
+        const data = await rpc("claim_site_lead", { p_lead_id: lead.id }, "Lead atribuído");
+        if (data && data.claimed === false) notify("Lead já assumido", data.message || "Outro corretor chegou primeiro.", "error");
+      } catch (error) { notify("Não foi possível assumir", error.message, "error"); }
+      finally { button.disabled = false; button.textContent = old; }
+      return;
+    }
+
+    if (action === "whatsapp") {
+      const phone = digits(lead.phone);
+      if (phone) window.open(`https://wa.me/${phone.startsWith("55") ? phone : "55" + phone}?text=${encodeURIComponent(`Olá ${lead.name || ""}, aqui é da Leads Imóveis. Recebemos seu contato e vou cuidar do seu atendimento.`)}`, "_blank", "noopener");
+      return;
+    }
+
+    if (action === "details") {
+      openModal(`Detalhes — ${lead.name || "Lead"}`, `<div class="cl-detail-grid">${[
+        ["Nome", lead.name], ["Telefone", lead.phone], ["E-mail", lead.email], ["Interesse", lead.intent],
+        ["Tipo", lead.property_type], ["Bairro", lead.neighborhood], ["Orçamento", lead.budget],
+        ["Quartos", lead.bedrooms], ["Status", (STATUS[statusOf(lead)] || STATUS.novo)[0]],
+        ["Responsável", profileName(lead.assigned_user_id)], ["Entrada", dateText(lead.created_at)],
+        ["Resumo", lead.summary]
+      ].map(([label, value]) => `<div class="cl-detail"><small>${esc(label)}</small><b>${esc(value || "Não informado")}</b></div>`).join("")}</div>`, `<button class="btn btn-sm btn-ghost" type="button" data-cl-close>Fechar</button>`);
+      return;
+    }
+
+    if (action === "contact") {
+      openModal(`Registrar contato — ${lead.name || "Lead"}`, `<div class="cl-field"><label>Observação do contato</label><textarea id="clContactNotes" placeholder="Ex.: Enviei WhatsApp e apresentei dois imóveis."></textarea></div>`, `<button class="btn btn-sm btn-ghost" data-cl-close>Cancelar</button><button class="btn btn-sm" id="clConfirmContact">Registrar</button>`);
+      $("clConfirmContact").addEventListener("click", async () => {
+        try { await rpc("register_site_lead_contact", { p_lead_id: lead.id, p_notes: $("clContactNotes").value.trim() || null }, "Contato registrado"); closeModal(); }
+        catch (error) { notify("Erro ao registrar", error.message, "error"); }
+      });
+      return;
+    }
+
+    if (action === "status") {
+      const options = Object.entries(STATUS).filter(([value]) => !["novo", "disponivel"].includes(value)).map(([value, meta]) => `<option value="${value}" ${statusOf(lead) === value ? "selected" : ""}>${esc(meta[0])}</option>`).join("");
+      openModal(`Alterar status — ${lead.name || "Lead"}`, `<div class="cl-field"><label>Novo status</label><select id="clNewStatus">${options}</select></div><div class="cl-field"><label>Motivo</label><input id="clStatusReason" placeholder="Obrigatório para Sem interesse ou Perdido"></div><div class="cl-field"><label>Observação</label><textarea id="clStatusNotes"></textarea></div>`, `<button class="btn btn-sm btn-ghost" data-cl-close>Cancelar</button><button class="btn btn-sm" id="clConfirmStatus">Salvar</button>`);
+      $("clConfirmStatus").addEventListener("click", async () => {
+        try { await rpc("update_site_lead_status", { p_lead_id: lead.id, p_new_status: $("clNewStatus").value, p_reason: $("clStatusReason").value.trim() || null, p_notes: $("clStatusNotes").value.trim() || null }, "Status atualizado"); closeModal(); }
+        catch (error) { notify("Erro ao alterar status", error.message, "error"); }
+      });
+      return;
+    }
+
+    if (action === "note") {
+      openModal(`Observação — ${lead.name || "Lead"}`, `<div class="cl-field"><label>Observação interna</label><textarea id="clNoteText" placeholder="Informação importante para o histórico."></textarea></div>`, `<button class="btn btn-sm btn-ghost" data-cl-close>Cancelar</button><button class="btn btn-sm" id="clConfirmNote">Adicionar</button>`);
+      $("clConfirmNote").addEventListener("click", async () => {
+        try { await rpc("add_site_lead_note", { p_lead_id: lead.id, p_notes: $("clNoteText").value.trim() }, "Observação adicionada"); closeModal(); }
+        catch (error) { notify("Erro ao adicionar", error.message, "error"); }
+      });
+      return;
+    }
+
+    if (action === "transfer") {
+      openModal(`Transferir — ${lead.name || "Lead"}`, `<div class="cl-field"><label>Novo corretor</label><select id="clTransferUser"><option value="">Escolha</option>${transferOptions(lead.assigned_user_id)}</select></div><div class="cl-field"><label>Motivo</label><textarea id="clTransferReason" placeholder="Explique a transferência."></textarea></div>`, `<button class="btn btn-sm btn-ghost" data-cl-close>Cancelar</button><button class="btn btn-sm" id="clConfirmTransfer">Transferir</button>`);
+      $("clConfirmTransfer").addEventListener("click", async () => {
+        try { await rpc("transfer_site_lead", { p_lead_id: lead.id, p_new_user_id: $("clTransferUser").value || null, p_reason: $("clTransferReason").value.trim() }, "Lead transferido"); closeModal(); }
+        catch (error) { notify("Erro na transferência", error.message, "error"); }
+      });
+      return;
+    }
+
+    if (action === "release") {
+      openModal(`Liberar — ${lead.name || "Lead"}`, `<p style="color:var(--mut);font-size:12px;line-height:1.5;margin-bottom:12px">O lead voltará para a fila e poderá ser assumido por outro corretor.</p><div class="cl-field"><label>Motivo</label><textarea id="clReleaseReason" placeholder="Informe o motivo da liberação."></textarea></div>`, `<button class="btn btn-sm btn-ghost" data-cl-close>Cancelar</button><button class="btn btn-sm btn-danger" id="clConfirmRelease">Liberar</button>`);
+      $("clConfirmRelease").addEventListener("click", async () => {
+        try { await rpc("release_site_lead", { p_lead_id: lead.id, p_reason: $("clReleaseReason").value.trim() }, "Lead liberado"); closeModal(); }
+        catch (error) { notify("Erro ao liberar", error.message, "error"); }
+      });
+      return;
+    }
+
+    if (action === "reopen") {
+      openModal(`Reabrir — ${lead.name || "Lead"}`, `<div class="cl-field"><label>Motivo</label><textarea id="clReopenReason" placeholder="Ex.: Cliente retornou."></textarea></div>`, `<button class="btn btn-sm btn-ghost" data-cl-close>Cancelar</button><button class="btn btn-sm" id="clConfirmReopen">Reabrir</button>`);
+      $("clConfirmReopen").addEventListener("click", async () => {
+        try { await rpc("reopen_site_lead", { p_lead_id: lead.id, p_reason: $("clReopenReason").value.trim() || null }, "Lead reaberto"); closeModal(); }
+        catch (error) { notify("Erro ao reabrir", error.message, "error"); }
+      });
+    }
+  }
+
+  function desiredPresence() {
+    return document.hidden ? "ausente" : state.leads.some((lead) => isMine(lead) && !CLOSED.has(statusOf(lead))) ? "em_atendimento" : "online";
+  }
+
+  async function updatePersistentPresence(status) {
+    if (!state.client || !state.user) return;
+    try { await state.client.rpc("touch_crm_presence", { p_status: status, p_current_lead_id: null }); }
+    catch (_) {}
+  }
+
+  async function trackPresence(status) {
+    const channel = state.channels.find((item) => item && item.__leadsPresence);
+    if (channel && typeof channel.track === "function") {
+      try {
+        await channel.track({ user_id: state.user.id, name: state.profile.full_name || state.profile.email || "Corretor", role: state.profile.role || "corretor", status, online_at: new Date().toISOString() });
+      } catch (_) {}
+    }
+    updatePersistentPresence(status);
+  }
+
+  function clearChannels() {
+    if (!state.client) return;
+    state.channels.forEach((channel) => { try { state.client.removeChannel(channel); } catch (_) {} });
+    state.channels = [];
+  }
+
+  function subscribeRealtime() {
+    if (!state.client || typeof state.client.channel !== "function") {
+      $("clRealtimeStatus").textContent = "Atualização a cada 30 s";
+      return;
+    }
+    clearChannels();
+    const refresh = () => window.setTimeout(() => refreshAll(false), 250);
+
+    const leadChannel = state.client.channel(`leads-central-${state.user.id}-${VERSION}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_leads" }, refresh)
+      .subscribe((status) => { if ($("clRealtimeStatus")) $("clRealtimeStatus").textContent = status === "SUBSCRIBED" ? "Tempo real conectado" : `Tempo real: ${status}`; });
+    state.channels.push(leadChannel);
+
+    try {
+      const history = state.client.channel(`leads-history-${state.user.id}-${VERSION}`)
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "site_lead_history" }, refresh)
+        .subscribe();
+      state.channels.push(history);
+    } catch (_) {}
+
+    try {
+      const presence = state.client.channel(PRESENCE_CHANNEL, { config: { presence: { key: state.user.id } } });
+      presence.__leadsPresence = true;
+      const sync = () => {
+        const raw = presence.presenceState ? presence.presenceState() : {};
+        const map = new Map();
+        Object.values(raw || {}).flat().forEach((entry) => { if (entry && entry.user_id) map.set(entry.user_id, entry); });
+        state.presenceMap = map;
+        renderAgents();
+      };
+      presence.on("presence", { event: "sync" }, sync).on("presence", { event: "join" }, sync).on("presence", { event: "leave" }, sync).subscribe(async (status) => { if (status === "SUBSCRIBED") await trackPresence(desiredPresence()); });
+      state.channels.push(presence);
+    } catch (_) {}
+  }
+
+  function startTimers() {
+    clearInterval(state.poll);
+    clearInterval(state.heartbeat);
+    state.poll = setInterval(() => { if (!document.hidden) refreshAll(false); }, POLL_MS);
+    state.heartbeat = setInterval(() => { if (!document.hidden) trackPresence(desiredPresence()); }, HEARTBEAT_MS);
+  }
+
+  function bindLifecycle() {
+    document.addEventListener("visibilitychange", () => {
+      if (!state.ready) return;
+      trackPresence(document.hidden ? "ausente" : desiredPresence());
+      if (!document.hidden) refreshAll(false);
+    });
+    window.addEventListener("focus", () => { if (state.ready) trackPresence(desiredPresence()); });
+    window.addEventListener("online", () => { if (state.ready) { subscribeRealtime(); refreshAll(false); } });
+    window.addEventListener("beforeunload", () => {
+      updatePersistentPresence("offline");
+      const presence = state.channels.find((item) => item && item.__leadsPresence);
+      try { if (presence && presence.untrack) presence.untrack(); } catch (_) {}
+    });
+  }
+
+  async function init() {
+    injectStyles();
+    injectNavigation();
+    injectView();
+    injectModal();
+    injectQuickButton();
+    try {
+      await loadIdentity();
+      state.ready = true;
+      await refreshAll(false);
+      subscribeRealtime();
+      startTimers();
+      bindLifecycle();
+    } catch (error) {
+      console.warn("Central de Atendimentos não iniciada:", error.message || error);
+      const root = $("clLeadTable");
+      if (root) root.innerHTML = `<div class="cl-empty"><strong>Faça login para abrir a Central</strong>${esc(error.message || "Usuário não autenticado.")}</div>`;
+      if ($("clRealtimeStatus")) $("clRealtimeStatus").textContent = "Aguardando login";
+    }
+
+    const observer = new MutationObserver(() => {
+      injectNavigation();
+      injectQuickButton();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
+  else init();
+})();
+
+</script>
 
 </body>
 </html>
