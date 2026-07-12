@@ -9427,7 +9427,127 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     .photo-img-v104{height:116px!important}
   }
 </style>
+<script>
+(function iniciarFrasesMotivacionais() {
+    "use strict";
 
+    const frasesMotivacionais = [
+        "Quem acompanha, fecha.",
+        "Cada contato aproxima você do fechamento.",
+        "Consistência transforma contatos em contratos.",
+        "Atendimento rápido gera confiança.",
+        "A disciplina de hoje vira comissão amanhã.",
+        "Cada visita é uma chance de encantar.",
+        "Confiança se conquista em cada atendimento.",
+        "Persistência com estratégia gera resultado.",
+        "O próximo lead pode ser a próxima venda.",
+        "Grandes resultados começam com pequenas ações.",
+        "Escute bem. Oriente melhor. Venda com verdade.",
+        "Quem conhece o mercado negocia com segurança.",
+        "Transforme dúvidas em segurança para o cliente.",
+        "Hoje é dia de criar novas oportunidades.",
+        "Follow-up bem feito mantém a negociação viva.",
+        "Sua energia abre portas antes da chave.",
+        "Conhecimento aumenta seu poder de negociação.",
+        "Um excelente corretor realiza grandes sonhos.",
+        "Cada resposta rápida fortalece a negociação.",
+        "O mercado recompensa quem age todos os dias."
+    ];
+
+    /*
+     * O código procura automaticamente os nomes mais comuns
+     * usados no elemento da frase motivacional.
+     */
+    const seletoresPossiveis = [
+        "#frase-motivacional",
+        "#fraseMotivacional",
+        "#motivationalPhrase",
+        "#motivational-phrase",
+        "#dailyMotivation",
+        ".frase-motivacional",
+        ".motivational-phrase",
+        "[data-motivational-phrase]"
+    ];
+
+    let elementoFrase = null;
+
+    for (const seletor of seletoresPossiveis) {
+        elementoFrase = document.querySelector(seletor);
+
+        if (elementoFrase) {
+            break;
+        }
+    }
+
+    if (!elementoFrase) {
+        console.warn(
+            "[Leads Imóveis] O elemento da frase motivacional não foi encontrado."
+        );
+        return;
+    }
+
+    /*
+     * Impede que o sistema seja iniciado duas vezes.
+     */
+    if (elementoFrase.dataset.rotacaoFrasesAtiva === "true") {
+        return;
+    }
+
+    elementoFrase.dataset.rotacaoFrasesAtiva = "true";
+
+    /*
+     * Mantém tamanho, posição, cor, fonte e layout existentes.
+     * Acrescenta apenas o efeito suave de troca.
+     */
+    elementoFrase.style.transition =
+        "opacity 0.45s ease, transform 0.45s ease";
+
+    let indiceAtual = Math.floor(
+        Math.random() * frasesMotivacionais.length
+    );
+
+    function calcularProximoTempo() {
+        /*
+         * Retorna um tempo aleatório entre 3 e 5 segundos.
+         */
+        return Math.floor(Math.random() * 2001) + 3000;
+    }
+
+    function exibirFraseAtual() {
+        elementoFrase.textContent =
+            frasesMotivacionais[indiceAtual];
+
+        elementoFrase.style.opacity = "1";
+        elementoFrase.style.transform = "translateY(0)";
+    }
+
+    function trocarFrase() {
+        elementoFrase.style.opacity = "0";
+        elementoFrase.style.transform = "translateY(4px)";
+
+        window.setTimeout(function () {
+            indiceAtual++;
+
+            if (indiceAtual >= frasesMotivacionais.length) {
+                indiceAtual = 0;
+            }
+
+            exibirFraseAtual();
+            agendarProximaTroca();
+        }, 450);
+    }
+
+    function agendarProximaTroca() {
+        window.setTimeout(
+            trocarFrase,
+            calcularProximoTempo()
+        );
+    }
+
+    exibirFraseAtual();
+    agendarProximaTroca();
+})();
+</script>
 
 
 
