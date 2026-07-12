@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -62,13 +61,20 @@
   <script>
     (function () {
       "use strict";
+
       const CRM_URL = "crm.html";
+      const ADMIN_EMAIL = "leadsimoveisoficial@gmail.com";
+
       const form = document.getElementById("loginForm");
       const email = document.getElementById("email");
       const password = document.getElementById("password");
       const submit = document.getElementById("submit");
       const signup = document.getElementById("signup");
       const msg = document.getElementById("msg");
+
+      function normalizeEmail(value) {
+        return String(value || "").trim().toLowerCase();
+      }
 
       function show(text, type) {
         msg.textContent = text;
@@ -86,47 +92,179 @@
       }
 
       async function clientReady() {
-        for (let i = 0; i < 80 && !window.supabaseClient; i += 1) await new Promise((resolve) => setTimeout(resolve, 100));
+        for (let i = 0; i < 80 && !window.supabaseClient; i += 1) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
         return window.supabaseClient || null;
+      }
+
+      async function readProfile(client, userId) {
+        const result = await client
+          .from("user_profiles")
+          .select("id,email,full_name,role,approved,active")
+          .eq("id", userId)
+          .maybeSingle();
+
+        if (result.error) throw result.error;
+        return result.data || null;
+      }
+
+      async function createPendingProfile(client, user) {
+        const userEmail = normalizeEmail(user && user.email);
+        const fullName =
+          (user && user.user_metadata &&
+            (user.user_metadata.full_name || user.user_metadata.name)) ||
+          (userEmail ? userEmail.split("@")[0] : "Corretor");
+
+        const result = await client
+          .from("user_profiles")
+          .insert({
+            id: user.id,
+            email: userEmail,
+            full_name: fullName,
+            role: "corretor",
+            approved: false,
+            active: true,
+            updated_at: new Date().toISOString()
+          })
+          .select("id,email,full_name,role,approved,active")
+          .single();
+
+        if (result.error) throw result.error;
+        return result.data;
+      }
+
+      async function updateSafeProfileFields(client, user) {
+        const userEmail = normalizeEmail(user && user.email);
+        const fullName =
+          (user && user.user_metadata &&
+            (user.user_metadata.full_name || user.user_metadata.name)) ||
+          (userEmail ? userEmail.split("@")[0] : "Corretor");
+
+        const result = await client
+          .from("user_profiles")
+          .update({
+            email: userEmail,
+            full_name: fullName,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", user.id);
+
+        if (result.error) {
+          console.warn("Não foi possível atualizar os dados básicos do perfil:", result.error);
+        }
+      }
+
+      async function validateAccess(client, user) {
+        const userEmail = normalizeEmail(user && user.email);
+        let profile = await readProfile(client, user.id);
+
+        if (!profile) {
+          if (userEmail === ADMIN_EMAIL) {
+            throw new Error(
+              "O perfil administrativo ainda não está configurado no Supabase. Execute o SQL de liberação do administrador."
+            );
+          }
+
+          profile = await createPendingProfile(client, user);
+        } else {
+          await updateSafeProfileFields(client, user);
+        }
+
+        const isOfficialAdmin =
+          userEmail === ADMIN_EMAIL &&
+          profile.role === "admin" &&
+          profile.approved === true &&
+          profile.active === true;
+
+        if (userEmail === ADMIN_EMAIL && !isOfficialAdmin) {
+          throw new Error(
+            "A conta administrativa existe, mas o perfil ainda não está marcado como admin, aprovado e ativo no Supabase."
+          );
+        }
+
+        if (profile.active !== true) {
+          throw new Error("Sua conta está inativa. Fale com o administrador.");
+        }
+
+        if (profile.approved !== true) {
+          throw new Error("Acesso pendente. Sua conta precisa ser liberada pelo administrador.");
+        }
+
+        return true;
       }
 
       async function redirectExistingSession() {
         const client = await clientReady();
-        if (!client) { show("Supabase não carregou. Atualize a página.", "error"); return; }
+
+        if (!client) {
+          show("Supabase não carregou. Atualize a página.", "error");
+          return;
+        }
+
         try {
           const result = await client.auth.getSession();
-          if (result.data && result.data.session) location.replace(CRM_URL);
-        } catch (_) {}
+          const session = result.data && result.data.session;
+
+          if (!session || !session.user) return;
+
+          await validateAccess(client, session.user);
+          location.replace(CRM_URL);
+        } catch (error) {
+          console.warn("Sessão existente sem acesso liberado:", error);
+        }
       }
 
       form.addEventListener("submit", async function (event) {
         event.preventDefault();
-        const mail = email.value.trim().toLowerCase();
+
+        const mail = normalizeEmail(email.value);
         const pass = password.value;
-        if (!mail || !pass) { show("Preencha e-mail e senha.", "error"); return; }
+
+        if (!mail || !pass) {
+          show("Preencha e-mail e senha.", "error");
+          return;
+        }
+
         const client = await clientReady();
-        if (!client) { show("Supabase não carregou. Atualize a página.", "error"); return; }
+
+        if (!client) {
+          show("Supabase não carregou. Atualize a página.", "error");
+          return;
+        }
+
         submit.disabled = true;
         submit.textContent = "Entrando...";
         show("Validando sua conta...", "success");
+
         try {
-          const result = await client.auth.signInWithPassword({ email: mail, password: pass });
+          const result = await client.auth.signInWithPassword({
+            email: mail,
+            password: pass
+          });
+
           if (result.error) throw result.error;
-          try {
-            await client.from("user_profiles").upsert({
-              id: result.data.user.id,
-              email: result.data.user.email,
-              full_name: result.data.user.user_metadata && (result.data.user.user_metadata.full_name || result.data.user.user_metadata.name) || mail.split("@")[0],
-              role: mail === "leadsimoveisoficial@gmail.com" ? "admin" : "corretor",
-              approved: true,
-              active: true,
-              last_login_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            }, { onConflict: "id" });
-          } catch (_) {}
+          if (!result.data || !result.data.user) {
+            throw new Error("O Supabase não retornou o usuário autenticado.");
+          }
+
+          await validateAccess(client, result.data.user);
+
+          if (document.getElementById("remember").checked) {
+            localStorage.setItem("leads_login_email", mail);
+          } else {
+            localStorage.removeItem("leads_login_email");
+          }
+
           show("Acesso autorizado. Abrindo o CRM...", "success");
           location.replace(CRM_URL);
         } catch (error) {
+          console.error("Falha no login:", error);
+
+          try {
+            await client.auth.signOut();
+          } catch (_) {}
+
           show(friendly(error), "error");
           submit.disabled = false;
           submit.textContent = "Entrar no CRM →";
@@ -134,24 +272,64 @@
       });
 
       signup.addEventListener("click", async function () {
-        const mail = email.value.trim().toLowerCase();
+        const mail = normalizeEmail(email.value);
         const pass = password.value;
-        if (!mail || pass.length < 6) { show("Informe um e-mail válido e uma senha com pelo menos 6 caracteres.", "error"); return; }
+
+        if (!mail || pass.length < 6) {
+          show("Informe um e-mail válido e uma senha com pelo menos 6 caracteres.", "error");
+          return;
+        }
+
+        if (mail === ADMIN_EMAIL) {
+          show("A conta administrativa não pode ser criada por este botão.", "error");
+          return;
+        }
+
         const client = await clientReady();
-        if (!client) { show("Supabase não carregou.", "error"); return; }
+
+        if (!client) {
+          show("Supabase não carregou.", "error");
+          return;
+        }
+
         signup.disabled = true;
         signup.textContent = "Criando conta...";
+
         try {
-          const fullName = prompt("Nome completo do corretor:", mail.split("@")[0]) || mail.split("@")[0];
-          const result = await client.auth.signUp({ email: mail, password: pass, options: { data: { full_name: fullName, name: fullName } } });
+          const fullName =
+            prompt("Nome completo do corretor:", mail.split("@")[0]) ||
+            mail.split("@")[0];
+
+          const result = await client.auth.signUp({
+            email: mail,
+            password: pass,
+            options: {
+              data: {
+                full_name: fullName,
+                name: fullName
+              },
+              emailRedirectTo: location.origin + "/login.html"
+            }
+          });
+
           if (result.error) throw result.error;
-          if (result.data && result.data.session) {
-            try { await client.from("user_profiles").upsert({ id: result.data.user.id, email: mail, full_name: fullName, role: mail === "leadsimoveisoficial@gmail.com" ? "admin" : "corretor", approved: true, active: true, updated_at: new Date().toISOString() }, { onConflict: "id" }); } catch (_) {}
-            location.replace(CRM_URL);
-          } else {
-            show("Conta criada. Confirme o e-mail recebido e depois clique em Entrar.", "success");
+
+          if (result.data && result.data.session && result.data.user) {
+            try {
+              await createPendingProfile(client, result.data.user);
+            } catch (profileError) {
+              console.warn("O perfil poderá ser criado no primeiro login:", profileError);
+            }
+
+            await client.auth.signOut();
           }
+
+          show(
+            "Conta criada. Confirme o e-mail, entre novamente e aguarde a liberação do administrador.",
+            "success"
+          );
         } catch (error) {
+          console.error("Falha ao criar conta:", error);
           show(friendly(error), "error");
         } finally {
           signup.disabled = false;
@@ -160,20 +338,36 @@
       });
 
       document.getElementById("forgot").addEventListener("click", async function () {
-        const mail = email.value.trim().toLowerCase();
-        if (!mail) { show("Digite seu e-mail primeiro.", "error"); return; }
+        const mail = normalizeEmail(email.value);
+
+        if (!mail) {
+          show("Digite seu e-mail primeiro.", "error");
+          return;
+        }
+
         const client = await clientReady();
         if (!client) return;
+
         try {
-          const result = await client.auth.resetPasswordForEmail(mail, { redirectTo: location.origin + "/login.html" });
+          const result = await client.auth.resetPasswordForEmail(mail, {
+            redirectTo: location.origin + "/login.html"
+          });
+
           if (result.error) throw result.error;
           show("Enviamos o link de recuperação para seu e-mail.", "success");
-        } catch (error) { show(friendly(error), "error"); }
+        } catch (error) {
+          show(friendly(error), "error");
+        }
       });
 
       document.getElementById("eye").addEventListener("click", function () {
         password.type = password.type === "password" ? "text" : "password";
       });
+
+      try {
+        const savedEmail = localStorage.getItem("leads_login_email");
+        if (savedEmail) email.value = savedEmail;
+      } catch (_) {}
 
       redirectExistingSession();
     })();
