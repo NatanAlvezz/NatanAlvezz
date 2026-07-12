@@ -10895,5 +10895,276 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
 
 </script>
 
-</body>
+<!-- ==============================================================
+LEADS IMÓVEIS · PATCH DO CHAT CRM SEM TRAVAR · V5
+Cole este bloco no crm.html, imediatamente ANTES de </body>.
+
+O patch:
+- impede dois envios ao mesmo tempo;
+- reduz histórico enviado;
+- cancela a chamada após 18 segundos;
+- restaura o botão e o campo mesmo quando ocorre erro;
+- não altera a Lia do site.
+================================================================ -->
+
+<script id="leadsCrmAiFastPatchV5">
+(function(){
+  "use strict";
+
+  if(window.__LEADS_CRM_AI_FAST_PATCH_V5__) return;
+  window.__LEADS_CRM_AI_FAST_PATCH_V5__ = true;
+
+  var sending = false;
+  var ENDPOINT =
+    "https://zyfbgydbwsvbaogbxzrd.supabase.co/functions/v1/crm-ai-assistant";
+
+  function setBusy(busy){
+    var input = document.getElementById("chatInput");
+    var form = input && input.closest ? input.closest("form") : null;
+    var button = form ? form.querySelector('button[type="submit"]') : null;
+
+    if(input) input.disabled = busy;
+
+    if(button){
+      button.disabled = busy;
+      button.setAttribute("aria-busy", busy ? "true" : "false");
+    }
+  }
+
+  function compactContext(){
+    try{
+      var hot = (db.clientes || [])
+        .filter(function(c){
+          return c.interesse === "Alto" ||
+                 c.temperatura === "Quente" ||
+                 c.etapa === "Negociação";
+        })
+        .slice(0, 5)
+        .map(function(c){
+          return {
+            nome: c.nome || "",
+            bairro: c.bairro || "",
+            tipo: c.tipo || "",
+            interesse: c.interesse || "",
+            etapa: c.etapa || "",
+            orcamentoMax: c.max || c.orcamentoMax || "",
+            proximaAcao: c.proximaAcao || ""
+          };
+        });
+
+      return {
+        resumo: {
+          leads: (db.clientes || []).length,
+          imoveis: (db.imoveis || []).length,
+          propostas: (db.propostas || []).length
+        },
+        leadsPrioritarios: hot,
+        imovelAtivo:
+          typeof getActiveProp === "function" && getActiveProp()
+            ? {
+                id: getActiveProp().id,
+                codigo: getActiveProp().codigo,
+                titulo: getActiveProp().titulo,
+                finalidade: getActiveProp().finalidade,
+                bairro: getActiveProp().bairro,
+                valor: getActiveProp().valor,
+                dormitorios: getActiveProp().dormitorios,
+                suites: getActiveProp().suites,
+                vagas: getActiveProp().vagas,
+                descricao: String(
+                  getActiveProp().descricao ||
+                  getActiveProp().proximaAcao ||
+                  ""
+                ).slice(0, 1600)
+              }
+            : null
+      };
+    }catch(_){
+      return {};
+    }
+  }
+
+  window.callCRMRealAI = async function(question, opts){
+    opts = opts || {};
+
+    if(!window.supabaseClient || !window.supabaseClient.auth){
+      throw new Error("Supabase não está disponível.");
+    }
+
+    var sessionResult =
+      await window.supabaseClient.auth.getSession();
+
+    var accessToken =
+      sessionResult &&
+      sessionResult.data &&
+      sessionResult.data.session &&
+      sessionResult.data.session.access_token;
+
+    if(!accessToken){
+      throw new Error("Sessão expirada. Entre novamente.");
+    }
+
+    var history = (db.chat || [])
+      .slice(-6)
+      .map(function(m){
+        return {
+          role: m.role === "me" ? "user" : "assistant",
+          text: String(m.text || "")
+            .replace(
+              "Analisando o CRM e preparando uma resposta consultiva...",
+              ""
+            )
+            .slice(0, 700)
+            .trim()
+        };
+      })
+      .filter(function(m){
+        return !!m.text;
+      });
+
+    var controller = new AbortController();
+    var timer = setTimeout(function(){
+      controller.abort();
+    }, 18000);
+
+    try{
+      var response = await fetch(ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + accessToken
+        },
+        signal: controller.signal,
+        body: JSON.stringify({
+          question: String(question || "").slice(0, 3000),
+          leadId: opts.leadId || null,
+          imovelId:
+            opts.imovelId ||
+            window.activePropertyId ||
+            null,
+          history: history,
+          crmState: compactContext()
+        })
+      });
+
+      var data = await response.json().catch(function(){
+        return null;
+      });
+
+      if(!response.ok){
+        throw new Error(
+          data && (data.error || data.message)
+            ? (data.error || data.message)
+            : "Erro HTTP " + response.status
+        );
+      }
+
+      if(!data){
+        throw new Error("A IA retornou resposta vazia.");
+      }
+
+      var reply =
+        data.reply ||
+        data.response ||
+        data.answer ||
+        data.text ||
+        data.message ||
+        data.resposta ||
+        (
+          data.choices &&
+          data.choices[0] &&
+          data.choices[0].message &&
+          data.choices[0].message.content
+        ) ||
+        "";
+
+      if(!reply){
+        throw new Error("A IA respondeu sem texto.");
+      }
+
+      return String(reply);
+    }catch(error){
+      if(error && error.name === "AbortError"){
+        throw new Error(
+          "A IA demorou mais de 18 segundos. Tente novamente com uma pergunta mais direta."
+        );
+      }
+
+      throw error;
+    }finally{
+      clearTimeout(timer);
+    }
+  };
+
+  window.askAI = async function(text){
+    text = String(text || "").trim();
+
+    if(!text || sending) return;
+
+    sending = true;
+    setBusy(true);
+
+    db.chat.push({
+      role: "me",
+      text: text
+    });
+
+    db.chat.push({
+      role: "ai",
+      text: "Consultando e preparando uma resposta..."
+    });
+
+    saveDB();
+    renderChat();
+
+    if(window.innerWidth < 980){
+      var rightbar = document.getElementById("rightbar");
+      if(rightbar) rightbar.classList.add("open");
+    }
+
+    try{
+      var reply = await window.callCRMRealAI(text);
+
+      db.chat[db.chat.length - 1] = {
+        role: "ai",
+        text: reply || (
+          typeof aiReply === "function"
+            ? aiReply(text)
+            : "Não consegui responder agora."
+        )
+      };
+    }catch(error){
+      console.warn("IA do CRM:", error);
+
+      var fallback =
+        typeof aiReply === "function"
+          ? aiReply(text)
+          : "Não consegui consultar a IA agora.";
+
+      db.chat[db.chat.length - 1] = {
+        role: "ai",
+        text:
+          fallback +
+          "\n\n" +
+          (
+            error && error.message
+              ? error.message
+              : "Tente novamente."
+          )
+      };
+    }finally{
+      sending = false;
+      setBusy(false);
+      saveDB();
+      renderChat();
+
+      var input = document.getElementById("chatInput");
+      if(input){
+        input.disabled = false;
+        input.focus();
+      }
+    }
+  };
+})();
+</script></body>
 </html>
