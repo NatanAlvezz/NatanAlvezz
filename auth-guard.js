@@ -1,100 +1,38 @@
-// =========================================================
-// LEADS IMÓVEIS CRM — AUTH GUARD PROFISSIONAL
-// Só entra usuário logado, aprovado e ativo.
-// =========================================================
-
+// Leads Imóveis · proteção segura do CRM interno
 (function () {
   "use strict";
 
-  const LOGIN_PAGE = "login.html";
+  const page = (location.pathname.split("/").pop() || "index.html").toLowerCase();
+  const publicPages = new Set(["", "index.html", "login.html"]);
+  if (publicPages.has(page)) return;
 
-  function isLoginPage() {
-    return location.pathname.toLowerCase().includes(LOGIN_PAGE);
-  }
-
-  function goLogin(reason = "") {
-    if (isLoginPage()) return;
-
-    const next = encodeURIComponent(location.pathname + location.search);
-    const url = reason
-      ? `${LOGIN_PAGE}?reason=${encodeURIComponent(reason)}&next=${next}`
-      : `${LOGIN_PAGE}?next=${next}`;
-
-    location.href = url;
-  }
-
-  async function waitSupabaseClient() {
-    for (let i = 0; i < 40; i++) {
-      if (window.supabaseClient) return window.supabaseClient;
-      await new Promise(resolve => setTimeout(resolve, 100));
+  window.__LEADS_AUTH_READY__ = (async function () {
+    for (let attempt = 0; attempt < 100 && !window.supabaseClient; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
-    return null;
-  }
-
-  async function checkAccess() {
-    const client = await waitSupabaseClient();
-
-    if (!client) {
-      goLogin("supabase");
-      return;
+    const client = window.supabaseClient;
+    if (!client || !client.auth) {
+      location.replace("login.html?reason=supabase&next=crm.html");
+      return null;
     }
 
-    const { data: sessionData, error: sessionError } = await client.auth.getSession();
+    try {
+      const result = await client.auth.getSession();
+      const session = result && result.data ? result.data.session : null;
+      if (result.error || !session) {
+        location.replace("login.html?reason=login&next=crm.html");
+        return null;
+      }
 
-    if (sessionError || !sessionData?.session) {
-      goLogin("login");
-      return;
+      window.__LEADS_AUTH_SESSION__ = session;
+      window.__LEADS_CURRENT_USER_ID__ = session.user && session.user.id ? session.user.id : null;
+      window.__LEADS_CURRENT_USER_EMAIL__ = session.user && session.user.email ? session.user.email : "";
+      return session;
+    } catch (error) {
+      console.warn("Falha ao validar a sessão do CRM:", error);
+      location.replace("login.html?reason=auth&next=crm.html");
+      return null;
     }
-
-    const user = sessionData.session.user;
-
-    let { data: profile, error } = await client
-      .from("user_profiles")
-      .select("*")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (!profile) {
-      await client.from("user_profiles").insert({
-        id: user.id,
-        email: user.email,
-        full_name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Corretor",
-        role: "corretor",
-        approved: false,
-        active: true
-      });
-
-      await client.auth.signOut();
-      goLogin("pending");
-      return;
-    }
-
-    if (error) {
-      console.error("Erro ao verificar perfil:", error);
-      await client.auth.signOut();
-      goLogin("profile");
-      return;
-    }
-
-    if (!profile.active) {
-      await client.auth.signOut();
-      goLogin("inactive");
-      return;
-    }
-
-    if (!profile.approved) {
-      await client.auth.signOut();
-      goLogin("pending");
-      return;
-    }
-
-    window.currentUserProfile = profile;
-
-    document.documentElement.dataset.userRole = profile.role;
-  }
-
-  if (!isLoginPage()) {
-    checkAccess();
-  }
+  })();
 })();
