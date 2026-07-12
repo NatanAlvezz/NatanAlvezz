@@ -9297,534 +9297,12 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
 
 <!-- PATCH V10.2 · Correção definitiva da galeria mobile: usa IMG real + até 10 fotos -->
 <!-- PATCH V10.5 ESTÁVEL · anti-travamento + galeria simples para mobile/desktop -->
-<style id="leadsCrmGaleriaV105AntiTravamento">
-  .pc-gallery-lite{
-    position:relative!important;
-    overflow:hidden!important;
-    min-height:210px!important;
-    background:#111318!important;
-    touch-action:pan-y!important;
-    contain:layout paint!important;
-  }
-  .pc-gallery-lite img{
-    position:absolute!important;
-    inset:0!important;
-    width:100%!important;
-    height:100%!important;
-    object-fit:cover!important;
-    display:block!important;
-    z-index:1!important;
-    user-select:none!important;
-    -webkit-user-drag:none!important;
-    transform:translateZ(0)!important;
-  }
-  .pc-gallery-lite::after{
-    content:""!important;
-    position:absolute!important;
-    inset:0!important;
-    z-index:2!important;
-    background:linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.72))!important;
-    pointer-events:none!important;
-  }
-  .pc-gallery-lite .photo-count{
-    z-index:9!important;
-    left:10px!important;
-    top:10px!important;
-  }
-  .gal-lite-btn{
-    position:absolute!important;
-    top:50%!important;
-    transform:translateY(-50%)!important;
-    z-index:12!important;
-    width:46px!important;
-    height:54px!important;
-    border-radius:18px!important;
-    border:1px solid rgba(255,255,255,.30)!important;
-    background:rgba(0,0,0,.62)!important;
-    color:#fff!important;
-    font-size:36px!important;
-    line-height:1!important;
-    display:grid!important;
-    place-items:center!important;
-    box-shadow:0 12px 28px rgba(0,0,0,.36)!important;
-  }
-  .gal-lite-btn.prev{left:9px!important}
-  .gal-lite-btn.next{right:9px!important}
-  .gal-lite-dots{
-    position:absolute!important;
-    left:50%!important;
-    bottom:13px!important;
-    transform:translateX(-50%)!important;
-    z-index:12!important;
-    display:flex!important;
-    gap:6px!important;
-    max-width:76%!important;
-    overflow:hidden!important;
-    pointer-events:none!important;
-  }
-  .gal-lite-dot{
-    width:8px!important;
-    height:8px!important;
-    min-width:8px!important;
-    border-radius:999px!important;
-    background:rgba(255,255,255,.40)!important;
-  }
-  .gal-lite-dot.active{
-    background:#d8b56d!important;
-    box-shadow:0 0 14px rgba(216,181,109,.78)!important;
-  }
-  .gal-lite-hint{
-    position:absolute!important;
-    right:12px!important;
-    bottom:34px!important;
-    z-index:12!important;
-    border-radius:999px!important;
-    padding:4px 8px!important;
-    background:rgba(0,0,0,.50)!important;
-    color:#ffecc2!important;
-    border:1px solid rgba(216,181,109,.25)!important;
-    font-size:10px!important;
-    pointer-events:none!important;
-  }
-  .crm-v104-meta{
-    margin-top:8px!important;
-    padding:8px 10px!important;
-    border-radius:12px!important;
-    border:1px solid rgba(216,181,109,.20)!important;
-    background:rgba(216,181,109,.07)!important;
-    color:#ffe8ad!important;
-    font-size:11px!important;
-    line-height:1.35!important;
-  }
-  .photo-grid-v104{
-    display:grid!important;
-    grid-template-columns:repeat(auto-fill,minmax(118px,1fr))!important;
-    gap:10px!important;
-    margin-top:12px!important;
-  }
-  .photo-item-v104{
-    border:1px solid rgba(255,255,255,.10)!important;
-    background:rgba(255,255,255,.035)!important;
-    border-radius:14px!important;
-    overflow:hidden!important;
-    position:relative!important;
-  }
-  .photo-img-v104{
-    height:104px!important;
-    background-size:cover!important;
-    background-position:center!important;
-    background-color:#15161a!important;
-  }
-  .photo-actions-v104{display:grid!important;grid-template-columns:1fr 1fr!important;gap:6px!important;padding:7px!important}
-  .photo-actions-v104 button{font-size:10px!important;padding:7px!important;border-radius:8px!important}
-  .cover-badge-v104{position:absolute!important;top:6px!important;left:6px!important;z-index:2!important;background:#d8b56d!important;color:#151007!important;border-radius:999px!important;padding:3px 7px!important;font-size:10px!important;font-weight:900!important}
-  @media(max-width:620px){
-    .pc-gallery-lite{min-height:235px!important}
-    .gal-lite-btn{width:50px!important;height:58px!important;font-size:40px!important}
-    .property-card{transform:translateZ(0)!important}
-    .photo-grid-v104{grid-template-columns:repeat(2,1fr)!important}
-    .photo-img-v104{height:116px!important}
-  }
-</style>
-
-<script id="leadsCrmGaleriaV105AntiTravamentoJS">
-(function(){
-  "use strict";
-
-  var MAX_FOTOS = 10;
-
-  function A(v){ return Array.isArray(v) ? v : []; }
-  function S(v){ return String(v == null ? "" : v); }
-  function H(v){
-    return S(v).replace(/[&<>"']/g, function(ch){
-      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch];
-    });
-  }
-  function getDB(){
-    try{ if(typeof db !== "undefined" && db) return db; }catch(_e){}
-    return window.db || { imoveis:[], clientes:[], tarefas:[], settings:{} };
-  }
-  function srcFoto(f){
-    if(!f) return "";
-    if(typeof f === "string") return f;
-    return f.data || f.url || f.src || f.publicUrl || f.image_url || f.cover_image || f.coverImage || f.preview || f.thumbnail || f.foto || f.image || "";
-  }
-  function fotos(p){
-    var raw = [];
-    if(p){ raw = A(p.photos).length ? A(p.photos) : (A(p.fotos).length ? A(p.fotos) : (A(p.images).length ? A(p.images) : [])); }
-    var lista = raw.map(function(f,idx){
-      if(typeof f === "string") return { id:"foto_url_"+idx, name:"foto-imovel.jpg", url:f, data:f, publicUrl:f, image_url:f, cover:idx===0, created:Date.now() };
-      if(f && typeof f === "object"){
-        var src = srcFoto(f);
-        return src ? Object.assign({}, f, { url:src, data:src, publicUrl:src, image_url:src, cover:!!f.cover || idx===0 }) : null;
-      }
-      return null;
-    }).filter(function(f){ return !!srcFoto(f); }).slice(0, MAX_FOTOS);
-    if(!lista.length && p){
-      var single = p.image_url || p.cover_image || p.coverImage || p.image || p.foto || p.thumbnail || "";
-      if(single) lista = [{ id:"foto_principal", name:"foto-imovel.jpg", url:single, data:single, publicUrl:single, image_url:single, cover:true, created:Date.now() }];
-    }
-    if(lista.length && !lista.some(function(f){ return !!f.cover; })) lista[0].cover = true;
-    return lista;
-  }
-  function dinheiro(v){
-    try{ if(typeof money === "function") return money(v); }catch(_e){}
-    var n = Number(v) || 0;
-    return n ? n.toLocaleString("pt-BR", {style:"currency", currency:"BRL", maximumFractionDigits:0}) : "A consultar";
-  }
-  function toastLite(msg){ try{ if(typeof toast === "function") toast(msg); }catch(_e){} }
-  function uidLite(i){
-    try{ if(typeof uid === "function") return uid("foto"); }catch(_e){}
-    return "foto_" + Date.now() + "_" + i + "_" + Math.floor(Math.random()*9999);
-  }
-  function isAdminLite(){
-    try{ if(typeof isAdmin === "function") return !!isAdmin(); }catch(_e){}
-    var email = "";
-    try{ email = S(window.__LEADS_CURRENT_USER_EMAIL__ || cloudUserEmail || ""); }catch(_e){}
-    return email.toLowerCase() === "leadsimoveisoficial@gmail.com";
-  }
-  function callGlobal(name){
-    try{ if(typeof window[name] === "function") window[name](); }catch(e){ console.warn("Falha em " + name, e); }
-  }
-
-  async function compactarImagemLite(file){
-    if(!file || !file.type || !file.type.startsWith("image/")) throw new Error("Arquivo inválido.");
-
-    return new Promise(function(resolve, reject){
-      var reader = new FileReader();
-      reader.onload = function(){
-        var img = new Image();
-        img.onload = function(){
-          var w = img.naturalWidth || img.width || 1;
-          var h = img.naturalHeight || img.height || 1;
-          var escala = Math.min(1, 1280 / Math.max(w, h));
-          w = Math.round(w * escala);
-          h = Math.round(h * escala);
-          var canvas = document.createElement("canvas");
-          canvas.width = w; canvas.height = h;
-          var ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, w, h);
-          resolve(canvas.toDataURL("image/jpeg", 0.38));
-        };
-        img.onerror = function(){ reject(new Error("Erro ao carregar imagem.")); };
-        img.src = reader.result;
-      };
-      reader.onerror = function(){ reject(new Error("Erro ao ler imagem.")); };
-      reader.readAsDataURL(file);
-    });
-  }
-
-  /* ============================================================
-   * Compressão para Blob (usada no upload ao Supabase Storage).
-   * Irmã de compactarImagemLite, mas devolve Blob em vez de base64.
-   * ============================================================ */
-  async function compactarParaBlobLite(file, maxLado, qualidade){
-    if(!file || !file.type || !file.type.startsWith("image/")) throw new Error("Arquivo inválido.");
-    maxLado = maxLado || 1400;
-    qualidade = qualidade || 0.74;
-
-    return new Promise(function(resolve, reject){
-      var reader = new FileReader();
-      reader.onload = function(){
-        var img = new Image();
-        img.onload = function(){
-          var w = img.naturalWidth || img.width || 1;
-          var h = img.naturalHeight || img.height || 1;
-          var escala = Math.min(1, maxLado / Math.max(w, h));
-          w = Math.round(w * escala);
-          h = Math.round(h * escala);
-
-          var canvas = document.createElement("canvas");
-          canvas.width = w; canvas.height = h;
-          canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-
-          canvas.toBlob(function(blob){
-            if(blob) resolve(blob);
-            else reject(new Error("Falha ao gerar imagem."));
-          }, "image/jpeg", qualidade);
-        };
-        img.onerror = function(){ reject(new Error("Erro ao carregar imagem.")); };
-        img.src = reader.result;
-      };
-      reader.onerror = function(){ reject(new Error("Erro ao ler imagem.")); };
-      reader.readAsDataURL(file);
-    });
-  }
-
-  /* ============================================================
-   * Envia uma foto ao Supabase Storage e devolve {url, path}.
-   * Se o Storage falhar, devolve null (o chamador cai no base64).
-   * ============================================================ */
-  var BUCKET_FOTOS = "property-photos";
-
-  async function enviarFotoStorageLite(file, indice){
-    var cli = window.supabaseClient || window.leadsSupabaseClient;
-    if(!cli || !cli.storage) return null;
-
-    try{
-      var blob = await compactarParaBlobLite(file, 1400, 0.74);
-
-      var pasta = (typeof cloudUserId !== "undefined" && cloudUserId) ? cloudUserId : "geral";
-      var caminho = pasta + "/" + Date.now() + "-" + Math.floor(Math.random()*999999) + ".jpg";
-
-      var up = await cli.storage.from(BUCKET_FOTOS).upload(caminho, blob, {
-        contentType: "image/jpeg",
-        upsert: false
-      });
-      if(up.error) throw up.error;
-
-      var pub = cli.storage.from(BUCKET_FOTOS).getPublicUrl(caminho);
-      var url = pub && pub.data && pub.data.publicUrl;
-      if(!url) throw new Error("URL pública não retornada.");
-
-      return { url: url, path: caminho };
-    }catch(e){
-      console.warn("[Fotos] Storage indisponível, usando base64:", e && e.message);
-      return null;
-    }
-  }
-
-  window.readSelectedPhotos = async function(existingPhotos){
-    var input = document.getElementById("p_fotos");
-    var files = input && input.files ? Array.from(input.files) : [];
-    var atuais = A(existingPhotos).filter(function(f){ return !!srcFoto(f); }).slice(0, MAX_FOTOS);
-
-    if(!files.length){
-      if(atuais.length && !atuais.some(function(f){ return !!f.cover; })) atuais[0].cover = true;
-      return atuais;
-    }
-
-    var restante = Math.max(0, MAX_FOTOS - atuais.length);
-    var lista = files.slice(0, restante);
-    if(files.length > restante) toastLite("Limite: 10 fotos por imóvel. As extras foram ignoradas.");
-
-    for(var i=0; i<lista.length; i++){
-      try{
-        var foto = {
-          id: uidLite(i),
-          name: lista[i].name || "foto-imovel.jpg",
-          cover: atuais.length === 0,
-          created: Date.now()
-        };
-
-        // 1) Tenta o Supabase Storage (guarda só a URL: ~100 bytes)
-        var enviada = await enviarFotoStorageLite(lista[i], i);
-
-        if(enviada){
-          foto.url  = enviada.url;
-          foto.path = enviada.path;
-        }else{
-          // 2) Fallback: base64 no banco (pesado, mas nunca perde a foto)
-          foto.data = await compactarImagemLite(lista[i]);
-        }
-
-        atuais.push(foto);
-      }catch(e){
-        console.error("Erro ao processar foto:", e);
-        toastLite("Uma foto não pôde ser carregada.");
-      }
-    }
-
-    if(atuais.length && !atuais.some(function(f){ return !!f.cover; })) atuais[0].cover = true;
-    return atuais.slice(0, MAX_FOTOS);
-  };
-
-  window.renderPhotoGrid = function(p){
-    var lista = fotos(p);
-    if(!lista.length) return '<div class="empty" style="margin-top:12px">Nenhuma foto adicionada ainda.</div>';
-    return '<div class="photo-grid-v104">' + lista.map(function(f){
-      return '<div class="photo-item-v104">' +
-        (f.cover ? '<div class="cover-badge-v104">CAPA</div>' : '') +
-        '<div class="photo-img-v104" style="background-image:url(\'' + H(srcFoto(f)) + '\')"></div>' +
-        '<div class="photo-actions-v104">' +
-          '<button class="btn btn-sm btn-ghost" type="button" onclick="setCoverPhoto(\'' + H(p.id) + '\',\'' + H(f.id) + '\')">Capa</button>' +
-          '<button class="btn btn-sm btn-danger" type="button" onclick="deletePhoto(\'' + H(p.id) + '\',\'' + H(f.id) + '\')">Excluir</button>' +
-        '</div>' +
-      '</div>';
-    }).join("") + '</div>';
-  };
-
-  function dots(total, ativo){
-    if(total <= 1) return "";
-    var html = '<div class="gal-lite-dots">';
-    for(var i=0; i<total; i++) html += '<span class="gal-lite-dot ' + (i === ativo ? "active" : "") + '"></span>';
-    return html + '</div>';
-  }
-
-  window.__LEADS_SET_PHOTO_LITE__ = function(gallery, index){
-    if(!gallery) return;
-    var propId = gallery.getAttribute("data-prop-id");
-    var banco = getDB();
-    var prop = A(banco.imoveis).find(function(x){ return S(x.id) === S(propId); });
-    if(!prop) return;
-    var lista = fotos(prop);
-    if(!lista.length) return;
-
-    index = (Number(index) + lista.length) % lista.length;
-    gallery.setAttribute("data-photo-index", S(index));
-    var img = gallery.querySelector("img");
-    var src = srcFoto(lista[index]);
-    if(img && src) img.src = src;
-    var count = gallery.querySelector(".photo-count");
-    if(count) count.textContent = "Fotos " + (index + 1) + "/" + lista.length;
-    gallery.querySelectorAll(".gal-lite-dot").forEach(function(d, i){ d.classList.toggle("active", i === index); });
-  };
-
-  function cardImovel(p){
-    p = p || {};
-    var lista = fotos(p);
-    var capa = lista.find(function(f){ return !!f.cover; }) || lista[0] || null;
-    var first = srcFoto(capa);
-    var controles = lista.length > 1
-      ? '<button class="gal-lite-btn prev" type="button" data-dir="-1">‹</button>' +
-        '<button class="gal-lite-btn next" type="button" data-dir="1">›</button>' +
-        '<span class="gal-lite-hint">arraste</span>' + dots(lista.length, 0)
-      : "";
-    var excluir = isAdminLite() ? '<button class="btn btn-sm btn-danger crm-delete-lite" data-id="' + H(p.id) + '">Excluir</button>' : "";
-
-    return '<div class="property-card" data-card-prop-id="' + H(p.id) + '">' +
-      '<div class="pc-img pc-gallery-lite" data-prop-id="' + H(p.id) + '" data-photo-index="0">' +
-        (first ? '<img src="' + H(first) + '" alt="Foto do imóvel" loading="lazy" decoding="async">' : '') +
-        '<span class="photo-count">' + (lista.length ? 'Fotos 1/' + lista.length : 'Sem foto') + '</span>' + controles +
-      '</div>' +
-      '<div class="pc-body">' +
-        '<h3>' + H(p.titulo || p.title || "Imóvel captado") + '</h3>' +
-        '<p>' + H(p.finalidade || "Venda") + ' · ' + H(p.tipo || "Imóvel") + ' · ' + H(p.bairro || "-") + '</p>' +
-        '<p>' + (Number(p.area)||0) + ' m² · ' + (Number(p.dormitorios)||0) + ' dorm. · ' + (Number(p.suites)||0) + ' suítes · ' + (Number(p.vagas)||0) + ' vagas</p>' +
-        '<p class="price">' + dinheiro(p.valor || p.price || 0) + '</p>' +
-        '<span class="pill gold">' + H(p.etapa || "Captação") + '</span> <span class="pill green">' + (p.publicarSite ? "No site" : "Interno") + '</span>' +
-        '<p class="crm-v104-meta"><b>Captado por:</b> ' + H(p.captadorNome || "Corretor") + '<br><b>Origem:</b> ' + H(p.origemCaptacao || "-") + '</p>' +
-        '<p><b>Proprietário:</b> ' + H(p.prop || "Não informado") + '</p>' +
-        '<p><b>Próxima ação:</b> ' + H(p.proximaAcao || "Definir atendimento") + '</p>' +
-        '<div class="actions">' +
-          '<button class="btn btn-sm btn-ghost crm-edit-lite" data-id="' + H(p.id) + '">Editar</button>' +
-          '<button class="btn btn-sm crm-ai-lite" data-title="' + H(p.titulo || "imóvel") + '" data-bairro="' + H(p.bairro || "Florianópolis") + '">IA anúncio</button>' +
-          excluir +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  }
-
-  window.propertyCard = cardImovel;
-
-  function wireLite(){
-    document.querySelectorAll(".pc-gallery-lite").forEach(function(gallery){
-      if(gallery.getAttribute("data-wired-lite") === "1") return;
-      gallery.setAttribute("data-wired-lite", "1");
-      var sx = 0, sy = 0, ativo = false;
-      gallery.addEventListener("pointerdown", function(e){
-        if(e.target && e.target.closest && e.target.closest(".gal-lite-btn")) return;
-        sx = e.clientX; sy = e.clientY; ativo = true;
-      }, { passive:true });
-      gallery.addEventListener("pointerup", function(e){
-        if(!ativo) return;
-        ativo = false;
-        var dx = e.clientX - sx;
-        var dy = e.clientY - sy;
-        if(Math.abs(dx) > 24 && Math.abs(dx) > Math.abs(dy)){
-          var atual = Number(gallery.getAttribute("data-photo-index") || 0);
-          window.__LEADS_SET_PHOTO_LITE__(gallery, atual + (dx < 0 ? 1 : -1));
-        }
-      }, { passive:true });
-      gallery.addEventListener("pointercancel", function(){ ativo = false; }, { passive:true });
-    });
-  }
-
-  window.renderImoveis = function(){
-    var el = document.getElementById("propertyList");
-    if(!el) return;
-    var banco = getDB();
-    var lista = A(banco.imoveis).slice();
-    var qEl = document.getElementById("searchImoveis");
-    var tEl = document.getElementById("filterPropType");
-    var q = qEl ? S(qEl.value).toLowerCase().trim() : "";
-    var tipo = tEl ? S(tEl.value) : "";
-    if(q) lista = lista.filter(function(p){ return JSON.stringify(p).toLowerCase().indexOf(q) >= 0; });
-    if(tipo) lista = lista.filter(function(p){ return S(p.tipo) === tipo; });
-    el.innerHTML = lista.length ? lista.map(cardImovel).join("") : '<div class="empty">Nenhum imóvel encontrado.</div>';
-    wireLite();
-  };
-
-  window.renderFeatured = function(){
-    var el = document.getElementById("featuredCards");
-    if(!el) return;
-    var banco = getDB();
-    var lista = A(banco.imoveis).slice(0, 3);
-    el.innerHTML = lista.length ? lista.map(cardImovel).join("") : '<div class="empty">Nenhum imóvel cadastrado.</div>';
-    wireLite();
-  };
-
-  window.renderAll = function(){
-    callGlobal("renderCentral");
-    callGlobal("renderKPIs");
-    callGlobal("renderHotLeads");
-    callGlobal("renderPriorities");
-    window.renderFeatured();
-    callGlobal("renderLeads");
-    window.renderImoveis();
-    callGlobal("renderTasks");
-    callGlobal("renderReports");
-    callGlobal("renderChat");
-    try{
-      var banco = getDB();
-      var notif = document.getElementById("notifDot");
-      if(notif) notif.textContent = A(banco.tarefas).length;
-      var top = document.getElementById("userNameTop");
-      if(top) top.textContent = (banco.settings && banco.settings.user) || "Natan Alves";
-      var hello = document.getElementById("aiHello");
-      if(hello){
-        var sdc = typeof saudacao === "function" ? saudacao() : "Olá";
-        hello.textContent = sdc + ", " + ((banco.settings && banco.settings.user) || "corretor") + " 👋";
-      }
-    }catch(e){ console.warn(e); }
-    wireLite();
-  };
-
-  document.addEventListener("click", function(e){
-    var btn = e.target.closest && e.target.closest(".gal-lite-btn");
-    if(btn){
-      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-      var gallery = btn.closest(".pc-gallery-lite");
-      var atual = Number(gallery && gallery.getAttribute("data-photo-index") || 0);
-      window.__LEADS_SET_PHOTO_LITE__(gallery, atual + Number(btn.getAttribute("data-dir") || 1));
-      return;
-    }
-    var edit = e.target.closest && e.target.closest(".crm-edit-lite");
-    if(edit){ e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); if(typeof openImovelModal === "function") openImovelModal(edit.getAttribute("data-id")); return; }
-    var del = e.target.closest && e.target.closest(".crm-delete-lite");
-    if(del){ e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); if(typeof deleteImovel === "function") deleteImovel(del.getAttribute("data-id")); return; }
-    var ai = e.target.closest && e.target.closest(".crm-ai-lite");
-    if(ai){ e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); if(typeof askAI === "function") askAI("Crie um anúncio premium para este imóvel: " + (ai.getAttribute("data-title") || "imóvel") + " em " + (ai.getAttribute("data-bairro") || "Florianópolis") + "."); }
-  }, true);
-
-  function boot(){
-    try{
-      if(typeof populateFilters === "function") populateFilters();
-      window.renderAll();
-      setTimeout(function(){ try{ window.renderAll(); }catch(_e){} }, 600);
-    }catch(e){ console.error("Erro no patch V10.5:", e); }
-  }
-
-  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
-  else boot();
-  window.addEventListener("load", function(){ setTimeout(boot, 500); });
-})();
-</script>
 
 
-<script id="leadsCrmV105CacheTool">
-(function(){
-  window.limparCachePesadoFotosV105 = function(){
-    try{
-      localStorage.removeItem("leads_imoveis_premium_ia_v105_leve_estavel");
-      localStorage.removeItem("leads_imoveis_premium_ia_v7_estavel");
-      localStorage.removeItem("leads_imoveis_premium_ia_v5");
-      localStorage.removeItem("leads_imoveis_premium_ia_v4");
-      if(typeof toast === "function") toast("Cache antigo limpo. Recarregue a página.");
-    }catch(e){ console.error(e); }
-  };
-})();
-</script>
+
+
+
+
 <!-- ============================================================
      LEADS IMÓVEIS · PATCH FINAL DE SINCRONIA CRM → SITE (V-DEF)
      ------------------------------------------------------------
@@ -10893,6 +10371,1448 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
   else init();
 })();
 
+</script>
+
+
+<!-- ==============================================================
+LEADS IMÓVEIS · REPARO FINAL CONSOLIDADO · FOTOS + IA · V6
+- Não altera o site público.
+- Não altera tabelas ou políticas do Supabase.
+- Normaliza fotos antigas e novas.
+- Restaura a galeria, capa, exclusão e upload.
+- Restaura o chat usando o formato original do CRM.
+================================================================ -->
+<style id="leadsCrmRepairV6Style">
+  .crm-v6-gallery{
+    position:relative;
+    height:190px;
+    overflow:hidden;
+    background:
+      radial-gradient(circle at 70% 20%,rgba(216,181,109,.18),transparent 32%),
+      linear-gradient(135deg,#25282e,#0b0c0e);
+    touch-action:pan-y;
+    user-select:none;
+  }
+  .crm-v6-gallery img{
+    display:block;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center;
+  }
+  .crm-v6-gallery::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.46));
+  }
+  .crm-v6-photo-count{
+    position:absolute;
+    left:10px;
+    top:10px;
+    z-index:3;
+    border:1px solid rgba(255,255,255,.18);
+    background:rgba(0,0,0,.64);
+    color:#fff;
+    border-radius:999px;
+    padding:5px 9px;
+    font-size:11px;
+    font-weight:850;
+  }
+  .crm-v6-gallery-btn{
+    position:absolute;
+    z-index:4;
+    top:50%;
+    transform:translateY(-50%);
+    width:40px;
+    height:48px;
+    border-radius:13px;
+    border:1px solid rgba(255,255,255,.20);
+    background:rgba(0,0,0,.58);
+    color:#fff4d7;
+    font-size:29px!important;
+    line-height:1;
+    display:grid;
+    place-items:center;
+  }
+  .crm-v6-gallery-btn.prev{left:8px}
+  .crm-v6-gallery-btn.next{right:8px}
+  .crm-v6-dots{
+    position:absolute;
+    left:50%;
+    bottom:9px;
+    transform:translateX(-50%);
+    display:flex;
+    gap:5px;
+    z-index:4;
+  }
+  .crm-v6-dot{
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:rgba(255,255,255,.45);
+    border:0;
+    padding:0;
+  }
+  .crm-v6-dot.active{
+    background:#d8b56d;
+    box-shadow:0 0 10px rgba(216,181,109,.65);
+  }
+  .crm-v6-photo-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(132px,1fr));
+    gap:10px;
+    margin-top:12px;
+  }
+  .crm-v6-photo-item{
+    position:relative;
+    overflow:hidden;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.035);
+  }
+  .crm-v6-photo-preview{
+    height:110px;
+    background:#15161a;
+  }
+  .crm-v6-photo-preview img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .crm-v6-photo-actions{
+    display:flex;
+    gap:6px;
+    padding:7px;
+  }
+  .crm-v6-photo-actions button{
+    flex:1;
+    font-size:10px!important;
+    padding:7px!important;
+  }
+  .crm-v6-cover{
+    position:absolute;
+    left:6px;
+    top:6px;
+    z-index:2;
+    border-radius:999px;
+    padding:3px 7px;
+    background:#d8b56d;
+    color:#171006;
+    font-size:10px;
+    font-weight:900;
+  }
+  .crm-v6-no-photo{
+    height:100%;
+    display:grid;
+    place-items:center;
+    text-align:center;
+    color:#b7b2a8;
+    padding:20px;
+    font-size:12px;
+  }
+  @media(max-width:620px){
+    .crm-v6-gallery{height:238px}
+    .crm-v6-gallery-btn{width:46px;height:58px;font-size:36px!important}
+    .crm-v6-photo-grid{grid-template-columns:repeat(2,1fr)}
+    .crm-v6-photo-preview{height:120px}
+  }
+</style>
+
+<script id="leadsCrmRepairPhotosAiV6">
+(function(){
+  "use strict";
+
+  if(window.__LEADS_CRM_REPAIR_PHOTOS_AI_V6__) return;
+  window.__LEADS_CRM_REPAIR_PHOTOS_AI_V6__ = true;
+
+  var MAX_PHOTOS = 10;
+  var PHOTO_BUCKET = "property-photos";
+  var AI_ENDPOINT =
+    "https://zyfbgydbwsvbaogbxzrd.supabase.co/functions/v1/crm-ai-assistant";
+  var aiSending = false;
+
+  function arr(value){
+    return Array.isArray(value) ? value : [];
+  }
+
+  function str(value){
+    return String(value == null ? "" : value);
+  }
+
+  function esc(value){
+    return str(value).replace(/[&<>"']/g,function(ch){
+      return {
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#39;"
+      }[ch];
+    });
+  }
+
+  function moneyValue(value){
+    try{
+      if(typeof money === "function") return money(value);
+    }catch(_){}
+    var number = Number(value || 0);
+    return number
+      ? number.toLocaleString("pt-BR",{
+          style:"currency",
+          currency:"BRL",
+          maximumFractionDigits:0
+        })
+      : "A consultar";
+  }
+
+  function toastV6(message){
+    try{
+      if(typeof toast === "function") toast(message);
+      else console.log("[Leads]",message);
+    }catch(_){}
+  }
+
+  function getDB(){
+    try{
+      if(window.db && typeof window.db === "object") return window.db;
+    }catch(_){}
+    return {imoveis:[],clientes:[],tarefas:[],chat:[],settings:{}};
+  }
+
+  function rawPhotoUrl(photo){
+    if(!photo) return "";
+    if(typeof photo === "string") return photo.trim();
+
+    return str(
+      photo.url ||
+      photo.data ||
+      photo.src ||
+      photo.publicUrl ||
+      photo.public_url ||
+      photo.image_url ||
+      photo.cover_image ||
+      photo.coverImage ||
+      photo.preview ||
+      photo.thumbnail ||
+      photo.foto ||
+      photo.image ||
+      ""
+    ).trim();
+  }
+
+  function normalizePhoto(photo,index){
+    var url = rawPhotoUrl(photo);
+    if(!url) return null;
+
+    var source =
+      photo && typeof photo === "object"
+        ? photo
+        : {};
+
+    return Object.assign({},source,{
+      id:
+        source.id ||
+        ("foto_v6_" + Date.now() + "_" + index + "_" +
+          Math.random().toString(36).slice(2,8)),
+      name:source.name || "foto-imovel.jpg",
+      url:url,
+      data:url,
+      src:url,
+      publicUrl:url,
+      image_url:url,
+      preview:url,
+      path:source.path || "",
+      cover:Boolean(source.cover || source.isCover),
+      isCover:Boolean(source.cover || source.isCover),
+      created:source.created || Date.now()
+    });
+  }
+
+  function parsePhotoValue(value){
+    if(!value) return [];
+
+    if(Array.isArray(value)){
+      return value;
+    }
+
+    if(typeof value === "string"){
+      var trimmed = value.trim();
+      if(!trimmed) return [];
+
+      if(
+        (trimmed.startsWith("[") && trimmed.endsWith("]")) ||
+        (trimmed.startsWith("{") && trimmed.endsWith("}"))
+      ){
+        try{
+          var parsed = JSON.parse(trimmed);
+          return Array.isArray(parsed) ? parsed : [parsed];
+        }catch(_){}
+      }
+
+      return [trimmed];
+    }
+
+    if(typeof value === "object"){
+      return [value];
+    }
+
+    return [];
+  }
+
+  function propertyPhotos(property){
+    property = property || {};
+
+    var candidates = [
+      property.photos,
+      property.fotos,
+      property.images,
+      property.imageUrls,
+      property.gallery
+    ];
+
+    var raw = [];
+
+    for(var i=0;i<candidates.length;i++){
+      raw = parsePhotoValue(candidates[i]);
+      if(raw.length) break;
+    }
+
+    if(!raw.length){
+      raw = parsePhotoValue(
+        property.image_url ||
+        property.cover_image ||
+        property.coverImage ||
+        property.image ||
+        property.photo ||
+        property.foto ||
+        property.thumbnail ||
+        ""
+      );
+    }
+
+    var normalized = raw
+      .map(function(photo,index){
+        return normalizePhoto(photo,index);
+      })
+      .filter(Boolean)
+      .slice(0,MAX_PHOTOS);
+
+    if(normalized.length){
+      var selected = normalized.findIndex(function(photo){
+        return photo.cover || photo.isCover;
+      });
+
+      if(selected < 0) selected = 0;
+
+      normalized.forEach(function(photo,index){
+        photo.cover = index === selected;
+        photo.isCover = index === selected;
+      });
+    }
+
+    return normalized;
+  }
+
+  function syncPhotoAliases(property){
+    if(!property || typeof property !== "object") return property;
+
+    var photos = propertyPhotos(property);
+    var cover =
+      photos.find(function(photo){return photo.cover;}) ||
+      photos[0] ||
+      null;
+    var main = rawPhotoUrl(cover);
+
+    property.photos = photos;
+    property.fotos = photos;
+    property.image_url = main || "";
+    property.cover_image = main || "";
+    property.coverImage = main || "";
+    property.image = main || "";
+    property.foto = main || "";
+    property.thumbnail = main || "";
+
+    return property;
+  }
+
+  function repairAllProperties(persist){
+    var database = getDB();
+    database.imoveis = arr(database.imoveis).map(syncPhotoAliases);
+
+    if(persist){
+      try{
+        if(typeof safeLocalSave === "function"){
+          safeLocalSave(database);
+        }
+      }catch(_){}
+    }
+
+    return database.imoveis;
+  }
+
+  window.normalizePhotoItem = normalizePhoto;
+  window.normalizePhotoArray = parsePhotoValue;
+  window.getPhotoUrl = rawPhotoUrl;
+  window.getPropertyPhotos = propertyPhotos;
+  window.getPropertyPhotoUrls = function(property){
+    return propertyPhotos(property)
+      .map(rawPhotoUrl)
+      .filter(Boolean)
+      .slice(0,MAX_PHOTOS);
+  };
+  window.getPropertyMainImage = function(property){
+    var photos = propertyPhotos(property);
+    var cover =
+      photos.find(function(photo){return photo.cover;}) ||
+      photos[0];
+    return rawPhotoUrl(cover);
+  };
+
+  function cardHtml(property){
+    property = syncPhotoAliases(property || {});
+    var photos = propertyPhotos(property);
+    var first = photos[0] ? rawPhotoUrl(photos[0]) : "";
+    var id = esc(property.id || "");
+    var title = esc(property.titulo || property.title || "Imóvel captado");
+    var finalidade = esc(property.finalidade || property.purpose || "Venda");
+    var type = esc(property.tipo || property.type || "Imóvel");
+    var bairro = esc(property.bairro || property.neighborhood || "-");
+    var etapa = esc(property.etapa || property.status || "Captação");
+    var isPublic = Boolean(property.publicarSite || property.is_public);
+    var admin = false;
+
+    try{
+      admin =
+        typeof isAdmin === "function"
+          ? Boolean(isAdmin())
+          : str(window.__LEADS_CURRENT_USER_ROLE__).toLowerCase() === "admin";
+    }catch(_){}
+
+    var controls = "";
+
+    if(photos.length > 1){
+      controls =
+        '<button type="button" class="crm-v6-gallery-btn prev" data-v6-dir="-1">‹</button>' +
+        '<button type="button" class="crm-v6-gallery-btn next" data-v6-dir="1">›</button>' +
+        '<div class="crm-v6-dots">' +
+          photos.map(function(_,index){
+            return '<button type="button" class="crm-v6-dot ' +
+              (index === 0 ? "active" : "") +
+              '" data-v6-index="' + index + '"></button>';
+          }).join("") +
+        '</div>';
+    }
+
+    var image =
+      first
+        ? '<img src="' + esc(first) + '" alt="' + title +
+          '" loading="lazy" decoding="async" referrerpolicy="no-referrer">'
+        : '<div class="crm-v6-no-photo">Sem foto cadastrada</div>';
+
+    return (
+      '<article class="property-card" data-v6-property-card="' + id + '">' +
+        '<div class="crm-v6-gallery" data-v6-gallery="' + id +
+          '" data-v6-index="0">' +
+          image +
+          '<span class="crm-v6-photo-count">' +
+            (photos.length ? "Fotos 1/" + photos.length : "Sem foto") +
+          '</span>' +
+          controls +
+        '</div>' +
+        '<div class="pc-body">' +
+          '<h3>' + title + '</h3>' +
+          '<p>' + finalidade + ' · ' + type + ' · ' + bairro + '</p>' +
+          '<p>' +
+            (Number(property.area)||0) + ' m² · ' +
+            (Number(property.dormitorios || property.bedrooms)||0) + ' dorm. · ' +
+            (Number(property.suites)||0) + ' suítes · ' +
+            (Number(property.vagas || property.parking)||0) + ' vagas' +
+          '</p>' +
+          '<p class="price">' + moneyValue(property.valor || property.price) + '</p>' +
+          '<span class="pill gold">' + etapa + '</span> ' +
+          '<span class="pill green">' + (isPublic ? "No site" : "Interno") + '</span>' +
+          '<p class="captacao-meta"><b>Captado por:</b> ' +
+            esc(property.captadorNome || "Corretor") +
+            '<br><b>Origem:</b> ' +
+            esc(property.origemCaptacao || "-") +
+          '</p>' +
+          '<p><b>Proprietário:</b> ' +
+            esc(property.prop || "Não informado") +
+          '</p>' +
+          '<p><b>Próxima ação:</b> ' +
+            esc(property.proximaAcao || property.description || "Definir atendimento") +
+          '</p>' +
+          '<div class="actions">' +
+            '<button type="button" class="btn btn-sm btn-ghost" data-v6-edit="' +
+              id + '">Editar</button>' +
+            '<button type="button" class="btn btn-sm" data-v6-ai="' +
+              id + '">IA anúncio</button>' +
+            (admin
+              ? '<button type="button" class="btn btn-sm btn-danger" data-v6-delete="' +
+                id + '">Excluir</button>'
+              : '') +
+          '</div>' +
+        '</div>' +
+      '</article>'
+    );
+  }
+
+  function setGalleryIndex(gallery,index){
+    if(!gallery) return;
+
+    var propertyId = gallery.getAttribute("data-v6-gallery");
+    var property = arr(getDB().imoveis).find(function(item){
+      return str(item.id) === str(propertyId);
+    });
+
+    if(!property) return;
+
+    var photos = propertyPhotos(property);
+    if(!photos.length) return;
+
+    index = (Number(index) + photos.length) % photos.length;
+    gallery.setAttribute("data-v6-index",str(index));
+
+    var img = gallery.querySelector("img");
+    var url = rawPhotoUrl(photos[index]);
+
+    if(img && url){
+      img.src = url;
+    }
+
+    var count = gallery.querySelector(".crm-v6-photo-count");
+    if(count){
+      count.textContent = "Fotos " + (index + 1) + "/" + photos.length;
+    }
+
+    gallery.querySelectorAll(".crm-v6-dot").forEach(function(dot,dotIndex){
+      dot.classList.toggle("active",dotIndex === index);
+    });
+  }
+
+  function wirePropertyCards(root){
+    root = root || document;
+
+    root.querySelectorAll("[data-v6-gallery]").forEach(function(gallery){
+      if(gallery.dataset.v6Wired === "1") return;
+      gallery.dataset.v6Wired = "1";
+
+      gallery.querySelectorAll("[data-v6-dir]").forEach(function(button){
+        button.addEventListener("click",function(event){
+          event.preventDefault();
+          event.stopPropagation();
+          var current = Number(gallery.getAttribute("data-v6-index") || 0);
+          setGalleryIndex(
+            gallery,
+            current + Number(button.getAttribute("data-v6-dir") || 0)
+          );
+        });
+      });
+
+      gallery.querySelectorAll("[data-v6-index]").forEach(function(dot){
+        dot.addEventListener("click",function(event){
+          event.preventDefault();
+          event.stopPropagation();
+          setGalleryIndex(
+            gallery,
+            Number(dot.getAttribute("data-v6-index") || 0)
+          );
+        });
+      });
+
+      var startX = 0;
+      var startY = 0;
+      var active = false;
+
+      gallery.addEventListener("pointerdown",function(event){
+        if(event.target.closest("button")) return;
+        startX = event.clientX;
+        startY = event.clientY;
+        active = true;
+      },{passive:true});
+
+      gallery.addEventListener("pointerup",function(event){
+        if(!active) return;
+        active = false;
+
+        var dx = event.clientX - startX;
+        var dy = event.clientY - startY;
+
+        if(Math.abs(dx) > 28 && Math.abs(dx) > Math.abs(dy)){
+          var current = Number(gallery.getAttribute("data-v6-index") || 0);
+          setGalleryIndex(gallery,current + (dx < 0 ? 1 : -1));
+        }
+      },{passive:true});
+
+      gallery.addEventListener("pointercancel",function(){
+        active = false;
+      },{passive:true});
+    });
+
+    root.querySelectorAll("[data-v6-edit]").forEach(function(button){
+      button.addEventListener("click",function(){
+        if(typeof window.openImovelModal === "function"){
+          window.openImovelModal(button.getAttribute("data-v6-edit"));
+        }
+      });
+    });
+
+    root.querySelectorAll("[data-v6-ai]").forEach(function(button){
+      button.addEventListener("click",function(){
+        var id = button.getAttribute("data-v6-ai");
+        var property = arr(getDB().imoveis).find(function(item){
+          return str(item.id) === str(id);
+        });
+
+        if(property && typeof window.askAI === "function"){
+          window.activePropertyId = property.id;
+          window.askAI(
+            "Crie um anúncio premium para o imóvel " +
+            (property.codigo || property.code || property.titulo || property.title) +
+            ", usando somente os dados reais cadastrados."
+          );
+        }
+      });
+    });
+
+    root.querySelectorAll("[data-v6-delete]").forEach(function(button){
+      button.addEventListener("click",function(){
+        if(typeof window.deleteImovel === "function"){
+          window.deleteImovel(button.getAttribute("data-v6-delete"));
+        }
+      });
+    });
+  }
+
+  window.renderImoveis = function(){
+    var container = document.getElementById("propertyList");
+    if(!container) return;
+
+    var list = repairAllProperties(false).slice();
+    var search = document.getElementById("searchImoveis");
+    var type = document.getElementById("filterPropType");
+    var query = search ? str(search.value).toLowerCase().trim() : "";
+    var selectedType = type ? str(type.value) : "";
+
+    if(query){
+      list = list.filter(function(property){
+        return JSON.stringify(property).toLowerCase().includes(query);
+      });
+    }
+
+    if(selectedType){
+      list = list.filter(function(property){
+        return str(property.tipo || property.type) === selectedType;
+      });
+    }
+
+    container.innerHTML =
+      list.length
+        ? list.map(cardHtml).join("")
+        : '<div class="empty">Nenhum imóvel encontrado.</div>';
+
+    wirePropertyCards(container);
+  };
+
+  window.renderFeatured = function(){
+    var container = document.getElementById("featuredCards");
+    if(!container) return;
+
+    var list = repairAllProperties(false)
+      .slice()
+      .sort(function(a,b){
+        return Number(b.updated || 0) - Number(a.updated || 0);
+      })
+      .slice(0,3);
+
+    container.innerHTML =
+      list.length
+        ? list.map(cardHtml).join("")
+        : '<div class="empty">Nenhum imóvel cadastrado.</div>';
+
+    wirePropertyCards(container);
+  };
+
+  window.renderPhotoGrid = function(property){
+    var photos = propertyPhotos(property);
+
+    if(!photos.length){
+      return '<div class="empty" style="margin-top:12px">' +
+        'Nenhuma foto adicionada ainda.</div>';
+    }
+
+    var propertyId = encodeURIComponent(str(property && property.id || ""));
+
+    return (
+      '<div class="crm-v6-photo-grid">' +
+      photos.map(function(photo){
+        var photoId = encodeURIComponent(str(photo.id));
+        var url = rawPhotoUrl(photo);
+
+        return (
+          '<div class="crm-v6-photo-item">' +
+            (photo.cover
+              ? '<div class="crm-v6-cover">CAPA</div>'
+              : '') +
+            '<div class="crm-v6-photo-preview">' +
+              '<img src="' + esc(url) +
+                '" alt="Foto do imóvel" loading="lazy" decoding="async">' +
+            '</div>' +
+            '<div class="crm-v6-photo-actions">' +
+              '<button class="btn btn-sm btn-ghost" type="button" ' +
+                'onclick="setCoverPhoto(decodeURIComponent(\'' +
+                  propertyId + '\'),decodeURIComponent(\'' +
+                  photoId + '\'))">Capa</button>' +
+              '<button class="btn btn-sm btn-danger" type="button" ' +
+                'onclick="deletePhoto(decodeURIComponent(\'' +
+                  propertyId + '\'),decodeURIComponent(\'' +
+                  photoId + '\'))">Excluir</button>' +
+            '</div>' +
+          '</div>'
+        );
+      }).join("") +
+      '</div>'
+    );
+  };
+
+  function imageToBlob(file,maxSide,quality){
+    return new Promise(function(resolve,reject){
+      if(!file || !str(file.type).startsWith("image/")){
+        reject(new Error("Arquivo inválido."));
+        return;
+      }
+
+      var reader = new FileReader();
+
+      reader.onerror = function(){
+        reject(new Error("Não foi possível ler a imagem."));
+      };
+
+      reader.onload = function(){
+        var image = new Image();
+
+        image.onerror = function(){
+          reject(new Error("Formato de imagem não suportado."));
+        };
+
+        image.onload = function(){
+          var width = image.naturalWidth || image.width || 1;
+          var height = image.naturalHeight || image.height || 1;
+          var scale = Math.min(1,maxSide / Math.max(width,height));
+
+          width = Math.max(1,Math.round(width * scale));
+          height = Math.max(1,Math.round(height * scale));
+
+          var canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+
+          var context = canvas.getContext("2d");
+          if(!context){
+            reject(new Error("Canvas indisponível."));
+            return;
+          }
+
+          context.drawImage(image,0,0,width,height);
+
+          canvas.toBlob(function(blob){
+            if(blob) resolve(blob);
+            else reject(new Error("Falha ao comprimir imagem."));
+          },"image/jpeg",quality);
+        };
+
+        image.src = str(reader.result);
+      };
+
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function blobToDataUrl(blob){
+    return new Promise(function(resolve,reject){
+      var reader = new FileReader();
+
+      reader.onload = function(){
+        resolve(str(reader.result));
+      };
+
+      reader.onerror = function(){
+        reject(new Error("Falha ao converter imagem."));
+      };
+
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  async function uploadPhoto(file,index){
+    var client = window.supabaseClient;
+    var compressed = await imageToBlob(file,1600,.78);
+
+    if(client && client.storage){
+      try{
+        var userId =
+          window.__LEADS_CURRENT_USER_ID__ ||
+          window.cloudUserId ||
+          "geral";
+
+        var path =
+          str(userId) + "/" +
+          Date.now() + "-" +
+          Math.floor(Math.random()*999999) +
+          "-" + index + ".jpg";
+
+        var upload = await client.storage
+          .from(PHOTO_BUCKET)
+          .upload(path,compressed,{
+            contentType:"image/jpeg",
+            upsert:false
+          });
+
+        if(upload.error) throw upload.error;
+
+        var publicResult = client.storage
+          .from(PHOTO_BUCKET)
+          .getPublicUrl(path);
+
+        var url =
+          publicResult &&
+          publicResult.data &&
+          publicResult.data.publicUrl;
+
+        if(!url) throw new Error("URL pública não retornada.");
+
+        return {
+          id:"foto_storage_" + Date.now() + "_" + index,
+          name:file.name || "foto-imovel.jpg",
+          url:url,
+          data:url,
+          src:url,
+          publicUrl:url,
+          image_url:url,
+          preview:url,
+          path:path,
+          cover:false,
+          isCover:false,
+          created:Date.now()
+        };
+      }catch(error){
+        console.warn("[Fotos V6] Storage indisponível; usando imagem compactada local.",error);
+      }
+    }
+
+    var dataUrl = await blobToDataUrl(compressed);
+
+    return {
+      id:"foto_local_" + Date.now() + "_" + index,
+      name:file.name || "foto-imovel.jpg",
+      url:dataUrl,
+      data:dataUrl,
+      src:dataUrl,
+      publicUrl:dataUrl,
+      image_url:dataUrl,
+      preview:dataUrl,
+      path:"",
+      cover:false,
+      isCover:false,
+      created:Date.now()
+    };
+  }
+
+  window.readSelectedPhotos = async function(existingPhotos){
+    var input = document.getElementById("p_fotos");
+    var files =
+      input && input.files
+        ? Array.from(input.files)
+        : [];
+
+    var current = parsePhotoValue(existingPhotos)
+      .map(function(photo,index){
+        return normalizePhoto(photo,index);
+      })
+      .filter(Boolean)
+      .slice(0,MAX_PHOTOS);
+
+    if(!files.length){
+      if(current.length){
+        var coverIndex = current.findIndex(function(photo){
+          return photo.cover || photo.isCover;
+        });
+        if(coverIndex < 0) coverIndex = 0;
+        current.forEach(function(photo,index){
+          photo.cover = index === coverIndex;
+          photo.isCover = index === coverIndex;
+        });
+      }
+      return current;
+    }
+
+    var available = Math.max(0,MAX_PHOTOS - current.length);
+    var selected = files.slice(0,available);
+
+    if(files.length > available){
+      toastV6("Limite de 10 fotos. As fotos extras foram ignoradas.");
+    }
+
+    for(var i=0;i<selected.length;i++){
+      try{
+        var photo = await uploadPhoto(selected[i],i);
+        current.push(photo);
+      }catch(error){
+        console.error("[Fotos V6]",error);
+        toastV6(
+          "A foto " + (selected[i].name || "") +
+          " não pôde ser carregada."
+        );
+      }
+    }
+
+    if(current.length){
+      var existingCover = current.findIndex(function(photo){
+        return photo.cover || photo.isCover;
+      });
+      if(existingCover < 0) existingCover = 0;
+      current.forEach(function(photo,index){
+        photo.cover = index === existingCover;
+        photo.isCover = index === existingCover;
+      });
+    }
+
+    return current.slice(0,MAX_PHOTOS);
+  };
+
+  async function persistPhotoChange(){
+    var database = getDB();
+
+    try{
+      if(typeof safeLocalSave === "function"){
+        safeLocalSave(database);
+      }else if(typeof saveDB === "function"){
+        saveDB();
+      }
+    }catch(error){
+      console.warn("[Fotos V6] Falha no backup local.",error);
+    }
+
+    try{
+      if(typeof window.__LEADS_SAVE_TEAM_PROPERTIES__ === "function"){
+        await window.__LEADS_SAVE_TEAM_PROPERTIES__(false);
+      }else if(typeof window.saveGlobalImoveis === "function"){
+        await window.saveGlobalImoveis(false);
+      }
+    }catch(error){
+      console.warn("[Fotos V6] Falha ao sincronizar.",error);
+    }
+
+    try{
+      if(typeof window.renderAll === "function"){
+        window.renderAll();
+      }else{
+        window.renderImoveis();
+        window.renderFeatured();
+      }
+    }catch(error){
+      console.warn("[Fotos V6] Falha ao redesenhar.",error);
+    }
+  }
+
+  window.setCoverPhoto = async function(propertyId,photoId){
+    var property = arr(getDB().imoveis).find(function(item){
+      return str(item.id) === str(propertyId);
+    });
+    if(!property) return;
+
+    var photos = propertyPhotos(property);
+    var found = false;
+
+    photos.forEach(function(photo){
+      var selected = str(photo.id) === str(photoId);
+      photo.cover = selected;
+      photo.isCover = selected;
+      if(selected) found = true;
+    });
+
+    if(!found && photos.length){
+      photos[0].cover = true;
+      photos[0].isCover = true;
+    }
+
+    property.photos = photos;
+    property.fotos = photos;
+    syncPhotoAliases(property);
+    property.updated = Date.now();
+
+    await persistPhotoChange();
+
+    if(
+      typeof modal !== "undefined" &&
+      modal &&
+      modal.open &&
+      typeof currentEdit !== "undefined" &&
+      currentEdit &&
+      str(currentEdit.id) === str(propertyId)
+    ){
+      try{
+        closeModal();
+        setTimeout(function(){
+          openImovelModal(propertyId);
+        },100);
+      }catch(_){}
+    }
+
+    toastV6("Foto de capa atualizada.");
+  };
+
+  window.deletePhoto = async function(propertyId,photoId){
+    var property = arr(getDB().imoveis).find(function(item){
+      return str(item.id) === str(propertyId);
+    });
+    if(!property) return;
+
+    var before = propertyPhotos(property);
+    var removed = before.find(function(photo){
+      return str(photo.id) === str(photoId);
+    });
+
+    var photos = before.filter(function(photo){
+      return str(photo.id) !== str(photoId);
+    });
+
+    if(photos.length){
+      var coverIndex = photos.findIndex(function(photo){
+        return photo.cover || photo.isCover;
+      });
+      if(coverIndex < 0) coverIndex = 0;
+
+      photos.forEach(function(photo,index){
+        photo.cover = index === coverIndex;
+        photo.isCover = index === coverIndex;
+      });
+    }
+
+    property.photos = photos;
+    property.fotos = photos;
+    syncPhotoAliases(property);
+    property.updated = Date.now();
+
+    var path = removed && removed.path;
+
+    if(path && window.supabaseClient && window.supabaseClient.storage){
+      try{
+        await window.supabaseClient.storage
+          .from(PHOTO_BUCKET)
+          .remove([path]);
+      }catch(error){
+        console.warn("[Fotos V6] Não removeu arquivo do Storage.",error);
+      }
+    }
+
+    await persistPhotoChange();
+
+    if(
+      typeof modal !== "undefined" &&
+      modal &&
+      modal.open &&
+      typeof currentEdit !== "undefined" &&
+      currentEdit &&
+      str(currentEdit.id) === str(propertyId)
+    ){
+      try{
+        closeModal();
+        setTimeout(function(){
+          openImovelModal(propertyId);
+        },100);
+      }catch(_){}
+    }
+
+    toastV6("Foto removida.");
+  };
+
+  function compactCrmContext(){
+    var database = getDB();
+
+    var priorityLeads = arr(database.clientes)
+      .filter(function(lead){
+        return (
+          lead.interesse === "Alto" ||
+          lead.temperatura === "Quente" ||
+          lead.etapa === "Negociação" ||
+          lead.etapa === "Proposta"
+        );
+      })
+      .slice(0,5)
+      .map(function(lead){
+        return {
+          nome:lead.nome || "",
+          bairro:lead.bairro || "",
+          tipo:lead.tipo || "",
+          etapa:lead.etapa || "",
+          interesse:lead.interesse || "",
+          orcamentoMax:lead.max || lead.orcamentoMax || 0,
+          proximaAcao:lead.proximaAcao || ""
+        };
+      });
+
+    var property = arr(database.imoveis).find(function(item){
+      return str(item.id) === str(window.activePropertyId || "");
+    });
+
+    return {
+      resumo:{
+        leads:arr(database.clientes).length,
+        imoveis:arr(database.imoveis).length,
+        tarefas:arr(database.tarefas).length
+      },
+      leadsPrioritarios:priorityLeads,
+      imovelAtivo:property
+        ? {
+            id:property.id,
+            codigo:property.codigo || property.code || "",
+            titulo:property.titulo || property.title || "",
+            finalidade:property.finalidade || property.purpose || "",
+            tipo:property.tipo || property.type || "",
+            bairro:property.bairro || property.neighborhood || "",
+            valor:property.valor || property.price || 0,
+            area:property.area || 0,
+            dormitorios:property.dormitorios || property.bedrooms || 0,
+            suites:property.suites || 0,
+            vagas:property.vagas || property.parking || 0,
+            descricao:str(
+              property.descricao ||
+              property.proximaAcao ||
+              property.description ||
+              ""
+            ).slice(0,1800)
+          }
+        : null
+    };
+  }
+
+  function extractAiReply(data){
+    return (
+      data && (
+        data.reply ||
+        data.response ||
+        data.answer ||
+        data.text ||
+        data.message ||
+        data.resposta ||
+        (
+          data.choices &&
+          data.choices[0] &&
+          data.choices[0].message &&
+          data.choices[0].message.content
+        )
+      )
+    ) || "";
+  }
+
+  function aiHistory(){
+    return arr(getDB().chat)
+      .filter(function(message){
+        return !message.loading;
+      })
+      .slice(-6)
+      .map(function(message){
+        return {
+          role:
+            message.role === "user" ||
+            message.role === "me"
+              ? "user"
+              : "assistant",
+          content:str(message.content || message.text || "").slice(0,700)
+        };
+      })
+      .filter(function(message){
+        return message.content;
+      });
+  }
+
+  window.callCRMRealAI = async function(question,options){
+    options = options || {};
+
+    if(!window.supabaseClient || !window.supabaseClient.auth){
+      throw new Error("Supabase não carregou.");
+    }
+
+    var sessionResult =
+      await window.supabaseClient.auth.getSession();
+    var session =
+      sessionResult &&
+      sessionResult.data &&
+      sessionResult.data.session;
+    var token =
+      session &&
+      session.access_token;
+
+    if(!token){
+      throw new Error("Sua sessão expirou. Entre novamente no CRM.");
+    }
+
+    var controller = new AbortController();
+    var timer = setTimeout(function(){
+      controller.abort();
+    },20000);
+
+    var context = compactCrmContext();
+
+    try{
+      var response = await fetch(AI_ENDPOINT,{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":"Bearer " + token
+        },
+        signal:controller.signal,
+        body:JSON.stringify({
+          question:str(question).slice(0,3000),
+          message:str(question).slice(0,3000),
+          imovelId:
+            options.imovelId ||
+            window.activePropertyId ||
+            null,
+          leadId:options.leadId || null,
+          history:options.history || aiHistory(),
+          crmState:context,
+          crm_state:context
+        })
+      });
+
+      var data = null;
+
+      try{
+        data = await response.json();
+      }catch(_){}
+
+      if(!response.ok){
+        throw new Error(
+          extractAiReply(data) ||
+          (data && (data.error || data.message)) ||
+          ("Erro HTTP " + response.status)
+        );
+      }
+
+      var reply = extractAiReply(data);
+
+      if(!reply){
+        throw new Error("A IA respondeu sem texto.");
+      }
+
+      return str(reply);
+    }catch(error){
+      if(error && error.name === "AbortError"){
+        throw new Error(
+          "A IA demorou mais de 20 segundos. Tente uma pergunta mais direta."
+        );
+      }
+
+      throw error;
+    }finally{
+      clearTimeout(timer);
+    }
+  };
+
+  function setAiBusy(busy){
+    var input = document.getElementById("chatInput");
+    var form = input && input.closest
+      ? input.closest("form")
+      : null;
+    var button = form
+      ? form.querySelector('button[type="submit"]')
+      : null;
+
+    if(input) input.disabled = busy;
+
+    if(button){
+      button.disabled = busy;
+      if(busy) button.setAttribute("aria-busy","true");
+      else button.removeAttribute("aria-busy");
+    }
+  }
+
+  window.renderChat = function(){
+    var log = document.getElementById("chatLog");
+    if(!log) return;
+
+    var messages = arr(getDB().chat).slice(-30);
+
+    log.innerHTML = messages.map(function(message){
+      var role =
+        message.role === "user" ||
+        message.role === "me"
+          ? "me"
+          : "ai";
+
+      return (
+        '<div class="msg ' + role + '">' +
+          esc(message.content || message.text || "") +
+        '</div>'
+      );
+    }).join("");
+
+    if(!messages.length){
+      var name =
+        getDB().settings &&
+        getDB().settings.user
+          ? getDB().settings.user
+          : "corretor";
+
+      log.innerHTML =
+        '<div class="msg ai">Olá, ' + esc(name) +
+        '. Posso ajudar com imóveis, descrições, follow-up, captação e WhatsApp.</div>';
+    }
+
+    log.scrollTop = log.scrollHeight;
+  };
+
+  window.sendChat = function(event){
+    if(event && typeof event.preventDefault === "function"){
+      event.preventDefault();
+    }
+
+    var input = document.getElementById("chatInput");
+    var question = input ? str(input.value).trim() : "";
+
+    if(!question || aiSending) return false;
+
+    if(input) input.value = "";
+    window.askAI(question);
+    return false;
+  };
+
+  window.askAI = async function(question){
+    question = str(question).trim();
+    if(!question || aiSending) return;
+
+    var database = getDB();
+    database.chat = arr(database.chat);
+
+    var historyBefore = aiHistory();
+
+    database.chat.push({
+      role:"user",
+      content:question,
+      created:Date.now()
+    });
+
+    database.chat.push({
+      role:"assistant",
+      content:"Consultando IA...",
+      loading:true,
+      created:Date.now()
+    });
+
+    var loadingIndex = database.chat.length - 1;
+
+    aiSending = true;
+    setAiBusy(true);
+
+    try{
+      if(typeof saveDB === "function") saveDB();
+      else if(typeof safeLocalSave === "function") safeLocalSave(database);
+    }catch(_){}
+
+    window.renderChat();
+
+    if(window.innerWidth < 980){
+      var rightbar = document.getElementById("rightbar");
+      if(rightbar) rightbar.classList.add("open");
+    }
+
+    try{
+      var reply = await window.callCRMRealAI(question,{
+        history:historyBefore
+      });
+
+      database.chat[loadingIndex] = {
+        role:"assistant",
+        content:reply,
+        created:Date.now()
+      };
+    }catch(error){
+      console.error("[IA CRM V6]",error);
+
+      database.chat[loadingIndex] = {
+        role:"assistant",
+        content:
+          "Não consegui responder agora. " +
+          (
+            error && error.message
+              ? error.message
+              : "Tente novamente."
+          ),
+        created:Date.now()
+      };
+    }finally{
+      aiSending = false;
+      setAiBusy(false);
+
+      try{
+        if(typeof saveDB === "function") saveDB();
+        else if(typeof safeLocalSave === "function") safeLocalSave(database);
+      }catch(_){}
+
+      window.renderChat();
+
+      var input = document.getElementById("chatInput");
+      if(input){
+        input.disabled = false;
+        input.focus();
+      }
+    }
+  };
+
+  var previousRenderAll = window.renderAll;
+
+  window.renderAll = function(){
+    repairAllProperties(false);
+
+    if(typeof previousRenderAll === "function"){
+      try{
+        previousRenderAll.apply(this,arguments);
+      }catch(error){
+        console.warn("[CRM V6] Renderização antiga apresentou erro.",error);
+      }
+    }
+
+    try{window.renderImoveis();}catch(_){}
+    try{window.renderFeatured();}catch(_){}
+    try{window.renderChat();}catch(_){}
+  };
+
+  function bootRepair(){
+    repairAllProperties(true);
+
+    try{
+      window.renderAll();
+    }catch(error){
+      console.warn("[CRM V6] Falha no primeiro desenho.",error);
+    }
+
+    setTimeout(function(){
+      repairAllProperties(false);
+      try{window.renderImoveis();}catch(_){}
+      try{window.renderFeatured();}catch(_){}
+      try{window.renderChat();}catch(_){}
+    },1800);
+
+    console.log(
+      "[Leads] CRM V6 carregado: fotos e IA restauradas."
+    );
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener(
+      "DOMContentLoaded",
+      bootRepair,
+      {once:true}
+    );
+  }else{
+    bootRepair();
+  }
+})();
 </script>
 
 </body>
