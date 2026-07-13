@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#071422" />
+  <meta name="description" id="metaDescription" content="Detalhes do imóvel publicado pela Leads Imóveis em Florianópolis." />
+  <meta property="og:title" id="ogTitle" content="Imóvel · Leads Imóveis" />
+  <meta property="og:description" id="ogDescription" content="Conheça este imóvel publicado pela Leads Imóveis." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" id="ogImage" content="hero-leads-floripa-final.webp" />
+  <title>Imóvel · Leads Imóveis</title>
+
+  <link rel="icon" href="favicon.png" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+
+  <style>
+    :root{
+      --navy:#071422;--navy-2:#0d2438;--navy-3:#173e58;--sky:#74d5ff;--sky-soft:#bdefff;
+      --surface:#f6fcff;--ink:#071422;--ink-soft:#3b6075;--line:rgba(111,174,202,.28);
+      --shadow-lg:0 28px 78px rgba(2,12,22,.30);--shadow-md:0 18px 46px rgba(3,18,31,.15);
+      --safe-bottom:env(safe-area-inset-bottom,0px)
+    }
+    *,*::before,*::after{box-sizing:border-box}
+    html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+    body{margin:0;min-height:100vh;color:var(--ink);background:var(--surface);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+    body.locked{overflow:hidden}
+    button{border:0;cursor:pointer;font:inherit}
+    a{color:inherit;text-decoration:none}
+    img{display:block;max-width:100%}
+    a:focus-visible,button:focus-visible{outline:3px solid var(--sky);outline-offset:3px}
+    .shell{width:min(1180px,calc(100% - 28px));margin-inline:auto}
+    .topbar{position:sticky;top:0;z-index:80;min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px clamp(14px,3vw,46px);color:var(--ink);background:linear-gradient(135deg,rgba(249,254,255,.94),rgba(219,246,255,.76));border-bottom:1px solid rgba(255,255,255,.68);box-shadow:0 12px 36px rgba(4,12,22,.12);backdrop-filter:blur(22px) saturate(155%)}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:900}
+    .brand-mark{width:56px;height:56px;display:grid;place-items:center;border-radius:18px;background:linear-gradient(145deg,var(--navy),var(--navy-3));box-shadow:0 14px 32px rgba(3,18,31,.24);animation:floatY 5.8s ease-in-out infinite}
+    .brand-mark img{width:41px;height:41px;object-fit:contain}
+    .brand-copy small,.brand-copy strong{display:block}.brand-copy small{margin-top:3px;color:#557488;font-size:11px;font-weight:700}.top-actions{display:flex;gap:9px;align-items:center}
+    .button{min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 17px;border-radius:999px;color:var(--navy);background:linear-gradient(135deg,#e3f9ff,#8ee1ff);box-shadow:0 12px 28px rgba(116,213,255,.18),inset 0 1px 0 rgba(255,255,255,.72);font-size:12px;font-weight:900;transition:.2s ease}
+    .button:hover{transform:translateY(-2px)}.button.dark{color:#eafcff;background:var(--navy);box-shadow:none}.button.whatsapp{color:#063b1b;background:#e8fff1;box-shadow:none}.button.ghost{background:rgba(255,255,255,.75);border:1px solid var(--line);box-shadow:none}
+
+    .hero{position:relative;isolation:isolate;padding:48px 0 54px;overflow:hidden;color:#fff;background:var(--navy)}
+    .hero::before{content:"";position:absolute;inset:0;background-image:linear-gradient(96deg,rgba(5,14,24,.92),rgba(7,20,34,.64),rgba(5,14,24,.70)),url("hero-leads-floripa-final.webp");background-size:cover;background-position:center 45%;transform:scale(1.03)}
+    .hero-content{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end}
+    .breadcrumbs{display:flex;gap:8px;flex-wrap:wrap;color:rgba(255,255,255,.72);font-size:12px}.breadcrumbs a{text-decoration:underline}.kicker{display:inline-flex;margin-top:18px;padding:8px 13px;border:1px solid rgba(189,239,255,.38);border-radius:999px;background:rgba(255,255,255,.09);font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;backdrop-filter:blur(12px)}
+    .hero h1{max-width:850px;margin:14px 0 0;font-size:clamp(34px,5.5vw,66px);line-height:1.02;letter-spacing:-1.8px;text-shadow:0 18px 44px rgba(0,0,0,.48)}
+    .hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.hero-meta span{padding:8px 11px;border-radius:999px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.20);font-size:11px;font-weight:850;backdrop-filter:blur(10px)}
+    .price-card{min-width:230px;padding:20px;border-radius:25px;color:var(--ink);background:linear-gradient(145deg,rgba(255,255,255,.94),rgba(225,247,255,.78));border:1px solid rgba(255,255,255,.68);box-shadow:var(--shadow-lg);backdrop-filter:blur(20px)}
+    .price-card small,.price-card strong{display:block}.price-card small{color:#5a7889;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.8px}.price-card strong{margin-top:5px;font-size:25px}.price-card .button{width:100%;margin-top:14px}
+
+    .main{padding:34px 0 80px}.layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.65fr);gap:26px;align-items:start}
+    .panel{overflow:hidden;background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(235,249,253,.84));border:1px solid rgba(174,221,239,.56);border-radius:28px;box-shadow:var(--shadow-md),inset 0 1px 0 rgba(255,255,255,.90)}
+    .gallery{padding:14px}.gallery-stage{position:relative;aspect-ratio:16/10;overflow:hidden;border-radius:22px;background:#071422}.gallery-stage img{width:100%;height:100%;object-fit:contain;background:#071422;transition:opacity .18s ease}.gallery-arrow{position:absolute;top:50%;z-index:3;width:48px;height:48px;display:grid;place-items:center;color:#fff;background:rgba(7,20,34,.70);border:1px solid rgba(255,255,255,.24);border-radius:50%;transform:translateY(-50%);font-size:23px;backdrop-filter:blur(9px)}.gallery-arrow.previous{left:14px}.gallery-arrow.next{right:14px}.gallery-counter{position:absolute;right:14px;bottom:14px;padding:8px 11px;color:#fff;background:rgba(7,20,34,.72);border-radius:999px;font-size:11px;font-weight:900;backdrop-filter:blur(9px)}
+    .thumbs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:10px}.thumb{position:relative;aspect-ratio:4/3;overflow:hidden;padding:0;border:2px solid transparent;border-radius:13px;background:#dceff6}.thumb.active{border-color:var(--sky);box-shadow:0 0 0 3px rgba(116,213,255,.17)}.thumb img{width:100%;height:100%;object-fit:cover}
+    .content{padding:24px}.section-title{margin:0;color:var(--ink);font-size:24px}.description{margin:13px 0 0;color:#496b7f;line-height:1.75;white-space:pre-line}.details{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:22px}.detail{padding:14px;background:#f1fafd;border:1px solid #dceff6;border-radius:17px}.detail small,.detail strong{display:block}.detail small{color:#6b8797;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.7px}.detail strong{margin-top:5px;color:var(--ink);font-size:14px}
+    .side{position:sticky;top:96px;display:grid;gap:16px}.contact-card{padding:22px}.contact-card h2{margin:0;font-size:23px}.contact-card p{margin:10px 0 0;color:#547487;font-size:13px;line-height:1.55}.contact-actions{display:grid;gap:9px;margin-top:17px}.contact-actions .button{width:100%}.reference{padding:15px;background:#f1fafd;border:1px solid #dceff6;border-radius:17px}.reference small,.reference strong{display:block}.reference small{color:#6b8797;font-size:10px;font-weight:900;text-transform:uppercase}.reference strong{margin-top:4px;overflow-wrap:anywhere}
+    .share-status{min-height:18px;margin-top:9px;color:#39758f;font-size:11px;text-align:center}
+    .loading,.error{padding:70px 20px;text-align:center;color:#4a6f83;background:#fff;border:1px solid #dceef5;border-radius:26px;box-shadow:var(--shadow-md)}.spinner{width:42px;height:42px;margin:0 auto 15px;border:4px solid #dceff6;border-top-color:var(--navy-3);border-radius:50%;animation:spin .8s linear infinite}
+    footer{padding:30px 0 calc(30px + var(--safe-bottom));color:rgba(255,255,255,.66);background:#04101b}.footer-content{display:flex;align-items:center;justify-content:space-between;gap:20px}.footer-brand{display:flex;align-items:center;gap:12px}.footer-brand img{width:52px;height:52px;object-fit:contain}.footer-brand strong,.footer-brand span{display:block}.footer-brand strong{color:#fff}.footer-brand span{margin-top:3px;font-size:12px}.footer-copy{font-size:12px;text-align:right}
+    @keyframes floatY{0%,100%{translate:0 0}50%{translate:0 -6px}}@keyframes spin{to{transform:rotate(360deg)}}
+    @media(max-width:900px){.hero-content,.layout{grid-template-columns:1fr}.price-card{width:min(420px,100%)}.side{position:static}.thumbs{grid-template-columns:repeat(5,minmax(0,1fr))}}
+    @media(max-width:650px){.topbar{min-height:68px;padding:7px 12px}.brand-copy{display:none}.top-actions .button.ghost{display:none}.hero{padding-top:34px}.hero-content{align-items:start}.price-card{min-width:0}.main{padding-top:18px}.gallery{padding:8px}.gallery-stage{aspect-ratio:4/3;border-radius:18px}.gallery-arrow{width:42px;height:42px}.gallery-arrow.previous{left:8px}.gallery-arrow.next{right:8px}.thumbs{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.content{padding:19px}.details{grid-template-columns:repeat(2,minmax(0,1fr))}.footer-content{align-items:flex-start;flex-direction:column}.footer-copy{text-align:left}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.brand-mark{animation:none}.gallery-stage img{transition:none}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="Voltar à página inicial">
+      <span class="brand-mark"><img src="leads-monograma-v3.webp" alt="Leads Imóveis" /></span>
+      <span class="brand-copy"><strong>Leads Imóveis</strong><small>Florianópolis / SC</small></span>
+    </a>
+    <div class="top-actions">
+      <a class="button ghost" href="index.html#imoveis">Ver outros imóveis</a>
+      <a class="button dark" id="topWhatsapp" href="https://wa.me/5548991115992" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+    </div>
+  </header>
+
+  <main id="pageContent">
+    <section class="hero">
+      <div class="shell hero-content">
+        <div>
+          <div class="breadcrumbs"><a href="index.html">Início</a><span>›</span><a href="index.html#imoveis">Imóveis</a><span>›</span><span id="breadcrumbCode">Carregando</span></div>
+          <span class="kicker" id="purpose">Imóvel</span>
+          <h1 id="title">Carregando imóvel…</h1>
+          <div class="hero-meta" id="heroMeta"></div>
+        </div>
+        <aside class="price-card"><small>Valor</small><strong id="price">Consulte</strong><a class="button whatsapp" id="heroWhatsapp" href="https://wa.me/5548991115992" target="_blank" rel="noopener noreferrer">Tenho interesse</a></aside>
+      </div>
+    </section>
+
+    <section class="main">
+      <div class="shell" id="propertyArea">
+        <div class="loading"><div class="spinner"></div>Carregando dados e fotos do imóvel…</div>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="shell footer-content"><div class="footer-brand"><img src="leads-monograma-v3.webp" alt="Leads Imóveis" /><div><strong>Leads Imóveis</strong><span>Conectando sonhos. Realizando histórias.</span></div></div><div class="footer-copy">© <span id="currentYear"></span> Leads Imóveis · Florianópolis/SC</div></div></footer>
+
+  <script>
+    "use strict";
+
+    const SUPABASE_URL = "https://zyfbgydbwsvbaogbxzrd.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_AP670pbIpkD_KleT7VaQ3Q_BTsBh8yh";
+    const WHATSAPP_NUMBER = "5548991115992";
+    const FALLBACK_IMAGE = "hero-leads-floripa-final.webp";
+    const $ = id => document.getElementById(id);
+    const escapeHtml = value => String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+    const normalizeText = value => String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
+    const state = { db:null, property:null, photos:[], index:0, touchX:0 };
+
+    function initializeSupabase() {
+      if (!window.supabase?.createClient) throw new Error("Biblioteca do Supabase não carregou.");
+      state.db = window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+    }
+
+    function safeImageUrl(value) {
+      if (typeof value !== "string") return "";
+      const url = value.trim().replace(/["'<>]/g, "");
+      if (/^https:\/\//i.test(url)) return url;
+      if (/^data:image\/(png|jpeg|jpg|webp|gif);base64,/i.test(url)) return url;
+      if (/^[a-z0-9_./-]+\.(png|jpe?g|webp|gif)(\?.*)?$/i.test(url)) return url;
+      return "";
+    }
+
+    function extractPhotoUrl(item) {
+      if (!item) return "";
+      if (typeof item === "string") {
+        const text = item.trim();
+        if ((text.startsWith("[")&&text.endsWith("]"))||(text.startsWith("{")&&text.endsWith("}"))) {
+          try { return extractPhotoUrl(JSON.parse(text)); } catch (_) { return safeImageUrl(text); }
+        }
+        return safeImageUrl(text);
+      }
+      if (Array.isArray(item)) { for (const entry of item) { const url=extractPhotoUrl(entry); if (url) return url; } return ""; }
+      if (typeof item === "object") return safeImageUrl(item.url||item.src||item.publicUrl||item.public_url||item.image_url||item.file_url||item.photo_url||item.path||"");
+      return "";
+    }
+
+    function normalizePhotos(raw) {
+      const result=[];
+      for (let source of [raw.photos,raw.fotos,raw.images,raw.gallery,raw.photo_urls,raw.imagens]) {
+        if (!source) continue;
+        if (typeof source === "string") { try { source=JSON.parse(source); } catch (_) { source=[source]; } }
+        if (!Array.isArray(source)) source=[source];
+        source.forEach(item=>{ const url=extractPhotoUrl(item); if (url&&!result.includes(url)) result.push(url); });
+      }
+      [raw.image_url,raw.cover_url,raw.cover,raw.foto,raw.photo,raw.main_photo,raw.thumbnail_url].forEach(item=>{ const url=extractPhotoUrl(item); if (url&&!result.includes(url)) result.unshift(url); });
+      return result.slice(0,30);
+    }
+
+    function firstValue(object,keys,fallback="") { for (const key of keys) { const value=object?.[key]; if (value!==undefined&&value!==null&&value!=="") return value; } return fallback; }
+    function numberValue(value) { if (typeof value==="number"&&Number.isFinite(value)) return value; const normalized=String(value??"").replace(/[^0-9,.-]/g,"").replace(/\.(?=\d{3}(?:\D|$))/g,"").replace(",","."); const parsed=Number(normalized); return Number.isFinite(parsed)?parsed:0; }
+    function normalizePurpose(value) { const text=normalizeText(value); if(text.includes("tempor"))return"Temporada"; if(text.includes("anual")||text.includes("locacao")||text.includes("aluguel"))return"Aluguel Anual"; if(text.includes("vend"))return"Venda"; return String(value||"Venda").trim(); }
+
+    function normalizeProperty(raw) {
+      return {
+        id:String(firstValue(raw,["id","uuid","property_id","code"],"")),
+        code:String(firstValue(raw,["code","codigo","property_code","reference","ref"],"")).trim(),
+        title:String(firstValue(raw,["title","titulo","name","nome"],"Imóvel Leads Imóveis")).trim(),
+        purpose:normalizePurpose(firstValue(raw,["purpose","finalidade","modalidade","transaction_type"],"Venda")),
+        neighborhood:String(firstValue(raw,["neighborhood","bairro","district","location"],"Florianópolis")).trim(),
+        type:String(firstValue(raw,["property_type","type","tipo","category"],"Imóvel")).trim(),
+        price:numberValue(firstValue(raw,["price","valor","sale_price","rent_price","daily_price"],0)),
+        area:numberValue(firstValue(raw,["area","area_m2","total_area","private_area"],0)),
+        bedrooms:numberValue(firstValue(raw,["bedrooms","dormitorios","quartos","rooms"],0)),
+        suites:numberValue(firstValue(raw,["suites","suite"],0)),
+        parking:numberValue(firstValue(raw,["parking","parking_spaces","vagas","garage"],0)),
+        bathrooms:numberValue(firstValue(raw,["bathrooms","banheiros","baths"],0)),
+        description:String(firstValue(raw,["description","descricao","commercial_description","descricao_comercial"],"Fale com a Leads Imóveis para receber informações completas sobre esta oportunidade.")).trim(),
+        address:String(firstValue(raw,["address","endereco","full_address"],"")).trim(),
+        photos:normalizePhotos(raw)
+      };
+    }
+
+    function formatMoney(value,purpose) {
+      if (!value) return "Consulte o valor";
+      const formatted=new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0}).format(value);
+      if(purpose==="Temporada")return`${formatted} / diária`;
+      if(purpose==="Aluguel Anual")return`${formatted} / mês`;
+      return formatted;
+    }
+
+    function referenceFromUrl() {
+      const params=new URLSearchParams(location.search);
+      const queryReference=String(params.get("codigo")||params.get("code")||params.get("id")||"").trim();
+      if(queryReference)return queryReference;
+      const match=location.pathname.match(/\/imovel\/([^/?#]+)/i);
+      return match ? decodeURIComponent(match[1]) : "";
+    }
+
+    async function fetchProperty(reference) {
+      let response=await state.db.from("public_properties").select("*").eq("code",reference).limit(1);
+      if (response.error) throw new Error(response.error.hint||response.error.message);
+      if (response.data?.length) return response.data[0];
+
+      response=await state.db.from("public_properties").select("*").eq("id",reference).limit(1);
+      if (response.error) throw new Error(response.error.hint||response.error.message);
+      return response.data?.[0]||null;
+    }
+
+    function whatsappUrl(property) {
+      const text=["Olá, vim pelo site da Leads Imóveis.",`Tenho interesse no imóvel: ${property.title}.`,property.code?`Código: ${property.code}.`:"",`Link: ${location.href}`].filter(Boolean).join(" ");
+      return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+    }
+
+    function updateMetadata(property) {
+      const description=`${property.title} em ${property.neighborhood}. ${property.purpose}. Consulte fotos, detalhes e atendimento da Leads Imóveis.`;
+      document.title=`${property.title}${property.code?` · ${property.code}`:""} | Leads Imóveis`;
+      $("metaDescription").setAttribute("content",description);
+      $("ogTitle").setAttribute("content",document.title);
+      $("ogDescription").setAttribute("content",description);
+      if(property.photos[0])$("ogImage").setAttribute("content",property.photos[0]);
+    }
+
+    function detailCard(label,value) {
+      return `<div class="detail"><small>${escapeHtml(label)}</small><strong>${escapeHtml(value)}</strong></div>`;
+    }
+
+    function renderProperty(property) {
+      state.property=property;
+      state.photos=property.photos.length?property.photos:[FALLBACK_IMAGE];
+      state.index=0;
+      updateMetadata(property);
+      $("breadcrumbCode").textContent=property.code||"Imóvel";
+      $("purpose").textContent=property.purpose;
+      $("title").textContent=property.title;
+      $("price").textContent=formatMoney(property.price,property.purpose);
+      const wa=whatsappUrl(property);
+      $("heroWhatsapp").href=wa;
+      $("topWhatsapp").href=wa;
+
+      const meta=[property.code,property.neighborhood,property.type].filter(Boolean).map(item=>`<span>${escapeHtml(item)}</span>`).join("");
+      $("heroMeta").innerHTML=meta;
+
+      const details=[];
+      if(property.bedrooms)details.push(detailCard("Dormitórios",String(property.bedrooms)));
+      if(property.suites)details.push(detailCard("Suítes",String(property.suites)));
+      if(property.bathrooms)details.push(detailCard("Banheiros",String(property.bathrooms)));
+      if(property.parking)details.push(detailCard("Vagas",String(property.parking)));
+      if(property.area)details.push(detailCard("Área",`${property.area} m²`));
+      details.push(detailCard("Finalidade",property.purpose));
+      details.push(detailCard("Bairro",property.neighborhood));
+      details.push(detailCard("Tipo",property.type));
+
+      $("propertyArea").innerHTML=`
+        <div class="layout">
+          <div>
+            <section class="panel gallery" aria-label="Galeria de fotos">
+              <div class="gallery-stage" id="galleryStage">
+                <button class="gallery-arrow previous" id="previousPhoto" type="button" aria-label="Foto anterior">‹</button>
+                <img id="mainPhoto" src="${escapeHtml(state.photos[0])}" alt="${escapeHtml(property.title)} - foto 1" />
+                <button class="gallery-arrow next" id="nextPhoto" type="button" aria-label="Próxima foto">›</button>
+                <span class="gallery-counter" id="galleryCounter">1 de ${state.photos.length}</span>
+              </div>
+              <div class="thumbs" id="thumbs"></div>
+            </section>
+            <section class="panel content" style="margin-top:18px">
+              <h2 class="section-title">Sobre este imóvel</h2>
+              <p class="description">${escapeHtml(property.description)}</p>
+              <div class="details">${details.join("")}</div>
+            </section>
+          </div>
+          <aside class="side">
+            <section class="panel contact-card">
+              <h2>Gostou deste imóvel?</h2>
+              <p>Fale com a Leads Imóveis para confirmar disponibilidade, agendar visita e receber todas as informações.</p>
+              <div class="contact-actions">
+                <a class="button whatsapp" href="${escapeHtml(wa)}" target="_blank" rel="noopener noreferrer">Falar no WhatsApp</a>
+                <button class="button dark" id="shareButton" type="button">Compartilhar página</button>
+                <button class="button ghost" id="copyButton" type="button">Copiar link</button>
+              </div>
+              <div class="share-status" id="shareStatus" aria-live="polite"></div>
+            </section>
+            <section class="panel contact-card">
+              <div class="reference"><small>Código do imóvel</small><strong>${escapeHtml(property.code||property.id)}</strong></div>
+              <div class="reference" style="margin-top:9px"><small>Localização</small><strong>${escapeHtml([property.address,property.neighborhood,"Florianópolis/SC"].filter(Boolean).join(" · "))}</strong></div>
+            </section>
+          </aside>
+        </div>`;
+
+      renderThumbs();
+      bindPropertyEvents();
+    }
+
+    function renderThumbs() {
+      const thumbs=$("thumbs");
+      thumbs.innerHTML=state.photos.map((photo,index)=>`<button class="thumb ${index===state.index?"active":""}" type="button" data-photo-index="${index}" aria-label="Abrir foto ${index+1}"><img loading="lazy" src="${escapeHtml(photo)}" alt="Miniatura ${index+1}" /></button>`).join("");
+      const multiple=state.photos.length>1;
+      $("previousPhoto").hidden=!multiple;
+      $("nextPhoto").hidden=!multiple;
+    }
+
+    function setPhoto(index) {
+      if(!state.photos.length)return;
+      state.index=(index+state.photos.length)%state.photos.length;
+      const image=$("mainPhoto");
+      image.style.opacity=".55";
+      setTimeout(()=>{image.src=state.photos[state.index];image.alt=`${state.property.title} - foto ${state.index+1}`;image.style.opacity="1";},90);
+      $("galleryCounter").textContent=`${state.index+1} de ${state.photos.length}`;
+      document.querySelectorAll(".thumb").forEach((thumb,i)=>thumb.classList.toggle("active",i===state.index));
+      document.querySelector(`.thumb[data-photo-index="${state.index}"]`)?.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
+    }
+
+    async function copyLink() {
+      try { await navigator.clipboard.writeText(location.href); $("shareStatus").textContent="Link copiado com sucesso."; }
+      catch (_) { $("shareStatus").textContent="Copie o endereço exibido na barra do navegador."; }
+    }
+
+    async function sharePage() {
+      const data={title:document.title,text:`Confira este imóvel da Leads Imóveis: ${state.property.title}`,url:location.href};
+      if(navigator.share){try{await navigator.share(data);$("shareStatus").textContent="Página compartilhada.";}catch(error){if(error.name!=="AbortError")copyLink();}}
+      else copyLink();
+    }
+
+    function bindPropertyEvents() {
+      $("previousPhoto").onclick=()=>setPhoto(state.index-1);
+      $("nextPhoto").onclick=()=>setPhoto(state.index+1);
+      $("thumbs").onclick=event=>{const button=event.target.closest("[data-photo-index]");if(button)setPhoto(Number(button.dataset.photoIndex));};
+      $("galleryStage").addEventListener("touchstart",event=>state.touchX=event.changedTouches[0]?.clientX||0,{passive:true});
+      $("galleryStage").addEventListener("touchend",event=>{const delta=(event.changedTouches[0]?.clientX||0)-state.touchX;if(Math.abs(delta)>50)setPhoto(state.index+(delta>0?-1:1));},{passive:true});
+      $("copyButton").onclick=copyLink;
+      $("shareButton").onclick=sharePage;
+      document.addEventListener("keydown",event=>{if(event.key==="ArrowLeft")setPhoto(state.index-1);if(event.key==="ArrowRight")setPhoto(state.index+1);});
+    }
+
+    function showError(message) {
+      $("propertyArea").innerHTML=`<div class="error"><strong>Não foi possível abrir este imóvel.</strong><br>${escapeHtml(message)}<br><br><a class="button dark" href="index.html#imoveis">Voltar para os imóveis</a></div>`;
+      $("title").textContent="Imóvel não encontrado";
+      $("price").textContent="Consulte";
+    }
+
+    async function init() {
+      $("currentYear").textContent=new Date().getFullYear();
+      const reference=referenceFromUrl();
+      if(!reference){showError("O link não possui o código do imóvel.");return;}
+      try{
+        initializeSupabase();
+        const raw=await fetchProperty(reference);
+        if(!raw){showError("Este imóvel não está publicado ou o código informado não existe.");return;}
+        renderProperty(normalizeProperty(raw));
+      }catch(error){console.error("[Leads imóvel]",error);showError(error.message||"Falha ao consultar o Supabase.");}
+    }
+
+    window.addEventListener("DOMContentLoaded",init);
+  </script>
+</body>
+</html>
