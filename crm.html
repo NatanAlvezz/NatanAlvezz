@@ -10609,13 +10609,11 @@ O patch:
   }, { once:true });
 })();
 </script>
-
 <!-- ==============================================================
-     PATCH: RADAR DE LEADS EM TEMPO REAL E ALERTA SONORO
-     Este script ouve a tabela "leads" no Supabase e avisa os
-     corretores instantaneamente quando um investidor quente entra.
+     PATCH: RADAR DE LEADS EM TEMPO REAL E ALERTA SONORO (V2 - FIX)
+     Script blindado contra execuções duplas no Supabase
 ================================================================ -->
-<script id="leadsRealtimeAlerts2026">
+<script id="leadsRealtimeAlerts2026_v2">
 (function () {
   "use strict";
 
@@ -10626,9 +10624,18 @@ O patch:
       return;
     }
 
+    // Trava de segurança: impede que o canal seja aberto duas vezes e cause erro
+    if (window.__LEADS_RADAR_ACTIVE__) return;
+    window.__LEADS_RADAR_ACTIVE__ = true;
+
     console.log("[Leads CRM] Conectando radar de leads em tempo real...");
 
-    // Cria o canal para ouvir os INSERTs na tabela public.leads
+    // Remove canais antigos "presos" na memória antes de criar um novo
+    try {
+      window.supabaseClient.removeChannel(window.supabaseClient.channel('leads_radar_channel'));
+    } catch(e) {}
+
+    // Cria o canal seguro
     const leadsChannel = window.supabaseClient.channel('leads_radar_channel')
       .on('postgres_changes', { 
         event: 'INSERT', 
@@ -10641,14 +10648,15 @@ O patch:
 
         console.log('🎯 Novo lead detectado pelo banco de dados!', lead);
 
-        // Toca um alerta sonoro (um "ping" suave) para chamar a atenção do corretor
+        // Toca um alerta sonoro (um "ping" suave)
         try {
            const beep = new Audio('https://www.soundjay.com/buttons/sounds/button-47.mp3');
            beep.volume = 0.6;
-           beep.play();
+           // O catch pega o erro caso o navegador bloqueie o áudio por falta de interação
+           beep.play().catch(e => console.log("Áudio bloqueado pelo navegador até o 1º clique.", e));
         } catch(e) {}
 
-        // Dispara o alerta visual na tela de todos os corretores
+        // Dispara o alerta visual
         if (typeof window.toast === 'function') {
           if (score >= 50) {
             window.toast('🔥 INVESTIDOR QUENTE: ' + nome + ' acabou de chegar! (Score: ' + score + ')');
@@ -10657,7 +10665,7 @@ O patch:
           }
         }
         
-        // Se a Central de Atendimentos estiver aberta, ela se atualiza sozinha
+        // Atualiza as listas do CRM em segundo plano
         if (typeof window.refreshAll === 'function') {
           setTimeout(function() { window.refreshAll(false); }, 500);
         }
@@ -10669,78 +10677,15 @@ O patch:
       });
   }
 
-  // Inicializa o radar assim que a página carregar
+  // Garantia de execução
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initRealtimeLeads);
   } else {
     initRealtimeLeads();
   }
-})();
-</script><!-- ==============================================================
-     PATCH: RADAR DE LEADS EM TEMPO REAL E ALERTA SONORO
-     Este script ouve a tabela "leads" no Supabase e avisa os
-     corretores instantaneamente quando um investidor quente entra.
-================================================================ -->
-<script id="leadsRealtimeAlerts2026">
-(function () {
-  "use strict";
-
-  function initRealtimeLeads() {
-    // Aguarda o Supabase carregar
-    if (!window.supabaseClient) {
-      setTimeout(initRealtimeLeads, 1000);
-      return;
-    }
-
-    console.log("[Leads CRM] Conectando radar de leads em tempo real...");
-
-    // Cria o canal para ouvir os INSERTs na tabela public.leads
-    const leadsChannel = window.supabaseClient.channel('leads_radar_channel')
-      .on('postgres_changes', { 
-        event: 'INSERT', 
-        schema: 'public', 
-        table: 'leads' 
-      }, payload => {
-        const lead = payload.new;
-        const score = lead.lead_score || 0;
-        const nome = lead.nome || 'Novo Investidor';
-
-        console.log('🎯 Novo lead detectado pelo banco de dados!', lead);
-
-        // Toca um alerta sonoro (um "ping" suave) para chamar a atenção do corretor
-        try {
-           const beep = new Audio('https://www.soundjay.com/buttons/sounds/button-47.mp3');
-           beep.volume = 0.6;
-           beep.play();
-        } catch(e) {}
-
-        // Dispara o alerta visual na tela de todos os corretores
-        if (typeof window.toast === 'function') {
-          if (score >= 50) {
-            window.toast('🔥 INVESTIDOR QUENTE: ' + nome + ' acabou de chegar! (Score: ' + score + ')');
-          } else {
-            window.toast('🔔 Novo lead captado: ' + nome);
-          }
-        }
-        
-        // Se a Central de Atendimentos estiver aberta, ela se atualiza sozinha
-        if (typeof window.refreshAll === 'function') {
-          setTimeout(function() { window.refreshAll(false); }, 500);
-        }
-      })
-      .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          console.log("[Leads CRM] Radar de leads ativado com sucesso!");
-        }
-      });
-  }
-
-  // Inicializa o radar assim que a página carregar
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initRealtimeLeads);
-  } else {
-    initRealtimeLeads();
-  }
+  
+  // Fallback de segurança para internet lenta
+  setTimeout(initRealtimeLeads, 2500);
 })();
 </script></body>
 </html>
