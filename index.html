@@ -549,8 +549,10 @@
     }
 
     function propertyLink(property) {
-      const reference = property.code || property.id;
-      return `/imovel/${encodeURIComponent(reference)}`;
+  const reference = property.code || property.id;
+
+  return `/imovel.html?codigo=${encodeURIComponent(reference)}`;
+}
     }
 
     function absolutePropertyLink(property) {
