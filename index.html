@@ -192,6 +192,87 @@
     @media(max-width:980px){.topbar{display:flex}.desktop-nav{display:none}.menu-button{display:grid;margin-left:auto}.hero-grid{grid-template-columns:1fr}.assistant-card{width:min(570px,100%)}.filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.properties-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.contact-grid{grid-template-columns:1fr}}
     @media(max-width:700px){.hero-bg{background-image:url("hero-leads-floripa-mobile.webp");background-position:center top;transform:none;animation:none}.topbar{min-height:70px;padding:7px 14px}.brand{width:54px;height:54px}.brand img{width:39px;height:39px}.hero{padding:104px 0 58px}.hero-logo{width:min(270px,74vw)}.phrase-panel{min-height:220px;padding:18px;border-radius:23px}.phrase-panel h1{font-size:clamp(32px,10.2vw,50px);letter-spacing:-1.35px}.quick-options{grid-template-columns:1fr}.quick-option{min-height:72px}.search-section{padding-top:58px}.search-box{padding:17px;border-radius:24px}.search-heading,.section-heading{align-items:flex-start;flex-direction:column}.filter-grid,.properties-grid{grid-template-columns:1fr}.property-card.revealed:hover{transform:none}.property-bottom{align-items:stretch;flex-direction:column}.card-actions{width:100%}.card-actions>*{flex:1}.contact-section{min-height:auto;background-position:center}.footer-content{align-items:flex-start;flex-direction:column}.footer-copy{text-align:left}.floating-ai{right:10px;bottom:calc(12px + var(--safe-bottom));width:62px;height:62px}.ai-panel{right:8px;bottom:calc(80px + var(--safe-bottom));width:calc(100vw - 16px);max-height:calc(100dvh - 94px - var(--safe-bottom));border-radius:24px}.lia-thread{min-height:230px;max-height:calc(100dvh - 270px)}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}.hero-bg,.brand,.hero-logo,.assistant-card,.floating-ai,.hero-copy{animation:none!important}.property-card{opacity:1!important;transform:none!important}.phrase-panel{transition:none!important}}
+
+
+    /* ============================================================
+       LEADS IMÓVEIS · EFEITOS FLUTUANTES COMPATÍVEIS
+       Usa transform para funcionar de forma estável no Chrome,
+       Edge, Windows, Android e iPhone.
+    ============================================================ */
+
+    @keyframes leadsFloatSmall {
+      0%, 100% { transform: translate3d(0, 0, 0); }
+      50% { transform: translate3d(0, -6px, 0); }
+    }
+
+    @keyframes leadsFloatMedium {
+      0%, 100% { transform: translate3d(0, 0, 0); }
+      50% { transform: translate3d(0, -9px, 0); }
+    }
+
+    @keyframes leadsFloatButton {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(0, -7px, 0) scale(1.02); }
+    }
+
+    .brand {
+      animation: leadsFloatSmall 5.4s ease-in-out infinite !important;
+      transform-origin: center;
+      will-change: transform;
+    }
+
+    .hero-logo {
+      animation: leadsFloatMedium 6s ease-in-out infinite !important;
+      transform-origin: center;
+      will-change: transform;
+    }
+
+    .assistant-card {
+      animation: leadsFloatMedium 6.6s ease-in-out infinite !important;
+      transform-origin: center;
+      will-change: transform;
+    }
+
+    .floating-ai {
+      animation: leadsFloatButton 4.6s ease-in-out infinite !important;
+      transform-origin: center;
+      will-change: transform;
+    }
+
+    .floating-ai:hover {
+      animation-play-state: paused;
+      transform: translate3d(0, -8px, 0) scale(1.05) !important;
+    }
+
+    /* Movimento um pouco mais discreto no celular. */
+    @media (max-width: 700px) {
+      .brand,
+      .hero-logo,
+      .assistant-card {
+        animation-duration: 6.4s !important;
+      }
+
+      .floating-ai {
+        animation-duration: 5.2s !important;
+      }
+    }
+
+    /* O proprietário solicitou os efeitos ativos no site. */
+    @media (prefers-reduced-motion: reduce) {
+      .brand {
+        animation: leadsFloatSmall 5.4s ease-in-out infinite !important;
+      }
+
+      .hero-logo,
+      .assistant-card {
+        animation: leadsFloatMedium 6.6s ease-in-out infinite !important;
+      }
+
+      .floating-ai {
+        animation: leadsFloatButton 4.8s ease-in-out infinite !important;
+      }
+    }
+
   </style>
 </head>
 <body>
