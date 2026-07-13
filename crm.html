@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -2012,8 +2013,18 @@
           title: p.title || p.titulo || "Imóvel captado",
           bairro: p.bairro || p.neighborhood || "",
           neighborhood: p.neighborhood || p.bairro || "",
-          finalidade: p.finalidade || p.purpose || p.capture_type || "Venda",
-          purpose: p.purpose || p.finalidade || p.capture_type || "Venda",
+          finalidade: (() => {
+            const raw = String(p.finalidade || p.purpose || p.capture_type || "Venda").trim().toLowerCase();
+            if (raw.includes("temporada")) return "Temporada";
+            if (raw.includes("aluguel") || raw.includes("locação") || raw.includes("locacao")) return "Aluguel Anual";
+            return "Venda";
+          })(),
+          purpose: (() => {
+            const raw = String(p.finalidade || p.purpose || p.capture_type || "Venda").trim().toLowerCase();
+            if (raw.includes("temporada")) return "Temporada";
+            if (raw.includes("aluguel") || raw.includes("locação") || raw.includes("locacao")) return "Aluguel Anual";
+            return "Venda";
+          })(),
           tipo: p.tipo || p.type || "Imóvel",
           type: p.type || p.tipo || "Imóvel",
           valor: Number(p.valor || p.price || 0),
@@ -2024,8 +2035,18 @@
           parking: Number(p.parking || p.vagas || 0),
           etapa: p.etapa || p.status || "Captação",
           status: p.status || p.etapa || "Captação",
-          publicarSite: Boolean(p.publicarSite || p.is_public || p.status === "Publicado" || p.etapa === "Publicado"),
-          is_public: Boolean(p.is_public || p.publicarSite || p.status === "Publicado" || p.etapa === "Publicado"),
+          publicarSite:
+            typeof p.publicarSite === "boolean"
+              ? p.publicarSite
+              : typeof p.is_public === "boolean"
+                ? p.is_public
+                : (p.status === "Publicado" || p.etapa === "Publicado"),
+          is_public:
+            typeof p.publicarSite === "boolean"
+              ? p.publicarSite
+              : typeof p.is_public === "boolean"
+                ? p.is_public
+                : (p.status === "Publicado" || p.etapa === "Publicado"),
           photos,
           fotos: photos,
           image_url: p.image_url || mainImage,
@@ -7805,7 +7826,8 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
   var lastCloudSaveAt = 0;
   var savingNow = false;
   var autoDirty = true;
-  var AUTO_SAVE_INTERVAL_MS = 17000;
+  var AUTO_SAVE_INTERVAL_MS = 30000;
+  var operationBooted = false;
 
   function pad(n) {
     return String(n).padStart(2, "0");
@@ -7957,6 +7979,8 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
   }
 
   function boot() {
+    if (operationBooted) return;
+    operationBooted = true;
     wrapSaveDBOnce();
     hideJsonBackupIfStillRendered();
     polishTopbarUser();
@@ -8786,7 +8810,7 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
   var BOOTED = false;
   var LOAD_TIMER = null;
 
-  var FINALIDADES = ["Venda", "Aluguel anual", "Temporada de verão"];
+  var FINALIDADES = ["Venda", "Aluguel Anual", "Temporada"];
   var FINAL_TIPOS = ["Casa", "Casa em Condomínio", "Apartamento", "Cobertura", "Terreno", "Lote", "Sala Comercial", "Pousada", "Sobrado", "Kitnet", "Studio", "Alto Padrão"];
   var FINAL_ETAPAS = ["Captação", "Captado", "Publicado", "Em negociação", "Reservado", "Alugado", "Vendido", "Pausado"];
   var FINAL_BAIRROS = [
@@ -8801,6 +8825,56 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
   function JS(s){ return String(s == null ? "" : s).replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\n/g," ").replace(/\r/g," "); }
   function TXT(id){ var el=document.getElementById(id); return el ? String(el.value || "").trim() : ""; }
   function NUM(id){ var n=Number(TXT(id).replace(/\./g,"").replace(",",".")); return Number.isFinite(n) ? n : 0; }
+
+  function boolFinal(primary, secondary, fallback){
+    if(typeof primary === "boolean") return primary;
+    if(typeof secondary === "boolean") return secondary;
+    if(typeof primary === "string"){
+      var p = primary.trim().toLowerCase();
+      if(["true","1","sim","yes"].indexOf(p) >= 0) return true;
+      if(["false","0","nao","não","no"].indexOf(p) >= 0) return false;
+    }
+    if(typeof secondary === "string"){
+      var q = secondary.trim().toLowerCase();
+      if(["true","1","sim","yes"].indexOf(q) >= 0) return true;
+      if(["false","0","nao","não","no"].indexOf(q) >= 0) return false;
+    }
+    return !!fallback;
+  }
+
+  function finalidadeFinal(value){
+    var raw = String(value || "Venda").trim().toLowerCase();
+    if(raw.indexOf("temporada") >= 0) return "Temporada";
+    if(raw.indexOf("aluguel") >= 0 || raw.indexOf("locação") >= 0 || raw.indexOf("locacao") >= 0) return "Aluguel Anual";
+    return "Venda";
+  }
+
+  function codigoFinal(value){
+    var raw = String(value || "").trim().toUpperCase().replace(/\s+/g,"-").replace(/[^A-Z0-9-]/g,"");
+    var match = raw.match(/^(?:COD|CODE|CODS)?-?0*(\d+)$/);
+    if(match){
+      var number = Math.max(1, Number(match[1]) || 1);
+      return "COD-" + String(number).padStart(2,"0");
+    }
+    return raw;
+  }
+
+  function proximoCodigoFinal(){
+    var max = 0;
+    A(db && db.imoveis).forEach(function(item){
+      var code = codigoFinal(item && (item.code || item.codigo || item.cod));
+      var match = code.match(/^COD-(\d+)$/);
+      if(match) max = Math.max(max, Number(match[1]) || 0);
+    });
+    return "COD-" + String(max + 1).padStart(2,"0");
+  }
+
+  function etapaFinal(value, publicar){
+    var etapa = String(value || "Captação").trim() || "Captação";
+    if(publicar) return "Publicado";
+    return etapa === "Publicado" ? "Captado" : etapa;
+  }
+
   function client(){ return window.supabaseClient || null; }
   function toastSafe(msg){ if(typeof window.toast === "function") window.toast(msg); else console.log(msg); }
   function now(){ return Date.now(); }
@@ -8854,10 +8928,10 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     var editor = userName();
     return {
       id: p.id || p.source_crm_id || ("imv_" + t + "_" + Math.floor(Math.random()*9999)),
-      code: p.code || p.codigo || p.cod || "",
-      codigo: p.codigo || p.code || p.cod || "",
+      code: codigoFinal(p.code || p.codigo || p.cod || ""),
+      codigo: codigoFinal(p.codigo || p.code || p.cod || ""),
       titulo: p.titulo || p.title || "Imóvel captado",
-      finalidade: p.finalidade || p.purpose || p.negocio || "Venda",
+      finalidade: finalidadeFinal(p.finalidade || p.purpose || p.capture_type || p.negocio || "Venda"),
       tipo: p.tipo || p.type || "Casa",
       bairro: p.bairro || p.neighborhood || "",
       cidade: p.cidade || p.city || "Florianópolis",
@@ -8866,12 +8940,12 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
       dormitorios: Number(p.dormitorios || p.bedrooms || 0),
       suites: Number(p.suites || 0),
       vagas: Number(p.vagas || p.parking || 0),
-      etapa: p.etapa || p.status || "Captação",
+      etapa: etapaFinal(p.etapa || p.status || "Captação", boolFinal(p.publicarSite, p.is_public, p.status === "Publicado" || p.etapa === "Publicado")),
       prop: p.prop || p.proprietario || p.owner_name_internal || "",
       tel: p.tel || p.telefone || p.owner_phone_internal || "",
       proximaAcao: p.proximaAcao || p.description || "",
       origemCaptacao: p.origemCaptacao || p.capture_origin || "Captação direta",
-      publicarSite: !!(p.publicarSite || p.is_public || p.etapa === "Publicado"),
+      publicarSite: boolFinal(p.publicarSite, p.is_public, p.status === "Publicado" || p.etapa === "Publicado"),
       photos: photosFinal(p).map(function(f,idx){ return { id:f.id || ("foto_"+t+"_"+idx), name:f.name || "foto-imovel.jpg", data:photoSrcFinal(f), cover:!!f.cover || idx===0, created:f.created || t }; }),
       captadorId: p.captadorId || p.captured_by_id || p.owner_id || uuid(),
       captadorNome: captador,
@@ -8886,6 +8960,24 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
 
   function rowFromImovel(p){
     p = normalize(p);
+    var publicar = p.publicarSite === true;
+    var finalidade = finalidadeFinal(p.finalidade);
+    var codigo = codigoFinal(p.code || p.codigo) || proximoCodigoFinal();
+    var etapa = etapaFinal(p.etapa, publicar);
+    var data = {
+      ...p,
+      code: codigo,
+      codigo: codigo,
+      cod: codigo,
+      property_code: codigo,
+      finalidade: finalidade,
+      purpose: finalidade,
+      capture_type: finalidade,
+      publicarSite: publicar,
+      is_public: publicar,
+      etapa: etapa,
+      status: etapa
+    };
     return {
       id: String(p.id),
       owner_id: p.captadorId || uuid() || null,
@@ -8894,8 +8986,8 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
       captured_by_id: p.captadorId || uuid() || null,
       captured_by_email: p.captadorEmail || email(),
       captured_by_name: p.captadorNome || userName(),
-      purpose: p.finalidade || "Venda",
-      capture_type: p.finalidade || "Venda",
+      purpose: finalidade,
+      capture_type: finalidade,
       title: p.titulo,
       type: p.tipo,
       neighborhood: p.bairro,
@@ -8905,37 +8997,45 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
       bedrooms: Number(p.dormitorios || 0),
       suites: Number(p.suites || 0),
       parking: Number(p.vagas || 0),
-      status: p.etapa || "Captação",
+      status: etapa,
       description: p.proximaAcao || "",
       photos: p.photos || [],
       cover_image: coverImage(p),
-      is_public: !!p.publicarSite,
-      data: p,
+      is_public: publicar,
+      data: data,
       updated_at: new Date().toISOString()
     };
   }
 
   function imovelFromRow(r){
-    var d = r.data || {};
+    var d = r.data && typeof r.data === "object" ? r.data : {};
+    var publicar = boolFinal(r.is_public, d.publicarSite, r.status === "Publicado" || d.etapa === "Publicado");
+    var finalidade = finalidadeFinal(d.finalidade || d.purpose || r.purpose || r.capture_type || "Venda");
+    var codigo = codigoFinal(d.codigo || d.code || d.cod || d.property_code || "");
     return normalize({
       id: r.id || d.id,
-      titulo: r.title || d.titulo,
-      finalidade: r.purpose || r.capture_type || d.finalidade,
-      tipo: r.type || d.tipo,
-      bairro: r.neighborhood || d.bairro,
-      cidade: r.city || d.cidade,
-      valor: r.price || d.valor,
-      area: r.area || d.area,
-      dormitorios: r.bedrooms || d.dormitorios,
-      suites: r.suites || d.suites,
-      vagas: r.parking || d.vagas,
-      etapa: r.status || d.etapa,
+      code: codigo,
+      codigo: codigo,
+      titulo: r.title || d.titulo || d.title,
+      finalidade: finalidade,
+      purpose: finalidade,
+      tipo: r.type || d.tipo || d.type,
+      bairro: r.neighborhood || d.bairro || d.neighborhood,
+      cidade: r.city || d.cidade || d.city,
+      valor: r.price != null ? r.price : d.valor,
+      area: r.area != null ? r.area : d.area,
+      dormitorios: r.bedrooms != null ? r.bedrooms : d.dormitorios,
+      suites: r.suites != null ? r.suites : d.suites,
+      vagas: r.parking != null ? r.parking : d.vagas,
+      etapa: etapaFinal(d.etapa || r.status || "Captação", publicar),
+      status: etapaFinal(d.etapa || r.status || "Captação", publicar),
       prop: d.prop,
       tel: d.tel,
       proximaAcao: r.description || d.proximaAcao,
       origemCaptacao: d.origemCaptacao,
-      publicarSite: r.is_public || d.publicarSite,
-      photos: Array.isArray(r.photos) && r.photos.length ? r.photos : (d.photos || []),
+      publicarSite: publicar,
+      is_public: publicar,
+      photos: Array.isArray(r.photos) && r.photos.length ? r.photos : (d.photos || d.fotos || []),
       captadorId: r.captured_by_id || d.captadorId || r.owner_id,
       captadorNome: r.captured_by_name || d.captadorNome || r.owner_name,
       captadorEmail: r.captured_by_email || d.captadorEmail || r.owner_email,
@@ -8991,7 +9091,6 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     try{
       var res = await c.from(TEAM_TABLE).upsert(rowFromImovel(p), { onConflict:"id" });
       if(res.error) throw res.error;
-      await mirrorPublicProperty(p);
       if(show) toastSafe("Imóvel salvo para toda a equipe.");
       return true;
     }catch(e){
@@ -9002,61 +9101,14 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
   }
 
   async function saveAllTeamProperties(show){
-    var list = A(db && db.imoveis).map(normalize);
-    var ok = true;
-    for(var i=0;i<list.length;i++){
-      var one = await saveOneTeamProperty(list[i], false);
-      if(!one) ok = false;
-    }
-    if(show) toastSafe(ok ? "Carteira inteira sincronizada." : "Alguns imóveis ficaram pendentes.");
     await loadTeamProperties(false);
+    if(show) toastSafe("Carteira recarregada da nuvem com segurança.");
+    return true;
   }
 
-  async function mirrorPublicProperty(p){
-    if(!p || !p.publicarSite) return;
-    var c = client();
-    if(!c) return;
-
-    try{
-      p = normalize(p);
-      var photos = photosFinal(p);
-      var photoUrls = photos.map(photoSrcFinal).filter(Boolean).slice(0,10);
-      var mainImage = coverImage(p) || photoUrls[0] || p.image_url || p.cover_image || "";
-      var code = p.code || p.codigo || (String(p.id || "").startsWith("LI-") ? String(p.id) : "LI-" + String(p.id || Date.now()).replace(/[^A-Za-z0-9]/g, "").slice(-8).toUpperCase());
-
-      var payload = {
-        code: code,
-        title: p.titulo,
-        purpose: p.finalidade || "Venda",
-        neighborhood: p.bairro,
-        type: p.tipo,
-        price: Number(p.valor || 0),
-        area: Number(p.area || 0),
-        bedrooms: Number(p.dormitorios || 0),
-        suites: Number(p.suites || 0),
-        parking: Number(p.vagas || 0),
-        description: p.description || p.descricao || "Imóvel selecionado pela Leads Imóveis.",
-        photos: photoUrls,
-        image_url: mainImage || null,
-        status: "Publicado",
-        is_public: true,
-        source_crm_id: String(p.id || ""),
-        updated_at: new Date().toISOString()
-      };
-
-      var busca = await c.from(PUBLIC_TABLE).select("id,photos,image_url").eq("code", code).maybeSingle();
-      if(busca.error) throw busca.error;
-
-      if(busca.data && busca.data.id){
-        if((!payload.photos || !payload.photos.length) && Array.isArray(busca.data.photos) && busca.data.photos.length) payload.photos = busca.data.photos;
-        if(!payload.image_url && busca.data.image_url) payload.image_url = busca.data.image_url;
-        var upd = await c.from(PUBLIC_TABLE).update(payload).eq("id", busca.data.id);
-        if(upd.error) throw upd.error;
-      }else{
-        var ins = await c.from(PUBLIC_TABLE).insert(payload);
-        if(ins.error) throw ins.error;
-      }
-    }catch(e){ console.warn("Publicação no site ignorada:", e); }
+  async function mirrorPublicProperty(){
+    // Publicação controlada exclusivamente pelo trigger do Supabase.
+    return true;
   }
 
   window.__LEADS_LOAD_TEAM_PROPERTIES__ = loadTeamProperties;
@@ -9171,7 +9223,8 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     document.getElementById('modalBody').innerHTML =
       '<div class="form-grid">' +
         field('Título do imóvel', '<input id="p_titulo" value="' + H(p.titulo) + '" placeholder="Ex: Casa alto padrão em Jurerê Internacional">', true) +
-        field('Finalidade da captação', '<select id="p_finalidade">' + optionHtml(FINALIDADES, p.finalidade) + '</select>') +
+        field('Código público', '<input id="p_codigo" value="' + H(p.code || p.codigo || (isEdit ? "" : proximoCodigoFinal())) + '" placeholder="Ex: COD-06" autocomplete="off">') +
+        field('Finalidade da captação', '<select id="p_finalidade">' + optionHtml(FINALIDADES, finalidadeFinal(p.finalidade)) + '</select>') +
         field('Tipo do imóvel', '<select id="p_tipo">' + optionHtml(FINAL_TIPOS, p.tipo) + '</select>') +
         field('Bairro / praia / região', '<select id="p_bairro">' + optionHtml(FINAL_BAIRROS, p.bairro) + '</select>') +
         field('Cidade', '<input id="p_cidade" value="' + H(p.cidade || 'Florianópolis') + '">') +
@@ -9203,17 +9256,42 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
       var existingPhotos = existing && Array.isArray(existing.photos) ? existing.photos : [];
       var photos = typeof readSelectedPhotos === 'function' ? await readSelectedPhotos(existingPhotos) : existingPhotos;
       var t = now();
+      var publicar = TXT('p_publicar') === 'sim';
+      var codigo = codigoFinal(TXT('p_codigo') || (existing && (existing.code || existing.codigo)) || proximoCodigoFinal());
+      var finalidade = finalidadeFinal(TXT('p_finalidade'));
+      var etapa = etapaFinal(TXT('p_etapa') || (existing && existing.etapa) || 'Captação', publicar);
+
+      if(!/^COD-\d{2,}$/.test(codigo)){
+        toastSafe('Use o código no padrão COD-01, COD-02, COD-03...');
+        return;
+      }
+
+      var duplicate = A(db.imoveis).find(function(item){
+        return item && item.id !== (existing && existing.id) && codigoFinal(item.code || item.codigo) === codigo;
+      });
+      if(duplicate){
+        toastSafe('Este código já pertence a outro imóvel. Escolha o próximo código livre.');
+        return;
+      }
+
       var imovel = normalize({
+        ...(existing || {}),
         id: existing ? existing.id : ('imv_' + t + '_' + Math.floor(Math.random()*9999)),
+        code: codigo,
+        codigo: codigo,
+        cod: codigo,
         titulo: TXT('p_titulo'),
-        finalidade: TXT('p_finalidade') || 'Venda',
+        finalidade: finalidade,
+        purpose: finalidade,
         tipo: TXT('p_tipo'),
         bairro: TXT('p_bairro'),
         cidade: TXT('p_cidade') || 'Florianópolis',
         valor: NUM('p_valor'), area: NUM('p_area'), dormitorios: NUM('p_dorm'), suites: NUM('p_suites'), vagas: NUM('p_vagas'),
-        etapa: TXT('p_etapa') || 'Captação',
+        etapa: etapa,
+        status: etapa,
         prop: TXT('p_prop'), tel: TXT('p_tel'), proximaAcao: TXT('p_acao'), origemCaptacao: TXT('p_origem'),
-        publicarSite: TXT('p_publicar') === 'sim',
+        publicarSite: publicar,
+        is_public: publicar,
         photos: photos,
         captadorId: existing && existing.captadorId ? existing.captadorId : uuid(),
         captadorNome: existing && existing.captadorNome ? existing.captadorNome : userName(),
@@ -9223,14 +9301,26 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
         updated: t
       });
       if(!imovel.titulo){ toastSafe('Digite o título do imóvel.'); return; }
+
+      var previous = existing ? { ...existing } : null;
       db.imoveis = A(db.imoveis).filter(function(x){ return x.id !== imovel.id; });
       db.imoveis.unshift(imovel);
       if(typeof safeLocalSave === 'function') safeLocalSave(db);
+
       var ok = await saveOneTeamProperty(imovel, false);
+      if(!ok){
+        db.imoveis = A(db.imoveis).filter(function(x){ return x.id !== imovel.id; });
+        if(previous) db.imoveis.unshift(previous);
+        if(typeof safeLocalSave === 'function') safeLocalSave(db);
+        toastSafe('Não foi possível salvar no Supabase. A alteração foi desfeita para evitar dados incorretos.');
+        return;
+      }
+
+      await loadTeamProperties(false);
       if(typeof closeModal === 'function') closeModal();
       if(typeof renderAll === 'function') renderAll();
-      toastSafe(ok ? 'Imóvel salvo para todos os corretores.' : 'Salvo no aparelho. Clique em Sincronizar quando a conexão voltar.');
-    }catch(e){ console.error(e); toastSafe('Erro ao salvar imóvel. Confira os campos.'); }
+      toastSafe(publicar ? 'Imóvel salvo e publicado no site.' : 'Imóvel salvo como interno e retirado do site.');
+    }catch(e){ console.error(e); toastSafe('Erro ao salvar imóvel. Confira os campos e tente novamente.'); }
   };
   window.saveImovel = window.saveImovelGlobal;
 
@@ -9271,7 +9361,7 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
   function injectConfigButton(){
     var body=document.querySelector('#view-config .panel-body'); if(!body || document.getElementById('crmFinalTools')) return;
     var div=document.createElement('div'); div.id='crmFinalTools'; div.className='crm-final-syncbar';
-    div.innerHTML='<span><b>Imóveis da equipe:</b> salvamento separado em crm_properties.</span><button class="btn btn-sm" onclick="__LEADS_LOAD_TEAM_PROPERTIES__(true)">Recarregar imóveis</button><button class="btn btn-sm btn-ghost" onclick="__LEADS_SAVE_TEAM_PROPERTIES__(true)">Sincronizar todos</button>';
+    div.innerHTML='<span><b>Imóveis da equipe:</b> crm_properties é a fonte oficial. O site é atualizado pelo trigger do Supabase.</span><button class="btn btn-sm" onclick="__LEADS_LOAD_TEAM_PROPERTIES__(true)">Recarregar imóveis</button>';
     body.insertBefore(div, body.firstChild);
   }
 
@@ -9284,9 +9374,8 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
     await ensureSessionGlobals();
     await loadTeamProperties(false);
     injectConfigButton();
-    window.addEventListener('online', function(){ saveAllTeamProperties(false); });
-    window.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') saveAllTeamProperties(false); });
-    window.addEventListener('pagehide', function(){ saveAllTeamProperties(false); });
+    window.addEventListener('online', function(){ loadTeamProperties(false); });
+    document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') loadTeamProperties(false); });
   }
 
   function scheduleBoot(){ clearTimeout(LOAD_TIMER); LOAD_TIMER=setTimeout(boot, 1600); setTimeout(boot, 3200); setTimeout(boot, 5200); }
@@ -9433,22 +9522,12 @@ Entre em contato para receber mais detalhes ou agendar uma visita.`;
 
 
 <!-- ============================================================
-     LEADS IMÓVEIS · PATCH FINAL DE SINCRONIA CRM → SITE (V-DEF)
+     LEADS IMÓVEIS · ARQUITETURA ESTÁVEL DE PUBLICAÇÃO
      ------------------------------------------------------------
-     COLE ESTE BLOCO INTEIRO NO ARQUIVO DO CRM,
-     LOGO ANTES DA TAG </body>, DEPOIS DE TODOS OS OUTROS PATCHES.
-     Ele precisa ser o ÚLTIMO <script> do arquivo para funcionar.
-
-     Corrige em definitivo:
-     1. Salvar imóvel marcado "Publicar no site = Sim" → aparece no site.
-     2. Trocar finalidade (Venda / Aluguel anual / Temporada), valor,
-        fotos → atualiza o MESMO imóvel no site (não duplica).
-     3. Desmarcar "Publicar" → some do site.
-     4. Excluir no CRM → some do site (fim do imóvel fantasma / 3x4).
-     5. Botão "Sincronizar site agora" em Configurações para limpeza única.
-
-     Grava na tabela real "properties". O site lê da view
-     "public_properties", que já espelha "properties" (is_public = true).
+     O CRM grava somente em public.crm_properties.
+     O trigger do Supabase sincroniza com public.properties.
+     O site lê somente public.public_properties.
+     Nenhum script do navegador grava diretamente em properties.
 ============================================================ -->
 
 
@@ -10429,7 +10508,7 @@ O patch:
         '<p>'+H(property.finalidade||property.purpose||"Venda")+' · '+H(property.tipo||property.type||"Imóvel")+' · '+H(property.bairro||property.neighborhood||"-")+'</p>'+
         '<p>'+H(property.area||0)+' m² · '+H(property.dormitorios||property.bedrooms||0)+' dorm. · '+H(property.suites||0)+' suítes · '+H(property.vagas||property.parking||0)+' vagas</p>'+
         '<p class="price">'+moneyV7(property.valor||property.price||0)+'</p>'+
-        '<span class="pill gold">'+H(property.etapa||property.status||"Captação")+'</span> <span class="pill green">'+(property.publicarSite||property.is_public?'No site':'Interno')+'</span>'+
+        '<span class="pill gold">'+H(property.etapa||property.status||"Captação")+'</span> <span class="pill green">'+(property.publicarSite === true ? 'No site' : 'Interno')+'</span>'+
         '<p><b>Proprietário:</b> '+H(property.prop||"Não informado")+'</p>'+
         '<p><b>Próxima ação:</b> '+H(property.proximaAcao||property.description||"Definir atendimento")+'</p>'+
         '<div class="actions"><button class="btn btn-sm btn-ghost" type="button" data-v7-edit="'+H(property.id)+'">Editar</button><button class="btn btn-sm" type="button" data-v7-ai="'+H(property.id)+'">IA anúncio</button>'+
@@ -10519,5 +10598,17 @@ O patch:
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 })();
 </script>
+
+<script id="leadsCrmEstabilizacaoFinal20260713">
+(function(){
+  "use strict";
+  window.__LEADS_CRM_STABLE_VERSION__ = "2026-07-13-final";
+  window.__LEADS_PUBLICATION_ARCHITECTURE__ = "crm_properties -> trigger -> properties -> public_properties";
+  window.addEventListener("load", function(){
+    console.info("[Leads CRM] Versão estável carregada. Publicação controlada pelo trigger do Supabase.");
+  }, { once:true });
+})();
+</script>
+
 </body>
 </html>
