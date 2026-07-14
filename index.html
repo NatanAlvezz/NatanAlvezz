@@ -12,7 +12,8 @@
   <title>Leads Imóveis · Florianópolis</title>
 
   <link rel="icon" href="favicon.png" />
-  <link rel="preload" href="hero-leads-floripa-final.webp" as="image" />
+  <link rel="preload" href="hero-leads-floripa-final.webp" as="image" media="(min-width: 701px)" fetchpriority="high" />
+  <link rel="preload" href="hero-leads-floripa-mobile.webp" as="image" media="(max-width: 700px)" fetchpriority="high" />
   <link rel="preload" href="leads-logo-completa-v3.webp" as="image" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 
@@ -416,6 +417,13 @@
     const normalizeText = value => String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
     const escapeHtml = value => String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
 
+    function getRadarSessionId() {
+      const fromRadar = window.LeadsRadar?.getSessionId?.();
+      const fromStorage = localStorage.getItem("leads_radar_session_id");
+      const value = String(fromRadar || fromStorage || "").trim();
+      return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value) ? value : null;
+    }
+
     function initializeSupabase() {
       if (!window.supabase?.createClient) throw new Error("Biblioteca do Supabase não carregou.");
       state.db = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
@@ -669,6 +677,7 @@
       const article = document.createElement("article");
       article.className = "property-card";
       article.dataset.propertyId = property.id;
+      article.dataset.propertyCode = property.code || property.id;
 
       const startIndex = Math.min(state.cardPhotoIndex.get(property.id) || 0,Math.max(0,property.photos.length-1));
       const media = document.createElement("div");
@@ -702,6 +711,7 @@
         const previous = document.createElement("button");
         previous.className = "gallery-arrow previous";
         previous.type = "button";
+        previous.dataset.gallery = "true";
         previous.textContent = "‹";
         previous.setAttribute("aria-label","Foto anterior");
         previous.onclick = event => { event.preventDefault(); event.stopPropagation(); changeCardPhoto(property,article,-1); };
@@ -709,6 +719,7 @@
         const next = document.createElement("button");
         next.className = "gallery-arrow next";
         next.type = "button";
+        next.dataset.gallery = "true";
         next.textContent = "›";
         next.setAttribute("aria-label","Próxima foto");
         next.onclick = event => { event.preventDefault(); event.stopPropagation(); changeCardPhoto(property,article,1); };
@@ -759,11 +770,14 @@
 
       const open = document.createElement("a");
       open.className = "small-button";
+      open.dataset.propertyCode = property.code || property.id;
       open.href = propertyLink(property);
       open.textContent = "Ver imóvel";
 
       const whatsapp = document.createElement("a");
       whatsapp.className = "small-button dark";
+      whatsapp.dataset.propertyCode = property.code || property.id;
+      whatsapp.dataset.whatsapp = "true";
       whatsapp.href = whatsappUrl(property);
       whatsapp.target = "_blank";
       whatsapp.rel = "noopener noreferrer";
@@ -856,7 +870,21 @@
       try {
         const session = localStorage.getItem("leads_lia_session") || (crypto.randomUUID?.() || String(Date.now()));
         localStorage.setItem("leads_lia_session",session);
-        const response = await fetch(LIA_ENDPOINT,{method:"POST",mode:"cors",cache:"no-store",headers:{"Content-Type":"application/json","x-site-session":session},body:JSON.stringify({message:clean,source:"leadsimoveis.com.br",page:location.href})});
+        const response = await fetch(LIA_ENDPOINT, {
+          method: "POST",
+          mode: "cors",
+          cache: "no-store",
+          headers: {
+            "Content-Type": "application/json",
+            "x-site-session": session
+          },
+          body: JSON.stringify({
+            message: clean,
+            source: "leadsimoveis.com.br",
+            page: location.href,
+            tracking_session_id: getRadarSessionId()
+          })
+        });
         const data = await response.json().catch(()=>({}));
         if (!response.ok || data.ok===false) throw new Error(data.message || `HTTP ${response.status}`);
         typing.remove();
@@ -976,5 +1004,7 @@
 
     window.addEventListener("DOMContentLoaded",init);
   </script>
-<script src="radar-leads.js?v=20260713-1"></script></body>
+  <!-- Radar Leads IA: rastreamento consentido e score de intenção -->
+  <script src="radar-leads.js?v=20260713-2"></script>
+</body>
 </html>
