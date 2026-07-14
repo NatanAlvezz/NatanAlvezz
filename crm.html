@@ -128,5 +128,404 @@
 })();
 
   </script>
-</body>
+<script>
+/* ============================================================
+   LEADS IMÓVEIS · AJUSTE FINAL CONFIGURAÇÕES + CORES
+   Cole este bloco antes de </body> no crm.html completo.
+   Não apaga Supabase, imóveis, leads, fotos nem IA.
+   ============================================================ */
+
+(function LeadsAjusteConfiguracoesFinal() {
+  "use strict";
+
+  if (window.__LEADS_AJUSTE_CONFIG_FINAL__) return;
+  window.__LEADS_AJUSTE_CONFIG_FINAL__ = "20260714-final";
+
+  const STORAGE_KEY = "leads_crm_cor_corretor_final";
+
+  const THEMES = [
+    ["Dourado Luxo", "#d8b56d", "#f1d28c"],
+    ["Azul Prime", "#4f8cff", "#7ab8ff"],
+    ["Verde Elite", "#35c77a", "#8be0b0"],
+    ["Rubi", "#e5485d", "#ff8293"],
+    ["Ametista", "#9b6cff", "#d1b4ff"],
+    ["Turquesa", "#22c7c9", "#7ce6df"],
+    ["Cobre", "#c97841", "#f0ad71"],
+    ["Prata", "#9ba7b4", "#d7dde5"],
+    ["Grafite", "#69717d", "#aab0b9"],
+    ["Rosa", "#e569ac", "#ffacd4"],
+    ["Coral", "#ff6f61", "#ffad91"],
+    ["Laranja", "#ff8a3d", "#ffc16b"],
+    ["Limão", "#9fd43f", "#d4f177"],
+    ["Esmeralda", "#00a878", "#63dfb5"],
+    ["Oceano", "#0077b6", "#48cae4"],
+    ["Azul Royal", "#405de6", "#7c8cff"],
+    ["Violeta", "#7b2cbf", "#c77dff"],
+    ["Magenta", "#d81b60", "#ff6fa5"],
+    ["Chocolate", "#8d5524", "#c68642"],
+    ["Aurora", "#00b4d8", "#a855f7"]
+  ];
+
+  function normalizar(txt) {
+    return String(txt || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+  }
+
+  function misturar(hex, fator) {
+    hex = String(hex || "#d8b56d").replace("#", "");
+    const n = parseInt(hex, 16);
+    const alvo = fator < 0 ? 0 : 255;
+    const f = Math.abs(fator);
+
+    let r = n >> 16;
+    let g = (n >> 8) & 255;
+    let b = n & 255;
+
+    r = Math.round(r + (alvo - r) * f);
+    g = Math.round(g + (alvo - g) * f);
+    b = Math.round(b + (alvo - b) * f);
+
+    return "#" + [r, g, b].map(v => v.toString(16).padStart(2, "0")).join("");
+  }
+
+  function aplicarTema(nome, cor1, cor2, salvar = true) {
+    const root = document.documentElement;
+
+    root.style.setProperty("--gold", cor1);
+    root.style.setProperty("--gold-2", cor2);
+    root.style.setProperty("--gold2", cor2);
+    root.style.setProperty("--accent", cor1);
+    root.style.setProperty("--accent-2", cor2);
+    root.style.setProperty("--brand", cor1);
+    root.style.setProperty("--brand-2", cor2);
+    root.style.setProperty("--leads-theme-a", cor1);
+    root.style.setProperty("--leads-theme-b", cor2);
+
+    document.querySelectorAll("[data-theme-final]").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.themeFinal === nome);
+    });
+
+    const atual = document.getElementById("leadsThemeAtualFinal");
+    if (atual) atual.textContent = nome;
+
+    if (salvar) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ nome, cor1, cor2 }));
+    }
+  }
+
+  function restaurarTema() {
+    try {
+      const salvo = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+      if (salvo && salvo.cor1 && salvo.cor2) {
+        aplicarTema(salvo.nome || "Cor personalizada", salvo.cor1, salvo.cor2, false);
+        return;
+      }
+    } catch (e) {}
+
+    aplicarTema("Dourado Luxo", "#d8b56d", "#f1d28c", false);
+  }
+
+  function cssFinal() {
+    if (document.getElementById("leadsConfigFinalCSS")) return;
+
+    const style = document.createElement("style");
+    style.id = "leadsConfigFinalCSS";
+    style.textContent = `
+      :root {
+        --leads-theme-a: var(--gold, #d8b56d);
+        --leads-theme-b: var(--gold-2, #f1d28c);
+      }
+
+      .leads-hide-config-copy {
+        display: none !important;
+      }
+
+      .leads-config-final-box {
+        margin-top: 14px;
+        padding: 16px;
+        border: 1px solid color-mix(in srgb, var(--leads-theme-a) 35%, transparent);
+        border-radius: 18px;
+        background:
+          radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--leads-theme-a) 12%, transparent), transparent 34%),
+          linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.018));
+        box-shadow: 0 18px 45px rgba(0,0,0,.25);
+      }
+
+      .leads-config-final-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .leads-config-final-head h3 {
+        margin: 0;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: .8px;
+        color: #fff;
+      }
+
+      .leads-config-final-atual {
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid color-mix(in srgb, var(--leads-theme-a) 42%, transparent);
+        color: var(--leads-theme-a);
+        background: color-mix(in srgb, var(--leads-theme-a) 10%, transparent);
+        font-size: 11px;
+        font-weight: 900;
+      }
+
+      .leads-config-final-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .leads-theme-final-btn {
+        min-height: 60px;
+        padding: 8px;
+        border: 1px solid rgba(255,255,255,.12);
+        border-radius: 13px;
+        background: rgba(255,255,255,.04);
+        color: #f7f4ed;
+        cursor: pointer;
+        transition: .18s ease;
+      }
+
+      .leads-theme-final-btn:hover {
+        transform: translateY(-2px);
+        border-color: var(--theme-a);
+      }
+
+      .leads-theme-final-btn.active {
+        border-color: var(--theme-a);
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--theme-a) 22%, transparent);
+      }
+
+      .leads-theme-final-swatch {
+        display: block;
+        height: 22px;
+        border-radius: 8px;
+        margin-bottom: 6px;
+        background: linear-gradient(135deg, var(--theme-a), var(--theme-b));
+      }
+
+      .leads-theme-final-name {
+        display: block;
+        font-size: 10px;
+        font-weight: 850;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .leads-config-final-custom {
+        display: grid;
+        grid-template-columns: auto minmax(100px, 1fr) auto;
+        gap: 10px;
+        align-items: center;
+        margin-top: 13px;
+        padding-top: 13px;
+        border-top: 1px solid rgba(255,255,255,.10);
+      }
+
+      .leads-config-final-custom label {
+        color: #b9b5aa;
+        font-size: 11px;
+        font-weight: 850;
+      }
+
+      .leads-config-final-custom input[type="color"] {
+        height: 40px;
+        padding: 3px;
+        border-radius: 11px;
+        border: 1px solid rgba(255,255,255,.15);
+        background: rgba(0,0,0,.25);
+      }
+
+      .leads-config-final-custom button {
+        min-height: 40px;
+        padding: 9px 13px;
+        border-radius: 11px;
+        border: 1px solid color-mix(in srgb, var(--leads-theme-a) 50%, transparent);
+        color: #15100a;
+        background: linear-gradient(135deg, var(--leads-theme-a), var(--leads-theme-b));
+        font-size: 11px;
+        font-weight: 950;
+      }
+
+      @media (max-width: 900px) {
+        .leads-config-final-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 560px) {
+        .leads-config-final-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .leads-config-final-head {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .leads-config-final-custom {
+          grid-template-columns: 1fr;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function acharContainerConfig() {
+    const titulos = document.querySelectorAll("h1,h2,h3,h4,h5,[role='heading']");
+
+    for (const titulo of titulos) {
+      if (normalizar(titulo.textContent).includes("configuracoes e dados")) {
+        return titulo.closest(".panel,.view,section,article,main,div") || titulo.parentElement;
+      }
+    }
+
+    return null;
+  }
+
+  function limparTextos(container) {
+    if (!container) return;
+
+    const frasesRemover = [
+      "nuvem, seguranca e sincronizacao automatica",
+      "imoveis da equipe: crm_properties e a fonte oficial",
+      "o crm salva localmente e sincroniza no supabase automaticamente",
+      "operacao final para corretores",
+      "muda a cor principal, fundo, paineis escuros",
+      "temas completos do layout"
+    ];
+
+    container.querySelectorAll("p,small,span,div,strong,h3,h4").forEach(el => {
+      const texto = normalizar(el.textContent);
+
+      if (frasesRemover.some(f => texto.includes(f))) {
+        el.classList.add("leads-hide-config-copy");
+      }
+    });
+
+    container.querySelectorAll("button").forEach(btn => {
+      const texto = normalizar(btn.textContent);
+
+      if (
+        texto === "dourado luxo" ||
+        texto === "azul prime" ||
+        texto === "verde elite"
+      ) {
+        btn.classList.add("leads-hide-config-copy");
+      }
+    });
+  }
+
+  function criarPainelCores(container) {
+    if (!container || document.getElementById("leadsConfigFinalBox")) return;
+
+    const box = document.createElement("section");
+    box.id = "leadsConfigFinalBox";
+    box.className = "leads-config-final-box";
+
+    const botoes = THEMES.map(([nome, cor1, cor2]) => `
+      <button
+        type="button"
+        class="leads-theme-final-btn"
+        data-theme-final="${nome}"
+        data-cor1="${cor1}"
+        data-cor2="${cor2}"
+        style="--theme-a:${cor1};--theme-b:${cor2}"
+      >
+        <span class="leads-theme-final-swatch"></span>
+        <span class="leads-theme-final-name">${nome}</span>
+      </button>
+    `).join("");
+
+    box.innerHTML = `
+      <div class="leads-config-final-head">
+        <h3>Cor do CRM por corretor</h3>
+        <span id="leadsThemeAtualFinal" class="leads-config-final-atual">Dourado Luxo</span>
+      </div>
+
+      <div class="leads-config-final-grid">
+        ${botoes}
+      </div>
+
+      <div class="leads-config-final-custom">
+        <label for="leadsCorPersonalizadaFinal">Outra cor</label>
+        <input id="leadsCorPersonalizadaFinal" type="color" value="#d8b56d">
+        <button type="button" id="leadsAplicarCorPersonalizadaFinal">Aplicar</button>
+      </div>
+    `;
+
+    container.appendChild(box);
+
+    box.querySelectorAll("[data-theme-final]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        aplicarTema(btn.dataset.themeFinal, btn.dataset.cor1, btn.dataset.cor2);
+      });
+    });
+
+    const input = box.querySelector("#leadsCorPersonalizadaFinal");
+    const aplicar = box.querySelector("#leadsAplicarCorPersonalizadaFinal");
+
+    aplicar.addEventListener("click", () => {
+      const cor = input.value || "#d8b56d";
+      aplicarTema("Cor personalizada", cor, misturar(cor, 0.35));
+    });
+
+    restaurarTema();
+  }
+
+  function executar() {
+    cssFinal();
+
+    const container = acharContainerConfig();
+    if (!container) return false;
+
+    limparTextos(container);
+    criarPainelCores(container);
+
+    return true;
+  }
+
+  let tentativas = 0;
+
+  function iniciar() {
+    if (executar()) return;
+
+    tentativas++;
+    if (tentativas < 25) {
+      setTimeout(iniciar, 300);
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", iniciar, { once: true });
+  } else {
+    iniciar();
+  }
+
+  window.addEventListener("load", () => {
+    setTimeout(executar, 400);
+  });
+
+  if (window.MutationObserver) {
+    const observer = new MutationObserver(() => executar());
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true
+    });
+  }
+})();
+</script></body>
 </html>
