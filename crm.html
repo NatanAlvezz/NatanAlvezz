@@ -1,656 +1,132 @@
-/* ============================================================
-   LEADS IMÓVEIS · CONFIGURAÇÕES ORGANIZADAS
-   - Remove explicações longas da tela
-   - Mantém sincronização, salvar e sair
-   - Adiciona 20 temas + cor personalizada
-   - Preferência salva somente no navegador de cada corretor
-   ============================================================ */
 
-(function LeadsConfigOrganizada() {
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07080a">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Leads Imóveis · CRM Premium</title>
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:#050506;color:#f7f4ed;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+    body{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 50% 0%,rgba(216,181,109,.18),transparent 35%),#050506}
+    .loader-card{width:min(470px,94vw);padding:30px;border:1px solid rgba(216,181,109,.28);border-radius:24px;background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.02));box-shadow:0 30px 100px rgba(0,0,0,.6);text-align:center}
+    .loader-logo{width:66px;height:66px;margin:0 auto 15px;border:1px solid rgba(216,181,109,.55);border-radius:20px;display:grid;place-items:center;color:#ffe8aa;background:radial-gradient(circle,#312612,#090909);font-family:Georgia,serif;font-size:20px;box-shadow:0 0 35px rgba(216,181,109,.23)}
+    .loader-kicker{margin:0 0 8px;color:#d8b56d;font-size:10px;font-weight:900;letter-spacing:2.2px}
+    h1{margin:0;font-size:21px}
+    p{color:#aaa69d;line-height:1.55;font-size:13px}
+    button{min-height:43px;padding:10px 16px;border:1px solid rgba(216,181,109,.55);border-radius:12px;color:#171006;background:linear-gradient(135deg,#efd28f,#d8b56d);font-weight:900;cursor:pointer}
+    .spinner{width:28px;height:28px;margin:18px auto 0;border:3px solid rgba(255,255,255,.10);border-top-color:#d8b56d;border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+  <main class="loader-card">
+    <div class="loader-logo">LI</div>
+    <p class="loader-kicker">LEADS IMÓVEIS</p>
+    <h1>Inicializando CRM Premium</h1>
+    <p>Carregando a versão operacional estável e preservando todas as funções.</p>
+    <div class="spinner" aria-label="Carregando"></div>
+  </main>
+  <script>
+
+(function LeadsCrmPremiumLoader(){
   "use strict";
 
-  if (window.__LEADS_CONFIG_ORGANIZADA__) return;
-  window.__LEADS_CONFIG_ORGANIZADA__ = "2026.07.14-1";
+  var SOURCES = ["https://raw.githubusercontent.com/NatanAlvezz/NatanAlvezz/1a43ab2441dd0c33e2cc8bf9bc00a0556f534ca8/crm.html", "https://cdn.jsdelivr.net/gh/NatanAlvezz/NatanAlvezz@1a43ab2441dd0c33e2cc8bf9bc00a0556f534ca8/crm.html"];
+  var PREMIUM_CSS = "\n/* ============================================================\n   LEADS IMÓVEIS · CRM PREMIUM CORPORATIVO\n   Camada modular: não substitui funções, IDs ou eventos existentes.\n   ============================================================ */\n:root{\n  --elite-sidebar:280px;\n  --elite-ai:330px;\n  --elite-card:rgba(255,255,255,.042);\n  --elite-card-strong:rgba(255,255,255,.065);\n  --elite-line:rgba(255,255,255,.105);\n  --elite-muted:#a9a7a0;\n  --elite-radius:18px;\n  --elite-shadow:0 18px 50px rgba(0,0,0,.30);\n}\n\nbody{\n  background:\n    radial-gradient(circle at 12% -8%, color-mix(in srgb, var(--gold) 16%, transparent), transparent 31%),\n    radial-gradient(circle at 90% 4%, rgba(143,184,255,.08), transparent 30%),\n    linear-gradient(145deg,#050506,#090a0d 52%,#040405)!important;\n}\n\n@media (min-width:1181px){\n  .app{\n    grid-template-columns:var(--elite-sidebar) minmax(0,1fr) var(--elite-ai)!important;\n  }\n\n  .sidebar{\n    position:sticky!important;\n    top:0!important;\n    height:100vh!important;\n    height:100dvh!important;\n    padding:14px 13px!important;\n    gap:12px!important;\n    background:\n      radial-gradient(circle at 30% 0%, color-mix(in srgb, var(--gold) 12%, transparent), transparent 32%),\n      linear-gradient(180deg,rgba(10,11,13,.99),rgba(5,5,6,.995))!important;\n    box-shadow:18px 0 42px rgba(0,0,0,.18);\n  }\n\n  .rightbar{\n    width:auto!important;\n    padding:14px 12px!important;\n    background:linear-gradient(180deg,rgba(9,10,12,.98),rgba(5,6,7,.99))!important;\n  }\n}\n\n.brand{\n  min-height:64px;\n  padding:8px 7px!important;\n  border-bottom:1px solid color-mix(in srgb,var(--gold) 22%,transparent)!important;\n}\n\n.brand-logo{\n  box-shadow:0 9px 25px rgba(0,0,0,.28);\n}\n\n.nav{\n  gap:6px!important;\n  scrollbar-width:thin;\n}\n\n.nav button{\n  min-height:44px;\n  padding:10px 11px!important;\n  border-radius:12px!important;\n  font-size:12.5px;\n  letter-spacing:.1px;\n}\n\n.nav button.active,\n.nav button:hover{\n  background:linear-gradient(90deg,color-mix(in srgb,var(--gold) 22%,transparent),color-mix(in srgb,var(--gold) 5%,transparent))!important;\n  border-color:color-mix(in srgb,var(--gold) 35%,transparent)!important;\n}\n\n.topbar{\n  min-height:68px!important;\n  padding:10px 16px!important;\n  border-bottom:1px solid var(--elite-line)!important;\n  background:rgba(7,8,10,.91)!important;\n  box-shadow:0 10px 30px rgba(0,0,0,.12);\n}\n\n.topbar .search{\n  width:min(540px,100%)!important;\n}\n\n.topbar .search input{\n  min-height:44px;\n  background:rgba(0,0,0,.30)!important;\n  border-color:rgba(255,255,255,.12)!important;\n}\n\n.content{\n  padding:16px!important;\n}\n\n.panel,\n.central,\n.kpi,\n.item-card,\n.property-card,\n.smart-box{\n  border-color:var(--elite-line)!important;\n  box-shadow:var(--elite-shadow)!important;\n}\n\n.panel-head{\n  padding:15px 17px!important;\n}\n\n.panel-head h2{\n  letter-spacing:1px!important;\n}\n\n.btn{\n  min-height:40px;\n}\n\n.btn:not(.btn-ghost):not(.btn-danger):not(.btn-green){\n  background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 35%,#101010),color-mix(in srgb,var(--gold) 14%,#171717))!important;\n  border-color:color-mix(in srgb,var(--gold) 58%,transparent)!important;\n}\n\n/* CONSULTA EXPRESSA */\n.elite-express{\n  border:1px solid color-mix(in srgb,var(--gold) 28%,transparent);\n  border-radius:15px;\n  padding:10px;\n  background:\n    radial-gradient(circle at 100% 0%,color-mix(in srgb,var(--gold) 15%,transparent),transparent 46%),\n    rgba(255,255,255,.025);\n  box-shadow:0 12px 30px rgba(0,0,0,.20);\n}\n\n.elite-express-head{\n  display:flex;\n  align-items:center;\n  justify-content:space-between;\n  gap:8px;\n  margin-bottom:8px;\n}\n\n.elite-express-head strong{\n  color:#fff5d8;\n  font-size:10px;\n  letter-spacing:1.25px;\n  text-transform:uppercase;\n}\n\n.elite-express-head span{\n  color:var(--gold);\n  font-size:14px;\n}\n\n.elite-express-search{\n  position:relative;\n}\n\n.elite-express-search input{\n  height:40px;\n  padding:9px 34px 9px 11px!important;\n  border-radius:11px!important;\n  font-size:12px!important;\n  background:rgba(0,0,0,.32)!important;\n}\n\n.elite-express-search button{\n  position:absolute;\n  right:5px;\n  top:5px;\n  width:30px;\n  height:30px;\n  display:grid;\n  place-items:center;\n  border-radius:9px;\n  color:#111;\n  background:var(--gold);\n  font-weight:900;\n}\n\n.elite-new-capture{\n  width:100%;\n  margin-top:7px;\n  min-height:34px!important;\n  padding:7px 9px!important;\n  border-radius:10px!important;\n  font-size:10.5px!important;\n  letter-spacing:.25px;\n}\n\n.elite-results{\n  display:none;\n  max-height:250px;\n  overflow:auto;\n  margin-top:8px;\n  padding-right:2px;\n  scrollbar-width:thin;\n}\n\n.elite-results.open{\n  display:block;\n}\n\n.elite-result{\n  padding:9px;\n  margin-bottom:6px;\n  border:1px solid rgba(255,255,255,.09);\n  border-radius:11px;\n  background:rgba(0,0,0,.22);\n}\n\n.elite-result:last-child{\n  margin-bottom:0;\n}\n\n.elite-result-code{\n  display:inline-flex;\n  margin-bottom:4px;\n  padding:3px 6px;\n  border-radius:999px;\n  color:#161006;\n  background:var(--gold);\n  font-size:9px;\n  font-weight:900;\n}\n\n.elite-result h4{\n  margin:0 0 4px;\n  color:#fff;\n  font-size:11.5px;\n  line-height:1.3;\n}\n\n.elite-result p{\n  margin:2px 0;\n  color:var(--elite-muted);\n  font-size:10px;\n  line-height:1.35;\n}\n\n.elite-result-actions{\n  display:grid;\n  grid-template-columns:1fr 1fr;\n  gap:5px;\n  margin-top:7px;\n}\n\n.elite-result-actions button,\n.elite-result-actions a{\n  display:flex;\n  align-items:center;\n  justify-content:center;\n  min-height:31px;\n  padding:6px;\n  border:1px solid rgba(255,255,255,.11);\n  border-radius:9px;\n  color:#f5f2ea;\n  background:rgba(255,255,255,.05);\n  font-size:9.5px;\n  font-weight:800;\n  text-decoration:none;\n}\n\n.elite-result-actions a{\n  border-color:rgba(101,214,121,.30);\n  color:#d9ffdd;\n  background:rgba(101,214,121,.10);\n}\n\n.elite-empty{\n  padding:12px 8px;\n  color:var(--elite-muted);\n  text-align:center;\n  font-size:10.5px;\n}\n\n/* CAPTAÇÃO ELITE */\ndialog.elite-capture-dialog{\n  width:min(980px,96vw)!important;\n}\n\n.elite-capture-dialog .modal{\n  border-color:color-mix(in srgb,var(--gold) 33%,transparent)!important;\n  background:\n    radial-gradient(circle at 84% 0%,color-mix(in srgb,var(--gold) 12%,transparent),transparent 28%),\n    linear-gradient(145deg,#101216,#08090b)!important;\n}\n\n.elite-capture-dialog .modal-head{\n  padding:17px 19px!important;\n}\n\n.elite-capture-dialog .modal-head h2,\n.elite-capture-dialog #modalTitle{\n  letter-spacing:.6px;\n}\n\n.elite-capture-dialog .modal-body{\n  max-height:70vh!important;\n  padding:15px!important;\n  background:rgba(0,0,0,.10);\n}\n\n.elite-capture-dialog .modal-foot{\n  position:sticky;\n  bottom:0;\n  z-index:3;\n  padding:12px 16px!important;\n  background:rgba(8,9,11,.96);\n  backdrop-filter:blur(12px);\n}\n\n.elite-capture-dialog .modal-foot .btn{\n  min-width:120px;\n}\n\n.elite-capture-dialog .modal-foot .btn:last-child{\n  min-width:170px;\n  color:#161006!important;\n  background:linear-gradient(135deg,#f1d28c,var(--gold))!important;\n  border-color:#f3d99e!important;\n  box-shadow:0 12px 28px color-mix(in srgb,var(--gold) 23%,transparent)!important;\n}\n\n.elite-form-shell{\n  display:grid;\n  gap:13px;\n}\n\n.elite-form-section{\n  border:1px solid rgba(255,255,255,.095);\n  border-radius:16px;\n  padding:14px;\n  background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018));\n}\n\n.elite-form-section-title{\n  display:flex;\n  align-items:center;\n  gap:8px;\n  margin:0 0 12px;\n  color:#fff1c6;\n  font-size:11px;\n  letter-spacing:1.1px;\n  text-transform:uppercase;\n}\n\n.elite-form-section-title::before{\n  content:\"\";\n  width:5px;\n  height:18px;\n  border-radius:99px;\n  background:var(--gold);\n  box-shadow:0 0 14px color-mix(in srgb,var(--gold) 45%,transparent);\n}\n\n.elite-section-grid{\n  display:grid;\n  grid-template-columns:repeat(3,minmax(0,1fr));\n  gap:11px;\n}\n\n.elite-section-owner .elite-section-grid{\n  grid-template-columns:repeat(2,minmax(0,1fr));\n}\n\n.elite-form-section .field{\n  margin:0!important;\n}\n\n.elite-form-section .field.full{\n  grid-column:1/-1!important;\n}\n\n.elite-form-section .field label{\n  margin-bottom:6px!important;\n  color:#b9b5aa!important;\n  font-size:9.5px!important;\n  letter-spacing:.9px!important;\n}\n\n.elite-form-section input,\n.elite-form-section select,\n.elite-form-section textarea{\n  min-height:43px;\n  padding:10px 11px!important;\n  border-radius:11px!important;\n  background:rgba(0,0,0,.27)!important;\n}\n\n.elite-form-section textarea{\n  min-height:92px;\n  resize:vertical;\n}\n\n.elite-phone-actions{\n  display:flex;\n  gap:6px;\n  margin-top:6px;\n}\n\n.elite-phone-actions a{\n  flex:1;\n  display:flex;\n  align-items:center;\n  justify-content:center;\n  min-height:32px;\n  padding:6px 8px;\n  border:1px solid rgba(101,214,121,.31);\n  border-radius:9px;\n  color:#d9ffdc;\n  background:rgba(101,214,121,.10);\n  font-size:10px;\n  font-weight:850;\n}\n\n.elite-phone-actions a[aria-disabled=\"true\"]{\n  opacity:.45;\n  pointer-events:none;\n}\n\n.elite-capture-badge{\n  display:inline-flex;\n  align-items:center;\n  gap:6px;\n  margin-left:8px;\n  padding:5px 8px;\n  border:1px solid color-mix(in srgb,var(--gold) 30%,transparent);\n  border-radius:999px;\n  color:#ffe9b2;\n  background:color-mix(in srgb,var(--gold) 9%,transparent);\n  font-size:9px;\n  font-weight:900;\n  letter-spacing:.7px;\n  text-transform:uppercase;\n}\n\n@media (max-width:1180px) and (min-width:981px){\n  .elite-express{\n    display:none!important;\n  }\n}\n\n@media (max-width:980px){\n  .elite-express{\n    margin:0 1px 2px;\n  }\n\n  .elite-express-search input{\n    font-size:16px!important;\n  }\n\n  .elite-section-grid,\n  .elite-section-owner .elite-section-grid{\n    grid-template-columns:repeat(2,minmax(0,1fr));\n  }\n\n  dialog.elite-capture-dialog{\n    width:min(96vw,820px)!important;\n  }\n}\n\n@media (max-width:620px){\n  .elite-section-grid,\n  .elite-section-owner .elite-section-grid{\n    grid-template-columns:1fr;\n  }\n\n  .elite-form-section{\n    padding:11px;\n  }\n\n  .elite-capture-dialog .modal-body{\n    max-height:66vh!important;\n    padding:10px!important;\n  }\n\n  .elite-capture-dialog .modal-foot{\n    display:grid!important;\n    grid-template-columns:1fr 1fr;\n  }\n\n  .elite-capture-dialog .modal-foot .btn{\n    width:100%!important;\n    min-width:0!important;\n  }\n\n  .elite-capture-dialog .modal-foot .btn:last-child{\n    grid-column:1/-1;\n  }\n}\n";
+  var PREMIUM_JS = "\n(function LeadsCrmPremiumCorporate(){\n  \"use strict\";\n\n  if (window.__LEADS_CRM_PREMIUM_CORPORATE__) return;\n  window.__LEADS_CRM_PREMIUM_CORPORATE__ = \"2026.07.14-final\";\n\n  function text(value){\n    return value == null ? \"\" : String(value);\n  }\n\n  function escapeHtml(value){\n    return text(value)\n      .replace(/&/g,\"&amp;\")\n      .replace(/</g,\"&lt;\")\n      .replace(/>/g,\"&gt;\")\n      .replace(/\"/g,\"&quot;\")\n      .replace(/'/g,\"&#039;\");\n  }\n\n  function database(){\n    try{\n      if (typeof db !== \"undefined\" && db) return db;\n    }catch(_error){}\n    return window.db || window.database || window.crmDB || null;\n  }\n\n  function properties(){\n    var source = database();\n    if (!source) return [];\n    var list = source.imoveis || source.properties || [];\n    return Array.isArray(list) ? list : [];\n  }\n\n  function propertyCode(p){\n    return text(p.codigo || p.code || p.referencia || p.reference || p.ref || p.codigo_imovel || \"\");\n  }\n\n  function propertyTitle(p){\n    return text(p.titulo || p.title || p.nome || p.name || p.tipo || \"Imóvel sem título\");\n  }\n\n  function propertyOwner(p){\n    return text(\n      p.prop ||\n      p.proprietario ||\n      p.owner_name ||\n      p.owner ||\n      p.nome_proprietario ||\n      \"\"\n    );\n  }\n\n  function propertyPhone(p){\n    return text(\n      p.tel ||\n      p.telefone ||\n      p.owner_phone ||\n      p.telefone_proprietario ||\n      p.whatsapp ||\n      \"\"\n    );\n  }\n\n  function phoneDigits(value){\n    var digits = text(value).replace(/\\D/g,\"\");\n    if (!digits) return \"\";\n    if (digits.length === 10 || digits.length === 11) digits = \"55\" + digits;\n    return digits;\n  }\n\n  function locationText(p){\n    return [p.bairro,p.cidade].filter(Boolean).join(\" · \");\n  }\n\n  function editProperty(id){\n    try{\n      if (typeof window.openImovelModal === \"function\"){\n        window.openImovelModal(id || undefined);\n      }else if (typeof openImovelModal === \"function\"){\n        openImovelModal(id || undefined);\n      }\n    }catch(error){\n      console.error(\"[CRM Premium] Não foi possível abrir o imóvel:\",error);\n    }\n  }\n\n  function buildExpressPanel(){\n    if (document.getElementById(\"eliteExpressPanel\")) return;\n\n    var sidebar = document.getElementById(\"sidebar\") || document.querySelector(\".sidebar\");\n    var nav = document.getElementById(\"nav\") || document.querySelector(\".sidebar .nav\");\n    if (!sidebar || !nav) return;\n\n    var panel = document.createElement(\"section\");\n    panel.id = \"eliteExpressPanel\";\n    panel.className = \"elite-express\";\n    panel.setAttribute(\"aria-label\",\"Consulta expressa de imóveis\");\n    panel.innerHTML =\n      '<div class=\"elite-express-head\">' +\n        '<strong>Consulta expressa</strong><span aria-hidden=\"true\">⌕</span>' +\n      '</div>' +\n      '<div class=\"elite-express-search\">' +\n        '<input id=\"eliteExpressInput\" autocomplete=\"off\" placeholder=\"Código, imóvel ou proprietário\" aria-label=\"Código, imóvel ou proprietário\">' +\n        '<button id=\"eliteExpressButton\" type=\"button\" title=\"Pesquisar\">→</button>' +\n      '</div>' +\n      '<button class=\"btn elite-new-capture\" id=\"eliteNewCapture\" type=\"button\">＋ Nova captação Elite</button>' +\n      '<div class=\"elite-results\" id=\"eliteExpressResults\" aria-live=\"polite\"></div>';\n\n    sidebar.insertBefore(panel,nav);\n\n    var input = document.getElementById(\"eliteExpressInput\");\n    var button = document.getElementById(\"eliteExpressButton\");\n    var newCapture = document.getElementById(\"eliteNewCapture\");\n\n    function run(){\n      renderExpressResults(input ? input.value : \"\");\n    }\n\n    if (input){\n      input.addEventListener(\"input\",run);\n      input.addEventListener(\"focus\",run);\n      input.addEventListener(\"keydown\",function(event){\n        if (event.key === \"Enter\"){\n          event.preventDefault();\n          run();\n          var first = document.querySelector(\"#eliteExpressResults [data-elite-edit]\");\n          if (first) first.focus();\n        }\n        if (event.key === \"Escape\"){\n          var results = document.getElementById(\"eliteExpressResults\");\n          if (results) results.classList.remove(\"open\");\n        }\n      });\n    }\n\n    if (button) button.addEventListener(\"click\",run);\n    if (newCapture) newCapture.addEventListener(\"click\",function(){ editProperty(); });\n\n    document.addEventListener(\"click\",function(event){\n      var results = document.getElementById(\"eliteExpressResults\");\n      if (!results || panel.contains(event.target)) return;\n      results.classList.remove(\"open\");\n    });\n  }\n\n  function renderExpressResults(query){\n    var container = document.getElementById(\"eliteExpressResults\");\n    if (!container) return;\n\n    var normalized = text(query).trim().toLowerCase();\n    var list = properties().slice();\n\n    if (!normalized){\n      list = list\n        .sort(function(a,b){ return Number(b.updated || b.updated_at || 0) - Number(a.updated || a.updated_at || 0); })\n        .slice(0,4);\n    }else{\n      list = list.filter(function(p){\n        var haystack = [\n          propertyCode(p),\n          propertyTitle(p),\n          propertyOwner(p),\n          propertyPhone(p),\n          p.bairro,\n          p.cidade,\n          p.tipo,\n          p.finalidade\n        ].map(text).join(\" \").toLowerCase();\n        return haystack.indexOf(normalized) !== -1;\n      }).slice(0,6);\n    }\n\n    if (!list.length){\n      container.innerHTML = '<div class=\"elite-empty\">Nenhum imóvel encontrado.</div>';\n      container.classList.add(\"open\");\n      return;\n    }\n\n    container.innerHTML = list.map(function(p){\n      var id = text(p.id);\n      var code = propertyCode(p) || \"SEM CÓDIGO\";\n      var title = propertyTitle(p);\n      var owner = propertyOwner(p) || \"Proprietário não informado\";\n      var phone = propertyPhone(p);\n      var digits = phoneDigits(phone);\n      var where = locationText(p);\n      var whatsapp = digits\n        ? '<a href=\"https://wa.me/' + encodeURIComponent(digits) + '\" target=\"_blank\" rel=\"noopener\">WhatsApp</a>'\n        : '<a href=\"#\" aria-disabled=\"true\" tabindex=\"-1\">Sem telefone</a>';\n\n      return (\n        '<article class=\"elite-result\">' +\n          '<span class=\"elite-result-code\">' + escapeHtml(code) + '</span>' +\n          '<h4>' + escapeHtml(title) + '</h4>' +\n          (where ? '<p>⌂ ' + escapeHtml(where) + '</p>' : '') +\n          '<p>Proprietário: ' + escapeHtml(owner) + '</p>' +\n          (phone ? '<p>Telefone: ' + escapeHtml(phone) + '</p>' : '') +\n          '<div class=\"elite-result-actions\">' +\n            '<button type=\"button\" data-elite-edit=\"' + escapeHtml(id) + '\">Abrir cadastro</button>' +\n            whatsapp +\n          '</div>' +\n        '</article>'\n      );\n    }).join(\"\");\n\n    container.classList.add(\"open\");\n\n    container.querySelectorAll(\"[data-elite-edit]\").forEach(function(button){\n      button.addEventListener(\"click\",function(){\n        editProperty(button.getAttribute(\"data-elite-edit\"));\n      });\n    });\n  }\n\n  function fieldFor(id){\n    var element = document.getElementById(id);\n    return element && element.closest ? element.closest(\".field\") : null;\n  }\n\n  function section(title,className){\n    var block = document.createElement(\"section\");\n    block.className = \"elite-form-section \" + (className || \"\");\n    block.innerHTML =\n      '<h3 class=\"elite-form-section-title\">' + escapeHtml(title) + '</h3>' +\n      '<div class=\"elite-section-grid\"></div>';\n    return block;\n  }\n\n  function moveField(targetGrid,id){\n    var field = fieldFor(id);\n    if (field && field.parentNode !== targetGrid) targetGrid.appendChild(field);\n  }\n\n  function ownerWhatsapp(){\n    var phoneInput = document.getElementById(\"p_tel\");\n    if (!phoneInput) return;\n\n    var field = phoneInput.closest(\".field\");\n    if (!field) return;\n\n    var actions = field.querySelector(\".elite-phone-actions\");\n    if (!actions){\n      actions = document.createElement(\"div\");\n      actions.className = \"elite-phone-actions\";\n      actions.innerHTML = '<a id=\"eliteOwnerWhatsapp\" target=\"_blank\" rel=\"noopener\">Abrir WhatsApp do proprietário</a>';\n      field.appendChild(actions);\n    }\n\n    function update(){\n      var link = document.getElementById(\"eliteOwnerWhatsapp\");\n      if (!link) return;\n      var digits = phoneDigits(phoneInput.value);\n      if (digits){\n        link.href = \"https://wa.me/\" + encodeURIComponent(digits);\n        link.setAttribute(\"aria-disabled\",\"false\");\n      }else{\n        link.href = \"#\";\n        link.setAttribute(\"aria-disabled\",\"true\");\n      }\n    }\n\n    if (!phoneInput.dataset.eliteWhatsappBound){\n      phoneInput.dataset.eliteWhatsappBound = \"true\";\n      phoneInput.addEventListener(\"input\",update);\n    }\n    update();\n  }\n\n  function enhanceCaptureModal(){\n    var titleInput = document.getElementById(\"p_titulo\");\n    var body = document.getElementById(\"modalBody\");\n    if (!titleInput || !body) return;\n\n    var dialog = body.closest(\"dialog\") || document.querySelector(\"dialog[open]\");\n    if (dialog) dialog.classList.add(\"elite-capture-dialog\");\n\n    var modalTitle = document.getElementById(\"modalTitle\");\n    if (modalTitle && !document.getElementById(\"eliteCaptureBadge\")){\n      var badge = document.createElement(\"span\");\n      badge.id = \"eliteCaptureBadge\";\n      badge.className = \"elite-capture-badge\";\n      badge.textContent = \"Captação Elite\";\n      modalTitle.insertAdjacentElement(\"afterend\",badge);\n    }\n\n    var originalGrid = titleInput.closest(\".form-grid\");\n    if (!originalGrid) return;\n\n    var shell = body.querySelector(\".elite-form-shell\");\n    if (!shell){\n      shell = document.createElement(\"div\");\n      shell.className = \"elite-form-shell\";\n      originalGrid.parentNode.insertBefore(shell,originalGrid);\n      shell.appendChild(originalGrid);\n      originalGrid.style.display = \"contents\";\n\n      var propertySection = section(\"Detalhes do imóvel\",\"elite-section-property\");\n      propertySection.id = \"elitePropertySection\";\n      var ownerSection = section(\"Dados do proprietário\",\"elite-section-owner\");\n      ownerSection.id = \"eliteOwnerSection\";\n      var notesSection = section(\"Observações, responsável e fotos\",\"elite-section-notes\");\n      notesSection.id = \"eliteNotesSection\";\n\n      shell.appendChild(propertySection);\n      shell.appendChild(ownerSection);\n      shell.appendChild(notesSection);\n    }\n\n    var propertyGrid = document.querySelector(\"#elitePropertySection .elite-section-grid\");\n    var ownerGrid = document.querySelector(\"#eliteOwnerSection .elite-section-grid\");\n    var notesGrid = document.querySelector(\"#eliteNotesSection .elite-section-grid\");\n    if (!propertyGrid || !ownerGrid || !notesGrid) return;\n\n    [\n      \"p_codigo\",\"p_titulo\",\"p_finalidade\",\"p_tipo\",\"p_bairro\",\"p_cidade\",\n      \"p_valor\",\"p_area\",\"p_dorm\",\"p_suites\",\"p_vagas\",\"p_etapa\",\n      \"p_publicar\",\"p_origem\"\n    ].forEach(function(id){ moveField(propertyGrid,id); });\n\n    [\"p_prop\",\"p_tel\",\"p_captado_por\",\"p_captador\",\"p_captador_email\"]\n      .forEach(function(id){ moveField(ownerGrid,id); });\n\n    [\"p_acao\"].forEach(function(id){ moveField(notesGrid,id); });\n\n    var remaining = Array.prototype.slice.call(originalGrid.querySelectorAll(\":scope > .field\"));\n    remaining.forEach(function(field){ notesGrid.appendChild(field); });\n\n    ownerWhatsapp();\n\n    var saveButton = document.querySelector(\"#modalFoot .btn:last-child\");\n    if (saveButton && /salvar/i.test(saveButton.textContent)){\n      saveButton.textContent = \"Salvar captação Elite\";\n    }\n  }\n\n  function improveTopSearch(){\n    var input = document.getElementById(\"globalSearch\");\n    if (!input) return;\n    input.placeholder = \"Buscar leads, imóveis, códigos, proprietários...\";\n    input.setAttribute(\"aria-label\",\"Busca global do CRM\");\n  }\n\n  function observeModal(){\n    var body = document.getElementById(\"modalBody\");\n    if (!body || !window.MutationObserver) return;\n\n    var queued = false;\n    var observer = new MutationObserver(function(){\n      if (queued) return;\n      queued = true;\n      setTimeout(function(){\n        queued = false;\n        enhanceCaptureModal();\n      },20);\n    });\n\n    observer.observe(body,{childList:true,subtree:true});\n  }\n\n  function boot(){\n    buildExpressPanel();\n    improveTopSearch();\n    observeModal();\n    enhanceCaptureModal();\n\n    setTimeout(buildExpressPanel,500);\n    setTimeout(enhanceCaptureModal,500);\n    setTimeout(enhanceCaptureModal,1200);\n  }\n\n  if (document.readyState === \"loading\"){\n    document.addEventListener(\"DOMContentLoaded\",boot,{once:true});\n  }else{\n    boot();\n  }\n\n  window.addEventListener(\"load\",function(){\n    setTimeout(boot,250);\n  },{once:true});\n})();\n";
+  var TIMEOUT_MS = 14000;
 
-  var STORAGE_KEY = "leads_crm_tema_corretor_v1";
-
-  var THEMES = [
-    { name: "Dourado Luxo", a: "#d8b56d", b: "#f1d28c" },
-    { name: "Azul Prime", a: "#4f8cff", b: "#7ab8ff" },
-    { name: "Verde Elite", a: "#35c77a", b: "#8be0b0" },
-    { name: "Rubi", a: "#e5485d", b: "#ff8293" },
-    { name: "Ametista", a: "#9b6cff", b: "#d1b4ff" },
-    { name: "Turquesa", a: "#22c7c9", b: "#7ce6df" },
-    { name: "Cobre", a: "#c97841", b: "#f0ad71" },
-    { name: "Prata", a: "#9ba7b4", b: "#d7dde5" },
-    { name: "Grafite", a: "#69717d", b: "#aab0b9" },
-    { name: "Rosa", a: "#e569ac", b: "#ffacd4" },
-    { name: "Coral", a: "#ff6f61", b: "#ffad91" },
-    { name: "Laranja", a: "#ff8a3d", b: "#ffc16b" },
-    { name: "Limão", a: "#9fd43f", b: "#d4f177" },
-    { name: "Esmeralda", a: "#00a878", b: "#63dfb5" },
-    { name: "Oceano", a: "#0077b6", b: "#48cae4" },
-    { name: "Azul Royal", a: "#405de6", b: "#7c8cff" },
-    { name: "Violeta", a: "#7b2cbf", b: "#c77dff" },
-    { name: "Magenta", a: "#d81b60", b: "#ff6fa5" },
-    { name: "Chocolate", a: "#8d5524", b: "#c68642" },
-    { name: "Aurora", a: "#00b4d8", b: "#a855f7" }
-  ];
-
-  function normalize(value) {
-    return String(value || "")
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, " ")
-      .trim()
-      .toLowerCase();
+  function loaderScreen(message, detail){
+    document.body.innerHTML =
+      '<main class="loader-card">' +
+        '<div class="loader-logo">LI</div>' +
+        '<p class="loader-kicker">LEADS IMÓVEIS</p>' +
+        '<h1>' + message + '</h1>' +
+        '<p>' + detail + '</p>' +
+        '<button type="button" onclick="location.reload()">Tentar novamente</button>' +
+      '</main>';
   }
 
-  function isValidHex(value) {
-    return /^#[0-9a-f]{6}$/i.test(String(value || ""));
-  }
-
-  function mix(hex, amount) {
-    var value = hex.replace("#", "");
-    var n = parseInt(value, 16);
-    var target = amount < 0 ? 0 : 255;
-    var factor = Math.abs(amount);
-    var r = n >> 16;
-    var g = (n >> 8) & 255;
-    var b = n & 255;
-
-    r = Math.round(r + (target - r) * factor);
-    g = Math.round(g + (target - g) * factor);
-    b = Math.round(b + (target - b) * factor);
-
-    return (
-      "#" +
-      [r, g, b]
-        .map(function (channel) {
-          return channel.toString(16).padStart(2, "0");
-        })
-        .join("")
-    );
-  }
-
-  function readableText(hex) {
-    var value = hex.replace("#", "");
-    var r = parseInt(value.slice(0, 2), 16);
-    var g = parseInt(value.slice(2, 4), 16);
-    var b = parseInt(value.slice(4, 6), 16);
-    var luminance = (r * 299 + g * 587 + b * 114) / 1000;
-
-    return luminance > 160 ? "#111318" : "#ffffff";
-  }
-
-  function applyTheme(theme, save) {
-    if (!theme || !isValidHex(theme.a) || !isValidHex(theme.b)) return;
-
-    var root = document.documentElement;
-
-    root.style.setProperty("--gold", theme.a);
-    root.style.setProperty("--gold-2", theme.b);
-    root.style.setProperty("--gold2", theme.b);
-    root.style.setProperty("--accent", theme.a);
-    root.style.setProperty("--accent-2", theme.b);
-    root.style.setProperty("--accent-strong", mix(theme.a, -0.2));
-    root.style.setProperty("--brand", theme.a);
-    root.style.setProperty("--brand-2", theme.b);
-    root.style.setProperty("--elite-theme-a", theme.a);
-    root.style.setProperty("--elite-theme-b", theme.b);
-    root.style.setProperty("--elite-theme-text", readableText(theme.a));
-
-    document
-      .querySelectorAll("[data-leads-theme]")
-      .forEach(function (button) {
-        button.classList.toggle(
-          "active",
-          normalize(button.getAttribute("data-theme-name")) ===
-            normalize(theme.name)
-        );
+  async function fetchWithTimeout(url){
+    var controller = new AbortController();
+    var timer = setTimeout(function(){ controller.abort(); },TIMEOUT_MS);
+    try{
+      var response = await fetch(url,{
+        mode:"cors",
+        credentials:"omit",
+        cache:"force-cache",
+        signal:controller.signal
       });
-
-    var current = document.getElementById("leadsCurrentTheme");
-
-    if (current) {
-      current.textContent = theme.name || "Cor personalizada";
-    }
-
-    if (save !== false) {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(theme));
-      } catch (_error) {}
+      if(!response.ok) throw new Error("HTTP " + response.status);
+      return await response.text();
+    }finally{
+      clearTimeout(timer);
     }
   }
 
-  function restoreTheme() {
-    try {
-      var saved = JSON.parse(
-        localStorage.getItem(STORAGE_KEY) || "null"
-      );
-
-      if (saved && isValidHex(saved.a) && isValidHex(saved.b)) {
-        applyTheme(saved, false);
-        return;
-      }
-    } catch (_error) {}
-
-    applyTheme(THEMES[0], false);
-  }
-
-  function injectStyles() {
-    if (document.getElementById("leadsConfigOrganizadaStyles")) return;
-
-    var style = document.createElement("style");
-    style.id = "leadsConfigOrganizadaStyles";
-
-    style.textContent = `
-      :root {
-        --elite-theme-a: var(--gold, #d8b56d);
-        --elite-theme-b: var(--gold-2, #f1d28c);
-        --elite-theme-text: #111318;
-      }
-
-      body::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        z-index: -1;
-        pointer-events: none;
-        background:
-          radial-gradient(
-            circle at 12% -4%,
-            color-mix(in srgb, var(--elite-theme-a) 16%, transparent),
-            transparent 34%
-          ),
-          radial-gradient(
-            circle at 94% 5%,
-            color-mix(in srgb, var(--elite-theme-b) 9%, transparent),
-            transparent 31%
-          );
-      }
-
-      .leads-settings-compact {
-        gap: 12px !important;
-      }
-
-      .leads-settings-compact .panel-head,
-      .leads-settings-compact > header {
-        padding-bottom: 10px !important;
-      }
-
-      .leads-settings-hidden-copy {
-        display: none !important;
-      }
-
-      .leads-theme-panel {
-        margin-top: 14px;
-        padding: 14px;
-        border: 1px solid
-          color-mix(in srgb, var(--elite-theme-a) 34%, transparent);
-        border-radius: 16px;
-        background:
-          linear-gradient(
-            145deg,
-            color-mix(
-              in srgb,
-              var(--elite-theme-a) 8%,
-              rgba(255, 255, 255, 0.035)
-            ),
-            color-mix(
-              in srgb,
-              var(--elite-theme-b) 4%,
-              rgba(0, 0, 0, 0.2)
-            )
-          );
-        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2);
-      }
-
-      .leads-theme-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        margin-bottom: 12px;
-      }
-
-      .leads-theme-head h3 {
-        margin: 0;
-        color: #ffffff;
-        font-size: 13px;
-        letter-spacing: 0.5px;
-      }
-
-      .leads-theme-current {
-        display: inline-flex;
-        align-items: center;
-        min-height: 28px;
-        padding: 5px 9px;
-        border: 1px solid
-          color-mix(in srgb, var(--elite-theme-a) 35%, transparent);
-        border-radius: 999px;
-        color: var(--elite-theme-a);
-        background:
-          color-mix(in srgb, var(--elite-theme-a) 9%, transparent);
-        font-size: 10px;
-        font-weight: 850;
-      }
-
-      .leads-theme-grid {
-        display: grid;
-        grid-template-columns: repeat(5, minmax(0, 1fr));
-        gap: 8px;
-      }
-
-      .leads-theme-option {
-        position: relative;
-        min-height: 58px;
-        padding: 8px 6px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        color: #f7f4ed;
-        background: rgba(255, 255, 255, 0.035);
-        cursor: pointer;
-        transition:
-          transform 0.18s ease,
-          border-color 0.18s ease,
-          background 0.18s ease;
-      }
-
-      .leads-theme-option:hover {
-        transform: translateY(-2px);
-        border-color:
-          color-mix(in srgb, var(--theme-a) 55%, transparent);
-        background:
-          color-mix(
-            in srgb,
-            var(--theme-a) 8%,
-            rgba(255, 255, 255, 0.04)
-          );
-      }
-
-      .leads-theme-option.active {
-        border-color: var(--theme-a);
-        box-shadow:
-          0 0 0 2px
-          color-mix(in srgb, var(--theme-a) 20%, transparent);
-      }
-
-      .leads-theme-swatch {
-        display: block;
-        width: 100%;
-        height: 20px;
-        margin-bottom: 6px;
-        border-radius: 7px;
-        background:
-          linear-gradient(
-            135deg,
-            var(--theme-a),
-            var(--theme-b)
-          );
-        box-shadow:
-          inset 0 0 0 1px rgba(255, 255, 255, 0.16);
-      }
-
-      .leads-theme-name {
-        display: block;
-        overflow: hidden;
-        font-size: 9.5px;
-        font-weight: 800;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .leads-custom-color {
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr) auto;
-        align-items: center;
-        gap: 9px;
-        margin-top: 12px;
-        padding-top: 12px;
-        border-top: 1px solid rgba(255, 255, 255, 0.09);
-      }
-
-      .leads-custom-color label {
-        color: #b9b5aa;
-        font-size: 10px;
-        font-weight: 800;
-      }
-
-      .leads-custom-color input[type="color"] {
-        width: 100%;
-        min-width: 80px;
-        height: 39px;
-        padding: 3px;
-        border: 1px solid rgba(255, 255, 255, 0.13);
-        border-radius: 10px;
-        background: rgba(0, 0, 0, 0.25);
-        cursor: pointer;
-      }
-
-      .leads-custom-color button {
-        min-height: 39px;
-        padding: 8px 12px;
-        border: 1px solid
-          color-mix(in srgb, var(--elite-theme-a) 55%, transparent);
-        border-radius: 10px;
-        color: var(--elite-theme-text);
-        background:
-          linear-gradient(
-            135deg,
-            var(--elite-theme-a),
-            var(--elite-theme-b)
-          );
-        font-size: 10px;
-        font-weight: 900;
-        cursor: pointer;
-      }
-
-      .leads-settings-compact
-        .btn:not(.btn-ghost):not(.btn-danger):not(.btn-green),
-      .leads-settings-compact
-        button:not(.leads-theme-option) {
-        border-color:
-          color-mix(in srgb, var(--elite-theme-a) 45%, transparent);
-      }
-
-      @media (max-width: 900px) {
-        .leads-theme-grid {
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-        }
-      }
-
-      @media (max-width: 620px) {
-        .leads-theme-panel {
-          padding: 11px;
-        }
-
-        .leads-theme-grid {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .leads-theme-head {
-          align-items: flex-start;
-          flex-direction: column;
-        }
-
-        .leads-custom-color {
-          grid-template-columns: 1fr auto;
-        }
-
-        .leads-custom-color label {
-          grid-column: 1 / -1;
-        }
-      }
-    `;
-
-    document.head.appendChild(style);
-  }
-
-  function findSettingsHeading() {
-    var headings = document.querySelectorAll(
-      "h1,h2,h3,h4,h5,[role='heading']"
-    );
-
-    for (var i = 0; i < headings.length; i++) {
-      if (
-        normalize(headings[i].textContent) ===
-        "configuracoes e dados"
-      ) {
-        return headings[i];
-      }
-    }
-
-    return null;
-  }
-
-  function findSettingsContainer(heading) {
-    if (!heading) return null;
-
-    var preferred = heading.closest(
-      "[data-view],.view,.page,.panel,.settings," +
-        ".content-section,section,article"
-    );
-
-    if (preferred) return preferred;
-
-    return heading.parentElement;
-  }
-
-  function hideLongCopies(container) {
-    if (!container) return;
-
-    var hiddenStarts = [
-      "nuvem, seguranca e sincronizacao automatica",
-      "imoveis da equipe: crm_properties e a fonte oficial",
-      "o crm salva localmente e sincroniza no supabase automaticamente",
-      "operacao final para corretores:",
-      "muda a cor principal, fundo, paineis escuros"
+  function validate(html){
+    var required = [
+      "<!DOCTYPE html",
+      "supabase-config.js",
+      "auth-guard.js",
+      "openImovelModal",
+      "Sair com segurança",
+      "globalSearch",
+      "</body>",
+      "</html>"
     ];
+    return required.every(function(token){ return html.indexOf(token) !== -1; });
+  }
 
-    container
-      .querySelectorAll(
-        "p,small,.sub,.subtitle,.muted,.hint,.helper-text"
-      )
-      .forEach(function (node) {
-        var content = normalize(node.textContent);
+  function inject(html){
+    var style =
+      '<style id="leadsCrmPremiumCorporateStyles">' +
+      PREMIUM_CSS +
+      '</style>';
 
-        if (
-          hiddenStarts.some(function (start) {
-            return content.indexOf(start) === 0;
-          })
-        ) {
-          node.classList.add("leads-settings-hidden-copy");
-        }
-      });
+    var script =
+      '<script id="leadsCrmPremiumCorporateModule">' +
+      PREMIUM_JS.replace(/<\/script/gi,"<\\/script") +
+      '<' + '/script>';
 
-    container
-      .querySelectorAll("h2,h3,h4,h5,strong,span")
-      .forEach(function (node) {
-        var content = normalize(node.textContent);
+    html = html.replace(/<\/head>/i,style + "\n</head>");
+    html = html.replace(/<\/body>\s*<\/html>\s*$/i,script + "\n</body>\n</html>");
+    return html;
+  }
 
-        if (content === "salvamento automatico em nuvem") {
-          node.textContent = "Sincronização";
-        }
+  async function start(){
+    var errors = [];
 
-        if (content === "temas completos do layout") {
-          var parent = node.closest(
-            "section,article,.panel,.card,.box,div"
-          );
-
-          if (
-            parent &&
-            normalize(parent.textContent).indexOf(
-              "dourado luxo"
-            ) !== -1
-          ) {
-            parent.classList.add(
-              "leads-settings-hidden-copy"
-            );
-          } else {
-            node.classList.add(
-              "leads-settings-hidden-copy"
-            );
-          }
-        }
-      });
-
-    ["dourado luxo", "azul prime", "verde elite"].forEach(
-      function (oldTheme) {
-        container
-          .querySelectorAll("button")
-          .forEach(function (button) {
-            if (
-              normalize(button.textContent) === oldTheme
-            ) {
-              button.classList.add(
-                "leads-settings-hidden-copy"
-              );
-            }
-          });
+    for(var index=0;index<SOURCES.length;index++){
+      try{
+        var html = await fetchWithTimeout(SOURCES[index]);
+        if(!validate(html)) throw new Error("Arquivo-base incompleto");
+        var finalHtml = inject(html);
+        document.open("text/html","replace");
+        document.write(finalHtml);
+        document.close();
+        return;
+      }catch(error){
+        errors.push(String(error && error.message || error));
       }
-    );
-  }
-
-  function buildThemePanel(container) {
-    if (
-      !container ||
-      document.getElementById("leadsThemePanel")
-    ) {
-      return;
     }
 
-    var panel = document.createElement("section");
-
-    panel.id = "leadsThemePanel";
-    panel.className = "leads-theme-panel";
-    panel.setAttribute(
-      "aria-label",
-      "Escolha de cor do CRM"
+    loaderScreen(
+      "Não foi possível carregar o CRM",
+      "Verifique a internet e tente novamente. Detalhes: " + errors.join(" · ")
     );
-
-    var buttons = THEMES.map(function (theme) {
-      return (
-        '<button type="button" ' +
-        'class="leads-theme-option" ' +
-        "data-leads-theme " +
-        'data-theme-name="' +
-        theme.name +
-        '" ' +
-        'data-theme-a="' +
-        theme.a +
-        '" ' +
-        'data-theme-b="' +
-        theme.b +
-        '" ' +
-        'style="--theme-a:' +
-        theme.a +
-        ";--theme-b:" +
-        theme.b +
-        '">' +
-        '<span class="leads-theme-swatch" ' +
-        'aria-hidden="true"></span>' +
-        '<span class="leads-theme-name">' +
-        theme.name +
-        "</span>" +
-        "</button>"
-      );
-    }).join("");
-
-    panel.innerHTML =
-      '<div class="leads-theme-head">' +
-      "<h3>Cor do CRM</h3>" +
-      '<span class="leads-theme-current" ' +
-      'id="leadsCurrentTheme">' +
-      "Dourado Luxo" +
-      "</span>" +
-      "</div>" +
-      '<div class="leads-theme-grid">' +
-      buttons +
-      "</div>" +
-      '<div class="leads-custom-color">' +
-      '<label for="leadsCustomColor">' +
-      "Escolher outra cor" +
-      "</label>" +
-      '<input id="leadsCustomColor" ' +
-      'type="color" value="#d8b56d" ' +
-      'aria-label="Escolher cor personalizada">' +
-      '<button id="leadsApplyCustomColor" type="button">' +
-      "Aplicar cor" +
-      "</button>" +
-      "</div>";
-
-    container.appendChild(panel);
-
-    panel
-      .querySelectorAll("[data-leads-theme]")
-      .forEach(function (button) {
-        button.addEventListener("click", function () {
-          applyTheme({
-            name: button.getAttribute("data-theme-name"),
-            a: button.getAttribute("data-theme-a"),
-            b: button.getAttribute("data-theme-b")
-          });
-        });
-      });
-
-    var picker = document.getElementById(
-      "leadsCustomColor"
-    );
-
-    var apply = document.getElementById(
-      "leadsApplyCustomColor"
-    );
-
-    if (apply && picker) {
-      apply.addEventListener("click", function () {
-        var selected = picker.value;
-
-        applyTheme({
-          name: "Cor personalizada",
-          a: selected,
-          b: mix(selected, 0.35)
-        });
-      });
-    }
-
-    restoreTheme();
   }
 
-  function organizeSettings() {
-    injectStyles();
-
-    var heading = findSettingsHeading();
-    var container = findSettingsContainer(heading);
-
-    if (!heading || !container) return false;
-
-    container.classList.add("leads-settings-compact");
-
-    hideLongCopies(container);
-    buildThemePanel(container);
-
-    return true;
-  }
-
-  var attempts = 0;
-
-  function boot() {
-    if (organizeSettings()) return;
-
-    attempts += 1;
-
-    if (attempts < 20) {
-      setTimeout(boot, 300);
-    }
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener(
-      "DOMContentLoaded",
-      boot,
-      { once: true }
-    );
-  } else {
-    boot();
-  }
-
-  window.addEventListener(
-    "load",
-    function () {
-      setTimeout(organizeSettings, 250);
-    },
-    { once: true }
-  );
-
-  if (window.MutationObserver) {
-    var observer = new MutationObserver(function () {
-      organizeSettings();
-    });
-
-    observer.observe(document.documentElement, {
-      childList: true,
-      subtree: true
-    });
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded",start,{once:true});
+  }else{
+    start();
   }
 })();
+
+  </script>
+</body>
+</html>
