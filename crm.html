@@ -1,8 +1,3 @@
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -10700,5 +10695,413 @@ O patch:
   // Fallback de segurança para internet lenta
   setTimeout(initRealtimeLeads, 2500);
 })();
-</script></body>
+</script>
+
+<!-- CORREÇÃO DEFINITIVA 2026-07-14: IA FLUTUANTE COMPACTA + LAYOUT SIMÉTRICO -->
+<style id="leadsIaCompactaDefinitiva20260714">
+  /* O CRM deixa de reservar uma coluna permanente para a IA. */
+  @media (min-width: 981px) and (hover: hover) and (pointer: fine) {
+    .app {
+      grid-template-columns: 232px minmax(0, 1fr) !important;
+    }
+
+    .main {
+      grid-column: 2 !important;
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .content {
+      width: 100% !important;
+      max-width: 1440px !important;
+      padding: 16px 18px 24px !important;
+    }
+
+    .rightbar {
+      position: fixed !important;
+      top: 84px !important;
+      right: 14px !important;
+      width: 276px !important;
+      height: auto !important;
+      max-height: calc(100dvh - 100px) !important;
+      padding: 0 !important;
+      border: 0 !important;
+      border-radius: 18px !important;
+      background: transparent !important;
+      overflow: visible !important;
+      z-index: 260 !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      transform: translateX(calc(100% + 28px)) scale(.98) !important;
+      transform-origin: right center !important;
+      transition: transform .22s ease, opacity .18s ease, visibility .18s ease !important;
+      box-shadow: none !important;
+    }
+
+    .rightbar.open {
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+      transform: translateX(0) scale(1) !important;
+    }
+
+    .rightbar .ai-card {
+      width: 100% !important;
+      max-height: calc(100dvh - 100px) !important;
+      overflow-y: auto !important;
+      border-radius: 18px !important;
+      box-shadow: 0 22px 60px rgba(0,0,0,.52) !important;
+    }
+
+    .mobile-ai-toggle {
+      display: grid !important;
+      position: fixed !important;
+      right: 18px !important;
+      bottom: 22px !important;
+      z-index: 270 !important;
+      width: 52px !important;
+      min-width: 52px !important;
+      height: 52px !important;
+      padding: 0 !important;
+      border-radius: 17px !important;
+      place-items: center !important;
+      font-size: 13px !important;
+      font-weight: 950 !important;
+      letter-spacing: .08em !important;
+      box-shadow: 0 14px 34px rgba(0,0,0,.48), 0 0 24px rgba(216,181,109,.17) !important;
+      transition: right .22s ease, transform .18s ease !important;
+    }
+
+    body.ai-open .mobile-ai-toggle {
+      right: 302px !important;
+      transform: rotate(-5deg) !important;
+    }
+
+    .rightbar .ai-close-mobile {
+      display: inline-grid !important;
+      place-items: center !important;
+      width: 30px !important;
+      min-width: 30px !important;
+      height: 30px !important;
+      margin-left: auto !important;
+      padding: 0 !important;
+      border-radius: 9px !important;
+      font-size: 0 !important;
+      line-height: 1 !important;
+    }
+
+    .rightbar .ai-close-mobile::before {
+      content: "×" !important;
+      font-size: 21px !important;
+      line-height: 1 !important;
+    }
+  }
+
+  @media (min-width: 981px) and (max-width: 1180px) and (hover: hover) and (pointer: fine) {
+    .app {
+      grid-template-columns: 88px minmax(0, 1fr) !important;
+    }
+
+    body.ai-open .mobile-ai-toggle {
+      right: 294px !important;
+    }
+  }
+
+  /* Dimensões internas realmente compactas. */
+  .rightbar .ai-head {
+    min-height: 42px !important;
+    padding: 8px 10px !important;
+    gap: 7px !important;
+  }
+
+  .rightbar .ai-head h2 {
+    max-width: 112px !important;
+    font-size: 10.5px !important;
+    letter-spacing: .55px !important;
+  }
+
+  .rightbar .online {
+    font-size: 7.5px !important;
+    white-space: nowrap !important;
+  }
+
+  .rightbar .ai-hero {
+    padding: 9px 10px !important;
+  }
+
+  .rightbar .ai-orb {
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    margin: 0 auto 6px !important;
+    font-size: 13px !important;
+  }
+
+  .rightbar .ai-orb::before {
+    inset: 5px !important;
+  }
+
+  .rightbar .ai-orb::after {
+    width: 5px !important;
+    height: 5px !important;
+    right: 8px !important;
+    top: 7px !important;
+  }
+
+  .rightbar .ai-hero h3 {
+    font-size: 11.5px !important;
+    line-height: 1.2 !important;
+  }
+
+  .rightbar .ai-hero p {
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+    overflow: hidden !important;
+    margin-top: 3px !important;
+    font-size: 9px !important;
+    line-height: 1.25 !important;
+  }
+
+  .rightbar .ai-section {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 5px !important;
+    padding: 8px 9px !important;
+  }
+
+  .rightbar .ai-section h4 {
+    grid-column: 1 / -1 !important;
+    margin: 0 0 2px !important;
+    font-size: 8px !important;
+  }
+
+  .rightbar .suggestion {
+    min-height: 34px !important;
+    margin: 0 !important;
+    padding: 6px 7px !important;
+    border-radius: 9px !important;
+    gap: 5px !important;
+    font-size: 9px !important;
+    line-height: 1.18 !important;
+  }
+
+  .rightbar .ai-section .suggestion:nth-of-type(n+5) {
+    display: none !important;
+  }
+
+  .rightbar .chat-log {
+    min-height: 82px !important;
+    max-height: 160px !important;
+    padding: 8px 9px !important;
+    gap: 6px !important;
+  }
+
+  .rightbar .msg {
+    max-width: 94% !important;
+    padding: 7px 8px !important;
+    border-radius: 10px !important;
+    font-size: 9.5px !important;
+    line-height: 1.3 !important;
+  }
+
+  .rightbar .chat-form {
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 7px 9px !important;
+  }
+
+  .rightbar .chat-form input {
+    min-width: 0 !important;
+    height: 36px !important;
+    padding: 7px 9px !important;
+    border-radius: 9px !important;
+    font-size: 10px !important;
+  }
+
+  .rightbar .chat-form button {
+    width: 36px !important;
+    min-width: 36px !important;
+    height: 36px !important;
+    flex: 0 0 36px !important;
+    padding: 0 !important;
+    border-radius: 9px !important;
+  }
+
+  .rightbar .quick {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0,1fr)) !important;
+    gap: 4px !important;
+    padding: 0 9px 9px !important;
+  }
+
+  .rightbar .quick .btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 6px 2px !important;
+    font-size: 8px !important;
+    white-space: nowrap !important;
+  }
+
+  .grid-kpi {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+  }
+
+  .cards,
+  .grid-list {
+    align-items: stretch !important;
+  }
+
+  /* Celular: janela lateral pequena, não ocupa a tela inteira. */
+  @media (max-width: 980px), (hover: none) and (pointer: coarse) {
+    .app {
+      display: block !important;
+    }
+
+    .rightbar {
+      position: fixed !important;
+      top: 10px !important;
+      right: -110% !important;
+      width: min(300px, 92vw) !important;
+      max-width: 92vw !important;
+      height: calc(100dvh - 20px) !important;
+      min-height: 0 !important;
+      padding: 7px !important;
+      border: 1px solid rgba(216,181,109,.22) !important;
+      border-right: 0 !important;
+      border-radius: 20px 0 0 20px !important;
+      overflow-y: auto !important;
+      z-index: 99999 !important;
+      box-shadow: -18px 0 60px rgba(0,0,0,.52) !important;
+    }
+
+    .rightbar.open {
+      right: 0 !important;
+    }
+
+    .rightbar .ai-card {
+      min-height: 0 !important;
+      max-height: none !important;
+      border-radius: 15px !important;
+    }
+
+    .rightbar .ai-head {
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 2 !important;
+      padding: 8px 9px !important;
+    }
+
+    .rightbar .ai-close-mobile {
+      display: inline-grid !important;
+      place-items: center !important;
+      width: 31px !important;
+      min-width: 31px !important;
+      height: 31px !important;
+      margin-left: auto !important;
+      padding: 0 !important;
+      border-radius: 9px !important;
+      font-size: 0 !important;
+    }
+
+    .rightbar .ai-close-mobile::before {
+      content: "×" !important;
+      font-size: 21px !important;
+      line-height: 1 !important;
+    }
+
+    .rightbar .ai-hero p {
+      -webkit-line-clamp: 1 !important;
+    }
+
+    .rightbar .ai-section .suggestion:nth-of-type(n+4) {
+      display: none !important;
+    }
+
+    .rightbar .chat-log {
+      min-height: 100px !important;
+      max-height: 26dvh !important;
+    }
+
+    .mobile-ai-toggle {
+      display: grid !important;
+      position: fixed !important;
+      right: 14px !important;
+      bottom: calc(86px + env(safe-area-inset-bottom,0px)) !important;
+      z-index: 99998 !important;
+      width: 48px !important;
+      min-width: 48px !important;
+      height: 48px !important;
+      padding: 0 !important;
+      border-radius: 15px !important;
+      font-size: 13px !important;
+      place-items: center !important;
+    }
+
+    body.ai-open .mobile-ai-toggle {
+      display: none !important;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .rightbar {
+      width: min(286px, 94vw) !important;
+      max-width: 94vw !important;
+    }
+
+    .rightbar .ai-section {
+      grid-template-columns: 1fr !important;
+    }
+
+    .rightbar .ai-section h4 {
+      grid-column: 1 !important;
+    }
+  }
+</style>
+
+<script id="leadsIaCompactaDefinitiva20260714Script">
+(function () {
+  "use strict";
+
+  function setupCompactAI() {
+    var panel = document.getElementById("rightbar");
+    var toggle = document.querySelector(".mobile-ai-toggle");
+    if (!panel || !toggle) return;
+
+    toggle.textContent = "IA";
+    toggle.setAttribute("aria-label", "Abrir ou fechar IA");
+    toggle.setAttribute("title", "IA Consultiva");
+
+    /* No computador a IA começa recolhida para liberar a tela principal. */
+    if (window.matchMedia("(min-width: 981px) and (hover: hover) and (pointer: fine)").matches) {
+      panel.classList.remove("open");
+      document.body.classList.remove("ai-open");
+    }
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && panel.classList.contains("open") && typeof window.closeAI === "function") {
+        window.closeAI();
+      }
+    });
+
+    document.addEventListener("pointerdown", function (event) {
+      if (!panel.classList.contains("open")) return;
+      if (!window.matchMedia("(min-width: 981px) and (hover: hover) and (pointer: fine)").matches) return;
+      if (panel.contains(event.target) || toggle.contains(event.target)) return;
+      if (typeof window.closeAI === "function") window.closeAI();
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", setupCompactAI, { once: true });
+  } else {
+    setupCompactAI();
+  }
+  setTimeout(setupCompactAI, 1400);
+})();
+</script>
+
+</body>
 </html>
