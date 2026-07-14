@@ -1,0 +1,440 @@
+(function () {
+  "use strict";
+
+  if (window.__LEADS_RADAR_STARTED__) return;
+  window.__LEADS_RADAR_STARTED__ = true;
+
+  const ENDPOINT =
+    "https://zyfbgydbwsvbaogbxzrd.supabase.co/functions/v1/bright-task";
+
+  const SESSION_KEY = "leads_radar_session_id";
+  const CONSENT_KEY = "leads_radar_consent";
+  const LAST_VISIT_KEY = "leads_radar_last_visit";
+  const INITIAL_EVENT_KEY = "leads_radar_initial_event_sent";
+
+  let sessionId = localStorage.getItem(SESSION_KEY) || "";
+  let initialized = false;
+  let sessionPromise = null;
+
+  function clean(value, maxLength = 500) {
+    const text = String(value ?? "").trim();
+    return text ? text.slice(0, maxLength) : null;
+  }
+
+  function getUtmData() {
+    const params = new URLSearchParams(window.location.search);
+
+    return {
+      utm_source: clean(params.get("utm_source"), 200),
+      utm_medium: clean(params.get("utm_medium"), 200),
+      utm_campaign: clean(params.get("utm_campaign"), 300),
+      utm_content: clean(params.get("utm_content"), 300),
+      utm_term: clean(params.get("utm_term"), 300),
+    };
+  }
+
+  function hasConsent() {
+    return localStorage.getItem(CONSENT_KEY) === "accepted";
+  }
+
+  function findPropertyContainer(element) {
+    if (!(element instanceof Element)) return null;
+
+    return element.closest(
+      [
+        ".property-card",
+        "[data-property-code]",
+        "[data-property-id]",
+        "[data-code]",
+      ].join(","),
+    );
+  }
+
+  function getPropertyCode(element) {
+    const container = findPropertyContainer(element);
+    if (!container) return null;
+
+    const directCode =
+      container.getAttribute("data-property-code") ||
+      container.dataset?.propertyCode ||
+      container.getAttribute("data-code") ||
+      container.dataset?.code ||
+      null;
+
+    if (directCode) return clean(directCode, 80);
+
+    const codeNode = container.querySelector(
+      ".property-code,[data-property-code],[data-code]",
+    );
+
+    const codeText = clean(codeNode?.textContent, 100);
+    if (codeText) return codeText;
+
+    const fallbackText = container.textContent || "";
+    const match = fallbackText.match(
+      /\b(?:LI|LID|COD|CODE)[-\s]?[A-Z0-9]+\b/i,
+    );
+
+    return match
+      ? clean(match[0].replace(/\s+/g, "-").toUpperCase(), 80)
+      : null;
+  }
+
+  async function parseResponse(response) {
+    const body = await response.json().catch(() => ({}));
+
+    if (!response.ok || body.ok === false) {
+      throw new Error(
+        body.message || body.error || `HTTP ${response.status}`,
+      );
+    }
+
+    return body;
+  }
+
+  async function sendEvent(eventType, details = {}) {
+    if (!hasConsent()) return null;
+
+    const payload = {
+      session_id: sessionId || null,
+      event_type: eventType,
+      page_url: window.location.href,
+      referrer: document.referrer || null,
+      consent_analytics: true,
+      consent_marketing: false,
+      ...getUtmData(),
+      ...details,
+    };
+
+    try {
+      const response = await fetch(ENDPOINT, {
+        method: "POST",
+        mode: "cors",
+        cache: "no-store",
+        keepalive: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await parseResponse(response);
+
+      if (result.session_id && result.session_id !== sessionId) {
+        sessionId = result.session_id;
+        localStorage.setItem(SESSION_KEY, sessionId);
+      }
+
+      window.dispatchEvent(
+        new CustomEvent("leads-radar-update", {
+          detail: result,
+        }),
+      );
+
+      console.info(`[Radar Leads IA] ${eventType}`, result);
+      return result;
+    } catch (error) {
+      console.warn(
+        `[Radar Leads IA] Evento não enviado: ${eventType}`,
+        error,
+      );
+      return null;
+    }
+  }
+
+  async function ensureSession() {
+    if (sessionId) return sessionId;
+
+    if (!sessionPromise) {
+      sessionPromise = sendEvent("page_view", {
+        surface: "site_start",
+        event_key: `initial:${location.pathname}:${Date.now()}`,
+      }).finally(() => {
+        sessionPromise = null;
+      });
+    }
+
+    await sessionPromise;
+    return sessionId;
+  }
+
+  async function registerInitialVisit() {
+    if (!hasConsent()) return;
+
+    if (!sessionId) {
+      await ensureSession();
+      sessionStorage.setItem(INITIAL_EVENT_KEY, "yes");
+      return;
+    }
+
+    if (sessionStorage.getItem(INITIAL_EVENT_KEY) === "yes") return;
+
+    sessionStorage.setItem(INITIAL_EVENT_KEY, "yes");
+
+    await sendEvent("page_view", {
+      surface: "page_load",
+      event_key: `page:${location.pathname}:${Math.floor(Date.now() / 30000)}`,
+    });
+  }
+
+  function createConsentBanner() {
+    if (localStorage.getItem(CONSENT_KEY)) return;
+
+    const style = document.createElement("style");
+    style.id = "leads-radar-consent-style";
+    style.textContent = `
+      .leads-radar-consent {
+        position: fixed;
+        left: 16px;
+        right: 16px;
+        bottom: 16px;
+        z-index: 999999;
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 17px;
+        border: 1px solid rgba(255,255,255,.15);
+        border-radius: 18px;
+        background: rgba(7,18,29,.96);
+        box-shadow: 0 22px 65px rgba(0,0,0,.42);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        color: #fff;
+        font-family: Inter, Arial, sans-serif;
+      }
+      .leads-radar-consent strong { display:block; margin-bottom:6px; font-size:14px; }
+      .leads-radar-consent p { margin:0; color:rgba(255,255,255,.76); font-size:12px; line-height:1.5; }
+      .leads-radar-consent-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; margin-top:13px; }
+      .leads-radar-consent button { min-height:38px; border:0; border-radius:11px; padding:9px 14px; font:inherit; font-size:12px; font-weight:800; cursor:pointer; }
+      .leads-radar-reject { background:rgba(255,255,255,.10); color:#fff; }
+      .leads-radar-accept { background:#9ad8f3; color:#07131b; }
+      @media (max-width:600px) {
+        .leads-radar-consent { left:10px; right:10px; bottom:10px; padding:15px; }
+        .leads-radar-consent-actions { display:grid; grid-template-columns:1fr 1fr; }
+      }
+    `;
+
+    document.head.appendChild(style);
+
+    const banner = document.createElement("section");
+    banner.className = "leads-radar-consent";
+    banner.setAttribute("role", "dialog");
+    banner.setAttribute("aria-label", "Preferências de privacidade");
+    banner.innerHTML = `
+      <strong>Experiência personalizada na Leads Imóveis</strong>
+      <p>Podemos registrar quais imóveis e recursos despertam mais interesse para melhorar seu atendimento. Não registramos senhas neste rastreamento.</p>
+      <div class="leads-radar-consent-actions">
+        <button type="button" class="leads-radar-reject">Continuar sem personalização</button>
+        <button type="button" class="leads-radar-accept">Aceitar</button>
+      </div>
+    `;
+
+    document.body.appendChild(banner);
+
+    banner
+      .querySelector(".leads-radar-reject")
+      ?.addEventListener("click", () => {
+        localStorage.setItem(CONSENT_KEY, "rejected");
+        banner.remove();
+      });
+
+    banner
+      .querySelector(".leads-radar-accept")
+      ?.addEventListener("click", async () => {
+        localStorage.setItem(CONSENT_KEY, "accepted");
+        banner.remove();
+        await startTracking();
+      });
+  }
+
+  function bindClickEvents() {
+    document.addEventListener(
+      "click",
+      async (event) => {
+        const target = event.target instanceof Element ? event.target : null;
+        if (!target) return;
+
+        const propertyCode = getPropertyCode(target);
+
+        const galleryControl = target.closest(
+          "[data-gallery],.gallery-arrow,.property-photo,.property-image",
+        );
+        if (galleryControl && propertyCode) {
+          await ensureSession();
+          void sendEvent("gallery_open", {
+            property_code: propertyCode,
+            surface: "property_gallery",
+          });
+          return;
+        }
+
+        const whatsappLink = target.closest(
+          'a[href*="wa.me"],a[href*="whatsapp.com"],a[href*="api.whatsapp.com"],[data-whatsapp]',
+        );
+        if (whatsappLink) {
+          await ensureSession();
+          void sendEvent("whatsapp_click", {
+            property_code: propertyCode,
+            surface: propertyCode ? "property_whatsapp" : "general_whatsapp",
+          });
+          return;
+        }
+
+        const chatButton = target.closest(
+          "#openAi,#openLia,#liaButton,.lia-button,.ai-button,[data-open-lia],[data-open-ai]",
+        );
+        if (chatButton) {
+          await ensureSession();
+          void sendEvent("chat_opened", {
+            property_code: propertyCode,
+            surface: "lia_button",
+          });
+          return;
+        }
+
+        const propertyOpen = target.closest(
+          ".property-media a,.property-body h3 a,.small-button:not(.dark)",
+        );
+        if (propertyOpen && propertyCode) {
+          await ensureSession();
+          void sendEvent("property_view", {
+            property_code: propertyCode,
+            surface: "property_open",
+          });
+          return;
+        }
+
+        const purposeButton = target.closest("[data-purpose]");
+        if (purposeButton) {
+          await ensureSession();
+          void sendEvent("filter_used", {
+            filter_name: "purpose",
+            purpose: clean(purposeButton.getAttribute("data-purpose"), 80),
+            surface: "purpose_button",
+          });
+        }
+      },
+      { passive: true, capture: true },
+    );
+  }
+
+  function bindFormEvents() {
+    document.addEventListener(
+      "submit",
+      async (event) => {
+        const form = event.target;
+        if (!(form instanceof HTMLFormElement)) return;
+
+        await ensureSession();
+
+        const identity = [form.id, form.className, form.getAttribute("name")]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        if (
+          identity.includes("assistant") ||
+          identity.includes("chat") ||
+          identity.includes("lia")
+        ) {
+          void sendEvent("chat_message", {
+            property_code: getPropertyCode(form),
+            surface: form.id || "lia_chat_form",
+          });
+          return;
+        }
+
+        const hasContactField = form.querySelector(
+          'input[type="tel"],input[type="email"],input[name*="phone" i],input[name*="telefone" i],input[name*="whatsapp" i],input[name*="email" i]',
+        );
+
+        if (hasContactField) {
+          void sendEvent("contact_submitted", {
+            property_code: getPropertyCode(form),
+            surface: form.id || "contact_form",
+          });
+        }
+      },
+      true,
+    );
+  }
+
+  function bindFilterEvents() {
+    document
+      .querySelectorAll(
+        "#purposeFilter,#neighborhoodFilter,#typeFilter,#codeFilter,[data-leads-filter]",
+      )
+      .forEach((field) => {
+        field.addEventListener("change", async () => {
+          await ensureSession();
+          void sendEvent("filter_used", {
+            filter_name:
+              field.id || field.getAttribute("name") || "site_filter",
+            surface: "property_search",
+          });
+        });
+      });
+  }
+
+  async function startTracking() {
+    if (initialized || !hasConsent()) return;
+    initialized = true;
+
+    const previousVisit = Number(
+      localStorage.getItem(LAST_VISIT_KEY) || "0",
+    );
+    const now = Date.now();
+
+    await registerInitialVisit();
+
+    if (previousVisit && now - previousVisit > 6 * 60 * 60 * 1000) {
+      void sendEvent("return_visit", {
+        surface: "returning_visitor",
+      });
+    }
+
+    localStorage.setItem(LAST_VISIT_KEY, String(now));
+
+    bindClickEvents();
+    bindFormEvents();
+    bindFilterEvents();
+
+    window.setTimeout(() => {
+      if (!document.hidden) {
+        void sendEvent("engaged_60s", {
+          duration_seconds: 60,
+          surface: "site_engagement",
+          event_key: `engaged60:${location.pathname}`,
+        });
+      }
+    }, 60000);
+  }
+
+  function initialize() {
+    createConsentBanner();
+    if (hasConsent()) void startTracking();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initialize, { once: true });
+  } else {
+    initialize();
+  }
+
+  window.LeadsRadar = {
+    track: sendEvent,
+    getSessionId() {
+      return sessionId || localStorage.getItem(SESSION_KEY);
+    },
+    getConsent() {
+      return localStorage.getItem(CONSENT_KEY);
+    },
+    reset() {
+      localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(CONSENT_KEY);
+      localStorage.removeItem(LAST_VISIT_KEY);
+      sessionStorage.removeItem(INITIAL_EVENT_KEY);
+      sessionId = "";
+      initialized = false;
+    },
+  };
+})();
