@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 420" role="img" aria-labelledby="title">
+  <title id="title">Monograma Leads Imóveis</title>
+  <defs>
+    <linearGradient id="silver" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset=".32" stop-color="#cdd2d9"/>
+      <stop offset=".55" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#8f959e"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#a87935"/>
+      <stop offset=".5" stop-color="#efd39b"/>
+      <stop offset="1" stop-color="#95672e"/>
+    </linearGradient>
+  </defs>
+  <path d="M76 55 V282 Q76 330 126 330 H304"
+        fill="none" stroke="url(#silver)" stroke-width="22"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M157 321 L264 62 L370 321"
+        fill="none" stroke="url(#silver)" stroke-width="22"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M128 325 Q225 367 335 313"
+        fill="none" stroke="url(#gold)" stroke-width="9" stroke-linecap="round"/>
+  <path d="M208 274 V196 H237 V274 Z
+           M251 274 V143 H282 V274 Z
+           M297 274 V215 H326 V274 Z"
+        fill="url(#silver)"/>
+  <path d="M194 278 H340" stroke="url(#gold)" stroke-width="6" stroke-linecap="round"/>
+</svg>
