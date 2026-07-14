@@ -1,1010 +1,440 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#071422" />
-  <meta name="description" content="Leads Imóveis: venda, aluguel anual e temporada em Florianópolis." />
-  <meta property="og:title" content="Leads Imóveis · Florianópolis" />
-  <meta property="og:description" content="Imóveis selecionados para venda, aluguel anual e temporada em Florianópolis." />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="hero-leads-floripa-final.webp" />
-  <title>Leads Imóveis · Florianópolis</title>
+(function () {
+  "use strict";
 
-  <link rel="icon" href="favicon.png" />
-  <link rel="preload" href="hero-leads-floripa-final.webp" as="image" media="(min-width: 701px)" fetchpriority="high" />
-  <link rel="preload" href="hero-leads-floripa-mobile.webp" as="image" media="(max-width: 700px)" fetchpriority="high" />
-  <link rel="preload" href="leads-logo-completa-v3.webp" as="image" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  if (window.__LEADS_RADAR_STARTED__) return;
+  window.__LEADS_RADAR_STARTED__ = true;
 
-  <style>
-    :root {
-      --navy:#071422;
-      --navy-2:#0d2438;
-      --navy-3:#173e58;
-      --sky:#74d5ff;
-      --sky-soft:#bdefff;
-      --surface:#f6fcff;
-      --surface-2:#eaf7fc;
-      --ink:#071422;
-      --ink-soft:#3b6075;
-      --line:rgba(111,174,202,.28);
-      --glass-light:rgba(249,254,255,.82);
-      --glass-dark:rgba(7,20,34,.55);
-      --shadow-lg:0 28px 78px rgba(2,12,22,.30);
-      --shadow-md:0 18px 46px rgba(3,18,31,.15);
-      --safe-bottom:env(safe-area-inset-bottom,0px);
+  const ENDPOINT =
+    "https://zyfbgydbwsvbaogbxzrd.supabase.co/functions/v1/bright-task";
+
+  const SESSION_KEY = "leads_radar_session_id";
+  const CONSENT_KEY = "leads_radar_consent";
+  const LAST_VISIT_KEY = "leads_radar_last_visit";
+  const INITIAL_EVENT_KEY = "leads_radar_initial_event_sent";
+
+  let sessionId = localStorage.getItem(SESSION_KEY) || "";
+  let initialized = false;
+  let sessionPromise = null;
+
+  function clean(value, maxLength = 500) {
+    const text = String(value ?? "").trim();
+    return text ? text.slice(0, maxLength) : null;
+  }
+
+  function getUtmData() {
+    const params = new URLSearchParams(window.location.search);
+
+    return {
+      utm_source: clean(params.get("utm_source"), 200),
+      utm_medium: clean(params.get("utm_medium"), 200),
+      utm_campaign: clean(params.get("utm_campaign"), 300),
+      utm_content: clean(params.get("utm_content"), 300),
+      utm_term: clean(params.get("utm_term"), 300),
+    };
+  }
+
+  function hasConsent() {
+    return localStorage.getItem(CONSENT_KEY) === "accepted";
+  }
+
+  function findPropertyContainer(element) {
+    if (!(element instanceof Element)) return null;
+
+    return element.closest(
+      [
+        ".property-card",
+        "[data-property-code]",
+        "[data-property-id]",
+        "[data-code]",
+      ].join(","),
+    );
+  }
+
+  function getPropertyCode(element) {
+    const container = findPropertyContainer(element);
+    if (!container) return null;
+
+    const directCode =
+      container.getAttribute("data-property-code") ||
+      container.dataset?.propertyCode ||
+      container.getAttribute("data-code") ||
+      container.dataset?.code ||
+      null;
+
+    if (directCode) return clean(directCode, 80);
+
+    const codeNode = container.querySelector(
+      ".property-code,[data-property-code],[data-code]",
+    );
+
+    const codeText = clean(codeNode?.textContent, 100);
+    if (codeText) return codeText;
+
+    const fallbackText = container.textContent || "";
+    const match = fallbackText.match(
+      /\b(?:LI|LID|COD|CODE)[-\s]?[A-Z0-9]+\b/i,
+    );
+
+    return match
+      ? clean(match[0].replace(/\s+/g, "-").toUpperCase(), 80)
+      : null;
+  }
+
+  async function parseResponse(response) {
+    const body = await response.json().catch(() => ({}));
+
+    if (!response.ok || body.ok === false) {
+      throw new Error(
+        body.message || body.error || `HTTP ${response.status}`,
+      );
     }
 
-    *,*::before,*::after{box-sizing:border-box}
-    html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-    body{margin:0;min-height:100vh;overflow-x:hidden;color:#fff;background:var(--navy);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
-    body.locked{overflow:hidden}
-    button,input,select{font:inherit}
-    button{border:0;cursor:pointer}
-    a{color:inherit;text-decoration:none}
-    img{display:block;max-width:100%}
-    a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--sky);outline-offset:3px}
-    .shell{width:min(1180px,calc(100% - 28px));margin-inline:auto}
-    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    return body;
+  }
 
-    .glass{border:1px solid rgba(255,255,255,.55);background:linear-gradient(145deg,rgba(255,255,255,.90),rgba(225,247,255,.69));box-shadow:var(--shadow-md),inset 0 1px 0 rgba(255,255,255,.82);backdrop-filter:blur(22px) saturate(155%);-webkit-backdrop-filter:blur(22px) saturate(155%)}
+  async function sendEvent(eventType, details = {}) {
+    if (!hasConsent()) return null;
 
-    .topbar{position:fixed;inset:0 0 auto;z-index:80;min-height:78px;display:grid;grid-template-columns:60px minmax(0,1fr) 60px;align-items:center;gap:18px;padding:9px clamp(16px,3vw,46px);color:var(--ink);background:linear-gradient(135deg,rgba(249,254,255,.87),rgba(219,246,255,.61));border-bottom:1px solid rgba(255,255,255,.62);box-shadow:0 12px 36px rgba(4,12,22,.12);backdrop-filter:blur(22px) saturate(155%);transition:min-height .24s ease,background .24s ease,box-shadow .24s ease}
-    .topbar.scrolled{min-height:68px;background:linear-gradient(135deg,rgba(249,254,255,.97),rgba(219,246,255,.84));box-shadow:0 16px 40px rgba(4,12,22,.17)}
-    .brand{width:58px;height:58px;display:grid;place-items:center;border-radius:19px;background:linear-gradient(145deg,var(--navy),var(--navy-3));border:1px solid rgba(189,239,255,.34);box-shadow:0 14px 32px rgba(3,18,31,.24);animation:floatY 5.8s ease-in-out infinite}
-    .brand img{width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 8px 13px rgba(0,0,0,.28))}
-    .desktop-nav{justify-self:center;width:min(720px,calc(100vw - 220px));min-height:56px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:6px;border:1px solid rgba(255,255,255,.68);border-radius:999px;background:linear-gradient(135deg,rgba(255,255,255,.70),rgba(218,244,253,.40));box-shadow:inset 0 1px 0 rgba(255,255,255,.78);backdrop-filter:blur(18px)}
-    .desktop-nav button,.desktop-nav a{min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 10px;border-radius:999px;color:#17384b;background:transparent;font-size:12px;font-weight:850;letter-spacing:.45px;text-transform:uppercase;white-space:nowrap;transition:.2s ease}
-    .desktop-nav button:hover,.desktop-nav a:hover{color:#071422;background:linear-gradient(145deg,#eefbff,#9fe5ff);transform:translateY(-2px)}
-    .menu-button{display:none;justify-self:end;width:44px;height:44px;place-items:center;border-radius:15px;color:var(--ink);background:rgba(7,20,34,.08);font-size:21px}
-
-    .overlay{display:none;position:fixed;inset:0;z-index:110;background:rgba(0,0,0,.52);backdrop-filter:blur(3px)}
-    .overlay.visible{display:block}
-    .mobile-menu{position:fixed;top:0;right:min(-330px,-90vw);z-index:120;width:min(320px,90vw);height:100dvh;padding:18px;color:var(--ink);background:linear-gradient(155deg,rgba(249,254,255,.99),rgba(223,248,255,.97));box-shadow:-26px 0 70px rgba(0,0,0,.32);transition:right .28s ease}
-    .mobile-menu.open{right:0}
-    .mobile-menu-head{min-height:78px;display:flex;align-items:center;justify-content:space-between}
-    .mobile-menu-head img{width:120px}
-    .icon-button{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;color:var(--navy);background:#e6f8ff;font-size:22px}
-    .mobile-nav{display:grid;gap:8px;margin-top:16px}
-    .mobile-nav button,.mobile-nav a{min-height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;color:#102f42;background:rgba(255,255,255,.87);border:1px solid var(--line);border-radius:17px;box-shadow:0 9px 22px rgba(4,12,22,.07);font-size:13px;font-weight:850}
-    .mobile-nav button::after,.mobile-nav a::after{content:"›";color:#39758f;font-size:20px}
-
-    .hero{position:relative;isolation:isolate;min-height:100svh;display:grid;align-items:center;padding:116px 0 72px;overflow:hidden;background:var(--navy)}
-    .hero-bg{position:absolute;inset:0;z-index:0;background-image:url("hero-leads-floripa-final.webp");background-position:center 45%;background-size:cover;transform:scale(1.015);animation:heroZoom 28s ease-in-out infinite alternate}
-    .hero-bg::before{content:"";position:absolute;inset:0;background:linear-gradient(96deg,rgba(5,14,24,.90),rgba(7,20,34,.60) 48%,rgba(6,17,28,.24) 74%,rgba(5,14,24,.70)),linear-gradient(180deg,rgba(5,13,21,.08),rgba(5,13,21,.76))}
-    .hero::after{content:"";position:absolute;inset:auto 0 -2px;z-index:1;height:165px;background:linear-gradient(180deg,transparent,rgba(7,20,34,.35) 44%,var(--navy) 100%)}
-    .hero-grid{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:34px;align-items:center}
-    .hero-copy{max-width:710px;display:flex;flex-direction:column;align-items:flex-start;gap:15px;animation:heroEntry .85s cubic-bezier(.22,.78,.28,1) both}
-    .hero-logo{width:min(320px,48vw);filter:drop-shadow(0 20px 36px rgba(0,0,0,.46));animation:floatY 5.8s ease-in-out infinite}
-    .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;color:#eafcff;background:rgba(255,255,255,.10);border:1px solid rgba(189,239,255,.42);border-radius:999px;font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;backdrop-filter:blur(12px)}
-    .phrase-panel{width:min(710px,100%);min-height:190px;display:flex;flex-direction:column;justify-content:center;gap:12px;padding:clamp(18px,2.4vw,28px);color:#fff;background:linear-gradient(135deg,rgba(255,255,255,.14),rgba(116,213,255,.06));border:1px solid rgba(189,239,255,.30);border-radius:28px;box-shadow:0 24px 58px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.18);backdrop-filter:blur(18px) saturate(145%);transition:.42s ease}
-    .phrase-panel.changing{opacity:.32;transform:translateY(8px) scale(.985);filter:blur(1px)}
-    .phrase-panel h1{margin:0;font-size:clamp(36px,5.4vw,68px);line-height:1.02;letter-spacing:-2px;text-shadow:0 18px 44px rgba(0,0,0,.52)}
-    .phrase-panel p{max-width:600px;margin:0;color:rgba(247,252,255,.78);font-size:clamp(14px,1.5vw,17px);line-height:1.62}
-    .hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
-    .button{min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 19px;border-radius:999px;color:var(--navy);background:linear-gradient(135deg,#e3f9ff,#8ee1ff);box-shadow:0 14px 34px rgba(116,213,255,.22),inset 0 1px 0 rgba(255,255,255,.72);font-size:13px;font-weight:900;transition:.22s ease}
-    .button:hover{transform:translateY(-2px);box-shadow:0 18px 40px rgba(116,213,255,.28)}
-    .button.secondary{color:#fff;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.24);box-shadow:none;backdrop-filter:blur(12px)}
-    .button.dark{color:#ecfbff;background:var(--navy);box-shadow:none}
-    .button.whatsapp{color:#063b1b;background:#e8fff1;box-shadow:none}
-    .quick-options{width:min(640px,100%);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:8px}
-    .quick-option{min-height:82px;padding:14px;text-align:left;color:#fff;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.20);border-radius:22px;backdrop-filter:blur(14px);transition:.22s ease}
-    .quick-option:hover{transform:translateY(-5px) scale(1.01);background:rgba(223,248,255,.20);box-shadow:0 20px 46px rgba(0,0,0,.20)}
-    .quick-option strong,.quick-option span{display:block}.quick-option strong{margin-top:7px;font-size:13px}.quick-option span{margin-top:4px;color:rgba(255,255,255,.70);font-size:11px;line-height:1.35}
-
-    .assistant-card{padding:20px;color:var(--ink);border-radius:30px;animation:floatY 6.4s ease-in-out infinite}
-    .assistant-head{display:flex;gap:12px;align-items:center;margin-bottom:15px}
-    .assistant-orb{width:48px;height:48px;display:grid;place-items:center;border-radius:18px;color:var(--sky-soft);background:linear-gradient(145deg,var(--navy),#29536d);box-shadow:0 13px 30px rgba(0,0,0,.2);font-weight:900}
-    .assistant-head strong,.assistant-head span{display:block}.assistant-head strong{font-size:15px}.assistant-head span{margin-top:4px;color:#1f6749;font-size:10px;font-weight:900}
-    .assistant-search{display:flex;gap:8px;align-items:center;padding:9px;background:#fff;border:1px solid #d5effa;border-radius:21px}
-    .assistant-search input{width:100%;min-width:0;padding:0 5px;color:var(--ink);background:transparent;border:0;outline:0;font-size:14px}
-    .assistant-search button{width:42px;height:42px;display:grid;place-items:center;color:var(--navy);background:#e4f9ff;border-radius:15px;font-weight:900}
-    .assistant-chips{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}
-    .chip{padding:8px 10px;color:#17374a;background:#f0fbff;border:1px solid #d6eff9;border-radius:999px;font-size:11px;font-weight:800}
-    .assistant-answer{min-height:94px;padding:13px;color:#31566c;background:#f8fdff;border:1px solid #daeff8;border-radius:19px;font-size:13px;line-height:1.5}
-
-    .main-content{position:relative;z-index:3;color:var(--ink);background:var(--surface)}
-    .search-section{padding:72px 0 34px;background:linear-gradient(180deg,var(--navy),#0b2437 14%,var(--surface) 100%)}
-    .search-box{padding:22px;border-radius:30px}
-    .search-heading,.section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:18px}
-    .section-kicker{display:block;margin-bottom:6px;color:#3b758f;font-size:11px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase}
-    .search-heading h2,.section-heading h2{margin:0;color:var(--ink);font-size:clamp(25px,4vw,40px);line-height:1.08;letter-spacing:-1px}
-    .search-heading p,.section-heading p{max-width:620px;margin:8px 0 0;color:var(--ink-soft);font-size:14px;line-height:1.55}
-    .filter-grid{display:grid;grid-template-columns:1.05fr 1.1fr 1.1fr 1fr auto;gap:10px;align-items:end}
-    .field label{display:block;margin:0 0 7px 3px;color:#40677d;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.7px}
-    .field select,.field input{width:100%;min-height:48px;padding:0 14px;color:var(--ink);background:#fff;border:1px solid #d7edf6;border-radius:16px;outline:none}
-    .field select:focus,.field input:focus{border-color:var(--sky);box-shadow:0 0 0 4px rgba(116,213,255,.16)}
-    .filter-submit{min-height:48px;padding-inline:20px}
-    .filter-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
-    .filter-actions button{color:#356178;background:transparent;font-size:12px;font-weight:800}
-    .filter-status{color:#527487;font-size:12px}
-
-    .properties-section{position:relative;padding:42px 0 80px;overflow:hidden;background:var(--surface)}
-    .properties-section::before{content:"";position:absolute;top:5%;left:50%;width:min(900px,90vw);height:520px;background:radial-gradient(ellipse,rgba(116,213,255,.16),transparent 68%);filter:blur(26px);transform:translateX(-50%);pointer-events:none}
-    .properties-section>.shell{position:relative}
-    .property-count{padding:10px 14px;color:#28536a;background:#eaf8fd;border:1px solid #d3edf7;border-radius:999px;font-size:12px;font-weight:900}
-    .properties-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
-    .property-card{min-width:0;overflow:hidden;color:var(--ink);background:linear-gradient(145deg,rgba(255,255,255,.95),rgba(235,249,253,.84));border:1px solid rgba(174,221,239,.56);border-radius:26px;box-shadow:0 15px 42px rgba(4,12,22,.11),inset 0 1px 0 rgba(255,255,255,.90);opacity:0;transform:translateY(18px);transition:opacity .48s ease,transform .48s ease,box-shadow .24s ease,border-color .24s ease}
-    .property-card.revealed{opacity:1;transform:none}
-    .property-card.revealed:hover{transform:translateY(-8px) scale(1.006);border-color:rgba(116,188,219,.68);box-shadow:0 30px 72px rgba(4,12,22,.20),0 0 38px rgba(116,213,255,.10)}
-    .property-media{position:relative;aspect-ratio:16/10;overflow:hidden;background:linear-gradient(135deg,#dff4fc,#aecddd)}
-    .property-media>a{display:block;width:100%;height:100%}
-    .property-media img{width:100%;height:100%;object-fit:cover;transition:transform .35s ease,opacity .18s ease}
-    .property-card:hover .property-media img{transform:scale(1.035)}
-    .property-purpose,.property-code,.photo-counter{position:absolute;z-index:2;padding:7px 10px;border-radius:999px;font-size:10px;font-weight:900;backdrop-filter:blur(10px)}
-    .property-purpose{top:12px;left:12px;color:#eafcff;background:rgba(7,20,34,.78)}
-    .property-code{top:12px;right:12px;color:var(--navy);background:rgba(241,251,255,.92)}
-    .photo-counter{right:12px;bottom:12px;color:#fff;background:rgba(7,20,34,.68)}
-    .gallery-arrow{position:absolute;top:50%;z-index:3;width:38px;height:38px;display:grid;place-items:center;color:#fff;background:rgba(7,20,34,.66);border:1px solid rgba(255,255,255,.26);border-radius:50%;transform:translateY(-50%);backdrop-filter:blur(8px)}
-    .gallery-arrow.previous{left:10px}.gallery-arrow.next{right:10px}
-    .property-body{padding:18px}
-    .property-location{display:flex;gap:6px;align-items:center;color:#527487;font-size:11px;font-weight:800}
-    .property-body h3{margin:8px 0 0;color:var(--ink);font-size:19px;line-height:1.24}
-    .property-description{display:-webkit-box;overflow:hidden;margin:9px 0 0;color:#527084;font-size:12.5px;line-height:1.5;-webkit-box-orient:vertical;-webkit-line-clamp:3}
-    .property-details{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
-    .detail-pill{padding:7px 9px;color:#355d72;background:#f0f9fc;border:1px solid #dceff6;border-radius:999px;font-size:10.5px;font-weight:800}
-    .property-bottom{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:17px}
-    .property-price small,.property-price strong{display:block}
-    .property-price small{color:#6a8798;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.7px}
-    .property-price strong{margin-top:3px;color:var(--ink);font-size:18px}
-    .card-actions{display:flex;gap:7px}
-    .small-button{min-height:39px;display:inline-flex;align-items:center;justify-content:center;padding:0 12px;color:var(--navy);background:#e9f9ff;border:1px solid #d1edf8;border-radius:14px;font-size:11px;font-weight:900}
-    .small-button.dark{color:#eafcff;background:var(--navy);border-color:var(--navy)}
-    .loading-state,.empty-state,.error-state{grid-column:1/-1;padding:42px 20px;text-align:center;color:#4a6f83;background:#fff;border:1px solid #dceef5;border-radius:24px;box-shadow:var(--shadow-md)}
-    .loading-spinner{width:38px;height:38px;margin:0 auto 14px;border:4px solid #dceff6;border-top-color:var(--navy-3);border-radius:50%;animation:spin .8s linear infinite}
-
-    .contact-section{position:relative;isolation:isolate;min-height:620px;display:flex;align-items:center;padding:86px 0;overflow:hidden;color:#fff;background-image:linear-gradient(96deg,rgba(5,14,24,.90),rgba(7,20,34,.60),rgba(5,14,24,.70)),url("leads-praia-hero-final-otimizada.webp");background-position:center;background-size:cover}
-    .contact-section::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 75% 24%,rgba(189,239,255,.13),transparent 34%),linear-gradient(180deg,rgba(7,20,34,.03),rgba(7,20,34,.26));pointer-events:none}
-    .contact-grid{position:relative;z-index:2;display:grid;grid-template-columns:1fr .85fr;gap:28px;align-items:center}
-    .contact-copy h2{max-width:650px;margin:0;font-size:clamp(32px,5vw,56px);line-height:1.04;letter-spacing:-1.5px}
-    .contact-copy p{max-width:610px;margin:14px 0 0;color:rgba(255,255,255,.74);line-height:1.6}
-    .contact-card{padding:22px;color:var(--ink);border-radius:28px}
-    .contact-list{display:grid;gap:9px}
-    .contact-item{padding:14px;background:#fff;border:1px solid #d8eef7;border-radius:17px}
-    .contact-item small,.contact-item strong{display:block}.contact-item small{color:#6b8797;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.8px}.contact-item strong{margin-top:4px;color:var(--ink);font-size:13px;overflow-wrap:anywhere}
-
-    footer{padding:30px 0 calc(30px + var(--safe-bottom));color:rgba(255,255,255,.66);background:#04101b}
-    .footer-content{display:flex;align-items:center;justify-content:space-between;gap:20px}
-    .footer-brand{display:flex;align-items:center;gap:12px}.footer-brand img{width:54px;height:54px;object-fit:contain}.footer-brand strong,.footer-brand span{display:block}.footer-brand strong{color:#fff}.footer-brand span{margin-top:3px;font-size:12px}.footer-copy{font-size:12px;text-align:right}
-
-    .floating-ai{position:fixed;right:18px;bottom:calc(18px + var(--safe-bottom));z-index:90;width:68px;height:68px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--sky-soft);background:radial-gradient(circle at 30% 20%,rgba(189,239,255,.32),transparent 34%),linear-gradient(145deg,rgba(7,20,34,.98),rgba(40,83,109,.98));border:1px solid rgba(189,239,255,.42);border-radius:50%;box-shadow:0 22px 52px rgba(0,0,0,.38),0 0 0 7px rgba(116,213,255,.08);font-weight:900;animation:floatY 4.8s ease-in-out infinite;transition:.25s ease}
-    .floating-ai:hover{filter:brightness(1.08);transform:translateY(-4px) scale(1.045)}
-    .floating-ai-symbol{color:#eafcff;font-size:20px;font-weight:950}.floating-ai-label{color:rgba(234,252,255,.82);font-size:9px;font-weight:900;letter-spacing:.8px;text-transform:uppercase}
-    .ai-panel{position:fixed;right:18px;bottom:calc(96px + var(--safe-bottom));z-index:100;width:min(430px,calc(100vw - 28px));max-height:min(700px,calc(100dvh - 116px));overflow:hidden;display:flex;flex-direction:column;color:var(--ink);background:linear-gradient(155deg,rgba(250,254,255,.97),rgba(224,246,255,.93));border:1px solid rgba(189,239,255,.58);border-radius:27px;box-shadow:0 36px 96px rgba(1,10,18,.42);backdrop-filter:blur(28px) saturate(155%);transform:translateY(18px) scale(.96);opacity:0;pointer-events:none;transition:.24s ease}
-    .ai-panel.open{transform:none;opacity:1;pointer-events:auto}
-    .ai-panel-head{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;color:#eafcff;background:linear-gradient(135deg,rgba(7,20,34,.99),rgba(25,65,88,.97))}
-    .lia-head{display:flex;align-items:center;gap:11px}.lia-avatar{width:46px;height:46px;display:grid;place-items:center;border-radius:16px;color:#f2fcff;background:linear-gradient(145deg,rgba(116,213,255,.26),rgba(255,255,255,.06));border:1px solid rgba(189,239,255,.34);font-size:20px;font-weight:950}.lia-head strong{display:block;font-size:14px}.lia-head span{display:flex;align-items:center;gap:6px;margin-top:5px;color:rgba(230,248,255,.72);font-size:10px}.lia-dot{width:7px;height:7px;border-radius:50%;background:#68e6a6;box-shadow:0 0 0 4px rgba(104,230,166,.12)}
-    .ai-panel-head button{width:38px;height:38px;display:grid;place-items:center;color:#fff;background:rgba(255,255,255,.10);border-radius:12px;font-size:19px}
-    .ai-panel-body{display:flex;min-height:0;flex-direction:column;gap:10px;padding:13px;background:linear-gradient(180deg,rgba(248,253,255,.80),rgba(234,248,253,.94))}
-    .lia-thread{min-height:260px;max-height:min(430px,52dvh);display:flex;flex-direction:column;gap:10px;overflow-y:auto;padding:7px 4px 13px;scroll-behavior:smooth}
-    .lia-message{width:fit-content;max-width:88%;padding:12px 14px;border-radius:18px;font-size:13px;line-height:1.52;box-shadow:0 12px 28px rgba(4,12,22,.09);overflow-wrap:anywhere}
-    .lia-message.ai{align-self:flex-start;color:#22485f;background:#fff;border:1px solid rgba(116,188,219,.30);border-bottom-left-radius:7px}
-    .lia-message.me{align-self:flex-end;color:#f2fbff;background:linear-gradient(145deg,#071422,#28536d);border-bottom-right-radius:7px}
-    .lia-message.typing{display:inline-flex;gap:5px;min-width:66px}.typing-dot{width:7px;height:7px;border-radius:50%;background:#5d7d8e;animation:typing 1.05s infinite ease-in-out}.typing-dot:nth-child(2){animation-delay:.14s}.typing-dot:nth-child(3){animation-delay:.28s}
-    .lia-recommendations{display:grid;gap:7px}.lia-recommendation{width:min(94%,330px);display:grid;gap:3px;padding:10px 12px;text-align:left;color:#234a60;background:rgba(255,255,255,.82);border:1px solid rgba(116,188,219,.28);border-radius:15px;box-shadow:0 9px 22px rgba(4,12,22,.07)}.lia-recommendation strong{font-size:12px}.lia-recommendation span{color:#628093;font-size:10.5px}.lia-recommendation em{color:#0b6a91;font-size:10px;font-style:normal;font-weight:900}
-
-    @keyframes heroZoom{from{transform:scale(1.015) translate3d(0,0,0)}to{transform:scale(1.055) translate3d(.5%,-.4%,0)}}
-    @keyframes heroEntry{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
-    @keyframes floatY{0%,100%{translate:0 0}50%{translate:0 -7px}}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    @keyframes typing{0%,60%,100%{opacity:.35;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
-
-    @media(max-width:980px){.topbar{display:flex}.desktop-nav{display:none}.menu-button{display:grid;margin-left:auto}.hero-grid{grid-template-columns:1fr}.assistant-card{width:min(570px,100%)}.filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.properties-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.contact-grid{grid-template-columns:1fr}}
-    @media(max-width:700px){.hero-bg{background-image:url("hero-leads-floripa-mobile.webp");background-position:center top;transform:none;animation:none}.topbar{min-height:70px;padding:7px 14px}.brand{width:54px;height:54px}.brand img{width:39px;height:39px}.hero{padding:104px 0 58px}.hero-logo{width:min(270px,74vw)}.phrase-panel{min-height:220px;padding:18px;border-radius:23px}.phrase-panel h1{font-size:clamp(32px,10.2vw,50px);letter-spacing:-1.35px}.quick-options{grid-template-columns:1fr}.quick-option{min-height:72px}.search-section{padding-top:58px}.search-box{padding:17px;border-radius:24px}.search-heading,.section-heading{align-items:flex-start;flex-direction:column}.filter-grid,.properties-grid{grid-template-columns:1fr}.property-card.revealed:hover{transform:none}.property-bottom{align-items:stretch;flex-direction:column}.card-actions{width:100%}.card-actions>*{flex:1}.contact-section{min-height:auto;background-position:center}.footer-content{align-items:flex-start;flex-direction:column}.footer-copy{text-align:left}.floating-ai{right:10px;bottom:calc(12px + var(--safe-bottom));width:62px;height:62px}.ai-panel{right:8px;bottom:calc(80px + var(--safe-bottom));width:calc(100vw - 16px);max-height:calc(100dvh - 94px - var(--safe-bottom));border-radius:24px}.lia-thread{min-height:230px;max-height:calc(100dvh - 270px)}}
-    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}.hero-bg,.brand,.hero-logo,.assistant-card,.floating-ai,.hero-copy{animation:none!important}.property-card{opacity:1!important;transform:none!important}.phrase-panel{transition:none!important}}
-
-
-    /* ============================================================
-       LEADS IMÓVEIS · EFEITOS FLUTUANTES COMPATÍVEIS
-       Usa transform para funcionar de forma estável no Chrome,
-       Edge, Windows, Android e iPhone.
-    ============================================================ */
-
-    @keyframes leadsFloatSmall {
-      0%, 100% { transform: translate3d(0, 0, 0); }
-      50% { transform: translate3d(0, -6px, 0); }
-    }
-
-    @keyframes leadsFloatMedium {
-      0%, 100% { transform: translate3d(0, 0, 0); }
-      50% { transform: translate3d(0, -9px, 0); }
-    }
-
-    @keyframes leadsFloatButton {
-      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-      50% { transform: translate3d(0, -7px, 0) scale(1.02); }
-    }
-
-    .brand {
-      animation: leadsFloatSmall 5.4s ease-in-out infinite !important;
-      transform-origin: center;
-      will-change: transform;
-    }
-
-    .hero-logo {
-      animation: leadsFloatMedium 6s ease-in-out infinite !important;
-      transform-origin: center;
-      will-change: transform;
-    }
-
-    .assistant-card {
-      animation: leadsFloatMedium 6.6s ease-in-out infinite !important;
-      transform-origin: center;
-      will-change: transform;
-    }
-
-    .floating-ai {
-      animation: leadsFloatButton 4.6s ease-in-out infinite !important;
-      transform-origin: center;
-      will-change: transform;
-    }
-
-    .floating-ai:hover {
-      animation-play-state: paused;
-      transform: translate3d(0, -8px, 0) scale(1.05) !important;
-    }
-
-    /* Movimento um pouco mais discreto no celular. */
-    @media (max-width: 700px) {
-      .brand,
-      .hero-logo,
-      .assistant-card {
-        animation-duration: 6.4s !important;
-      }
-
-      .floating-ai {
-        animation-duration: 5.2s !important;
-      }
-    }
-
-    /* O proprietário solicitou os efeitos ativos no site. */
-    @media (prefers-reduced-motion: reduce) {
-      .brand {
-        animation: leadsFloatSmall 5.4s ease-in-out infinite !important;
-      }
-
-      .hero-logo,
-      .assistant-card {
-        animation: leadsFloatMedium 6.6s ease-in-out infinite !important;
-      }
-
-      .floating-ai {
-        animation: leadsFloatButton 4.8s ease-in-out infinite !important;
-      }
-    }
-
-  </style>
-</head>
-<body>
-  <header class="topbar">
-    <a class="brand" href="#inicio" aria-label="Leads Imóveis - início"><img src="leads-monograma-v3.webp" alt="Leads Imóveis" /></a>
-    <nav class="desktop-nav" aria-label="Navegação principal">
-      <button type="button" data-purpose="Venda">Venda</button>
-      <button type="button" data-purpose="Temporada">Temporada</button>
-      <button type="button" data-purpose="Aluguel Anual">Aluguel anual</button>
-      <button type="button" data-focus-code>Código</button>
-      <a href="#contato">Contato</a>
-    </nav>
-    <button class="menu-button" id="openMenu" type="button" aria-label="Abrir menu">☰</button>
-  </header>
-
-  <div class="overlay" id="overlay"></div>
-  <aside class="mobile-menu" id="mobileMenu" aria-hidden="true">
-    <div class="mobile-menu-head"><img src="leads-logo-completa-v3.webp" alt="Leads Imóveis" /><button class="icon-button" id="closeMenu" type="button" aria-label="Fechar menu">×</button></div>
-    <nav class="mobile-nav">
-      <button type="button" data-purpose="Venda">Venda</button>
-      <button type="button" data-purpose="Temporada">Temporada</button>
-      <button type="button" data-purpose="Aluguel Anual">Aluguel anual</button>
-      <button type="button" data-focus-code>Código do imóvel</button>
-      <button type="button" data-scroll-search>Localização</button>
-      <a href="#contato">Contato</a>
-    </nav>
-  </aside>
-
-  <main>
-    <section class="hero" id="inicio">
-      <div class="hero-bg" aria-hidden="true"></div>
-      <div class="shell hero-grid">
-        <div class="hero-copy">
-          <img class="hero-logo" src="leads-logo-completa-v3.webp" alt="Leads Imóveis" />
-          <span class="eyebrow">Florianópolis · Jurerê · Norte da Ilha</span>
-          <div class="phrase-panel" id="phrasePanel" aria-live="polite">
-            <h1 id="phraseTitle">Seu próximo imóvel pode ser o começo da sua melhor fase.</h1>
-            <p id="phraseCopy">Comprar, vender ou alugar fica mais simples quando você encontra o lugar certo e o atendimento certo.</p>
-          </div>
-          <div class="hero-actions">
-            <button class="button" type="button" data-scroll-search>Ver imóveis</button>
-            <a class="button secondary" href="https://wa.me/5548991115992?text=Olá%2C%20vim%20pelo%20site%20da%20Leads%20Imóveis%20e%20gostaria%20de%20falar%20com%20um%20especialista." target="_blank" rel="noopener noreferrer">Falar com especialista</a>
-          </div>
-          <div class="quick-options">
-            <button class="quick-option" type="button" data-purpose="Venda"><span>⌂</span><strong>Comprar</strong><span>Casas e apartamentos selecionados.</span></button>
-            <button class="quick-option" type="button" data-purpose="Temporada"><span>☀</span><strong>Temporada</strong><span>Opções para viver Floripa de perto.</span></button>
-            <button class="quick-option" type="button" data-purpose="Aluguel Anual"><span>⌂</span><strong>Aluguel anual</strong><span>Imóveis para morar o ano inteiro.</span></button>
-          </div>
-        </div>
-
-        <section class="assistant-card glass" aria-labelledby="assistantTitle">
-          <div class="assistant-head"><div class="assistant-orb">IA</div><div><strong id="assistantTitle">Lia · Assistente virtual</strong><span>Online · atendimento inteligente</span></div></div>
-          <form class="assistant-search" id="heroAssistantForm"><label class="sr-only" for="heroAssistantInput">Digite o imóvel que procura</label><input id="heroAssistantInput" type="search" autocomplete="off" placeholder="Ex.: casa em Jurerê" /><button type="submit" aria-label="Enviar">➜</button></form>
-          <div class="assistant-chips" id="heroChips"></div>
-          <div class="assistant-answer" id="heroAnswer" aria-live="polite">Olá! Eu sou a Lia. Conte o que você procura e eu ajudo a encontrar as melhores opções publicadas.</div>
-        </section>
-      </div>
-    </section>
-
-    <div class="main-content">
-      <section class="search-section" id="buscar">
-        <div class="shell"><div class="search-box glass">
-          <div class="search-heading"><div><span class="section-kicker">Busca inteligente</span><h2>Encontre o imóvel ideal</h2><p>Filtre por finalidade, bairro, tipo ou código do imóvel.</p></div></div>
-          <form id="filterForm"><div class="filter-grid">
-            <div class="field"><label for="purposeFilter">Objetivo</label><select id="purposeFilter"><option value="">Todos</option><option value="Venda">Venda</option><option value="Temporada">Temporada</option><option value="Aluguel Anual">Aluguel anual</option></select></div>
-            <div class="field"><label for="neighborhoodFilter">Bairro</label><select id="neighborhoodFilter"><option value="">Todos</option></select></div>
-            <div class="field"><label for="typeFilter">Tipo</label><select id="typeFilter"><option value="">Todos</option></select></div>
-            <div class="field"><label for="codeFilter">Código</label><input id="codeFilter" type="search" autocomplete="off" placeholder="Ex.: LI-1234" /></div>
-            <button class="button dark filter-submit" type="submit">Buscar</button>
-          </div></form>
-          <div class="filter-actions"><button id="clearFilters" type="button">Limpar filtros</button><span class="filter-status" id="connectionStatus" aria-live="polite">Conectando ao banco de imóveis…</span></div>
-        </div></div>
-      </section>
-
-      <section class="properties-section" id="imoveis">
-        <div class="shell">
-          <div class="section-heading"><div><span class="section-kicker">Vitrine</span><h2>Imóveis selecionados</h2><p>Cada imóvel possui uma página própria, pronta para compartilhar com proprietários e clientes.</p></div><span class="property-count" id="propertyCount">0 imóveis</span></div>
-          <div class="properties-grid" id="propertiesGrid" aria-live="polite"><div class="loading-state"><div class="loading-spinner"></div>Carregando imóveis publicados…</div></div>
-        </div>
-      </section>
-
-      <section class="contact-section" id="contato">
-        <div class="shell contact-grid">
-          <div class="contact-copy"><span class="eyebrow">Atendimento Leads Imóveis</span><h2>Seu próximo endereço começa com uma conversa.</h2><p>Fale com um especialista para comprar, anunciar, alugar ou encontrar uma opção de temporada em Florianópolis.</p><div class="hero-actions"><a class="button whatsapp" href="https://wa.me/5548991115992?text=Olá%2C%20vim%20pelo%20site%20da%20Leads%20Imóveis." target="_blank" rel="noopener noreferrer">Abrir WhatsApp</a></div></div>
-          <div class="contact-card glass"><div class="contact-list">
-            <a class="contact-item" href="https://wa.me/5548991115992" target="_blank" rel="noopener noreferrer"><small>WhatsApp</small><strong>(48) 99111-5992</strong></a>
-            <a class="contact-item" href="mailto:leadsimoveisoficial@gmail.com"><small>E-mail</small><strong>leadsimoveisoficial@gmail.com</strong></a>
-            <div class="contact-item"><small>Região</small><strong>Florianópolis / Santa Catarina</strong></div>
-            <div class="contact-item"><small>Endereço</small><strong>Av. dos Búzios · Jurerê Internacional · Florianópolis/SC</strong></div>
-          </div></div>
-        </div>
-      </section>
-    </div>
-  </main>
-
-  <footer><div class="shell footer-content"><div class="footer-brand"><img src="leads-monograma-v3.webp" alt="Leads Imóveis" /><div><strong>Leads Imóveis</strong><span>Conectando sonhos. Realizando histórias.</span></div></div><div class="footer-copy">© <span id="currentYear"></span> Leads Imóveis · Florianópolis/SC</div></div></footer>
-
-  <button class="floating-ai" id="openAi" type="button" aria-label="Abrir Lia"><span class="floating-ai-symbol">L</span><span class="floating-ai-label">Lia</span></button>
-  <aside class="ai-panel" id="aiPanel" aria-hidden="true">
-    <div class="ai-panel-head"><div class="lia-head"><div class="lia-avatar">L</div><div><strong>Lia · Assistente virtual</strong><span><i class="lia-dot"></i>Online · atendimento inteligente</span></div></div><button id="closeAi" type="button" aria-label="Fechar Lia">×</button></div>
-    <div class="ai-panel-body"><div class="lia-thread" id="liaThread" aria-live="polite"><div class="lia-message ai" id="panelAnswer">Olá! Eu sou a Lia. Conte o que você procura em Florianópolis.</div></div><form class="assistant-search" id="panelAssistantForm"><label class="sr-only" for="panelAssistantInput">Digite o imóvel que procura</label><input id="panelAssistantInput" type="search" autocomplete="off" placeholder="Converse com a Lia…" /><button type="submit" aria-label="Enviar">➜</button></form><div class="assistant-chips" id="panelChips"></div></div>
-  </aside>
-
-  <script>
-    "use strict";
-
-    const SUPABASE_URL = "https://zyfbgydbwsvbaogbxzrd.supabase.co";
-    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_AP670pbIpkD_KleT7VaQ3Q_BTsBh8yh";
-    const WHATSAPP_NUMBER = "5548991115992";
-    const LIA_ENDPOINT = `${SUPABASE_URL}/functions/v1/site-ai-assistant`;
-    const FALLBACK_IMAGE = "hero-leads-floripa-final.webp";
-
-    const state = {
-      db: null,
-      realtimeChannel: null,
-      properties: [],
-      filtered: [],
-      cardPhotoIndex: new Map(),
-      loading: false,
-      lastSignature: "",
-      lastLoadedAt: 0,
-      refreshTimer: null,
-      realtimeDebounce: null
+    const payload = {
+      session_id: sessionId || null,
+      event_type: eventType,
+      page_url: window.location.href,
+      referrer: document.referrer || null,
+      consent_analytics: true,
+      consent_marketing: false,
+      ...getUtmData(),
+      ...details,
     };
 
-    const phrases = [
-      ["Seu próximo imóvel pode ser o começo da sua melhor fase.","Comprar, vender ou alugar fica mais simples quando você encontra o lugar certo e o atendimento certo."],
-      ["O endereço certo transforma planos em realidade.","A Leads Imóveis aproxima você das melhores oportunidades para morar, investir ou recomeçar em Florianópolis."],
-      ["Toda grande mudança começa com uma escolha bem feita.","Encontre um imóvel que combine com seus objetivos, seu estilo de vida e o momento que você está vivendo."],
-      ["Seu novo lar pode estar mais perto do que imagina.","Explore imóveis para venda e locação com informações claras, fotos reais e atendimento humanizado."],
-      ["Mais do que paredes, escolha onde sua história vai acontecer.","O imóvel ideal cria espaço para novos planos, conquistas e momentos que ficam para sempre."],
-      ["A melhor oportunidade é aquela que combina com você.","Conte o que procura e deixe a Leads Imóveis transformar sua busca em uma decisão segura."],
-      ["Seu próximo capítulo merece um endereço especial.","Descubra casas e apartamentos selecionados para viver o melhor de Florianópolis."],
-      ["Florianópolis pode ser o cenário da sua próxima conquista.","Viva perto do mar, dos serviços e das regiões que mais combinam com o seu momento."],
-      ["Seu imóvel merece ser visto pelas pessoas certas.","Uma apresentação profissional aumenta a confiança e valoriza cada oportunidade de venda ou locação."],
-      ["A Leads Imóveis aproxima você do lugar que procura.","Tecnologia, atendimento humano e conhecimento local para tornar sua jornada imobiliária mais simples."]
-    ];
+    try {
+      const response = await fetch(ENDPOINT, {
+        method: "POST",
+        mode: "cors",
+        cache: "no-store",
+        keepalive: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
-    const suggestions = ["Casa em Jurerê","Temporada com piscina","Apartamento anual","Imóvel para venda","Falar no WhatsApp"];
-    const $ = id => document.getElementById(id);
-    const normalizeText = value => String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-    const escapeHtml = value => String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+      const result = await parseResponse(response);
 
-    function getRadarSessionId() {
-      const fromRadar = window.LeadsRadar?.getSessionId?.();
-      const fromStorage = localStorage.getItem("leads_radar_session_id");
-      const value = String(fromRadar || fromStorage || "").trim();
-      return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value) ? value : null;
+      if (result.session_id && result.session_id !== sessionId) {
+        sessionId = result.session_id;
+        localStorage.setItem(SESSION_KEY, sessionId);
+      }
+
+      window.dispatchEvent(
+        new CustomEvent("leads-radar-update", {
+          detail: result,
+        }),
+      );
+
+      console.info(`[Radar Leads IA] ${eventType}`, result);
+      return result;
+    } catch (error) {
+      console.warn(
+        `[Radar Leads IA] Evento não enviado: ${eventType}`,
+        error,
+      );
+      return null;
     }
+  }
 
-    function initializeSupabase() {
-      if (!window.supabase?.createClient) throw new Error("Biblioteca do Supabase não carregou.");
-      state.db = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-        auth: { persistSession:false, autoRefreshToken:false, detectSessionInUrl:false },
-        realtime: { params: { eventsPerSecond: 5 } }
+  async function ensureSession() {
+    if (sessionId) return sessionId;
+
+    if (!sessionPromise) {
+      sessionPromise = sendEvent("page_view", {
+        surface: "site_start",
+        event_key: `initial:${location.pathname}:${Date.now()}`,
+      }).finally(() => {
+        sessionPromise = null;
       });
     }
 
-    function safeImageUrl(value) {
-      if (typeof value !== "string") return "";
-      const url = value.trim().replace(/["'<>]/g, "");
-      if (/^https:\/\//i.test(url)) return url;
-      if (/^data:image\/(png|jpeg|jpg|webp|gif);base64,/i.test(url)) return url;
-      if (/^[a-z0-9_./-]+\.(png|jpe?g|webp|gif)(\?.*)?$/i.test(url)) return url;
-      return "";
+    await sessionPromise;
+    return sessionId;
+  }
+
+  async function registerInitialVisit() {
+    if (!hasConsent()) return;
+
+    if (!sessionId) {
+      await ensureSession();
+      sessionStorage.setItem(INITIAL_EVENT_KEY, "yes");
+      return;
     }
 
-    function extractPhotoUrl(item) {
-      if (!item) return "";
-      if (typeof item === "string") {
-        const text = item.trim();
-        if (!text) return "";
-        if ((text.startsWith("[") && text.endsWith("]")) || (text.startsWith("{") && text.endsWith("}"))) {
-          try { return extractPhotoUrl(JSON.parse(text)); } catch (_) { return safeImageUrl(text); }
-        }
-        return safeImageUrl(text);
+    if (sessionStorage.getItem(INITIAL_EVENT_KEY) === "yes") return;
+
+    sessionStorage.setItem(INITIAL_EVENT_KEY, "yes");
+
+    await sendEvent("page_view", {
+      surface: "page_load",
+      event_key: `page:${location.pathname}:${Math.floor(Date.now() / 30000)}`,
+    });
+  }
+
+  function createConsentBanner() {
+    if (localStorage.getItem(CONSENT_KEY)) return;
+
+    const style = document.createElement("style");
+    style.id = "leads-radar-consent-style";
+    style.textContent = `
+      .leads-radar-consent {
+        position: fixed;
+        left: 16px;
+        right: 16px;
+        bottom: 16px;
+        z-index: 999999;
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 17px;
+        border: 1px solid rgba(255,255,255,.15);
+        border-radius: 18px;
+        background: rgba(7,18,29,.96);
+        box-shadow: 0 22px 65px rgba(0,0,0,.42);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        color: #fff;
+        font-family: Inter, Arial, sans-serif;
       }
-      if (Array.isArray(item)) {
-        for (const entry of item) { const url = extractPhotoUrl(entry); if (url) return url; }
-        return "";
+      .leads-radar-consent strong { display:block; margin-bottom:6px; font-size:14px; }
+      .leads-radar-consent p { margin:0; color:rgba(255,255,255,.76); font-size:12px; line-height:1.5; }
+      .leads-radar-consent-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; margin-top:13px; }
+      .leads-radar-consent button { min-height:38px; border:0; border-radius:11px; padding:9px 14px; font:inherit; font-size:12px; font-weight:800; cursor:pointer; }
+      .leads-radar-reject { background:rgba(255,255,255,.10); color:#fff; }
+      .leads-radar-accept { background:#9ad8f3; color:#07131b; }
+      @media (max-width:600px) {
+        .leads-radar-consent { left:10px; right:10px; bottom:10px; padding:15px; }
+        .leads-radar-consent-actions { display:grid; grid-template-columns:1fr 1fr; }
       }
-      if (typeof item === "object") {
-        return safeImageUrl(item.url || item.src || item.publicUrl || item.public_url || item.image_url || item.file_url || item.photo_url || item.path || "");
-      }
-      return "";
-    }
+    `;
 
-    function normalizePhotos(raw) {
-      const result = [];
-      const sources = [raw.photos,raw.fotos,raw.images,raw.gallery,raw.photo_urls,raw.imagens];
-      for (let source of sources) {
-        if (!source) continue;
-        if (typeof source === "string") { try { source = JSON.parse(source); } catch (_) { source = [source]; } }
-        if (!Array.isArray(source)) source = [source];
-        for (const item of source) {
-          const url = extractPhotoUrl(item);
-          if (url && !result.includes(url)) result.push(url);
-        }
-      }
-      for (const candidate of [raw.image_url,raw.cover_url,raw.cover,raw.foto,raw.photo,raw.main_photo,raw.thumbnail_url]) {
-        const url = extractPhotoUrl(candidate);
-        if (url && !result.includes(url)) result.unshift(url);
-      }
-      return result.slice(0,20);
-    }
+    document.head.appendChild(style);
 
-    function firstValue(object, keys, fallback="") {
-      for (const key of keys) {
-        const value = object?.[key];
-        if (value !== undefined && value !== null && value !== "") return value;
-      }
-      return fallback;
-    }
+    const banner = document.createElement("section");
+    banner.className = "leads-radar-consent";
+    banner.setAttribute("role", "dialog");
+    banner.setAttribute("aria-label", "Preferências de privacidade");
+    banner.innerHTML = `
+      <strong>Experiência personalizada na Leads Imóveis</strong>
+      <p>Podemos registrar quais imóveis e recursos despertam mais interesse para melhorar seu atendimento. Não registramos senhas neste rastreamento.</p>
+      <div class="leads-radar-consent-actions">
+        <button type="button" class="leads-radar-reject">Continuar sem personalização</button>
+        <button type="button" class="leads-radar-accept">Aceitar</button>
+      </div>
+    `;
 
-    function numberValue(value) {
-      if (typeof value === "number" && Number.isFinite(value)) return value;
-      const normalized = String(value ?? "").replace(/[^0-9,.-]/g,"").replace(/\.(?=\d{3}(?:\D|$))/g,"").replace(",",".");
-      const parsed = Number(normalized);
-      return Number.isFinite(parsed) ? parsed : 0;
-    }
+    document.body.appendChild(banner);
 
-    function normalizePurpose(value) {
-      const text = normalizeText(value);
-      if (text.includes("tempor")) return "Temporada";
-      if (text.includes("anual") || text.includes("locacao") || text.includes("aluguel")) return "Aluguel Anual";
-      if (text.includes("vend")) return "Venda";
-      return String(value || "Venda").trim();
-    }
-
-    function normalizeProperty(raw,index) {
-      return {
-        id:String(firstValue(raw,["id","uuid","property_id","code"],`property-${index}`)),
-        code:String(firstValue(raw,["code","codigo","property_code","reference","ref"],"")).trim(),
-        title:String(firstValue(raw,["title","titulo","name","nome"],"Imóvel Leads Imóveis")).trim(),
-        purpose:normalizePurpose(firstValue(raw,["purpose","finalidade","modalidade","transaction_type"],"Venda")),
-        neighborhood:String(firstValue(raw,["neighborhood","bairro","district","location"],"Florianópolis")).trim(),
-        type:String(firstValue(raw,["property_type","type","tipo","category"],"Imóvel")).trim(),
-        price:numberValue(firstValue(raw,["price","valor","sale_price","rent_price","daily_price"],0)),
-        area:numberValue(firstValue(raw,["area","area_m2","total_area","private_area"],0)),
-        bedrooms:numberValue(firstValue(raw,["bedrooms","dormitorios","quartos","rooms"],0)),
-        suites:numberValue(firstValue(raw,["suites","suite"],0)),
-        parking:numberValue(firstValue(raw,["parking","parking_spaces","vagas","garage"],0)),
-        bathrooms:numberValue(firstValue(raw,["bathrooms","banheiros","baths"],0)),
-        description:String(firstValue(raw,["description","descricao","commercial_description","descricao_comercial"],"Fale com a Leads Imóveis para receber informações completas sobre esta oportunidade.")).trim(),
-        photos:normalizePhotos(raw),
-        updatedAt:firstValue(raw,["updated_at","created_at"],"")
-      };
-    }
-
-    function buildSignature(list) {
-      return JSON.stringify(list.map(item => [item.id,item.code,item.updatedAt,item.photos.length,item.photos[0] || ""]));
-    }
-
-    function setStatus(message,error=false) {
-      const el = $("connectionStatus");
-      el.textContent = message;
-      el.style.color = error ? "#9a3040" : "#527487";
-    }
-
-    async function fetchPublishedProperties() {
-      const { data, error } = await state.db
-        .from("public_properties")
-        .select("*")
-        .order("updated_at", { ascending:false })
-        .limit(1000);
-
-      if (error) {
-        console.error("[Leads] Erro completo do Supabase:", error);
-        throw new Error(error.hint || error.message || "Não foi possível consultar public_properties.");
-      }
-      return Array.isArray(data) ? data : [];
-    }
-
-    async function loadProperties({silent=false}={}) {
-      if (state.loading) return;
-      state.loading = true;
-      if (!silent) $("propertiesGrid").innerHTML = '<div class="loading-state"><div class="loading-spinner"></div>Carregando imóveis publicados…</div>';
-
-      try {
-        const raw = await fetchPublishedProperties();
-        const normalized = raw.map(normalizeProperty).sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)));
-        const signature = buildSignature(normalized);
-        state.lastLoadedAt = Date.now();
-
-        if (silent && signature === state.lastSignature && state.properties.length) return;
-
-        state.lastSignature = signature;
-        state.properties = normalized;
-        populateFilters();
-        applyFilters({scroll:false});
-        setStatus(normalized.length ? `Supabase conectado · ${normalized.length} imóvel(is) publicado(s).` : "Supabase conectado, mas nenhum imóvel está publicado.", !normalized.length);
-        console.info(`[Leads] Vitrine atualizada: ${normalized.length} imóvel(is).`);
-      } catch (error) {
-        console.error("[Leads] Falha ao carregar imóveis:", error);
-        if (!silent) {
-          state.properties = [];
-          state.filtered = [];
-          updateCount(0);
-          $("propertiesGrid").innerHTML = `<div class="error-state"><strong>Não foi possível carregar os imóveis.</strong><br>${escapeHtml(error.message)}<br><small>Execute o arquivo SQL de configuração e confira a view public_properties.</small></div>`;
-          setStatus("Falha ao consultar os imóveis públicos.",true);
-        }
-      } finally {
-        state.loading = false;
-      }
-    }
-
-    function unique(values) {
-      return [...new Set(values.map(v=>String(v||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
-    }
-
-    function updateSelect(select,values) {
-      const current = select.value;
-      const first = select.options[0]?.outerHTML || '<option value="">Todos</option>';
-      select.innerHTML = first + values.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");
-      if ([...select.options].some(option=>option.value===current)) select.value = current;
-    }
-
-    function populateFilters() {
-      updateSelect($("neighborhoodFilter"),unique(state.properties.map(p=>p.neighborhood)));
-      updateSelect($("typeFilter"),unique(state.properties.map(p=>p.type)));
-    }
-
-    function currentFilters() {
-      return {
-        purpose:normalizeText($("purposeFilter").value),
-        neighborhood:normalizeText($("neighborhoodFilter").value),
-        type:normalizeText($("typeFilter").value),
-        code:normalizeText($("codeFilter").value)
-      };
-    }
-
-    function applyFilters({scroll=true}={}) {
-      const filters = currentFilters();
-      state.filtered = state.properties.filter(property => {
-        if (filters.purpose && normalizeText(property.purpose) !== filters.purpose) return false;
-        if (filters.neighborhood && normalizeText(property.neighborhood) !== filters.neighborhood) return false;
-        if (filters.type && normalizeText(property.type) !== filters.type) return false;
-        if (filters.code && !normalizeText(`${property.code} ${property.title} ${property.neighborhood}`).includes(filters.code)) return false;
-        return true;
+    banner
+      .querySelector(".leads-radar-reject")
+      ?.addEventListener("click", () => {
+        localStorage.setItem(CONSENT_KEY, "rejected");
+        banner.remove();
       });
-      renderProperties();
-      if (scroll) $("imoveis").scrollIntoView({behavior:"smooth",block:"start"});
-    }
 
-    function updateCount(count) {
-      $("propertyCount").textContent = `${count} ${count===1 ? "imóvel" : "imóveis"}`;
-    }
-
-    function detail(text) {
-      const span = document.createElement("span");
-      span.className = "detail-pill";
-      span.textContent = text;
-      return span;
-    }
-
-    function formatMoney(value,purpose) {
-      if (!value) return "Consulte o valor";
-      const formatted = new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0}).format(value);
-      if (purpose === "Temporada") return `${formatted} / diária`;
-      if (purpose === "Aluguel Anual") return `${formatted} / mês`;
-      return formatted;
-    }
-
-    function propertyLink(property) {
-      const reference = property.code || property.id;
-      return `/imovel.html?codigo=${encodeURIComponent(reference)}`;
-    }
-
-    function absolutePropertyLink(property) {
-      return new URL(propertyLink(property), window.location.href).href;
-    }
-
-    function whatsappUrl(property) {
-      const text = [
-        "Olá, vim pelo site da Leads Imóveis.",
-        `Tenho interesse no imóvel: ${property.title}.`,
-        property.code ? `Código: ${property.code}.` : "",
-        `Link: ${absolutePropertyLink(property)}`
-      ].filter(Boolean).join(" ");
-      return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
-    }
-
-    function renderProperties() {
-      const grid = $("propertiesGrid");
-      grid.innerHTML = "";
-      updateCount(state.filtered.length);
-
-      if (!state.filtered.length) {
-        grid.innerHTML = '<div class="empty-state"><strong>Nenhum imóvel encontrado.</strong><br>Tente limpar os filtros ou fale com um especialista.</div>';
-        return;
-      }
-
-      const fragment = document.createDocumentFragment();
-      state.filtered.forEach((property,index)=>fragment.appendChild(createCard(property,index)));
-      grid.appendChild(fragment);
-
-      requestAnimationFrame(()=>document.querySelectorAll(".property-card").forEach((card,index)=>setTimeout(()=>card.classList.add("revealed"),Math.min(index*55,250))));
-    }
-
-    function createCard(property) {
-      const article = document.createElement("article");
-      article.className = "property-card";
-      article.dataset.propertyId = property.id;
-      article.dataset.propertyCode = property.code || property.id;
-
-      const startIndex = Math.min(state.cardPhotoIndex.get(property.id) || 0,Math.max(0,property.photos.length-1));
-      const media = document.createElement("div");
-      media.className = "property-media";
-
-      const mediaLink = document.createElement("a");
-      mediaLink.href = propertyLink(property);
-      mediaLink.setAttribute("aria-label",`Abrir ${property.title}`);
-      const image = document.createElement("img");
-      image.loading = "lazy";
-      image.decoding = "async";
-      image.alt = property.title;
-      image.src = property.photos[startIndex] || FALLBACK_IMAGE;
-      image.onerror = () => { image.onerror = null; image.src = FALLBACK_IMAGE; };
-      mediaLink.appendChild(image);
-      media.appendChild(mediaLink);
-
-      const purpose = document.createElement("span");
-      purpose.className = "property-purpose";
-      purpose.textContent = property.purpose;
-      media.appendChild(purpose);
-
-      if (property.code) {
-        const code = document.createElement("span");
-        code.className = "property-code";
-        code.textContent = property.code;
-        media.appendChild(code);
-      }
-
-      if (property.photos.length > 1) {
-        const previous = document.createElement("button");
-        previous.className = "gallery-arrow previous";
-        previous.type = "button";
-        previous.dataset.gallery = "true";
-        previous.textContent = "‹";
-        previous.setAttribute("aria-label","Foto anterior");
-        previous.onclick = event => { event.preventDefault(); event.stopPropagation(); changeCardPhoto(property,article,-1); };
-
-        const next = document.createElement("button");
-        next.className = "gallery-arrow next";
-        next.type = "button";
-        next.dataset.gallery = "true";
-        next.textContent = "›";
-        next.setAttribute("aria-label","Próxima foto");
-        next.onclick = event => { event.preventDefault(); event.stopPropagation(); changeCardPhoto(property,article,1); };
-
-        const counter = document.createElement("span");
-        counter.className = "photo-counter";
-        counter.textContent = `${startIndex+1} / ${property.photos.length}`;
-        media.append(previous,next,counter);
-      }
-
-      let touchX = 0;
-      media.addEventListener("touchstart",event=>touchX=event.changedTouches[0]?.clientX||0,{passive:true});
-      media.addEventListener("touchend",event=>{
-        if (property.photos.length < 2) return;
-        const delta = (event.changedTouches[0]?.clientX||0)-touchX;
-        if (Math.abs(delta)>45) changeCardPhoto(property,article,delta>0?-1:1);
-      },{passive:true});
-
-      const body = document.createElement("div");
-      body.className = "property-body";
-      const location = document.createElement("div");
-      location.className = "property-location";
-      location.textContent = `⌖ ${property.neighborhood} · ${property.type}`;
-      const title = document.createElement("h3");
-      const titleLink = document.createElement("a");
-      titleLink.href = propertyLink(property);
-      titleLink.textContent = property.title;
-      title.appendChild(titleLink);
-      const description = document.createElement("p");
-      description.className = "property-description";
-      description.textContent = property.description;
-
-      const details = document.createElement("div");
-      details.className = "property-details";
-      if (property.bedrooms) details.appendChild(detail(`${property.bedrooms} dormitório${property.bedrooms===1?"":"s"}`));
-      if (property.suites) details.appendChild(detail(`${property.suites} suíte${property.suites===1?"":"s"}`));
-      if (property.bathrooms) details.appendChild(detail(`${property.bathrooms} banheiro${property.bathrooms===1?"":"s"}`));
-      if (property.parking) details.appendChild(detail(`${property.parking} vaga${property.parking===1?"":"s"}`));
-      if (property.area) details.appendChild(detail(`${property.area} m²`));
-
-      const bottom = document.createElement("div");
-      bottom.className = "property-bottom";
-      const price = document.createElement("div");
-      price.className = "property-price";
-      price.innerHTML = `<small>Valor</small><strong>${escapeHtml(formatMoney(property.price,property.purpose))}</strong>`;
-      const actions = document.createElement("div");
-      actions.className = "card-actions";
-
-      const open = document.createElement("a");
-      open.className = "small-button";
-      open.dataset.propertyCode = property.code || property.id;
-      open.href = propertyLink(property);
-      open.textContent = "Ver imóvel";
-
-      const whatsapp = document.createElement("a");
-      whatsapp.className = "small-button dark";
-      whatsapp.dataset.propertyCode = property.code || property.id;
-      whatsapp.dataset.whatsapp = "true";
-      whatsapp.href = whatsappUrl(property);
-      whatsapp.target = "_blank";
-      whatsapp.rel = "noopener noreferrer";
-      whatsapp.textContent = "Tenho interesse";
-
-      actions.append(open,whatsapp);
-      bottom.append(price,actions);
-      body.append(location,title,description,details,bottom);
-      article.append(media,body);
-      return article;
-    }
-
-    function changeCardPhoto(property,card,direction) {
-      if (!property.photos.length) return;
-      const current = state.cardPhotoIndex.get(property.id) || 0;
-      const next = (current + direction + property.photos.length) % property.photos.length;
-      state.cardPhotoIndex.set(property.id,next);
-      const image = card.querySelector(".property-media img");
-      const counter = card.querySelector(".photo-counter");
-      image.style.opacity = ".55";
-      setTimeout(()=>{ image.src = property.photos[next]; image.style.opacity = "1"; },100);
-      if (counter) counter.textContent = `${next+1} / ${property.photos.length}`;
-    }
-
-    function openMenu() { $("mobileMenu").classList.add("open"); $("overlay").classList.add("visible"); document.body.classList.add("locked"); }
-    function closeMenu() { $("mobileMenu").classList.remove("open"); $("overlay").classList.remove("visible"); document.body.classList.remove("locked"); }
-    function openAi() { $("aiPanel").classList.add("open"); $("aiPanel").setAttribute("aria-hidden","false"); setTimeout(()=>$("panelAssistantInput").focus(),180); }
-    function closeAi() { $("aiPanel").classList.remove("open"); $("aiPanel").setAttribute("aria-hidden","true"); }
-    function setPurpose(purpose) { $("purposeFilter").value = purpose; applyFilters({scroll:true}); closeMenu(); }
-    function scrollSearch() { closeMenu(); $("buscar").scrollIntoView({behavior:"smooth",block:"start"}); }
-    function focusCode() { scrollSearch(); setTimeout(()=>$("codeFilter").focus(),450); }
-
-    function renderChips() {
-      const html = suggestions.map(suggestion=>`<button class="chip" type="button" data-query="${escapeHtml(suggestion)}">${escapeHtml(suggestion)}</button>`).join("");
-      $("heroChips").innerHTML = html;
-      $("panelChips").innerHTML = html;
-    }
-
-    function localMatches(message) {
-      const query = normalizeText(message);
-      const ignored = new Set(["quero","procuro","preciso","para","uma","com","imovel","imoveis","favor","ola"]);
-      const words = query.split(/\s+/).filter(word=>word.length>=3&&!ignored.has(word));
-      return state.properties.map(property=>{
-        const text = normalizeText([property.code,property.title,property.purpose,property.neighborhood,property.type,property.description].join(" "));
-        let score = 0;
-        words.forEach(word=>{ if (text.includes(word)) score += 2; });
-        if (property.code && query.includes(normalizeText(property.code))) score += 20;
-        if (property.neighborhood && query.includes(normalizeText(property.neighborhood))) score += 8;
-        return {property,score};
-      }).filter(item=>item.score>0).sort((a,b)=>b.score-a.score).slice(0,4).map(item=>item.property);
-    }
-
-    function addMessage(role,text,typing=false) {
-      const bubble = document.createElement("div");
-      bubble.className = `lia-message ${role}`;
-      if (typing) {
-        bubble.classList.add("typing");
-        for (let i=0;i<3;i++) { const dot=document.createElement("span"); dot.className="typing-dot"; bubble.appendChild(dot); }
-      } else bubble.textContent = text;
-      $("liaThread").appendChild(bubble);
-      $("liaThread").scrollTop = $("liaThread").scrollHeight;
-      return bubble;
-    }
-
-    function renderRecommendations(items) {
-      if (!items.length) return;
-      const wrap = document.createElement("div");
-      wrap.className = "lia-recommendations";
-      items.forEach(property=>{
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "lia-recommendation";
-        button.innerHTML = `<strong>${escapeHtml(property.title)}</strong><span>${escapeHtml([property.code,property.neighborhood,property.type].filter(Boolean).join(" · "))}</span><em>${escapeHtml(formatMoney(property.price,property.purpose))}</em>`;
-        button.onclick = ()=>window.location.href = propertyLink(property);
-        wrap.appendChild(button);
+    banner
+      .querySelector(".leads-radar-accept")
+      ?.addEventListener("click", async () => {
+        localStorage.setItem(CONSENT_KEY, "accepted");
+        banner.remove();
+        await startTracking();
       });
-      $("liaThread").appendChild(wrap);
-      $("liaThread").scrollTop = $("liaThread").scrollHeight;
-    }
+  }
 
-    let liaSending = false;
-    async function sendLia(message) {
-      const clean = String(message||"").trim().slice(0,3000);
-      if (!clean || liaSending) return;
-      liaSending = true;
-      addMessage("me",clean);
-      const typing = addMessage("ai","",true);
-      $("heroAnswer").textContent = "Estou analisando sua mensagem…";
+  function bindClickEvents() {
+    document.addEventListener(
+      "click",
+      async (event) => {
+        const target = event.target instanceof Element ? event.target : null;
+        if (!target) return;
 
-      try {
-        const session = localStorage.getItem("leads_lia_session") || (crypto.randomUUID?.() || String(Date.now()));
-        localStorage.setItem("leads_lia_session",session);
-        const response = await fetch(LIA_ENDPOINT, {
-          method: "POST",
-          mode: "cors",
-          cache: "no-store",
-          headers: {
-            "Content-Type": "application/json",
-            "x-site-session": session
-          },
-          body: JSON.stringify({
-            message: clean,
-            source: "leadsimoveis.com.br",
-            page: location.href,
-            tracking_session_id: getRadarSessionId()
-          })
+        const propertyCode = getPropertyCode(target);
+
+        const galleryControl = target.closest(
+          "[data-gallery],.gallery-arrow,.property-photo,.property-image",
+        );
+        if (galleryControl && propertyCode) {
+          await ensureSession();
+          void sendEvent("gallery_open", {
+            property_code: propertyCode,
+            surface: "property_gallery",
+          });
+          return;
+        }
+
+        const whatsappLink = target.closest(
+          'a[href*="wa.me"],a[href*="whatsapp.com"],a[href*="api.whatsapp.com"],[data-whatsapp]',
+        );
+        if (whatsappLink) {
+          await ensureSession();
+          void sendEvent("whatsapp_click", {
+            property_code: propertyCode,
+            surface: propertyCode ? "property_whatsapp" : "general_whatsapp",
+          });
+          return;
+        }
+
+        const chatButton = target.closest(
+          "#openAi,#openLia,#liaButton,.lia-button,.ai-button,[data-open-lia],[data-open-ai]",
+        );
+        if (chatButton) {
+          await ensureSession();
+          void sendEvent("chat_opened", {
+            property_code: propertyCode,
+            surface: "lia_button",
+          });
+          return;
+        }
+
+        const propertyOpen = target.closest(
+          ".property-media a,.property-body h3 a,.small-button:not(.dark)",
+        );
+        if (propertyOpen && propertyCode) {
+          await ensureSession();
+          void sendEvent("property_view", {
+            property_code: propertyCode,
+            surface: "property_open",
+          });
+          return;
+        }
+
+        const purposeButton = target.closest("[data-purpose]");
+        if (purposeButton) {
+          await ensureSession();
+          void sendEvent("filter_used", {
+            filter_name: "purpose",
+            purpose: clean(purposeButton.getAttribute("data-purpose"), 80),
+            surface: "purpose_button",
+          });
+        }
+      },
+      { passive: true },
+    );
+  }
+
+  function bindFormEvents() {
+    document.addEventListener(
+      "submit",
+      async (event) => {
+        const form = event.target;
+        if (!(form instanceof HTMLFormElement)) return;
+
+        await ensureSession();
+
+        const identity = [form.id, form.className, form.getAttribute("name")]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        if (
+          identity.includes("assistant") ||
+          identity.includes("chat") ||
+          identity.includes("lia")
+        ) {
+          void sendEvent("chat_message", {
+            property_code: getPropertyCode(form),
+            surface: form.id || "lia_chat_form",
+          });
+          return;
+        }
+
+        const hasContactField = form.querySelector(
+          'input[type="tel"],input[type="email"],input[name*="phone" i],input[name*="telefone" i],input[name*="whatsapp" i],input[name*="email" i]',
+        );
+
+        if (hasContactField) {
+          void sendEvent("contact_submitted", {
+            property_code: getPropertyCode(form),
+            surface: form.id || "contact_form",
+          });
+        }
+      },
+      true,
+    );
+  }
+
+  function bindFilterEvents() {
+    document
+      .querySelectorAll(
+        "#purposeFilter,#neighborhoodFilter,#typeFilter,#codeFilter,[data-leads-filter]",
+      )
+      .forEach((field) => {
+        field.addEventListener("change", async () => {
+          await ensureSession();
+          void sendEvent("filter_used", {
+            filter_name:
+              field.id || field.getAttribute("name") || "site_filter",
+            surface: "property_search",
+          });
         });
-        const data = await response.json().catch(()=>({}));
-        if (!response.ok || data.ok===false) throw new Error(data.message || `HTTP ${response.status}`);
-        typing.remove();
-        const reply = String(data.reply || data.message || "Posso ajudar você a encontrar o imóvel ideal.");
-        $("heroAnswer").textContent = reply;
-        addMessage("ai",reply);
-        const codes = Array.isArray(data.recommendedCodes) ? data.recommendedCodes.map(normalizeText) : [];
-        const recommendations = codes.length ? state.properties.filter(property=>codes.includes(normalizeText(property.code))).slice(0,4) : localMatches(clean);
-        renderRecommendations(recommendations);
-      } catch (error) {
-        console.warn("[Lia] Modo local:",error);
-        typing.remove();
-        const matches = localMatches(clean);
-        const reply = matches.length ? `Encontrei ${matches.length} ${matches.length===1?"opção relacionada":"opções relacionadas"}. Toque em uma delas para abrir a página completa.` : "Não encontrei uma correspondência exata. Conte o bairro, o tipo de imóvel e se procura compra, aluguel anual ou temporada.";
-        $("heroAnswer").textContent = reply;
-        addMessage("ai",reply);
-        renderRecommendations(matches);
-      } finally {
-        liaSending = false;
-        $("heroAssistantInput").value = "";
-        $("panelAssistantInput").value = "";
-      }
+      });
+  }
+
+  async function startTracking() {
+    if (initialized || !hasConsent()) return;
+    initialized = true;
+
+    const previousVisit = Number(
+      localStorage.getItem(LAST_VISIT_KEY) || "0",
+    );
+    const now = Date.now();
+
+    await registerInitialVisit();
+
+    if (previousVisit && now - previousVisit > 6 * 60 * 60 * 1000) {
+      void sendEvent("return_visit", {
+        surface: "returning_visitor",
+      });
     }
 
-    function startPhrases() {
-      let current = 0;
-      const panel = $("phrasePanel");
-      window.setInterval(()=>{
-        if (document.hidden) return;
-        let next = current;
-        while (next===current) next = Math.floor(Math.random()*phrases.length);
-        panel.classList.add("changing");
-        window.setTimeout(()=>{
-          current = next;
-          $("phraseTitle").textContent = phrases[current][0];
-          $("phraseCopy").textContent = phrases[current][1];
-          panel.classList.remove("changing");
-        },420);
-      },4500);
-    }
+    localStorage.setItem(LAST_VISIT_KEY, String(now));
 
-    function scheduleRealtimeReload() {
-      clearTimeout(state.realtimeDebounce);
-      state.realtimeDebounce = setTimeout(()=>loadProperties({silent:true}),700);
-    }
+    bindClickEvents();
+    bindFormEvents();
+    bindFilterEvents();
 
-    function startRealtime() {
-      state.realtimeChannel = state.db
-        .channel("leads-site-properties-v1")
-        .on("postgres_changes",{event:"*",schema:"public",table:"properties"},scheduleRealtimeReload)
-        .subscribe(status=>{
-          if (status === "SUBSCRIBED") setStatus(`Tempo real conectado · ${state.properties.length} imóvel(is) publicado(s).`);
-          if (["CHANNEL_ERROR","TIMED_OUT"].includes(status)) setStatus("Tempo real indisponível. Atualização de segurança continua ativa.",true);
+    window.setTimeout(() => {
+      if (!document.hidden) {
+        void sendEvent("engaged_60s", {
+          duration_seconds: 60,
+          surface: "site_engagement",
+          event_key: `engaged60:${location.pathname}`,
         });
-    }
-
-    function startSafetyRefresh() {
-      clearInterval(state.refreshTimer);
-      state.refreshTimer = setInterval(()=>{
-        if (!document.hidden && navigator.onLine) loadProperties({silent:true});
-      },60000);
-
-      document.addEventListener("visibilitychange",()=>{
-        const stale = Date.now()-state.lastLoadedAt > 60000;
-        if (!document.hidden && navigator.onLine && stale) loadProperties({silent:true});
-      });
-    }
-
-    function bindEvents() {
-      $("openMenu").onclick = openMenu;
-      $("closeMenu").onclick = closeMenu;
-      $("overlay").onclick = closeMenu;
-      $("openAi").onclick = ()=>$("aiPanel").classList.contains("open") ? closeAi() : openAi();
-      $("closeAi").onclick = closeAi;
-      document.querySelectorAll("[data-purpose]").forEach(element=>element.onclick=()=>setPurpose(element.dataset.purpose));
-      document.querySelectorAll("[data-scroll-search]").forEach(element=>element.onclick=scrollSearch);
-      document.querySelectorAll("[data-focus-code]").forEach(element=>element.onclick=focusCode);
-      $("filterForm").onsubmit = event=>{ event.preventDefault(); applyFilters({scroll:true}); };
-      $("clearFilters").onclick = ()=>{ $("filterForm").reset(); applyFilters({scroll:false}); };
-      ["purposeFilter","neighborhoodFilter","typeFilter"].forEach(id=>$(id).onchange=()=>applyFilters({scroll:false}));
-      $("heroAssistantForm").onsubmit = event=>{ event.preventDefault(); sendLia($("heroAssistantInput").value); };
-      $("panelAssistantForm").onsubmit = event=>{ event.preventDefault(); sendLia($("panelAssistantInput").value); };
-      document.addEventListener("click",event=>{ const chip=event.target.closest("[data-query]"); if (chip) sendLia(chip.dataset.query); });
-      document.addEventListener("keydown",event=>{ if (event.key==="Escape") { closeMenu(); closeAi(); } });
-      window.addEventListener("scroll",()=>document.querySelector(".topbar")?.classList.toggle("scrolled",scrollY>18),{passive:true});
-      window.addEventListener("online",()=>loadProperties({silent:true}));
-      window.addEventListener("offline",()=>setStatus("Sem internet. Exibindo os dados já carregados.",true));
-      window.addEventListener("pagehide",()=>{
-        clearInterval(state.refreshTimer);
-        clearTimeout(state.realtimeDebounce);
-        if (state.realtimeChannel) state.db.removeChannel(state.realtimeChannel);
-      });
-    }
-
-    async function init() {
-      $("currentYear").textContent = new Date().getFullYear();
-      renderChips();
-      bindEvents();
-      startPhrases();
-
-      try {
-        initializeSupabase();
-        await loadProperties();
-        startRealtime();
-        startSafetyRefresh();
-      } catch (error) {
-        console.error("[Leads] Inicialização:",error);
-        $("propertiesGrid").innerHTML = `<div class="error-state"><strong>O site não conseguiu iniciar.</strong><br>${escapeHtml(error.message)}</div>`;
-        setStatus("Falha ao iniciar a conexão com o Supabase.",true);
       }
+    }, 60000);
+  }
 
-      const hour = new Date().getHours();
-      const greeting = hour<12 ? "Bom dia" : hour<18 ? "Boa tarde" : "Boa noite";
-      $("panelAnswer").textContent = `${greeting}! Eu sou a Lia. Conte o que você procura em Florianópolis.`;
-      $("heroAnswer").textContent = `${greeting}! Escreva o que procura como se estivesse conversando com uma pessoa.`;
-    }
+  function initialize() {
+    createConsentBanner();
+    if (hasConsent()) void startTracking();
+  }
 
-    window.addEventListener("DOMContentLoaded",init);
-  </script>
-  <!-- Radar Leads IA: rastreamento consentido e score de intenção -->
-  <script src="radar-leads.js?v=20260714-1"></script>
-</body>
-</html>
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initialize, { once: true });
+  } else {
+    initialize();
+  }
+
+  window.LeadsRadar = {
+    track: sendEvent,
+    getSessionId() {
+      return sessionId || localStorage.getItem(SESSION_KEY);
+    },
+    getConsent() {
+      return localStorage.getItem(CONSENT_KEY);
+    },
+    reset() {
+      localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(CONSENT_KEY);
+      localStorage.removeItem(LAST_VISIT_KEY);
+      sessionStorage.removeItem(INITIAL_EVENT_KEY);
+      sessionId = "";
+      initialized = false;
+    },
+  };
+})();
