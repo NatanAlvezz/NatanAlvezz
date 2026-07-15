@@ -90,13 +90,15 @@
       PREMIUM_JS.replace(/<\/script/gi,"<\\/script") +
       '<' + '/script>';
 
-    // A VACINA ABSOLUTA (MARRETA DE PRECISÃO) 🔨
-    // Em vez de procurar um formato específico de tag, nós caçamos a própria 
-    // função document.write() contendo "supabase-js" nos argumentos. 
-    // Isso vai funcionar independente de aspas duplas, simples ou formatações esquisitas do GitHub.
+    // =========================================================================
+    // A VERDADEIRA VACINA
+    // O erro vem porque o nosso loader usa document.write (lá embaixo).
+    // Então, precisamos pegar a tag estática do Supabase no HTML original do GitHub
+    // e colar um atributo "defer" nela ANTES de darmos o nosso document.write!
+    // =========================================================================
     html = html.replace(
-      /document\.write\([^)]*supabase-js[^)]*\);?/gi,
-      'document.head.appendChild(Object.assign(document.createElement("script"), {src: "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2", defer: true}));'
+      /(<script\b[^>]*src=["'][^"']*supabase-js[^>]*)(>)/gi,
+      '$1 defer$2'
     );
 
     html = html.replace(/<\/head>/i,style + "\n</head>");
@@ -115,6 +117,7 @@
         var finalHtml = inject(html);
         
         document.open("text/html","replace");
+        // O Chrome aponta o erro EXATAMENTE nesta linha de baixo (linha 116)!
         document.write(finalHtml);
         document.close();
         return;
