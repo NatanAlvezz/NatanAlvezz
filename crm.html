@@ -90,11 +90,11 @@
       PREMIUM_JS.replace(/<\/script/gi,"<\\/script") +
       '<' + '/script>';
 
-    // A VACINA: Intercepta o HTML sujo vindo do GitHub e corrige o document.write 
-    // do Supabase antes mesmo de o navegador processá-lo!
+    // A VACINA CORRIGIDA: Intercepta o HTML sujo vindo do GitHub e corrige o document.write.
+    // Usamos o truque '<' + '/script>' para que o navegador não corte nosso código ao meio!
     html = html.replace(
       /<script>\s*document\.write\(['"]<script[^>]+supabase-js[^>]+><\\\/script>['"]\);\s*<\/script>/gi,
-      '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>'
+      '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer><' + '/script>'
     );
 
     html = html.replace(/<\/head>/i,style + "\n</head>");
