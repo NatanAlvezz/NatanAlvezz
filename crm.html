@@ -90,11 +90,13 @@
       PREMIUM_JS.replace(/<\/script/gi,"<\\/script") +
       '<' + '/script>';
 
-    // A VACINA CORRIGIDA: Intercepta o HTML sujo vindo do GitHub e corrige o document.write.
-    // Usamos o truque '<' + '/script>' para que o navegador não corte nosso código ao meio!
+    // A VACINA ABSOLUTA (MARRETA DE PRECISÃO) 🔨
+    // Em vez de procurar um formato específico de tag, nós caçamos a própria 
+    // função document.write() contendo "supabase-js" nos argumentos. 
+    // Isso vai funcionar independente de aspas duplas, simples ou formatações esquisitas do GitHub.
     html = html.replace(
-      /<script>\s*document\.write\(['"]<script[^>]+supabase-js[^>]+><\\\/script>['"]\);\s*<\/script>/gi,
-      '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer><' + '/script>'
+      /document\.write\([^)]*supabase-js[^)]*\);?/gi,
+      'document.head.appendChild(Object.assign(document.createElement("script"), {src: "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2", defer: true}));'
     );
 
     html = html.replace(/<\/head>/i,style + "\n</head>");
