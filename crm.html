@@ -79,7 +79,7 @@
     return required.every(function(token){ return html.indexOf(token) !== -1; });
   }
 
-  function inject(html){
+  function inject(html, supabaseCode){
     var style =
       '<style id="leadsCrmPremiumCorporateStyles">' +
       PREMIUM_CSS +
@@ -90,16 +90,15 @@
       PREMIUM_JS.replace(/<\/script/gi,"<\\/script") +
       '<' + '/script>';
 
-    // =========================================================================
-    // A VERDADEIRA VACINA
-    // O erro vem porque o nosso loader usa document.write (lá embaixo).
-    // Então, precisamos pegar a tag estática do Supabase no HTML original do GitHub
-    // e colar um atributo "defer" nela ANTES de darmos o nosso document.write!
-    // =========================================================================
-    html = html.replace(
-      /(<script\b[^>]*src=["'][^"']*supabase-js[^>]*)(>)/gi,
-      '$1 defer$2'
-    );
+    // A ARQUITETURA INLINE SÍNCRONA
+    // Em vez de usar defer ou manter o link, pegamos o código puro baixado
+    // e criamos uma tag <script> gigantesca com ele.
+    if (supabaseCode) {
+      html = html.replace(
+        /<script\b[^>]*src=["'][^"']*supabase-js[^"']*["'][^>]*><\/script>/gi,
+        "<script>\n" + supabaseCode + "\n<" + "/script>"
+      );
+    }
 
     html = html.replace(/<\/head>/i,style + "\n</head>");
     html = html.replace(/<\/body>\s*<\/html>\s*$/i,script + "\n</body>\n</html>");
@@ -108,16 +107,23 @@
 
   async function start(){
     var errors = [];
+    
+    // NOVIDADE: Baixamos o Supabase *ANTES* de renderizar a tela.
+    var supabaseCode = "";
+    try {
+      supabaseCode = await fetchWithTimeout("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2");
+    } catch(e) {
+      console.warn("[Loader] Falha ao pré-carregar Supabase. Mantendo original.");
+    }
 
     for(var index=0;index<SOURCES.length;index++){
       try{
         var html = await fetchWithTimeout(SOURCES[index]);
         if(!validate(html)) throw new Error("Arquivo-base incompleto");
         
-        var finalHtml = inject(html);
+        var finalHtml = inject(html, supabaseCode);
         
         document.open("text/html","replace");
-        // O Chrome aponta o erro EXATAMENTE nesta linha de baixo (linha 116)!
         document.write(finalHtml);
         document.close();
         return;
