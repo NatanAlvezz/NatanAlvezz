@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nova Captação — Radar de Proprietários</title>
+<style>
+  :root {
+    --cor-fundo: #F7F3EC;
+    --cor-texto: #1F2B29;
+    --cor-texto-muted: #5B6A66;
+    --cor-borda: #E2DCCB;
+    --cor-card: #FFFFFF;
+    --cor-primaria: #16403A;
+    --cor-acento: #C1682E;
+    --cor-acento-fundo: #FFF6ED;
+    --cor-acento-borda: #E8C9A8;
+    --cor-erro-fundo: #FBEAE9;
+    --cor-erro-texto: #B3261E;
+    --cor-sucesso-fundo: #E7F5EC;
+    --cor-sucesso-texto: #1B7A4C;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--cor-fundo);
+    color: var(--cor-texto);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    padding: 2rem 1rem 4rem;
+  }
+  .container { max-width: 640px; margin: 0 auto; }
+  .voltar { font-size: 0.875rem; color: var(--cor-texto-muted); text-decoration: none; font-weight: 500; }
+  .voltar:hover { text-decoration: underline; }
+  h1 { color: var(--cor-primaria); font-size: 2rem; margin: 0.75rem 0 0.25rem; letter-spacing: -0.02em; }
+  .subtitulo { color: var(--cor-texto-muted); margin: 0 0 2rem; line-height: 1.5; }
+  .etapa { border-radius: 1rem; padding: 1.5rem; border: 1px solid var(--cor-borda); background: var(--cor-card); }
+  .etapa-pmf { background: var(--cor-acento-fundo); border-color: var(--cor-acento-borda); }
+  .etapa-linha { display: flex; align-items: flex-start; gap: 1rem; }
+  .badge-numero { flex-shrink: 0; width: 2rem; height: 2rem; border-radius: 50%; color: white; font-weight: 700; font-size: 0.875rem; display: flex; align-items: center; justify-content: center; }
+  .badge-numero.acento { background: var(--cor-acento); }
+  .badge-numero.primaria { background: var(--cor-primaria); }
+  .etapa h2 { font-size: 1.125rem; margin: 0 0 0.25rem; }
+  .etapa-pmf h2 { color: #7A4620; }
+  .etapa-pmf p { color: #8A6644; font-size: 0.9rem; margin: 0.25rem 0 0; line-height: 1.5; }
+  .conector { width: 1px; height: 1.5rem; background: #D8CDBA; margin: 0 0 0 2rem; }
+  .btn-pmf {
+    display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1rem;
+    background: var(--cor-acento); color: white; padding: 0.6rem 1rem; border-radius: 0.5rem;
+    font-size: 0.875rem; font-weight: 600; text-decoration: none;
+  }
+  .btn-pmf:hover { filter: brightness(1.1); }
+  .campos { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+  .campo-full { grid-column: 1 / -1; }
+  label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.25rem; }
+  input, select, textarea {
+    width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--cor-borda); border-radius: 0.5rem;
+    font-size: 0.875rem; font-family: inherit; color: var(--cor-texto); background: white;
+  }
+  textarea { resize: vertical; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--cor-primaria); outline-offset: 1px; }
+  .btn-salvar {
+    margin-top: 1.25rem; background: var(--cor-primaria); color: white; border: none;
+    padding: 0.65rem 1.5rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 600; cursor: pointer;
+  }
+  .btn-salvar:hover { filter: brightness(1.1); }
+  .btn-salvar:disabled { opacity: 0.6; cursor: not-allowed; }
+  .mensagem { margin-top: 1rem; padding: 0.6rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; display: none; }
+  .mensagem.erro { background: var(--cor-erro-fundo); color: var(--cor-erro-texto); display: block; }
+  .mensagem.sucesso { background: var(--cor-sucesso-fundo); color: var(--cor-sucesso-texto); display: block; }
+  @media (max-width: 560px) {
+    .campos { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="captacoes.html" class="voltar">← Captações</a>
+  <h1>Nova captação</h1>
+  <p class="subtitulo">Registre um imóvel encontrado via dados públicos. Duas etapas: consulte a Prefeitura, depois anote o que encontrou.</p>
+
+  <div class="etapa etapa-pmf">
+    <div class="etapa-linha">
+      <span class="badge-numero acento">1</span>
+      <div>
+        <h2>Consulte o Portal CidadãoWeb da Prefeitura</h2>
+        <p>Busque pelo endereço, CPF/CNPJ ou inscrição imobiliária. Anote o nome do proprietário e a inscrição — o telefone normalmente não aparece lá, então isso continua sendo capturado por fora.</p>
+        <a href="https://iptu.pmf.sc.gov.br" target="_blank" rel="noopener noreferrer" class="btn-pmf">
+          Abrir Portal CidadãoWeb
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17 17 7M8 7h9v9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="conector"></div>
+
+  <form class="etapa" id="form-captacao">
+    <div class="etapa-linha">
+      <span class="badge-numero primaria">2</span>
+      <div style="flex:1">
+        <h2 style="color: var(--cor-primaria)">Registre o que encontrou</h2>
+
+        <div class="campos">
+          <div class="campo-full">
+            <label for="endereco">Endereço *</label>
+            <input type="text" id="endereco" placeholder="Rua, número, complemento" required>
+          </div>
+          <div>
+            <label for="bairro">Bairro *</label>
+            <select id="bairro" required>
+              <option value="">Selecione</option>
+              <option>Centro</option>
+              <option>Trindade</option>
+              <option>Córrego Grande</option>
+              <option>Itacorubi</option>
+              <option>Lagoa da Conceição</option>
+              <option>Canasvieiras</option>
+              <option>Jurerê</option>
+              <option>Ingleses</option>
+              <option>Campeche</option>
+              <option>Rio Tavares</option>
+              <option>Coqueiros</option>
+              <option>Estreito</option>
+              <option>Capoeiras</option>
+              <option>Outro</option>
+            </select>
+          </div>
+          <div>
+            <label for="tipo_imovel">Tipo de imóvel</label>
+            <select id="tipo_imovel">
+              <option>Casa</option>
+              <option>Apartamento</option>
+              <option>Terreno</option>
+              <option>Comercial</option>
+              <option>Outro</option>
+            </select>
+          </div>
+          <div class="campo-full">
+            <label for="nome_proprietario">Nome do proprietário *</label>
+            <input type="text" id="nome_proprietario" placeholder="Como aparece no Portal CidadãoWeb" required>
+          </div>
+          <div>
+            <label for="inscricao_imobiliaria">Inscrição imobiliária</label>
+            <input type="text" id="inscricao_imobiliaria" placeholder="Opcional">
+          </div>
+          <div>
+            <label for="telefone">Telefone</label>
+            <input type="text" id="telefone" placeholder="Se já tiver, de outra fonte">
+          </div>
+          <div class="campo-full">
+            <label for="notas">Notas</label>
+            <textarea id="notas" rows="3" placeholder="Qualquer detalhe relevante pra próxima etapa"></textarea>
+          </div>
+        </div>
+
+        <div class="mensagem" id="mensagem"></div>
+
+        <button type="submit" class="btn-salvar" id="btn-salvar">Adicionar ao radar de captação</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // Se vocês já tiverem um client Supabase compartilhado em outro <script> do site,
+  // apague as 4 linhas abaixo e use o client existente no lugar de "sb".
+  const { createClient } = supabase;
+  const sb = createClient(
+    'https://zyfbgydbwsvbaogbxzrd.supabase.co',
+    'sb_publishable_AP670pbIpkD_KleT7VaQ3Q_BTsBh8yh'
+  );
+
+  const form = document.getElementById('form-captacao');
+  const btnSalvar = document.getElementById('btn-salvar');
+  const mensagemEl = document.getElementById('mensagem');
+
+  function mostrarMensagem(texto, tipo) {
+    mensagemEl.textContent = texto;
+    mensagemEl.className = 'mensagem ' + tipo;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    mensagemEl.className = 'mensagem';
+    mensagemEl.textContent = '';
+
+    const endereco = document.getElementById('endereco').value.trim();
+    const bairro = document.getElementById('bairro').value;
+    const tipo_imovel = document.getElementById('tipo_imovel').value;
+    const nome_proprietario = document.getElementById('nome_proprietario').value.trim();
+    const inscricao_imobiliaria = document.getElementById('inscricao_imobiliaria').value.trim();
+    const telefone = document.getElementById('telefone').value.trim();
+    const notas = document.getElementById('notas').value.trim();
+
+    if (!endereco || !bairro || !nome_proprietario) {
+      mostrarMensagem('Endereço, bairro e nome do proprietário são obrigatórios.', 'erro');
+      return;
+    }
+
+    btnSalvar.disabled = true;
+    btnSalvar.textContent = 'Salvando…';
+
+    const { data: userData } = await sb.auth.getUser();
+
+    const { error } = await sb.from('captacoes_radar').insert({
+      endereco,
+      bairro,
+      tipo_imovel,
+      nome_proprietario,
+      inscricao_imobiliaria: inscricao_imobiliaria || null,
+      telefone: telefone || null,
+      notas: notas || null,
+      origem: 'Dados públicos (PMF)',
+      origem_tipo: 'dados_publicos',
+      origem_detalhe: 'Consulta Portal CidadãoWeb - PMF',
+      status: 'novo',
+      assigned_to: userData?.user?.id ?? null,
+    });
+
+    btnSalvar.disabled = false;
+    btnSalvar.textContent = 'Adicionar ao radar de captação';
+
+    if (error) {
+      mostrarMensagem('Não deu pra salvar: ' + error.message, 'erro');
+      return;
+    }
+
+    mostrarMensagem('Captação adicionada ao radar com status "novo".', 'sucesso');
+    form.reset();
+  });
+</script>
+</body>
+</html>

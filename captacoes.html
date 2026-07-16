@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Captações — Radar de Proprietários</title>
+<style>
+  :root {
+    --cor-fundo: #F7F3EC;
+    --cor-texto: #1F2B29;
+    --cor-texto-muted: #5B6A66;
+    --cor-borda: #E2DCCB;
+    --cor-card: #FFFFFF;
+    --cor-primaria: #16403A;
+    --cor-acento: #C1682E;
+    --cor-erro-fundo: #FBEAE9;
+    --cor-erro-texto: #B3261E;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--cor-fundo);
+    color: var(--cor-texto);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    padding: 2rem 1rem 4rem;
+  }
+  .container { max-width: 1152px; margin: 0 auto; }
+  .cabecalho { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+  h1 { color: var(--cor-primaria); font-size: 2rem; margin: 0 0 0.25rem; letter-spacing: -0.02em; }
+  .subtitulo { color: var(--cor-texto-muted); margin: 0; font-size: 0.9rem; }
+  .btn-nova {
+    background: var(--cor-acento); color: white; padding: 0.65rem 1.1rem; border-radius: 0.5rem;
+    font-size: 0.875rem; font-weight: 600; text-decoration: none; white-space: nowrap;
+  }
+  .btn-nova:hover { filter: brightness(1.1); }
+
+  .controles { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-top: 1.5rem; }
+  .tabs { display: flex; border: 1px solid var(--cor-borda); background: var(--cor-card); border-radius: 0.5rem; padding: 0.25rem; }
+  .tab { border: none; background: transparent; padding: 0.4rem 0.8rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500; color: var(--cor-texto-muted); cursor: pointer; }
+  .tab.ativo { background: var(--cor-primaria); color: white; }
+  .chk-label { display: flex; align-items: center; gap: 0.4rem; font-size: 0.875rem; }
+
+  .erro { display: none; margin-top: 1rem; padding: 0.6rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background: var(--cor-erro-fundo); color: var(--cor-erro-texto); }
+  .carregando { margin-top: 2.5rem; font-size: 0.875rem; color: var(--cor-texto-muted); }
+
+  .colunas { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem; margin-top: 1.5rem; }
+  .coluna { width: 288px; flex-shrink: 0; }
+  .coluna-titulo { display: flex; align-items: center; gap: 0.5rem; padding: 0 0.25rem; margin-bottom: 0.5rem; }
+  .coluna-titulo h2 { font-size: 0.875rem; font-weight: 600; margin: 0; }
+  .ponto { width: 0.5rem; height: 0.5rem; border-radius: 50%; flex-shrink: 0; }
+  .contador { font-size: 0.75rem; color: var(--cor-texto-muted); }
+  .coluna-cards { display: flex; flex-direction: column; gap: 0.75rem; }
+  .vazio { border: 1px dashed var(--cor-borda); border-radius: 0.75rem; padding: 1rem; text-align: center; font-size: 0.75rem; color: var(--cor-texto-muted); }
+
+  .lista-encerradas { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1.5rem; }
+  .vazio-texto { font-size: 0.875rem; color: var(--cor-texto-muted); }
+
+  .card { border: 1px solid var(--cor-borda); background: var(--cor-card); border-radius: 0.75rem; padding: 0.75rem; }
+  .card-nome { font-size: 0.875rem; font-weight: 600; margin: 0; }
+  .card-endereco { font-size: 0.75rem; color: var(--cor-texto-muted); margin: 0.15rem 0 0; }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.5rem; }
+  .tag { border-radius: 999px; padding: 0.1rem 0.5rem; font-size: 0.68rem; font-weight: 500; }
+  .tag-tipo { background: #EFEAE0; color: var(--cor-texto-muted); }
+  .tag-origem { background: #FFF6ED; color: #7A4620; }
+  .card-rodape { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-top: 0.75rem; }
+  .card-atribuido { font-size: 0.75rem; color: var(--cor-texto-muted); }
+  .btn-assumir { border: none; background: none; color: var(--cor-acento); font-size: 0.75rem; font-weight: 600; text-decoration: underline; cursor: pointer; padding: 0; }
+  .select-status { margin-top: 0.5rem; width: 100%; padding: 0.35rem 0.5rem; border: 1px solid var(--cor-borda); border-radius: 0.375rem; font-size: 0.75rem; background: white; color: var(--cor-texto); }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="cabecalho">
+    <div>
+      <h1>Captações</h1>
+      <p class="subtitulo">Radar de proprietários — do primeiro contato até a publicação.</p>
+    </div>
+    <a href="captacoes-nova.html" class="btn-nova">+ Nova captação</a>
+  </div>
+
+  <div class="controles">
+    <div class="tabs">
+      <button class="tab ativo" id="tab-ativas">Ativas</button>
+      <button class="tab" id="tab-encerradas">Encerradas</button>
+    </div>
+    <label class="chk-label">
+      <input type="checkbox" id="chk-minhas">
+      Só as minhas
+    </label>
+  </div>
+
+  <div class="erro" id="erro"></div>
+  <p class="carregando" id="carregando">Carregando captações…</p>
+  <div id="board"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // Se vocês já tiverem um client Supabase compartilhado em outro <script> do site,
+  // apague as 4 linhas abaixo e use o client existente no lugar de "sb".
+  const { createClient } = supabase;
+  const sb = createClient(
+    'https://zyfbgydbwsvbaogbxzrd.supabase.co',
+    'sb_publishable_AP670pbIpkD_KleT7VaQ3Q_BTsBh8yh'
+  );
+
+  const STATUS_ATIVOS = [
+    { value: 'novo', label: 'Novo', cor: '#5B6A66' },
+    { value: 'contatado', label: 'Contatado', cor: '#2E6E8E' },
+    { value: 'visita_agendada', label: 'Visita agendada', cor: '#8E6E2E' },
+    { value: 'em_negociacao', label: 'Em negociação', cor: '#C1682E' },
+    { value: 'captado', label: 'Captado', cor: '#1B7A4C' },
+    { value: 'publicado', label: 'Publicado', cor: '#16403A' },
+  ];
+  const STATUS_ENCERRADOS = [
+    { value: 'recusado', label: 'Recusado' },
+    { value: 'sem_resposta', label: 'Sem resposta' },
+    { value: 'perdido', label: 'Perdido' },
+  ];
+  const TODOS_STATUS = STATUS_ATIVOS.concat(STATUS_ENCERRADOS);
+
+  let captacoes = [];
+  let nomesPorId = {};
+  let userId = null;
+  let aba = 'ativas';
+  let somenteMinhas = false;
+
+  const boardEl = document.getElementById('board');
+  const erroEl = document.getElementById('erro');
+  const carregandoEl = document.getElementById('carregando');
+
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function mostrarErro(texto) {
+    erroEl.textContent = texto;
+    erroEl.style.display = 'block';
+  }
+
+  function nomeUsuarioAtual() {
+    return userId ? (nomesPorId[userId] || '') : '';
+  }
+
+  async function carregarTudo() {
+    carregandoEl.style.display = 'block';
+    boardEl.style.display = 'none';
+
+    const [{ data: userData }, capResult, perfisResult] = await Promise.all([
+      sb.auth.getUser(),
+      sb.from('captacoes_radar').select('*').order('created_at', { ascending: false }),
+      sb.from('corretores_diretorio').select('id, full_name'),
+    ]);
+
+    if (capResult.error) {
+      mostrarErro('Não deu pra carregar as captações: ' + capResult.error.message);
+      carregandoEl.style.display = 'none';
+      return;
+    }
+
+    userId = userData && userData.user ? userData.user.id : null;
+    captacoes = capResult.data || [];
+    nomesPorId = {};
+    (perfisResult.data || []).forEach(function (p) { nomesPorId[p.id] = p.full_name || '—'; });
+
+    carregandoEl.style.display = 'none';
+    boardEl.style.display = 'block';
+    render();
+  }
+
+  async function registrarHistorico(captacaoId, action, oldStatus, newStatus) {
+    await sb.from('captacoes_radar_historico').insert({
+      captacao_id: captacaoId,
+      action: action,
+      old_status: oldStatus,
+      new_status: newStatus,
+      performed_by: userId,
+      performed_by_name: nomeUsuarioAtual() || null,
+    });
+  }
+
+  async function mudarStatus(id, novoStatus) {
+    const c = captacoes.find(function (x) { return x.id === id; });
+    if (!c) return;
+    const statusAntigo = c.status;
+    c.status = novoStatus;
+    render();
+
+    const { error } = await sb.from('captacoes_radar').update({ status: novoStatus }).eq('id', id);
+    if (error) {
+      mostrarErro('Não deu pra mudar o status: ' + error.message);
+      c.status = statusAntigo;
+      render();
+      return;
+    }
+    registrarHistorico(id, 'mudanca_status', statusAntigo, novoStatus);
+  }
+
+  async function assumir(id) {
+    if (!userId) return;
+    const c = captacoes.find(function (x) { return x.id === id; });
+    if (!c) return;
+    const statusAtual = c.status;
+    c.assigned_to = userId;
+    render();
+
+    const { error } = await sb.from('captacoes_radar').update({ assigned_to: userId }).eq('id', id);
+    if (error) {
+      mostrarErro('Não deu pra assumir essa captação: ' + error.message);
+      c.assigned_to = null;
+      render();
+      return;
+    }
+    registrarHistorico(id, 'assumida', statusAtual, statusAtual);
+  }
+
+  function cardHtml(c) {
+    const nomeAtribuido = c.assigned_to ? (nomesPorId[c.assigned_to] || '—') : null;
+    const tags = [];
+    if (c.tipo_imovel) tags.push('<span class="tag tag-tipo">' + escapeHtml(c.tipo_imovel) + '</span>');
+    if (c.origem_tipo) tags.push('<span class="tag tag-origem">' + escapeHtml(c.origem_tipo.replaceAll('_', ' ')) + '</span>');
+
+    const opcoesStatus = TODOS_STATUS.map(function (s) {
+      return '<option value="' + s.value + '"' + (s.value === c.status ? ' selected' : '') + '>' + s.label + '</option>';
+    }).join('');
+
+    const enderecoLinha = [c.endereco, c.bairro].filter(Boolean).join(' · ');
+
+    return (
+      '<div class="card">' +
+        '<p class="card-nome">' + (escapeHtml(c.nome_proprietario) || 'Sem nome') + '</p>' +
+        '<p class="card-endereco">' + (escapeHtml(enderecoLinha) || 'Sem endereço') + '</p>' +
+        '<div class="card-tags">' + tags.join('') + '</div>' +
+        '<div class="card-rodape">' +
+          '<span class="card-atribuido">' + (nomeAtribuido ? escapeHtml(nomeAtribuido) : 'Não atribuído') + '</span>' +
+          (!c.assigned_to ? '<button class="btn-assumir" data-id="' + c.id + '">Assumir</button>' : '') +
+        '</div>' +
+        '<select class="select-status" data-id="' + c.id + '">' + opcoesStatus + '</select>' +
+      '</div>'
+    );
+  }
+
+  function render() {
+    document.getElementById('tab-ativas').classList.toggle('ativo', aba === 'ativas');
+    document.getElementById('tab-encerradas').classList.toggle('ativo', aba === 'encerradas');
+
+    const visiveis = captacoes.filter(function (c) {
+      return somenteMinhas ? c.assigned_to === userId : true;
+    });
+
+    if (aba === 'ativas') {
+      const ativas = visiveis.filter(function (c) {
+        return STATUS_ATIVOS.some(function (s) { return s.value === c.status; });
+      });
+      boardEl.className = 'colunas';
+      boardEl.innerHTML = STATUS_ATIVOS.map(function (coluna) {
+        const itens = ativas.filter(function (c) { return c.status === coluna.value; });
+        return (
+          '<div class="coluna">' +
+            '<div class="coluna-titulo">' +
+              '<span class="ponto" style="background:' + coluna.cor + '"></span>' +
+              '<h2>' + coluna.label + '</h2>' +
+              '<span class="contador">' + itens.length + '</span>' +
+            '</div>' +
+            '<div class="coluna-cards">' +
+              (itens.length === 0 ? '<div class="vazio">Nada por aqui ainda</div>' : itens.map(cardHtml).join('')) +
+            '</div>' +
+          '</div>'
+        );
+      }).join('');
+    } else {
+      const encerradas = visiveis.filter(function (c) {
+        return STATUS_ENCERRADOS.some(function (s) { return s.value === c.status; });
+      });
+      boardEl.className = 'lista-encerradas';
+      boardEl.innerHTML = encerradas.length === 0
+        ? '<p class="vazio-texto">Nenhuma captação encerrada ainda.</p>'
+        : encerradas.map(cardHtml).join('');
+    }
+  }
+
+  boardEl.addEventListener('click', function (e) {
+    if (e.target.matches('.btn-assumir')) {
+      assumir(Number(e.target.dataset.id));
+    }
+  });
+  boardEl.addEventListener('change', function (e) {
+    if (e.target.matches('.select-status')) {
+      mudarStatus(Number(e.target.dataset.id), e.target.value);
+    }
+  });
+  document.getElementById('tab-ativas').addEventListener('click', function () { aba = 'ativas'; render(); });
+  document.getElementById('tab-encerradas').addEventListener('click', function () { aba = 'encerradas'; render(); });
+  document.getElementById('chk-minhas').addEventListener('change', function (e) { somenteMinhas = e.target.checked; render(); });
+
+  carregarTudo();
+</script>
+</body>
+</html>
