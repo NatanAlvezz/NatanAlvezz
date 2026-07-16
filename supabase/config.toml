@@ -1,0 +1,13 @@
+project_id = "zyfbgydbwsvbaogbxzrd"
+
+[functions.crm-ai-assistant]
+verify_jwt = true
+
+[functions.site-ai-assistant]
+verify_jwt = false
+
+[functions.bright-task]
+verify_jwt = false
+
+[functions.radar-leads-track]
+verify_jwt = false
