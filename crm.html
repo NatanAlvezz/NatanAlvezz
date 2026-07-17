@@ -210,12 +210,12 @@
       50%{transform:translateY(-5px) rotate(.6deg)}
     }
 
-    .nav button,.icon-btn,.ai-fab,.btn,.theme-card{
+    .nav button,.icon-btn,.btn,.theme-card{
       position:relative;
       overflow:hidden;
       isolation:isolate
     }
-    .nav button::after,.icon-btn::after,.ai-fab::after,.btn::after,.theme-card::before{
+    .nav button::after,.icon-btn::after,.ai-fab::after,.chat-fab::after,.btn::after,.theme-card::before{
       content:"";
       position:absolute;
       inset:-45%;
@@ -225,7 +225,7 @@
       background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--accent2) 34%,transparent),transparent);
       transition:opacity .22s ease,transform .48s ease
     }
-    .nav button:hover::after,.icon-btn:hover::after,.ai-fab:hover::after,.btn:hover::after,.theme-card:hover::before{
+    .nav button:hover::after,.icon-btn:hover::after,.ai-fab:hover::after,.chat-fab:hover::after,.btn:hover::after,.theme-card:hover::before{
       opacity:1;
       transform:translateX(65%) rotate(18deg)
     }
@@ -469,6 +469,266 @@
       .chat-people-panel{display:none}
       .chat-main-panel{height:calc(100dvh - 150px);min-height:560px}
       .team-message{max-width:94%}
+    }
+
+
+    /* =========================================================
+       ATALHOS FLUTUANTES DEFINITIVOS · CHAT + IA
+       Corrige conflito de posicionamento e mantém ambos visíveis.
+       ========================================================= */
+    .floating-tools{
+      position:fixed;
+      right:18px;
+      bottom:18px;
+      z-index:220;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:12px;
+      pointer-events:none;
+      padding-bottom:env(safe-area-inset-bottom,0px)
+    }
+    .floating-tools .ai-fab,
+    .floating-tools .chat-fab{
+      position:relative!important;
+      right:auto!important;
+      bottom:auto!important;
+      top:auto!important;
+      left:auto!important;
+      display:grid!important;
+      place-items:center;
+      width:60px;
+      height:60px;
+      min-width:60px;
+      min-height:60px;
+      margin:0;
+      padding:0;
+      border-radius:50%;
+      border:1px solid color-mix(in srgb,var(--accent) 44%,rgba(255,255,255,.18));
+      color:#fff;
+      font-weight:950;
+      z-index:1;
+      pointer-events:auto;
+      overflow:visible;
+      isolation:isolate;
+      cursor:pointer;
+      -webkit-tap-highlight-color:transparent;
+      touch-action:manipulation;
+      backdrop-filter:blur(16px) saturate(155%);
+      -webkit-backdrop-filter:blur(16px) saturate(155%);
+      box-shadow:
+        0 17px 42px rgba(0,0,0,.42),
+        inset 0 1px 0 rgba(255,255,255,.30),
+        0 0 26px color-mix(in srgb,var(--accent) 20%,transparent);
+      transition:
+        transform .25s cubic-bezier(.2,.8,.2,1),
+        box-shadow .25s ease,
+        filter .25s ease,
+        border-color .25s ease;
+      animation:crmFabFloat 4s ease-in-out infinite
+    }
+    .floating-tools .chat-fab{
+      width:56px;
+      height:56px;
+      min-width:56px;
+      min-height:56px;
+      background:
+        radial-gradient(circle at 28% 22%,rgba(255,255,255,.36),transparent 22%),
+        linear-gradient(145deg,
+          color-mix(in srgb,var(--accent2) 78%,var(--surface3)),
+          color-mix(in srgb,var(--accent) 45%,var(--surface2)));
+      border-color:color-mix(in srgb,var(--accent2) 48%,rgba(255,255,255,.16));
+      box-shadow:
+        0 16px 38px rgba(0,0,0,.40),
+        inset 0 1px 0 rgba(255,255,255,.32),
+        0 0 24px color-mix(in srgb,var(--accent2) 23%,transparent);
+      animation-delay:-1.1s
+    }
+    .floating-tools .ai-fab{
+      background:
+        radial-gradient(circle at 28% 22%,rgba(255,255,255,.38),transparent 22%),
+        linear-gradient(145deg,
+          color-mix(in srgb,var(--surface3) 75%,var(--accent2)),
+          color-mix(in srgb,var(--accent) 82%,var(--surface2)))
+    }
+    .floating-tools .ai-fab:hover,
+    .floating-tools .chat-fab:hover{
+      transform:translateY(-5px) scale(1.09)!important;
+      filter:brightness(1.14) saturate(1.10);
+      border-color:rgba(255,255,255,.46);
+      box-shadow:
+        0 23px 52px rgba(0,0,0,.48),
+        inset 0 1px 0 rgba(255,255,255,.42),
+        0 0 38px color-mix(in srgb,var(--accent) 46%,transparent)
+    }
+    .floating-tools .chat-fab:hover{
+      box-shadow:
+        0 23px 52px rgba(0,0,0,.48),
+        inset 0 1px 0 rgba(255,255,255,.42),
+        0 0 38px color-mix(in srgb,var(--accent2) 48%,transparent)
+    }
+    .floating-tools .ai-fab:focus-visible,
+    .floating-tools .chat-fab:focus-visible{
+      outline:3px solid color-mix(in srgb,var(--accent2) 60%,transparent);
+      outline-offset:4px
+    }
+    .fab-icon{
+      position:relative;
+      z-index:3;
+      display:grid;
+      place-items:center;
+      font-size:23px;
+      line-height:1;
+      filter:drop-shadow(0 3px 8px rgba(0,0,0,.38));
+      transition:transform .25s ease,text-shadow .25s ease
+    }
+    .fab-ai-text{
+      font-size:16px;
+      letter-spacing:.7px
+    }
+    .floating-tools button:hover .fab-icon{
+      transform:scale(1.10) rotate(-3deg);
+      text-shadow:0 0 17px rgba(255,255,255,.58)
+    }
+    .fab-online-dot{
+      position:absolute;
+      z-index:4;
+      right:5px;
+      bottom:5px;
+      width:11px;
+      height:11px;
+      border:2px solid color-mix(in srgb,var(--surface) 88%,#000);
+      border-radius:50%;
+      background:var(--green);
+      box-shadow:0 0 12px color-mix(in srgb,var(--green) 80%,transparent);
+      animation:crmOnlinePulse 2.3s ease-in-out infinite
+    }
+    .fab-unread{
+      position:absolute;
+      z-index:5;
+      top:-5px;
+      right:-5px;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      min-width:23px;
+      height:23px;
+      padding:0 6px;
+      border:2px solid color-mix(in srgb,var(--surface) 92%,#000);
+      border-radius:999px;
+      background:var(--red);
+      color:#fff;
+      font-size:10px;
+      font-weight:950;
+      line-height:1;
+      box-shadow:0 8px 18px rgba(0,0,0,.35),0 0 17px color-mix(in srgb,var(--red) 50%,transparent)
+    }
+    .fab-tooltip{
+      position:absolute;
+      right:calc(100% + 12px);
+      top:50%;
+      z-index:8;
+      transform:translate(7px,-50%);
+      opacity:0;
+      visibility:hidden;
+      white-space:nowrap;
+      padding:8px 10px;
+      border:1px solid color-mix(in srgb,var(--accent2) 24%,var(--line));
+      border-radius:10px;
+      background:color-mix(in srgb,var(--surface) 91%,transparent);
+      color:var(--text);
+      font-size:10px;
+      font-weight:800;
+      pointer-events:none;
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      box-shadow:0 12px 30px rgba(0,0,0,.32);
+      transition:opacity .18s ease,transform .18s ease,visibility .18s ease
+    }
+    .floating-tools button:hover .fab-tooltip,
+    .floating-tools button:focus-visible .fab-tooltip{
+      opacity:1;
+      visibility:visible;
+      transform:translate(0,-50%)
+    }
+    .floating-tools .ai-fab::before,
+    .floating-tools .chat-fab::before{
+      content:"";
+      position:absolute;
+      inset:-5px;
+      z-index:-2;
+      border-radius:50%;
+      border:1px solid color-mix(in srgb,var(--accent) 20%,transparent);
+      opacity:.54;
+      animation:crmFabRing 3.2s ease-out infinite;
+      pointer-events:none
+    }
+    .floating-tools .chat-fab::before{
+      border-color:color-mix(in srgb,var(--accent2) 25%,transparent);
+      animation-delay:-1.2s
+    }
+    .floating-tools .ai-fab::after,
+    .floating-tools .chat-fab::after{
+      content:"";
+      position:absolute;
+      inset:3px;
+      z-index:1;
+      border-radius:50%;
+      pointer-events:none;
+      background:linear-gradient(125deg,rgba(255,255,255,.22),transparent 38%,transparent 65%,rgba(255,255,255,.08));
+      opacity:.78
+    }
+    @keyframes crmFabFloat{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-4px)}
+    }
+    @keyframes crmFabRing{
+      0%{transform:scale(.94);opacity:.55}
+      70%,100%{transform:scale(1.24);opacity:0}
+    }
+    @keyframes crmOnlinePulse{
+      0%,100%{transform:scale(1);opacity:1}
+      50%{transform:scale(.78);opacity:.68}
+    }
+
+    /* Garante que o painel da IA permaneça acima da interface,
+       mas abaixo dos atalhos enquanto está fechado. */
+    .ai-drawer{z-index:210}
+    .ai-drawer.open{z-index:230}
+    .ai-drawer.open ~ * .floating-tools{opacity:1}
+
+    @media(max-width:900px){
+      .floating-tools{
+        right:13px;
+        bottom:calc(14px + env(safe-area-inset-bottom,0px));
+        gap:10px
+      }
+      .floating-tools .ai-fab{
+        width:56px;
+        height:56px;
+        min-width:56px;
+        min-height:56px
+      }
+      .floating-tools .chat-fab{
+        width:52px;
+        height:52px;
+        min-width:52px;
+        min-height:52px
+      }
+      .fab-tooltip{display:none}
+    }
+    @media(hover:none){
+      .floating-tools .ai-fab:hover,
+      .floating-tools .chat-fab:hover{transform:none!important}
+    }
+    @media(prefers-reduced-motion:reduce){
+      .floating-tools .ai-fab,
+      .floating-tools .chat-fab,
+      .fab-online-dot,
+      .floating-tools .ai-fab::before,
+      .floating-tools .chat-fab::before{
+        animation:none!important
+      }
     }
 
     @media(max-width:1180px){.kpis{grid-template-columns:repeat(3,1fr)}.grid-3{grid-template-columns:1fr 1fr}}
@@ -804,7 +1064,19 @@
   </main>
 </div>
 
-<button class="ai-fab" id="aiFab">IA</button>
+<div class="floating-tools" id="floatingTools" aria-label="Atalhos rápidos">
+  <button class="chat-fab" id="chatFab" type="button" aria-label="Abrir chat da equipe" title="Chat da equipe">
+    <span class="fab-icon" aria-hidden="true">✉</span>
+    <span class="fab-unread" id="chatFabUnreadBadge" aria-label="Mensagens não lidas">0</span>
+    <span class="fab-tooltip">Chat da equipe</span>
+  </button>
+
+  <button class="ai-fab" id="aiFab" type="button" aria-label="Abrir IA consultiva" title="IA Consultiva">
+    <span class="fab-icon fab-ai-text" aria-hidden="true">IA</span>
+    <span class="fab-online-dot" aria-hidden="true"></span>
+    <span class="fab-tooltip">IA Consultiva</span>
+  </button>
+</div>
 <aside class="ai-drawer" id="aiDrawer">
   <div class="ai-head"><div><b>IA Consultiva</b><div style="font-size:9px;color:var(--green);margin-top:3px">ASSISTENTE ONLINE</div></div><button class="icon-btn" id="closeAI">×</button></div>
   <div class="ai-log" id="aiLog"><div class="msg">Olá. Posso analisar leads, imóveis, captações e sugerir próximas ações.</div></div>
@@ -1012,8 +1284,17 @@ function switchPage(page){
     requestAnimationFrame(scrollChatToBottom);
   }
 }
-function openAI(prompt=""){$("#aiDrawer").classList.add("open");if(prompt){$("#aiInput").value=prompt;$("#aiInput").focus()}}
-function closeAI(){$("#aiDrawer").classList.remove("open")}
+function openAI(prompt=""){
+  $("#sidebar")?.classList.remove("open");
+  $("#aiDrawer")?.classList.add("open");
+  $("#aiFab")?.setAttribute("aria-expanded","true");
+  if(prompt)$("#aiInput").value=prompt;
+  window.setTimeout(()=>$("#aiInput")?.focus(),180);
+}
+function closeAI(){
+  $("#aiDrawer")?.classList.remove("open");
+  $("#aiFab")?.setAttribute("aria-expanded","false");
+}
 function openModal(title,body,foot){$("#modalTitle").textContent=title;$("#modalBody").innerHTML=body;$("#modalFoot").innerHTML=foot;$("#modal").showModal()}
 function closeModal(){$("#modal").close()}
 
@@ -1053,7 +1334,13 @@ function bind(){
   ["ownerAddress","ownerNumber","ownerComplement","ownerNeighborhood","ownerCity","ownerCep","ownerRegistration","ownerRegistry"].forEach(id=>{
     $("#"+id).addEventListener("keydown",e=>{if(e.key==="Enter")searchOwners(false)});
   });
-  $("#aiFab").onclick=()=>openAI();$("#heroAI").onclick=()=>openAI("Analise meu CRM e diga as prioridades de hoje.");
+  $("#aiFab").onclick=()=>openAI();
+  $("#chatFab").onclick=()=>{
+    closeAI();
+    switchPage("team-chat");
+    requestAnimationFrame(scrollChatToBottom);
+  };
+  $("#heroAI").onclick=()=>openAI("Analise meu CRM e diga as prioridades de hoje.");
   $("#closeAI").onclick=closeAI;$("#aiForm").onsubmit=sendAI;$("#modalClose").onclick=closeModal;
   $$(".ai-prompt").forEach(b=>b.onclick=()=>openAI(b.textContent));
   $("#teamChatForm").onsubmit=sendTeamChatMessage;
@@ -1435,10 +1722,14 @@ function scrollChatToBottom(){
   if(el)el.scrollTop=el.scrollHeight;
 }
 function updateChatUnreadBadge(){
-  const badge=$("#chatUnreadBadge");
-  if(!badge)return;
-  badge.textContent=String(state.chatUnread||0);
-  badge.style.display=state.chatUnread>0?"inline-flex":"none";
+  const total=Number(state.chatUnread||0);
+  const label=total>99?"99+":String(total);
+  const badges=[$("#chatUnreadBadge"),$("#chatFabUnreadBadge")].filter(Boolean);
+  badges.forEach(badge=>{
+    badge.textContent=label;
+    badge.style.display=total>0?"inline-flex":"none";
+    badge.setAttribute("aria-label",`${total} mensagem${total===1?"":"s"} não lida${total===1?"":"s"}`);
+  });
 }
 
 function renderDrafts(){
