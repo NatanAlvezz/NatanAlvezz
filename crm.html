@@ -377,6 +377,33 @@
     }
 
 
+
+    /* CAPTEI · BUSCA SIMPLES DE CONTATOS AUTORIZADOS */
+    .owner-quick-search{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:9px;
+      align-items:center
+    }
+    .owner-quick-search input{min-height:48px;font-size:13px}
+    .owner-contact-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(270px,1fr));
+      gap:11px
+    }
+    .owner-contact-card{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+      background:linear-gradient(145deg,color-mix(in srgb,var(--surface2) 72%,transparent),color-mix(in srgb,var(--surface) 58%,transparent));
+      box-shadow:0 12px 30px rgba(0,0,0,.15)
+    }
+    .owner-contact-card h4{margin:0;font-size:14px}
+    .owner-contact-line{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:11px;color:var(--text)}
+    .owner-contact-line span:first-child{width:24px;height:24px;border-radius:8px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent2) 12%,transparent);color:var(--accent2)}
+    .owner-contact-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+    @media(max-width:700px){.owner-quick-search{grid-template-columns:1fr}}
+
     /* CHAT INTERNO EM TEMPO REAL */
     .team-chat-layout{
       display:grid;
@@ -852,79 +879,39 @@
 
       <section class="page" id="page-owner-search">
         <div class="hero">
-          <h2>Localizar proprietário por endereço</h2>
-          <p>Encontre rapidamente imóveis e proprietários já cadastrados na operação da Leads Imóveis. Os dados de contato permanecem protegidos e aparecem somente quando o atendimento está autorizado.</p>
-          <div class="hero-actions">
-            <a class="btn ghost" href="https://www.cnj.jus.br/sistemas/srei/" target="_blank" rel="noopener noreferrer">Consultar serviços oficiais do SREI</a>
-            <button class="btn ghost" id="ownerClearBtn">Limpar pesquisa</button>
-          </div>
+          <h2>Captei · Localizar contato autorizado</h2>
+          <p>Digite um endereço e encontre rapidamente os contatos que já fazem parte da operação da Leads Imóveis. O resultado mostra somente nome, telefone e e-mail quando existe autorização de contato ativa.</p>
         </div>
 
-        <div class="grid-2" style="margin-top:14px">
-          <div class="panel">
-            <div class="panel-head">
-              <div>
-                <h3>Pesquisa por imóvel</h3>
-                <p>Endereço, número, CEP, inscrição imobiliária ou matrícula</p>
-              </div>
-              <span class="badge green">LGPD protegida</span>
+        <div class="panel" style="margin-top:14px">
+          <div class="panel-head">
+            <div>
+              <h3>Pesquisar por endereço</h3>
+              <p>Rua, número, complemento, bairro, cidade ou CEP</p>
             </div>
-            <div class="panel-body">
-              <div class="form-grid">
-                <div class="field full">
-                  <label>Finalidade da consulta</label>
-                  <select id="ownerPurpose">
-                    <option value="">Selecione a finalidade</option>
-                    <option value="captacao">Captação imobiliária legítima</option>
-                    <option value="cadastro">Atualização de cadastro autorizado</option>
-                    <option value="atendimento">Atendimento solicitado pelo proprietário</option>
-                    <option value="diligencia">Diligência documental de negociação</option>
-                  </select>
-                </div>
-                <div class="field full"><label>Rua ou endereço</label><input id="ownerAddress" placeholder="Ex.: Rua João Roberto Soares"></div>
-                <div class="field"><label>Número</label><input id="ownerNumber" placeholder="Ex.: 1270"></div>
-                <div class="field"><label>Complemento</label><input id="ownerComplement" placeholder="Apto, bloco, casa..."></div>
-                <div class="field"><label>Bairro</label><input id="ownerNeighborhood" placeholder="Ex.: Ingleses"></div>
-                <div class="field"><label>Cidade</label><input id="ownerCity" value="Florianópolis"></div>
-                <div class="field"><label>CEP</label><input id="ownerCep" inputmode="numeric" placeholder="88000-000"></div>
-                <div class="field"><label>Inscrição imobiliária</label><input id="ownerRegistration" placeholder="Número cadastral municipal"></div>
-                <div class="field full"><label>Matrícula do imóvel</label><input id="ownerRegistry" placeholder="Matrícula do Registro de Imóveis"></div>
-              </div>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-                <button class="btn" id="ownerSearchBtn">⌕ Localizar registros</button>
-                <button class="btn ghost" id="ownerSearchAllBtn">Ver registros autorizados</button>
-              </div>
-              <p style="font-size:10px;color:var(--muted);line-height:1.5;margin:12px 0 0">
-                Esta ferramenta não consulta CPF, não invade bases privadas e não promete identificar proprietários fora das fontes autorizadas. Para comprovação oficial da titularidade, solicite matrícula ou certidão ao Registro de Imóveis competente.
-              </p>
-            </div>
+            <span class="badge green">Consulta protegida</span>
           </div>
-
-          <div class="panel">
-            <div class="panel-head">
-              <div><h3>Como a localização funciona</h3><p>Fluxo profissional e juridicamente seguro</p></div>
+          <div class="panel-body">
+            <div class="owner-quick-search">
+              <input id="ownerQuickAddress" autocomplete="street-address" placeholder="Ex.: Rua João Roberto Soares, 1270, Ingleses">
+              <button class="btn" id="ownerQuickSearchBtn">⌕ Procurar contato</button>
             </div>
-            <div class="panel-body">
-              <div class="list">
-                <div class="row"><div class="dot">1</div><div><b>Pesquisa completa</b><span>Localize por endereço, CEP, inscrição ou matrícula.</span></div></div>
-                <div class="row"><div class="dot">2</div><div><b>Resultado organizado</b><span>Veja os dados comerciais disponíveis em um só lugar.</span></div></div>
-                <div class="row"><div class="dot">3</div><div><b>Contato seguro</b><span>Telefone e WhatsApp somente nos atendimentos autorizados.</span></div></div>
-                <div class="row"><div class="dot">4</div><div><b>Confirmação documental</b><span>Use a matrícula ou certidão quando precisar comprovar a titularidade.</span></div></div>
-              </div>
-            </div>
+            <p class="privacy-note">A pesquisa utiliza somente contatos autorizados já cadastrados no CRM. Não consulta CPF, documentos pessoais ou bases clandestinas.</p>
           </div>
         </div>
 
         <div class="panel" style="margin-top:14px">
           <div class="panel-head">
             <div>
-              <h3>Resultados encontrados</h3>
-              <p id="ownerResultSummary">Preencha pelo menos um campo para pesquisar.</p>
+              <h3>Contatos encontrados</h3>
+              <p id="ownerResultSummary">Digite um endereço para iniciar.</p>
             </div>
             <span class="badge" id="ownerResultCount">0 resultados</span>
           </div>
           <div class="panel-body">
-            <div class="cards" id="ownerResults"></div>
+            <div class="owner-contact-grid" id="ownerResults">
+              <div class="empty">Aguardando pesquisa.</div>
+            </div>
           </div>
         </div>
       </section>
@@ -1007,7 +994,7 @@
       <section class="page" id="page-ai">
         <div class="grid-2">
           <div class="panel"><div class="panel-head"><div><h3>Central Inteligente</h3><p>Assistente comercial seguro e integrado ao CRM</p></div><span class="badge green">Sistema protegido</span></div><div class="panel-body">
-            <div class="hero" style="box-shadow:none"><h2>Assistente comercial da Leads Imóveis</h2><p>Analisa dados autorizados, sugere próximas ações, cria mensagens e descrições. Não publica nem altera imóveis automaticamente.</p><div class="hero-actions"><button class="btn ai-prompt">Prioridades de hoje</button><button class="btn ai-prompt">Leads quentes</button><button class="btn ai-prompt">Gerar follow-up</button><button class="btn ai-prompt">Analisar captações</button></div></div>
+            <div class="hero" style="box-shadow:none"><h2>Assistente comercial da Leads Imóveis</h2><p>Conversa com você de forma natural, analisa o cenário, dá conselhos práticos, sugere caminhos e prepara mensagens. Nenhuma alteração é feita sem sua decisão.</p><div class="hero-actions"><button class="btn ai-prompt">Prioridades de hoje</button><button class="btn ai-prompt">Leads quentes</button><button class="btn ai-prompt">Gerar follow-up</button><button class="btn ai-prompt">Analisar captações</button></div></div>
           </div></div>
           <div class="panel"><div class="panel-head"><h3>Rascunhos da IA</h3></div><div class="panel-body"><div class="list" id="aiDrafts"></div></div></div>
         </div>
@@ -1079,7 +1066,7 @@
 </div>
 <aside class="ai-drawer" id="aiDrawer">
   <div class="ai-head"><div><b>IA Consultiva</b><div style="font-size:9px;color:var(--green);margin-top:3px">ASSISTENTE ONLINE</div></div><button class="icon-btn" id="closeAI">×</button></div>
-  <div class="ai-log" id="aiLog"><div class="msg">Olá. Posso analisar leads, imóveis, captações e sugerir próximas ações.</div></div>
+  <div class="ai-log" id="aiLog"><div class="msg">Olá! Estou aqui para pensar junto com você. Posso analisar atendimentos, sugerir caminhos, preparar mensagens e ajudar a decidir a melhor próxima ação.</div></div>
   <form class="ai-form" id="aiForm"><input id="aiInput" placeholder="Digite sua pergunta"><button class="btn">Enviar</button></form>
 </aside>
 
@@ -1093,8 +1080,8 @@
 "use strict";
 
 const PROJECT_URL="https://zyfbgydbwsvbaogbxzrd.supabase.co";
-const AI_FUNCTION=PROJECT_URL+"/functions/v1/crm-ai-assistant-openai-test";
-const state={user:null,profile:null,properties:[],leads:[],captures:[],team:[],tasks:[],drafts:[],activeLeadTab:"todos",activePropertyTab:"todos",bound:false,theme:"dourado",chatRoom:null,chatMessages:[],chatChannel:null,chatPresence:{},chatUnread:0,chatTypingTimer:null};
+const AI_FUNCTION=PROJECT_URL+"/functions/v1/crm-ai-assistant";
+const state={user:null,profile:null,properties:[],leads:[],captures:[],team:[],tasks:[],drafts:[],activeLeadTab:"todos",activePropertyTab:"todos",bound:false,theme:"dourado",chatRoom:null,chatMessages:[],chatChannel:null,chatPresence:{},chatUnread:0,chatTypingTimer:null,aiHistory:[],siteLeadChannel:null};
 
 const MOTIVATION_PHRASES=[
   "Cada atendimento de hoje pode abrir a porta do próximo grande negócio.",
@@ -1313,6 +1300,7 @@ async function init(){
     await Promise.all([loadProperties(),loadLeads(),loadCaptures(),loadTeam(),loadDrafts(),loadChatRoom()]);
     renderAll();
     subscribeTeamChat();
+    subscribeSiteLeadUpdates();
     $("#syncStatus").textContent="Sistema online";
     $("#settingsSupabase").textContent="Online e protegido";
   }catch(e){console.error("[CRM]",e);$("#syncStatus").textContent="Conexão instável";toast("Não foi possível carregar todos os dados.")}
@@ -1328,12 +1316,8 @@ function bind(){
   $("#globalSearch").onkeydown=e=>{if(e.key==="Enter")globalSearch()};
   $("#newLeadBtn").onclick=openLeadModal;$("#newPropertyBtn").onclick=openPropertyModal;$("#newCaptureBtn").onclick=openCaptureModal;$("#newTaskBtn").onclick=openTaskModal;
   $("#leadFilterBtn").onclick=renderLeads;$("#propertyFilterBtn").onclick=renderProperties;$("#captureFilterBtn").onclick=renderCaptures;
-  $("#ownerSearchBtn").onclick=()=>searchOwners(false);
-  $("#ownerSearchAllBtn").onclick=()=>searchOwners(true);
-  $("#ownerClearBtn").onclick=clearOwnerSearch;
-  ["ownerAddress","ownerNumber","ownerComplement","ownerNeighborhood","ownerCity","ownerCep","ownerRegistration","ownerRegistry"].forEach(id=>{
-    $("#"+id).addEventListener("keydown",e=>{if(e.key==="Enter")searchOwners(false)});
-  });
+  $("#ownerQuickSearchBtn").onclick=searchAuthorizedOwnerContacts;
+  $("#ownerQuickAddress").addEventListener("keydown",e=>{if(e.key==="Enter")searchAuthorizedOwnerContacts()});
   $("#aiFab").onclick=()=>openAI();
   $("#chatFab").onclick=()=>{
     closeAI();
@@ -1366,7 +1350,7 @@ async function loadCaptures(){const {data,error}=await db().from("captacoes_rada
 async function loadTeam(){const {data,error}=await db().from("user_profiles").select("*").order("full_name");if(error)throw error;state.team=data||[]}
 async function loadDrafts(){const {data}=await db().from("ai_property_drafts").select("*").eq("user_id",state.user.id).order("created_at",{ascending:false}).limit(20);state.drafts=data||[]}
 
-function renderAll(){renderDashboard();renderLeadTabs();renderLeads();renderPropertyTabs();renderProperties();renderCaptures();renderAgenda();renderTeam();renderTeamChat();renderDrafts();renderReports();fillFilters();renderThemeOptions();if(!$("#ownerResults").innerHTML.trim())clearOwnerSearch()}
+function renderAll(){renderDashboard();renderLeadTabs();renderLeads();renderPropertyTabs();renderProperties();renderCaptures();renderAgenda();renderTeam();renderTeamChat();renderDrafts();renderReports();fillFilters();renderThemeOptions();}
 function renderDashboard(){
   const hot=state.leads.filter(l=>(l.lead_score||0)>=60||String(l.lead_temperature).toLowerCase()==="quente");
   const publicProps=state.properties.filter(p=>p.is_public);
@@ -1421,92 +1405,54 @@ function captureCard(c){
   const phone=digits(c.telefone);return `<article class="card"><div class="card-body"><div style="display:flex;justify-content:space-between;gap:8px"><h4>${esc(c.tipo_imovel||"Imóvel")} · ${esc(c.bairro||"-")}</h4><span class="badge ${c.temperature==="quente"?"hot":"blue"}">${esc(c.temperature||"frio")} · ${c.score||0}</span></div><p><b>Proprietário:</b> ${esc(c.nome_proprietario||"Não informado")}</p><p>${esc(c.endereco||"Endereço não informado")} · ${esc(c.preco||"Preço não informado")}</p><p>${c.consentimento_contato?"Contato disponível para atendimento":"Contato protegido até autorização"}</p><div class="card-actions">${phone&&c.consentimento_contato?`<a class="btn green" target="_blank" href="https://wa.me/${phone.length<=11?"55":""}${phone}">WhatsApp</a>`:""}<button class="btn" onclick="window.crmConvertCapture('${c.id}')">Converter em imóvel</button></div></div></article>`;
 }
 
+
 function normalizeSearchValue(value){
-  return String(value||"")
-    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-    .toLowerCase().replace(/\s+/g," ").trim();
+  return String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s+/g," ").trim();
 }
-function maskPhone(value){
-  const d=digits(value);
-  if(d.length<8)return "Contato protegido";
-  return `${d.slice(0,2)} *****-${d.slice(-4)}`;
-}
-function ownerSourceText(row){
+function authorizedContactSearchText(row){
   return [
     row.endereco,row.numero,row.complemento,row.bairro,row.cidade,row.uf,row.cep,
-    row.inscricao_imobiliaria,row.matricula_imovel,row.nome_proprietario,
-    row.owner_name,row.owner_email,row.title,row.type,row.neighborhood,
-    row.data?.endereco,row.data?.address,row.data?.numero,row.data?.cep,
-    row.data?.inscricao_imobiliaria,row.data?.matricula_imovel
+    row.nome_proprietario,row.email_proprietario,row.tipo_imovel
   ].map(normalizeSearchValue).join(" ");
 }
-function clearOwnerSearch(){
-  $("#ownerPurpose").value="";
-  ["ownerAddress","ownerNumber","ownerComplement","ownerNeighborhood","ownerCep","ownerRegistration","ownerRegistry"].forEach(id=>$("#"+id).value="");
-  $("#ownerCity").value="Florianópolis";
-  $("#ownerResults").innerHTML=empty("Preencha pelo menos um campo para pesquisar.");
-  $("#ownerResultSummary").textContent="Preencha pelo menos um campo para pesquisar.";
-  $("#ownerResultCount").textContent="0 resultados";
-}
-function searchOwners(showAll=false){
-  const purpose=$("#ownerPurpose").value;
-  if(!purpose){toast("Selecione a finalidade legítima da consulta.");$("#ownerPurpose").focus();return}
-
-  const terms=[
-    $("#ownerAddress").value,$("#ownerNumber").value,$("#ownerComplement").value,
-    $("#ownerNeighborhood").value,$("#ownerCity").value,$("#ownerCep").value,
-    $("#ownerRegistration").value,$("#ownerRegistry").value
-  ].map(normalizeSearchValue).filter(Boolean);
-
-  if(!showAll && !terms.length){toast("Informe endereço, CEP, inscrição ou matrícula.");$("#ownerAddress").focus();return}
-
-  const captureRows=state.captures.map(row=>({...row,__source:"captacao"}));
-  const propertyRows=state.properties.map(row=>({...row,__source:"imovel"}));
-  let rows=[...captureRows,...propertyRows];
-
-  if(!showAll){
-    rows=rows.filter(row=>{
-      const source=ownerSourceText(row);
-      return terms.every(term=>source.includes(term));
-    });
+function searchAuthorizedOwnerContacts(){
+  const input=$("#ownerQuickAddress");
+  const query=normalizeSearchValue(input?.value);
+  if(query.length<4){
+    toast("Digite um endereço com pelo menos 4 caracteres.");
+    input?.focus();
+    return;
   }
 
-  rows=rows.slice(0,100);
-  $("#ownerResultCount").textContent=`${rows.length} resultado${rows.length===1?"":"s"}`;
-  $("#ownerResultSummary").textContent=rows.length
-    ? "Imóveis e proprietários compatíveis com a pesquisa."
-    : "Nenhum resultado foi localizado. Confirme os dados informados ou consulte a documentação do imóvel.";
+  const tokens=query.split(" ").filter(token=>token.length>=2);
+  const results=state.captures
+    .filter(row=>row.consentimento_contato===true&&!row.opt_out_at)
+    .filter(row=>{
+      const source=authorizedContactSearchText(row);
+      return tokens.every(token=>source.includes(token));
+    })
+    .slice(0,30);
 
-  $("#ownerResults").innerHTML=rows.map(ownerResultCard).join("")||empty("Nenhum registro autorizado encontrado.");
+  $("#ownerResultCount").textContent=`${results.length} resultado${results.length===1?"":"s"}`;
+  $("#ownerResultSummary").textContent=results.length
+    ?"Contatos autorizados compatíveis com o endereço informado."
+    :"Nenhum contato autorizado foi encontrado para esse endereço.";
+
+  $("#ownerResults").innerHTML=results.map(authorizedOwnerContactCard).join("")
+    ||empty("Nenhum contato autorizado encontrado.");
 }
-function ownerResultCard(row){
-  const isCapture=row.__source==="captacao";
-  const owner=isCapture?(row.nome_proprietario||"Proprietário não informado"):(row.owner_name||row.data?.owner_name||"Proprietário não informado");
-  const address=isCapture
-    ? [row.endereco,row.numero,row.complemento,row.bairro,row.cidade,row.uf,row.cep].filter(Boolean).join(", ")
-    : [row.data?.endereco||row.data?.address,row.data?.numero,row.neighborhood,row.city,row.data?.cep].filter(Boolean).join(", ");
-  const registration=isCapture?(row.inscricao_imobiliaria||"Não informada"):(row.data?.inscricao_imobiliaria||"Não informada");
-  const registry=isCapture?(row.matricula_imovel||"Não informada"):(row.data?.matricula_imovel||"Não informada");
-  const allowed=isCapture?Boolean(row.consentimento_contato):Boolean(row.data?.consentimento_contato);
-  const phone=isCapture?row.telefone:(row.data?.telefone_proprietario||row.data?.owner_phone||"");
-  const email=isCapture?row.email_proprietario:(row.owner_email||row.data?.email_proprietario||"");
-  const phoneText=allowed&&phone?phone:maskPhone(phone);
-
-  return `<article class="card">
-    <div class="card-body">
-      <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
-        <h4>${esc(owner)}</h4>
-        <span class="badge ${allowed?"green":"hot"}">${allowed?"Contato autorizado":"Dados protegidos"}</span>
-      </div>
-      <p><b>Endereço:</b> ${esc(address||"Endereço incompleto")}</p>
-      <p><b>Inscrição imobiliária:</b> ${esc(registration)}</p>
-      <p><b>Matrícula:</b> ${esc(registry)}</p>
-      <p><b>Contato:</b> ${esc(phoneText)}${allowed&&email?` · ${esc(email)}`:""}</p>
-      <div class="card-actions">
-        ${allowed&&phone?`<a class="btn green" target="_blank" rel="noopener noreferrer" href="https://wa.me/${digits(phone).length<=11?"55":""}${digits(phone)}">WhatsApp</a>`:""}
-        ${isCapture?`<button class="btn" onclick="window.crmConvertCapture('${row.id}')">Abrir captação</button>`:`<button class="btn" onclick="window.crmOpenProperty('${row.id}')">Abrir imóvel</button>`}
-        <a class="btn ghost" href="https://www.cnj.jus.br/sistemas/srei/" target="_blank" rel="noopener noreferrer">Confirmar no registro oficial</a>
-      </div>
+function authorizedOwnerContactCard(row){
+  const name=row.nome_proprietario||"Contato sem nome";
+  const phone=digits(row.telefone);
+  const email=String(row.email_proprietario||"").trim();
+  return `<article class="owner-contact-card">
+    <h4>${esc(name)}</h4>
+    <div class="owner-contact-line"><span>☎</span><b>${esc(row.telefone||"Telefone não informado")}</b></div>
+    <div class="owner-contact-line"><span>✉</span><b>${esc(email||"E-mail não informado")}</b></div>
+    <div class="owner-contact-actions">
+      ${phone?`<a class="btn green" target="_blank" rel="noopener noreferrer" href="https://wa.me/${phone.length<=11?"55":""}${phone}">WhatsApp</a>`:""}
+      ${email?`<a class="btn ghost" href="mailto:${esc(email)}">Enviar e-mail</a>`:""}
+      <button class="btn ghost" onclick="window.crmConvertCapture('${row.id}')">Abrir captação</button>
     </div>
   </article>`;
 }
@@ -1548,6 +1494,25 @@ async function loadChatMessages(){
   if(error){console.error("[Chat] Mensagens:",error);return}
   state.chatMessages=data||[];
 }
+
+function subscribeSiteLeadUpdates(){
+  const client=db();
+  if(!client||!state.user)return;
+  if(state.siteLeadChannel){
+    try{client.removeChannel(state.siteLeadChannel)}catch(_){}
+  }
+  state.siteLeadChannel=client.channel("crm-site-leads-live")
+    .on("postgres_changes",{event:"*",schema:"public",table:"site_leads"},async()=>{
+      await loadLeads();
+      renderDashboard();
+      renderLeadTabs();
+      renderLeads();
+      if($("#page-pipeline")?.classList.contains("active"))renderPipeline();
+      toast("Novo movimento de atendimento recebido do site.");
+    })
+    .subscribe();
+}
+
 function subscribeTeamChat(){
   if(!state.chatRoom||!state.user)return;
   const client=db();
@@ -1774,11 +1739,75 @@ async function saveCapture(){
 function openTaskModal(){toast("As tarefas atuais são geradas pelos retornos e visitas dos leads.")}
 async function toggleProperty(id,isPublic){const r=await db().from("crm_properties").update({is_public:isPublic,status:isPublic?"Publicado":"Interno",updated_at:new Date().toISOString()}).eq("id",id);if(r.error){toast("Não foi possível alterar a publicação.");return}await loadProperties();renderAll();toast(isPublic?"Imóvel publicado.":"Imóvel deixado como interno.")}
 async function convertCapture(id){const c=state.captures.find(x=>String(x.id)===String(id));if(!c)return;openPropertyModal();setTimeout(()=>{$("#mPropTitle").value=`${c.tipo_imovel||"Imóvel"} em ${c.bairro||"Florianópolis"}`;$("#mPropType").value=c.tipo_imovel||"";$("#mPropNeighborhood").value=c.bairro||"";$("#mPropCity").value=c.cidade||"Florianópolis";$("#mPropDescription").value=`Captação de ${c.nome_proprietario||"proprietário"}. ${c.notas||""}`},20)}
-async function sendAI(e){e.preventDefault();const input=$("#aiInput"),q=input.value.trim();if(!q)return;input.value="";$("#aiLog").insertAdjacentHTML("beforeend",`<div class="msg me">${esc(q)}</div><div class="msg" id="aiLoading">Consultando IA...</div>`);$("#aiLog").scrollTop=$("#aiLog").scrollHeight;
-  try{const {data:{session}}=await db().auth.getSession();const res=await fetch(AI_FUNCTION,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},body:JSON.stringify({question:q,history:[],crm_state:{properties:state.properties.slice(0,40),leads:state.leads.slice(0,40),captures:state.captures.slice(0,30)}})});const data=await res.json().catch(()=>({}));$("#aiLoading").remove();$("#aiLog").insertAdjacentHTML("beforeend",`<div class="msg">${esc(data.reply||data.response||data.answer||data.message||"Não foi possível gerar a resposta.")}</div>`)}catch(err){console.error(err);$("#aiLoading")?.remove();$("#aiLog").insertAdjacentHTML("beforeend",`<div class="msg">Falha ao consultar a IA.</div>`)}$("#aiLog").scrollTop=$("#aiLog").scrollHeight}
+async function sendAI(e){
+  e.preventDefault();
+  const input=$("#aiInput"),question=input.value.trim();
+  if(!question)return;
+
+  input.value="";
+  $("#aiLog").insertAdjacentHTML("beforeend",`<div class="msg me">${esc(question)}</div><div class="msg" id="aiLoading">Estou pensando no melhor caminho com você...</div>`);
+  $("#aiLog").scrollTop=$("#aiLog").scrollHeight;
+
+  const humanizedQuestion=[
+    "Converse comigo como uma parceira de trabalho experiente, humana, acolhedora e direta.",
+    "Analise a situação, dê sua recomendação principal, uma alternativa e a próxima ação prática.",
+    "Não fale como robô e não use motivação genérica.",
+    "Pergunta do corretor:",
+    question
+  ].join("\n");
+
+  try{
+    const {data:{session}}=await db().auth.getSession();
+    if(!session)throw new Error("SESSION_MISSING");
+
+    const crmState={
+      properties:state.properties.slice(0,60),
+      leads:state.leads.slice(0,60),
+      captures:state.captures.slice(0,40),
+      teamOnline:Object.values(state.chatPresence||{}).flat().length
+    };
+
+    const response=await fetch(AI_FUNCTION,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer "+session.access_token
+      },
+      body:JSON.stringify({
+        question:humanizedQuestion,
+        history:state.aiHistory.slice(-10),
+        crmState,
+        context:crmState
+      })
+    });
+
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(data?.error||`AI_${response.status}`);
+
+    const reply=data.reply||data.response||data.answer||data.resposta||data.message||"Não consegui concluir a resposta.";
+    $("#aiLoading")?.remove();
+    $("#aiLog").insertAdjacentHTML("beforeend",`<div class="msg">${esc(reply)}</div>`);
+
+    state.aiHistory.push(
+      {role:"user",content:question},
+      {role:"assistant",content:String(reply)}
+    );
+    state.aiHistory=state.aiHistory.slice(-12);
+  }catch(error){
+    console.error("[IA]",error);
+    $("#aiLoading")?.remove();
+    $("#aiLog").insertAdjacentHTML("beforeend",`<div class="msg">Tive uma instabilidade rápida. Nenhum dado foi alterado. Tente novamente em alguns segundos.</div>`);
+  }
+
+  $("#aiLog").scrollTop=$("#aiLog").scrollHeight;
+}
+
 async function logout(){
   if(state.chatChannel){
     try{await db().removeChannel(state.chatChannel)}catch(_){}
+  }
+  if(state.siteLeadChannel){
+    try{await db().removeChannel(state.siteLeadChannel)}catch(_){}
   }
   await db().auth.signOut();
   location.href="login.html";
