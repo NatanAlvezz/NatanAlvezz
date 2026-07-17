@@ -15,8 +15,9 @@
     :root{
       --bg:#061018;--surface:#0b1721;--surface2:#101f2b;--surface3:#142735;
       --line:rgba(255,255,255,.09);--text:#f7fbff;--muted:#8fa5b5;
-      --gold:#d9b66f;--cyan:#65d9ff;--green:#56d58a;--orange:#ffb35c;
-      --red:#ff6f75;--blue:#77a8ff;--purple:#a787ff;
+      --accent:#d9b66f;--accent2:#65d9ff;
+      --gold:var(--accent);--cyan:var(--accent2);
+      --green:#56d58a;--orange:#ffb35c;--red:#ff6f75;--blue:#77a8ff;--purple:#a787ff;
       --radius:18px;--shadow:0 20px 55px rgba(0,0,0,.32);
       --sidebar:270px;--header:72px;
     }
@@ -124,6 +125,70 @@
       linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.018))}
     #ownerResults .card{border-color:rgba(101,217,255,.12)}
     #ownerResults .card p b{color:#dceaf2}
+
+    /* TEMAS COMPLETOS DO CRM */
+    body{
+      background:
+        radial-gradient(circle at 10% -10%,color-mix(in srgb,var(--accent2) 11%,transparent),transparent 34%),
+        radial-gradient(circle at 85% 0,color-mix(in srgb,var(--accent) 12%,transparent),transparent 35%),
+        linear-gradient(150deg,var(--bg),color-mix(in srgb,var(--bg) 78%,var(--surface2)) 45%,color-mix(in srgb,var(--bg) 88%,#000));
+      transition:background .24s ease,color .2s ease
+    }
+    .sidebar{
+      background:
+        radial-gradient(circle at 20% 0,color-mix(in srgb,var(--accent) 10%,transparent),transparent 31%),
+        linear-gradient(180deg,color-mix(in srgb,var(--surface) 96%,#000),color-mix(in srgb,var(--bg) 94%,#000))
+    }
+    .topbar{background:color-mix(in srgb,var(--bg) 86%,transparent)}
+    .nav button:hover,.nav button.active{
+      border-color:color-mix(in srgb,var(--accent2) 32%,transparent);
+      background:linear-gradient(90deg,color-mix(in srgb,var(--accent2) 15%,transparent),color-mix(in srgb,var(--accent) 7%,transparent))
+    }
+    .hero{
+      background:
+        radial-gradient(circle at 80% 10%,color-mix(in srgb,var(--accent2) 15%,transparent),transparent 35%),
+        radial-gradient(circle at 10% 0,color-mix(in srgb,var(--accent) 17%,transparent),transparent 35%),
+        linear-gradient(145deg,color-mix(in srgb,var(--surface2) 58%,transparent),color-mix(in srgb,var(--surface) 42%,transparent))
+    }
+    .panel,.card,.kpi,.column,.mini,.row,.sidebar-foot{
+      background-color:color-mix(in srgb,var(--surface) 78%,transparent)
+    }
+    .btn{
+      border-color:color-mix(in srgb,var(--accent) 45%,transparent);
+      background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 30%,var(--surface)),color-mix(in srgb,var(--accent2) 12%,var(--surface)));
+      color:var(--text)
+    }
+    .global-search button{background:var(--accent);color:color-mix(in srgb,var(--bg) 88%,#000)}
+    input:focus,select:focus,textarea:focus{
+      border-color:color-mix(in srgb,var(--accent2) 55%,transparent);
+      box-shadow:0 0 0 3px color-mix(in srgb,var(--accent2) 11%,transparent)
+    }
+    .tab.active{
+      background:color-mix(in srgb,var(--accent2) 16%,transparent);
+      border-color:color-mix(in srgb,var(--accent2) 42%,transparent);
+      color:var(--text)
+    }
+    .dot{background:color-mix(in srgb,var(--accent2) 14%,transparent);color:var(--accent2)}
+    .ai-fab{
+      border-color:color-mix(in srgb,var(--accent) 46%,transparent);
+      background:linear-gradient(135deg,var(--surface3),var(--accent))
+    }
+    .ai-drawer,.modal{background:color-mix(in srgb,var(--surface) 94%,#000)}
+    .page-title small,.brand small{color:var(--accent)}
+    .brand img{border-color:color-mix(in srgb,var(--accent) 42%,transparent)}
+    .theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+    .theme-card{
+      border:1px solid var(--line);border-radius:15px;padding:10px;background:color-mix(in srgb,var(--surface2) 74%,transparent);
+      color:var(--text);text-align:left;transition:.18s;min-height:82px
+    }
+    .theme-card:hover,.theme-card.active{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 10px 26px color-mix(in srgb,var(--accent) 17%,transparent)}
+    .theme-card.active::after{content:"Tema ativo";display:block;margin-top:7px;font-size:9px;color:var(--accent);font-weight:900}
+    .theme-dots{display:flex;gap:6px;margin-bottom:9px}.theme-dot{width:22px;height:22px;border-radius:8px;border:1px solid rgba(255,255,255,.22)}
+    .theme-card b{display:block;font-size:11px}.theme-card span{display:block;font-size:9px;color:var(--muted);margin-top:3px}
+    .theme-custom{display:grid;grid-template-columns:1fr auto;gap:9px;align-items:end;margin-top:13px}
+    .theme-custom input[type="color"]{height:44px;padding:4px;cursor:pointer}
+    .privacy-note{font-size:10px;color:var(--muted);line-height:1.55;margin:10px 0 0}
+
     @media(max-width:1180px){.kpis{grid-template-columns:repeat(3,1fr)}.grid-3{grid-template-columns:1fr 1fr}}
     @media(max-width:900px){
       .app{display:block}.sidebar{position:fixed;left:-285px;width:270px;transition:.22s;box-shadow:25px 0 70px rgba(0,0,0,.5)}.sidebar.open{left:0}
@@ -157,8 +222,8 @@
       <button data-page="settings"><span class="ico">⚙</span>Configurações</button>
     </nav>
     <div class="sidebar-foot">
-      <b id="syncStatus">Conectando ao Supabase...</b>
-      <p>Imóveis, leads, usuários, captações e IA integrados em uma interface modular.</p>
+      <b id="syncStatus">Conectando ao sistema...</b>
+      <p>Sua operação comercial organizada, sincronizada e protegida.</p>
     </div>
   </aside>
 
@@ -237,7 +302,7 @@
       <section class="page" id="page-owner-search">
         <div class="hero">
           <h2>Localizar proprietário por endereço</h2>
-          <p>Pesquisa interna e autorizada em captações e imóveis já registrados pela Leads Imóveis. Dados pessoais aparecem somente quando existe consentimento, relação comercial ou outra base legal registrada.</p>
+          <p>Encontre rapidamente imóveis e proprietários já cadastrados na operação da Leads Imóveis. Os dados de contato permanecem protegidos e aparecem somente quando o atendimento está autorizado.</p>
           <div class="hero-actions">
             <a class="btn ghost" href="https://www.cnj.jus.br/sistemas/srei/" target="_blank" rel="noopener noreferrer">Consultar serviços oficiais do SREI</a>
             <button class="btn ghost" id="ownerClearBtn">Limpar pesquisa</button>
@@ -290,10 +355,10 @@
             </div>
             <div class="panel-body">
               <div class="list">
-                <div class="row"><div class="dot">1</div><div><b>Busca no CRM</b><span>Captações, imóveis, endereços e matrículas já autorizados.</span></div></div>
-                <div class="row"><div class="dot">2</div><div><b>Validação da origem</b><span>Exibe origem, consentimento e base legal registrada.</span></div></div>
-                <div class="row"><div class="dot">3</div><div><b>Contato protegido</b><span>Telefone e WhatsApp somente quando o contato está autorizado.</span></div></div>
-                <div class="row"><div class="dot">4</div><div><b>Confirmação oficial</b><span>A matrícula ou certidão do cartório é a fonte para comprovar titularidade.</span></div></div>
+                <div class="row"><div class="dot">1</div><div><b>Pesquisa completa</b><span>Localize por endereço, CEP, inscrição ou matrícula.</span></div></div>
+                <div class="row"><div class="dot">2</div><div><b>Resultado organizado</b><span>Veja os dados comerciais disponíveis em um só lugar.</span></div></div>
+                <div class="row"><div class="dot">3</div><div><b>Contato seguro</b><span>Telefone e WhatsApp somente nos atendimentos autorizados.</span></div></div>
+                <div class="row"><div class="dot">4</div><div><b>Confirmação documental</b><span>Use a matrícula ou certidão quando precisar comprovar a titularidade.</span></div></div>
               </div>
             </div>
           </div>
@@ -332,7 +397,7 @@
 
       <section class="page" id="page-ai">
         <div class="grid-2">
-          <div class="panel"><div class="panel-head"><div><h3>Central IA</h3><p>OpenAI protegida por Supabase Edge Function</p></div><span class="badge green">JWT protegido</span></div><div class="panel-body">
+          <div class="panel"><div class="panel-head"><div><h3>Central Inteligente</h3><p>Assistente comercial seguro e integrado ao CRM</p></div><span class="badge green">Sistema protegido</span></div><div class="panel-body">
             <div class="hero" style="box-shadow:none"><h2>Assistente comercial da Leads Imóveis</h2><p>Analisa dados autorizados, sugere próximas ações, cria mensagens e descrições. Não publica nem altera imóveis automaticamente.</p><div class="hero-actions"><button class="btn ai-prompt">Prioridades de hoje</button><button class="btn ai-prompt">Leads quentes</button><button class="btn ai-prompt">Gerar follow-up</button><button class="btn ai-prompt">Analisar captações</button></div></div>
           </div></div>
           <div class="panel"><div class="panel-head"><h3>Rascunhos da IA</h3></div><div class="panel-body"><div class="list" id="aiDrafts"></div></div></div>
@@ -341,8 +406,49 @@
 
       <section class="page" id="page-settings">
         <div class="grid-2">
-          <div class="panel"><div class="panel-head"><h3>Conta e perfil</h3></div><div class="panel-body"><div class="form-grid"><div class="field"><label>Nome</label><input id="settingsName" readonly></div><div class="field"><label>E-mail</label><input id="settingsEmail" readonly></div><div class="field"><label>Função</label><input id="settingsRole" readonly></div><div class="field"><label>Status</label><input id="settingsAccess" readonly></div></div></div></div>
-          <div class="panel"><div class="panel-head"><h3>Sistema</h3></div><div class="panel-body"><div class="list"><div class="row"><div class="dot">DB</div><div><b>Supabase</b><span id="settingsSupabase">Verificando conexão...</span></div></div><div class="row"><div class="dot">IA</div><div><b>Edge Function</b><span>crm-ai-assistant-openai-test</span></div></div><div class="row"><div class="dot">WEB</div><div><b>Publicação</b><span>Imóveis públicos sincronizados por regra do banco</span></div></div></div><button class="btn red" id="logoutBtn" style="margin-top:12px">Sair com segurança</button></div></div>
+          <div class="panel">
+            <div class="panel-head"><div><h3>Conta e perfil</h3><p>Informações do corretor conectado</p></div></div>
+            <div class="panel-body">
+              <div class="form-grid">
+                <div class="field"><label>Nome</label><input id="settingsName" readonly></div>
+                <div class="field"><label>E-mail</label><input id="settingsEmail" readonly></div>
+                <div class="field"><label>Função</label><input id="settingsRole" readonly></div>
+                <div class="field"><label>Status</label><input id="settingsAccess" readonly></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><div><h3>Status da operação</h3><p>Informações simples para o corretor</p></div></div>
+            <div class="panel-body">
+              <div class="list">
+                <div class="row"><div class="dot">✓</div><div><b>Sistema online</b><span id="settingsSupabase">Verificando conexão...</span></div></div>
+                <div class="row"><div class="dot">IA</div><div><b>Assistente inteligente</b><span>Disponível para mensagens, análises e organização</span></div></div>
+                <div class="row"><div class="dot">WEB</div><div><b>Site integrado</b><span>Publicação controlada pelo botão do imóvel</span></div></div>
+              </div>
+              <button class="btn red" id="logoutBtn" style="margin-top:12px">Sair com segurança</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:14px">
+          <div class="panel-head">
+            <div><h3>Aparência completa do CRM</h3><p>Cada corretor escolhe a própria cor; a preferência fica salva somente para o usuário dele</p></div>
+            <span class="badge green" id="themeCurrentBadge">Tema ativo</span>
+          </div>
+          <div class="panel-body">
+            <div class="theme-grid" id="themeGrid"></div>
+            <div class="theme-custom">
+              <div class="field">
+                <label>Cor personalizada</label>
+                <input id="themeCustomColor" type="color" value="#d9b66f" aria-label="Escolher cor personalizada">
+              </div>
+              <button class="btn" id="themeCustomApply">Aplicar cor</button>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:11px">
+              <button class="btn ghost" id="themeResetBtn">Restaurar Dourado Luxo</button>
+            </div>
+            <p class="privacy-note">A escolha altera o CRM inteiro: fundo, menu, cabeçalho, painéis, cartões, botões, campos, abas, IA e destaques. Ela não muda as cores dos outros corretores.</p>
+          </div>
         </div>
       </section>
     </section>
@@ -351,7 +457,7 @@
 
 <button class="ai-fab" id="aiFab">IA</button>
 <aside class="ai-drawer" id="aiDrawer">
-  <div class="ai-head"><div><b>IA Consultiva</b><div style="font-size:9px;color:var(--green);margin-top:3px">OPENAI · SUPABASE</div></div><button class="icon-btn" id="closeAI">×</button></div>
+  <div class="ai-head"><div><b>IA Consultiva</b><div style="font-size:9px;color:var(--green);margin-top:3px">ASSISTENTE ONLINE</div></div><button class="icon-btn" id="closeAI">×</button></div>
   <div class="ai-log" id="aiLog"><div class="msg">Olá. Posso analisar leads, imóveis, captações e sugerir próximas ações.</div></div>
   <form class="ai-form" id="aiForm"><input id="aiInput" placeholder="Digite sua pergunta"><button class="btn">Enviar</button></form>
 </aside>
@@ -367,7 +473,7 @@
 
 const PROJECT_URL="https://zyfbgydbwsvbaogbxzrd.supabase.co";
 const AI_FUNCTION=PROJECT_URL+"/functions/v1/crm-ai-assistant-openai-test";
-const state={user:null,profile:null,properties:[],leads:[],captures:[],team:[],tasks:[],drafts:[],activeLeadTab:"todos",activePropertyTab:"todos"};
+const state={user:null,profile:null,properties:[],leads:[],captures:[],team:[],tasks:[],drafts:[],activeLeadTab:"todos",activePropertyTab:"todos",bound:false,theme:"dourado"};
 const pageTitles={dashboard:"Visão geral",leads:"Leads",pipeline:"Funil comercial",properties:"Imóveis",capture:"Captação","owner-search":"Localizar proprietário",agenda:"Agenda e tarefas",team:"Corretores",reports:"Relatórios",ai:"Central IA",settings:"Configurações"};
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
@@ -375,6 +481,97 @@ const digits=v=>String(v||"").replace(/\D/g,"");
 const money=v=>Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0});
 const dateBR=v=>v?new Date(v).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"Não definido";
 const db=()=>window.supabaseClient||null;
+
+const THEME_STORAGE="leads_crm_theme_v3";
+const THEMES={
+  dourado:{label:"Dourado Luxo",desc:"Elegante e imobiliário",accent:"#d9b66f",accent2:"#65d9ff",bg:"#061018",surface:"#0b1721",surface2:"#101f2b",surface3:"#142735",text:"#f7fbff",muted:"#8fa5b5"},
+  azul:{label:"Azul Prime",desc:"Corporativo e confiável",accent:"#4f8cff",accent2:"#67d7ff",bg:"#06101d",surface:"#0a1829",surface2:"#10233a",surface3:"#15304b",text:"#f5f9ff",muted:"#91a8bf"},
+  verde:{label:"Verde Elite",desc:"Crescimento e resultado",accent:"#39c986",accent2:"#72f0bd",bg:"#061510",surface:"#0b2119",surface2:"#103126",surface3:"#174332",text:"#f4fff9",muted:"#91b3a3"},
+  roxo:{label:"Roxo Futuro",desc:"Tecnologia premium",accent:"#9b78ff",accent2:"#d07cff",bg:"#0d0818",surface:"#171026",surface2:"#24183a",surface3:"#33234f",text:"#fbf7ff",muted:"#aa9dbd"},
+  rubi:{label:"Rubi Executivo",desc:"Força e exclusividade",accent:"#e84d67",accent2:"#ff8c8c",bg:"#17080d",surface:"#251017",surface2:"#361722",surface3:"#4b2130",text:"#fff7f8",muted:"#bd9ba2"},
+  laranja:{label:"Laranja Energia",desc:"Ação e velocidade",accent:"#ff9f43",accent2:"#ffd166",bg:"#171008",surface:"#24180d",surface2:"#352414",surface3:"#49321d",text:"#fffaf3",muted:"#bea98e"},
+  rosa:{label:"Rosa Aurora",desc:"Moderno e sofisticado",accent:"#ef6fb5",accent2:"#ff9ed2",bg:"#170b14",surface:"#25111f",surface2:"#37192e",surface3:"#4b2340",text:"#fff7fc",muted:"#bda0b2"},
+  ciano:{label:"Ciano Tech",desc:"Futurista e digital",accent:"#3ed8e6",accent2:"#68f2ff",bg:"#041416",surface:"#081f23",surface2:"#0d3036",surface3:"#12434b",text:"#f2feff",muted:"#8db4b8"},
+  esmeralda:{label:"Esmeralda",desc:"Alto padrão natural",accent:"#1dbf9f",accent2:"#6be7cb",bg:"#041510",surface:"#08231b",surface2:"#0d3328",surface3:"#12483a",text:"#f2fff9",muted:"#8eb5a8"},
+  oceano:{label:"Oceano",desc:"Azul profundo premium",accent:"#2878c8",accent2:"#42c7e8",bg:"#030d18",surface:"#071829",surface2:"#0b263e",surface3:"#103652",text:"#f3f9ff",muted:"#879fb5"},
+  grafite:{label:"Grafite Pro",desc:"Discreto e executivo",accent:"#aeb7c2",accent2:"#d9e0e8",bg:"#090b0e",surface:"#11151a",surface2:"#1a2027",surface3:"#252d36",text:"#f7f8fa",muted:"#929aa5"},
+  bronze:{label:"Bronze Nobre",desc:"Clássico e exclusivo",accent:"#b97a45",accent2:"#e1b382",bg:"#130d08",surface:"#20150d",surface2:"#302015",surface3:"#432e1e",text:"#fff9f3",muted:"#b9a08d"},
+  branco:{label:"Claro Premium",desc:"Leve e luminoso",accent:"#ad7b24",accent2:"#2878c8",bg:"#eef2f5",surface:"#ffffff",surface2:"#f4f7f9",surface3:"#e5ebef",text:"#14202a",muted:"#60717e"},
+  preto:{label:"Preto Absoluto",desc:"Luxo minimalista",accent:"#e7c477",accent2:"#b9c8d6",bg:"#000000",surface:"#080808",surface2:"#111111",surface3:"#1b1b1b",text:"#ffffff",muted:"#999999"}
+};
+function themeStorageKey(){
+  return `${THEME_STORAGE}_${state.user?.id||"local"}`;
+}
+function setThemeVariables(theme){
+  const root=document.documentElement;
+  Object.entries(theme).forEach(([key,value])=>{
+    if(["label","desc"].includes(key))return;
+    root.style.setProperty(`--${key}`,value);
+  });
+  root.style.setProperty("--gold",theme.accent);
+  root.style.setProperty("--cyan",theme.accent2);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content",theme.bg);
+}
+function applyTheme(name,persist=true){
+  const theme=THEMES[name]||THEMES.dourado;
+  state.theme=THEMES[name]?name:"dourado";
+  setThemeVariables(theme);
+  document.documentElement.dataset.theme=state.theme;
+  if(persist){
+    try{
+      localStorage.setItem(themeStorageKey(),state.theme);
+      localStorage.setItem(`${THEME_STORAGE}_last`,state.theme);
+    }catch(_){}
+  }
+  renderThemeOptions();
+}
+function applyCustomTheme(color,persist=true){
+  const safe=/^#[0-9a-f]{6}$/i.test(color)?color:"#d9b66f";
+  const custom={...THEMES.grafite,label:"Personalizado",desc:"Sua cor exclusiva",accent:safe,accent2:mixHex(safe,"#ffffff",.28)};
+  THEMES.personalizado=custom;
+  state.theme="personalizado";
+  setThemeVariables(custom);
+  document.documentElement.dataset.theme="personalizado";
+  if(persist){
+    try{
+      localStorage.setItem(`${themeStorageKey()}_custom`,safe);
+      localStorage.setItem(themeStorageKey(),"personalizado");
+      localStorage.setItem(`${THEME_STORAGE}_last`,"personalizado");
+      localStorage.setItem(`${THEME_STORAGE}_last_custom`,safe);
+    }catch(_){}
+  }
+  renderThemeOptions();
+}
+function mixHex(a,b,amount){
+  const pa=parseInt(a.slice(1),16),pb=parseInt(b.slice(1),16);
+  const ar=(pa>>16)&255,ag=(pa>>8)&255,ab=pa&255,br=(pb>>16)&255,bg=(pb>>8)&255,bb=pb&255;
+  const ch=(x,y)=>Math.round(x+(y-x)*amount).toString(16).padStart(2,"0");
+  return `#${ch(ar,br)}${ch(ag,bg)}${ch(ab,bb)}`;
+}
+function loadSavedTheme(){
+  let saved="dourado",custom="";
+  try{
+    saved=localStorage.getItem(themeStorageKey())||localStorage.getItem(`${THEME_STORAGE}_last`)||"dourado";
+    custom=localStorage.getItem(`${themeStorageKey()}_custom`)||localStorage.getItem(`${THEME_STORAGE}_last_custom`)||"";
+  }catch(_){}
+  if(saved==="personalizado"&&custom)applyCustomTheme(custom,false);
+  else applyTheme(saved,false);
+}
+function renderThemeOptions(){
+  const grid=$("#themeGrid");
+  if(!grid)return;
+  const entries=Object.entries(THEMES).filter(([key])=>key!=="personalizado");
+  grid.innerHTML=entries.map(([key,t])=>`<button type="button" class="theme-card ${state.theme===key?"active":""}" data-theme-choice="${key}">
+    <div class="theme-dots"><span class="theme-dot" style="background:${t.bg}"></span><span class="theme-dot" style="background:${t.accent}"></span><span class="theme-dot" style="background:${t.accent2}"></span></div>
+    <b>${esc(t.label)}</b><span>${esc(t.desc)}</span>
+  </button>`).join("");
+  grid.querySelectorAll("[data-theme-choice]").forEach(btn=>btn.onclick=()=>applyTheme(btn.dataset.themeChoice));
+  const badge=$("#themeCurrentBadge");
+  if(badge)badge.textContent=(THEMES[state.theme]?.label||"Personalizado")+" ativo";
+  const picker=$("#themeCustomColor");
+  if(picker&&state.theme==="personalizado")picker.value=THEMES.personalizado?.accent||"#d9b66f";
+}
+
 
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove("show"),2500)}
 function switchPage(page){$$(".page").forEach(x=>x.classList.remove("active"));$("#page-"+page)?.classList.add("active");$$("#nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===page));$("#pageTitle").textContent=pageTitles[page]||"CRM";$("#sidebar").classList.remove("open");if(page==="pipeline")renderPipeline();if(page==="reports")renderReports()}
@@ -385,19 +582,22 @@ function closeModal(){$("#modal").close()}
 
 async function init(){
   bind();
+  applyTheme(localStorage.getItem(`${THEME_STORAGE}_last`)||"dourado",false);
   const client=db();
-  if(!client){$("#syncStatus").textContent="Supabase não configurado";$("#settingsSupabase").textContent="Cliente não encontrado";toast("Supabase não configurado.");return}
+  if(!client){$("#syncStatus").textContent="Sistema indisponível";$("#settingsSupabase").textContent="Conexão indisponível";toast("Não foi possível conectar ao sistema.");return}
   try{
     const {data:{session}}=await client.auth.getSession();
     if(!session){location.href="login.html";return}
     state.user=session.user;
+    loadSavedTheme();
     await Promise.all([loadProfile(),loadProperties(),loadLeads(),loadCaptures(),loadTeam(),loadDrafts()]);
     renderAll();
-    $("#syncStatus").textContent="Supabase conectado";
-    $("#settingsSupabase").textContent="Conectado e autenticado";
-  }catch(e){console.error(e);$("#syncStatus").textContent="Erro de sincronização";toast("Não foi possível carregar todos os dados.")}
+    $("#syncStatus").textContent="Sistema online";
+    $("#settingsSupabase").textContent="Online e protegido";
+  }catch(e){console.error("[CRM]",e);$("#syncStatus").textContent="Conexão instável";toast("Não foi possível carregar todos os dados.")}
 }
 function bind(){
+  if(state.bound)return;state.bound=true;
   $$("#nav button").forEach(b=>b.onclick=()=>switchPage(b.dataset.page));
   $$("[data-open-page]").forEach(b=>b.onclick=()=>switchPage(b.dataset.openPage));
   $("#menuBtn").onclick=()=>$("#sidebar").classList.toggle("open");
@@ -417,6 +617,8 @@ function bind(){
   $("#closeAI").onclick=closeAI;$("#aiForm").onsubmit=sendAI;$("#modalClose").onclick=closeModal;
   $$(".ai-prompt").forEach(b=>b.onclick=()=>openAI(b.textContent));
   $("#logoutBtn").onclick=logout;
+  $("#themeCustomApply").onclick=()=>applyCustomTheme($("#themeCustomColor").value);
+  $("#themeResetBtn").onclick=()=>applyTheme("dourado");
 }
 async function loadProfile(){
   const c=db();const {data}=await c.from("user_profiles").select("*").eq("id",state.user.id).maybeSingle();state.profile=data||{};
@@ -431,7 +633,7 @@ async function loadCaptures(){const {data,error}=await db().from("captacoes_rada
 async function loadTeam(){const {data,error}=await db().from("user_profiles").select("*").order("full_name");if(error)throw error;state.team=data||[]}
 async function loadDrafts(){const {data}=await db().from("ai_property_drafts").select("*").eq("user_id",state.user.id).order("created_at",{ascending:false}).limit(20);state.drafts=data||[]}
 
-function renderAll(){renderDashboard();renderLeadTabs();renderLeads();renderPropertyTabs();renderProperties();renderCaptures();renderAgenda();renderTeam();renderDrafts();renderReports();fillFilters();if(!$("#ownerResults").innerHTML.trim())clearOwnerSearch()}
+function renderAll(){renderDashboard();renderLeadTabs();renderLeads();renderPropertyTabs();renderProperties();renderCaptures();renderAgenda();renderTeam();renderDrafts();renderReports();fillFilters();renderThemeOptions();if(!$("#ownerResults").innerHTML.trim())clearOwnerSearch()}
 function renderDashboard(){
   const hot=state.leads.filter(l=>(l.lead_score||0)>=60||String(l.lead_temperature).toLowerCase()==="quente");
   const publicProps=state.properties.filter(p=>p.is_public);
@@ -483,7 +685,7 @@ function renderCaptures(){
   $("#captureKpis").innerHTML=[["Oportunidades",state.captures.length,"Radar total"],["Quentes",state.captures.filter(c=>c.temperature==="quente").length,"Contato prioritário"],["Convertidas",state.captures.filter(c=>c.property_id).length,"Viraram imóveis"]].map(k=>`<div class="kpi"><small>${k[0]}</small><strong>${k[1]}</strong><span>${k[2]}</span></div>`).join("");
 }
 function captureCard(c){
-  const phone=digits(c.telefone);return `<article class="card"><div class="card-body"><div style="display:flex;justify-content:space-between;gap:8px"><h4>${esc(c.tipo_imovel||"Imóvel")} · ${esc(c.bairro||"-")}</h4><span class="badge ${c.temperature==="quente"?"hot":"blue"}">${esc(c.temperature||"frio")} · ${c.score||0}</span></div><p><b>Proprietário:</b> ${esc(c.nome_proprietario||"Não informado")}</p><p>${esc(c.endereco||"Endereço não informado")} · ${esc(c.preco||"Preço não informado")}</p><p>Origem: ${esc(c.origem_detalhe||c.origem||c.origem_tipo||"-")} · ${c.consentimento_contato?"Contato autorizado":"Sem consentimento"}</p><div class="card-actions">${phone&&c.consentimento_contato?`<a class="btn green" target="_blank" href="https://wa.me/${phone.length<=11?"55":""}${phone}">WhatsApp</a>`:""}<button class="btn" onclick="window.crmConvertCapture('${c.id}')">Converter em imóvel</button></div></div></article>`;
+  const phone=digits(c.telefone);return `<article class="card"><div class="card-body"><div style="display:flex;justify-content:space-between;gap:8px"><h4>${esc(c.tipo_imovel||"Imóvel")} · ${esc(c.bairro||"-")}</h4><span class="badge ${c.temperature==="quente"?"hot":"blue"}">${esc(c.temperature||"frio")} · ${c.score||0}</span></div><p><b>Proprietário:</b> ${esc(c.nome_proprietario||"Não informado")}</p><p>${esc(c.endereco||"Endereço não informado")} · ${esc(c.preco||"Preço não informado")}</p><p>${c.consentimento_contato?"Contato disponível para atendimento":"Contato protegido até autorização"}</p><div class="card-actions">${phone&&c.consentimento_contato?`<a class="btn green" target="_blank" href="https://wa.me/${phone.length<=11?"55":""}${phone}">WhatsApp</a>`:""}<button class="btn" onclick="window.crmConvertCapture('${c.id}')">Converter em imóvel</button></div></div></article>`;
 }
 
 function normalizeSearchValue(value){
@@ -539,8 +741,8 @@ function searchOwners(showAll=false){
   rows=rows.slice(0,100);
   $("#ownerResultCount").textContent=`${rows.length} resultado${rows.length===1?"":"s"}`;
   $("#ownerResultSummary").textContent=rows.length
-    ? "Registros internos compatíveis com a pesquisa."
-    : "Nenhum registro autorizado foi localizado. Confirme o endereço ou solicite uma certidão oficial.";
+    ? "Imóveis e proprietários compatíveis com a pesquisa."
+    : "Nenhum resultado foi localizado. Confirme os dados informados ou consulte a documentação do imóvel.";
 
   $("#ownerResults").innerHTML=rows.map(ownerResultCard).join("")||empty("Nenhum registro autorizado encontrado.");
 }
@@ -555,8 +757,6 @@ function ownerResultCard(row){
   const allowed=isCapture?Boolean(row.consentimento_contato):Boolean(row.data?.consentimento_contato);
   const phone=isCapture?row.telefone:(row.data?.telefone_proprietario||row.data?.owner_phone||"");
   const email=isCapture?row.email_proprietario:(row.owner_email||row.data?.email_proprietario||"");
-  const legalBasis=isCapture?(row.base_legal||row.origem_tipo||"Origem registrada no CRM"):(row.data?.base_legal||"Relação comercial registrada");
-  const source=isCapture?(row.origem_detalhe||row.origem||row.fonte_url||"Captação interna"):"Carteira de imóveis";
   const phoneText=allowed&&phone?phone:maskPhone(phone);
 
   return `<article class="card">
@@ -569,8 +769,6 @@ function ownerResultCard(row){
       <p><b>Inscrição imobiliária:</b> ${esc(registration)}</p>
       <p><b>Matrícula:</b> ${esc(registry)}</p>
       <p><b>Contato:</b> ${esc(phoneText)}${allowed&&email?` · ${esc(email)}`:""}</p>
-      <p><b>Origem:</b> ${esc(source)}</p>
-      <p><b>Base registrada:</b> ${esc(legalBasis)}</p>
       <div class="card-actions">
         ${allowed&&phone?`<a class="btn green" target="_blank" rel="noopener noreferrer" href="https://wa.me/${digits(phone).length<=11?"55":""}${digits(phone)}">WhatsApp</a>`:""}
         ${isCapture?`<button class="btn" onclick="window.crmConvertCapture('${row.id}')">Abrir captação</button>`:`<button class="btn" onclick="window.crmOpenProperty('${row.id}')">Abrir imóvel</button>`}
