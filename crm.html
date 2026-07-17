@@ -3,132 +3,456 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#07080a">
+  <meta name="theme-color" content="#071018">
   <meta name="robots" content="noindex,nofollow">
-  <title>Leads Imóveis · CRM Arquitetura Completa</title>
+  <title>Leads Imóveis · CRM Next</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="auth-guard.js"></script>
+
   <style>
+    :root{
+      --bg:#061018;--surface:#0b1721;--surface2:#101f2b;--surface3:#142735;
+      --line:rgba(255,255,255,.09);--text:#f7fbff;--muted:#8fa5b5;
+      --gold:#d9b66f;--cyan:#65d9ff;--green:#56d58a;--orange:#ffb35c;
+      --red:#ff6f75;--blue:#77a8ff;--purple:#a787ff;
+      --radius:18px;--shadow:0 20px 55px rgba(0,0,0,.32);
+      --sidebar:270px;--header:72px;
+    }
     *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%;background:#050506;color:#f7f4ed;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
-    body{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 50% 0%,rgba(216,181,109,.18),transparent 35%),#050506}
-    .loader-card{width:min(500px,94vw);padding:30px;border:1px solid rgba(216,181,109,.28);border-radius:24px;background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.02));box-shadow:0 30px 100px rgba(0,0,0,.6);text-align:center}
-    .loader-logo{width:66px;height:66px;margin:0 auto 15px;border:1px solid rgba(216,181,109,.55);border-radius:20px;display:grid;place-items:center;color:#ffe8aa;background:radial-gradient(circle,#312612,#090909);font-family:Georgia,serif;font-size:20px}
-    .loader-kicker{margin:0 0 8px;color:#d8b56d;font-size:10px;font-weight:900;letter-spacing:2.2px}
-    h1{margin:0;font-size:21px}p{color:#aaa69d;line-height:1.55;font-size:13px}
-    button{min-height:43px;padding:10px 16px;border:1px solid rgba(216,181,109,.55);border-radius:12px;color:#171006;background:linear-gradient(135deg,#efd28f,#d8b56d);font-weight:900;cursor:pointer}
-    .spinner{width:28px;height:28px;margin:18px auto 0;border:3px solid rgba(255,255,255,.10);border-top-color:#d8b56d;border-radius:50%;animation:spin .8s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
+    html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+    body{overflow-x:hidden;background:
+      radial-gradient(circle at 10% -10%,rgba(101,217,255,.09),transparent 34%),
+      radial-gradient(circle at 85% 0,rgba(217,182,111,.10),transparent 35%),
+      linear-gradient(150deg,#061018,#08141d 45%,#04090e)}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    a{color:inherit;text-decoration:none}
+    .app{display:grid;grid-template-columns:var(--sidebar) minmax(0,1fr);min-height:100vh}
+    .sidebar{position:sticky;top:0;height:100vh;padding:16px 14px;border-right:1px solid var(--line);
+      background:linear-gradient(180deg,rgba(7,17,25,.98),rgba(4,10,15,.99));z-index:50;display:flex;flex-direction:column;gap:14px}
+    .brand{display:flex;gap:11px;align-items:center;padding:8px;border-bottom:1px solid var(--line)}
+    .brand img{width:48px;height:48px;border-radius:14px;object-fit:cover;border:1px solid rgba(217,182,111,.35)}
+    .brand strong{display:block;letter-spacing:1.4px;font-size:14px}
+    .brand small{display:block;color:var(--gold);font-size:9px;letter-spacing:2.2px;margin-top:3px}
+    .nav-label{font-size:10px;color:#5f7483;letter-spacing:1.5px;text-transform:uppercase;padding:5px 9px}
+    .nav{display:flex;flex-direction:column;gap:5px;overflow:auto}
+    .nav button{border:1px solid transparent;background:transparent;color:#bdd0dc;min-height:43px;padding:9px 11px;border-radius:12px;
+      display:flex;align-items:center;gap:10px;text-align:left;transition:.18s}
+    .nav button:hover,.nav button.active{border-color:rgba(101,217,255,.22);background:linear-gradient(90deg,rgba(101,217,255,.12),rgba(217,182,111,.05));color:#fff}
+    .nav .ico{width:22px;text-align:center;font-size:16px}
+    .sidebar-foot{margin-top:auto;border:1px solid var(--line);border-radius:15px;padding:12px;background:rgba(255,255,255,.025)}
+    .sidebar-foot b{font-size:12px}.sidebar-foot p{font-size:11px;color:var(--muted);line-height:1.45;margin:6px 0 0}
+    .main{min-width:0}
+    .topbar{position:sticky;top:0;z-index:40;height:var(--header);display:flex;align-items:center;gap:12px;padding:12px 18px;
+      border-bottom:1px solid var(--line);background:rgba(6,16,24,.87);backdrop-filter:blur(18px)}
+    .menu-btn{display:none}
+    .page-title small{color:var(--gold);font-size:9px;letter-spacing:1.4px;text-transform:uppercase}
+    .page-title h1{font-size:18px;margin:2px 0 0}
+    .global-search{margin-left:auto;width:min(430px,45vw);position:relative}
+    .global-search input{width:100%;height:42px;padding:0 42px 0 14px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.20);color:#fff}
+    .global-search button{position:absolute;right:5px;top:5px;width:32px;height:32px;border-radius:9px;border:0;background:var(--gold);color:#151006;font-weight:900}
+    .top-actions{display:flex;align-items:center;gap:8px}
+    .icon-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:#dbe8f0}
+    .profile{display:flex;align-items:center;gap:9px;border-left:1px solid var(--line);padding-left:12px}
+    .avatar{width:38px;height:38px;border-radius:12px;object-fit:cover;background:linear-gradient(135deg,var(--gold),#455d6b)}
+    .profile b{display:block;font-size:12px}.profile span{display:block;color:var(--muted);font-size:10px}
+    .content{padding:18px;max-width:1600px;margin:0 auto}
+    .page{display:none}.page.active{display:block;animation:fade .18s ease}
+    @keyframes fade{from{opacity:.2;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .hero{border:1px solid var(--line);border-radius:22px;padding:22px;background:
+      radial-gradient(circle at 80% 10%,rgba(101,217,255,.12),transparent 35%),
+      radial-gradient(circle at 10% 0,rgba(217,182,111,.14),transparent 35%),
+      linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.018));box-shadow:var(--shadow)}
+    .hero h2{font-size:24px;margin:0}.hero p{margin:7px 0 0;color:var(--muted);max-width:760px;line-height:1.55}
+    .hero-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+    .btn{border:1px solid rgba(217,182,111,.35);background:linear-gradient(135deg,rgba(217,182,111,.26),rgba(101,217,255,.08));
+      color:#fff6db;border-radius:11px;padding:10px 13px;font-weight:800;font-size:12px}
+    .btn:hover{filter:brightness(1.12)}.btn.ghost{background:rgba(255,255,255,.04);border-color:var(--line);color:#d9e5ed}
+    .btn.green{background:rgba(86,213,138,.12);border-color:rgba(86,213,138,.34);color:#d9ffe8}
+    .btn.red{background:rgba(255,111,117,.11);border-color:rgba(255,111,117,.32);color:#ffd9dc}
+    .kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:16px 0}
+    .kpi{border:1px solid var(--line);border-radius:16px;padding:15px;background:linear-gradient(145deg,rgba(255,255,255,.044),rgba(255,255,255,.015))}
+    .kpi small{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.7px}
+    .kpi strong{display:block;font-size:27px;margin-top:8px}.kpi span{font-size:10px;color:#718897}
+    .grid-2{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .panel{border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.015));box-shadow:0 12px 35px rgba(0,0,0,.18);overflow:hidden}
+    .panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:15px 16px;border-bottom:1px solid var(--line)}
+    .panel-head h3{font-size:13px;margin:0}.panel-head p{font-size:10px;color:var(--muted);margin:4px 0 0}.panel-body{padding:15px}
+    .tabs{display:flex;gap:7px;overflow:auto;padding-bottom:4px}.tab{white-space:nowrap;border:1px solid var(--line);background:rgba(255,255,255,.03);color:#a8bdca;border-radius:999px;padding:8px 11px;font-size:11px}
+    .tab.active{background:rgba(101,217,255,.12);border-color:rgba(101,217,255,.30);color:#eaffff}
+    .toolbar{display:grid;grid-template-columns:2fr repeat(3,minmax(130px,1fr)) auto;gap:9px;margin:12px 0}
+    input,select,textarea{width:100%;border:1px solid var(--line);background:rgba(0,0,0,.20);color:#fff;border-radius:11px;padding:10px 11px;outline:none}
+    input:focus,select:focus,textarea:focus{border-color:rgba(101,217,255,.42);box-shadow:0 0 0 3px rgba(101,217,255,.07)}
+    select option{background:#0b1721}
+    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+    .card{border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.025);overflow:hidden}
+    .card-img{height:150px;background:#10202b center/cover no-repeat;position:relative}
+    .card-body{padding:13px}.card h4{margin:0 0 5px;font-size:14px}.card p{margin:4px 0;color:var(--muted);font-size:11px;line-height:1.45}
+    .card-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:11px}.card-actions .btn{padding:7px 9px;font-size:10px}
+    .badge{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:4px 7px;font-size:9px;color:#c6d5df;background:rgba(255,255,255,.04)}
+    .badge.hot{color:#ffe7ad;border-color:rgba(217,182,111,.35);background:rgba(217,182,111,.10)}
+    .badge.green{color:#d8ffe6;border-color:rgba(86,213,138,.34);background:rgba(86,213,138,.10)}
+    .badge.blue{color:#dcf6ff;border-color:rgba(101,217,255,.30);background:rgba(101,217,255,.09)}
+    .list{display:flex;flex-direction:column;gap:8px}
+    .row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:11px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.023)}
+    .dot{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:rgba(101,217,255,.10);color:var(--cyan);font-weight:900}
+    .row b{font-size:12px}.row span{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+    .kanban{display:grid;grid-template-columns:repeat(5,minmax(230px,1fr));gap:12px;overflow:auto;padding-bottom:8px}
+    .column{border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.02);min-height:420px}
+    .column-head{padding:12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}.column-head b{font-size:11px}.column-body{padding:10px;display:flex;flex-direction:column;gap:8px}
+    .mini{padding:10px;border:1px solid var(--line);border-radius:12px;background:#0c1923}.mini b{font-size:11px}.mini p{font-size:9px;color:var(--muted);margin:4px 0}
+    .empty{padding:28px;border:1px dashed var(--line);border-radius:13px;text-align:center;color:var(--muted);font-size:11px}
+    .loading{opacity:.6;pointer-events:none}
+    dialog{border:0;background:transparent;color:#fff;width:min(780px,94vw);max-height:92vh}
+    dialog::backdrop{background:rgba(0,0,0,.78);backdrop-filter:blur(5px)}
+    .modal{border:1px solid var(--line);border-radius:20px;background:#091720;overflow:hidden;box-shadow:0 35px 100px rgba(0,0,0,.7)}
+    .modal-head,.modal-foot{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
+    .modal-foot{border-top:1px solid var(--line);border-bottom:0;justify-content:flex-end;gap:8px}
+    .modal-body{padding:16px;max-height:68vh;overflow:auto}
+    .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.full{grid-column:1/-1}.field label{display:block;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:0 0 5px}
+    .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;z-index:999;background:#0d1d27;border:1px solid rgba(101,217,255,.28);padding:10px 14px;border-radius:999px;font-size:11px;transition:.2s}.toast.show{opacity:1;transform:translateX(-50%)}
+    .ai-fab{position:fixed;right:18px;bottom:18px;width:58px;height:58px;border-radius:18px;border:1px solid rgba(217,182,111,.35);background:linear-gradient(135deg,#152a36,#d9b66f);color:#fff;font-weight:900;z-index:80;box-shadow:var(--shadow)}
+    .ai-drawer{position:fixed;right:-420px;top:0;width:min(410px,100vw);height:100vh;background:#07141d;border-left:1px solid var(--line);z-index:90;transition:.22s;display:flex;flex-direction:column}.ai-drawer.open{right:0}
+    .ai-head{padding:14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}.ai-log{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+    .msg{max-width:88%;padding:10px 11px;border-radius:13px;font-size:11px;line-height:1.5;background:rgba(255,255,255,.05)}.msg.me{margin-left:auto;background:rgba(101,217,255,.11)}
+    .ai-form{display:flex;gap:7px;padding:12px;border-top:1px solid var(--line)}
+    @media(max-width:1180px){.kpis{grid-template-columns:repeat(3,1fr)}.grid-3{grid-template-columns:1fr 1fr}}
+    @media(max-width:900px){
+      .app{display:block}.sidebar{position:fixed;left:-285px;width:270px;transition:.22s;box-shadow:25px 0 70px rgba(0,0,0,.5)}.sidebar.open{left:0}
+      .menu-btn{display:inline-grid}.global-search{order:3;width:100%;margin:0}.topbar{height:auto;min-height:66px;flex-wrap:wrap;padding:10px}.profile{display:none}
+      .content{padding:11px}.kpis{grid-template-columns:repeat(2,1fr)}.grid-2,.grid-3{grid-template-columns:1fr}.toolbar{grid-template-columns:1fr}.kanban{grid-template-columns:repeat(5,260px)}
+    }
+    @media(max-width:560px){.kpis{grid-template-columns:1fr}.hero h2{font-size:20px}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.top-actions .icon-btn:nth-child(2){display:none}}
+    @media(min-width:1700px){.content{max-width:1800px}.cards{grid-template-columns:repeat(auto-fill,minmax(310px,1fr))}}
   </style>
 </head>
 <body>
-  <main class="loader-card">
-    <div class="loader-logo">LI</div>
-    <p class="loader-kicker">LEADS IMÓVEIS</p>
-    <h1>Inicializando arquitetura completa</h1>
-    <p>Dashboard, leads, imóveis, captação, funil, agenda, corretores, relatórios, configurações e IA.</p>
-    <div class="spinner" aria-label="Carregando"></div>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <img src="midia/logo-leads.png.jpeg" alt="Leads Imóveis">
+      <div><strong>LEADS IMÓVEIS</strong><small>CRM NEXT · 2026</small></div>
+    </div>
+    <div class="nav-label">Operação</div>
+    <nav class="nav" id="nav">
+      <button class="active" data-page="dashboard"><span class="ico">◈</span>Visão geral</button>
+      <button data-page="leads"><span class="ico">◆</span>Leads</button>
+      <button data-page="pipeline"><span class="ico">▥</span>Funil comercial</button>
+      <button data-page="properties"><span class="ico">⌂</span>Imóveis</button>
+      <button data-page="capture"><span class="ico">◎</span>Captação</button>
+      <button data-page="agenda"><span class="ico">▣</span>Agenda e tarefas</button>
+      <div class="nav-label">Gestão</div>
+      <button data-page="team"><span class="ico">♙</span>Corretores</button>
+      <button data-page="reports"><span class="ico">◫</span>Relatórios</button>
+      <button data-page="ai"><span class="ico">✦</span>Central IA</button>
+      <button data-page="settings"><span class="ico">⚙</span>Configurações</button>
+    </nav>
+    <div class="sidebar-foot">
+      <b id="syncStatus">Conectando ao Supabase...</b>
+      <p>Imóveis, leads, usuários, captações e IA integrados em uma interface modular.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" id="menuBtn">☰</button>
+      <div class="page-title"><small>Leads Imóveis</small><h1 id="pageTitle">Visão geral</h1></div>
+      <div class="global-search"><input id="globalSearch" placeholder="Código, imóvel, lead, proprietário ou bairro"><button id="globalSearchBtn">⌕</button></div>
+      <div class="top-actions">
+        <button class="icon-btn" id="quickNew" title="Novo cadastro">＋</button>
+        <button class="icon-btn" id="refreshBtn" title="Atualizar dados">↻</button>
+        <div class="profile"><img class="avatar" id="profileAvatar" src="midia/logo-leads.png.jpeg" alt=""><div><b id="profileName">Carregando...</b><span id="profileRole">Usuário</span></div></div>
+      </div>
+    </header>
+
+    <section class="content">
+      <section class="page active" id="page-dashboard">
+        <div class="hero">
+          <h2 id="welcomeTitle">Central de operação imobiliária</h2>
+          <p>Um CRM modular para organizar atendimento, imóveis, captação, agenda, equipe e inteligência comercial sem acumular todas as informações na mesma tela.</p>
+          <div class="hero-actions">
+            <button class="btn" data-open-page="leads">Atender leads</button>
+            <button class="btn" data-open-page="properties">Abrir imóveis</button>
+            <button class="btn" data-open-page="capture">Nova captação</button>
+            <button class="btn ghost" id="heroAI">Consultar IA</button>
+          </div>
+        </div>
+        <div class="kpis" id="dashboardKpis"></div>
+        <div class="grid-2">
+          <div class="panel"><div class="panel-head"><div><h3>Leads prioritários</h3><p>Atendimento recomendado agora</p></div><button class="btn ghost" data-open-page="leads">Ver todos</button></div><div class="panel-body"><div class="list" id="priorityLeads"></div></div></div>
+          <div class="panel"><div class="panel-head"><div><h3>Agenda próxima</h3><p>Retornos e visitas</p></div><button class="btn ghost" data-open-page="agenda">Agenda</button></div><div class="panel-body"><div class="list" id="nextAgenda"></div></div></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-leads">
+        <div class="panel">
+          <div class="panel-head"><div><h3>Leads e atendimento</h3><p>Site, WhatsApp, tráfego e distribuição para corretores</p></div><button class="btn" id="newLeadBtn">＋ Novo lead</button></div>
+          <div class="panel-body">
+            <div class="tabs" id="leadTabs"></div>
+            <div class="toolbar"><input id="leadSearch" placeholder="Buscar nome, telefone, bairro ou interesse"><select id="leadTemp"><option value="">Todas as temperaturas</option><option>quente</option><option>morno</option><option>frio</option></select><select id="leadStatus"><option value="">Todos os status</option><option>novo</option><option>em_atendimento</option><option>aguardando</option><option>fechado</option><option>perdido</option></select><select id="leadOwner"><option value="">Todos os corretores</option></select><button class="btn ghost" id="leadFilterBtn">Filtrar</button></div>
+            <div class="cards" id="leadCards"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-pipeline">
+        <div class="panel"><div class="panel-head"><div><h3>Funil comercial</h3><p>Negociações organizadas por etapa</p></div></div><div class="panel-body"><div class="kanban" id="pipelineBoard"></div></div></div>
+      </section>
+
+      <section class="page" id="page-properties">
+        <div class="panel">
+          <div class="panel-head"><div><h3>Carteira de imóveis</h3><p>Publicados, internos, rascunhos e vendidos</p></div><button class="btn" id="newPropertyBtn">＋ Novo imóvel</button></div>
+          <div class="panel-body">
+            <div class="tabs" id="propertyTabs"></div>
+            <div class="toolbar"><input id="propertySearch" placeholder="Código, título, proprietário ou bairro"><select id="propertyPurpose"><option value="">Todas as finalidades</option><option>Venda</option><option>Aluguel Anual</option><option>Temporada</option></select><select id="propertyType"><option value="">Todos os tipos</option></select><select id="propertyVisibility"><option value="">Todos</option><option value="public">Publicados</option><option value="internal">Internos</option></select><button class="btn ghost" id="propertyFilterBtn">Filtrar</button></div>
+            <div class="cards" id="propertyCards"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-capture">
+        <div class="grid-3" id="captureKpis"></div>
+        <div class="grid-2">
+          <div class="panel"><div class="panel-head"><div><h3>Radar de captação</h3><p>Oportunidades registradas com consentimento e origem</p></div><button class="btn" id="newCaptureBtn">＋ Cadastrar oportunidade</button></div><div class="panel-body"><div class="toolbar" style="grid-template-columns:2fr 1fr auto"><input id="captureSearch" placeholder="Bairro, proprietário, telefone ou tipo"><select id="captureTemp"><option value="">Todas</option><option>quente</option><option>morno</option><option>frio</option></select><button class="btn ghost" id="captureFilterBtn">Filtrar</button></div><div class="cards" id="captureCards"></div></div></div>
+          <div class="panel"><div class="panel-head"><div><h3>Fluxo de captação</h3><p>Do primeiro contato à publicação</p></div></div><div class="panel-body"><div class="list">
+            <div class="row"><div class="dot">1</div><div><b>Oportunidade identificada</b><span>Origem, consentimento e dados básicos</span></div></div>
+            <div class="row"><div class="dot">2</div><div><b>Contato com proprietário</b><span>Registrar retorno e próxima ação</span></div></div>
+            <div class="row"><div class="dot">3</div><div><b>Visita e avaliação</b><span>Fotos, documentação e condições</span></div></div>
+            <div class="row"><div class="dot">4</div><div><b>Revisão comercial</b><span>Preço, finalidade e descrição</span></div></div>
+            <div class="row"><div class="dot">5</div><div><b>Publicação autorizada</b><span>Somente após revisão do corretor</span></div></div>
+          </div></div></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-agenda">
+        <div class="panel"><div class="panel-head"><div><h3>Agenda e tarefas</h3><p>Visitas, retornos, propostas e prioridades</p></div><button class="btn" id="newTaskBtn">＋ Nova tarefa</button></div><div class="panel-body"><div class="tabs" id="agendaTabs"><button class="tab active">Hoje</button><button class="tab">Próximas</button><button class="tab">Visitas</button><button class="tab">Retornos</button><button class="tab">Concluídas</button></div><div class="list" id="agendaList" style="margin-top:12px"></div></div></div>
+      </section>
+
+      <section class="page" id="page-team">
+        <div class="panel"><div class="panel-head"><div><h3>Equipe e acessos</h3><p>Corretores, administradores, aprovação e presença</p></div></div><div class="panel-body"><div class="cards" id="teamCards"></div></div></div>
+      </section>
+
+      <section class="page" id="page-reports">
+        <div class="kpis" id="reportKpis"></div>
+        <div class="grid-3">
+          <div class="panel"><div class="panel-head"><h3>Leads por temperatura</h3></div><div class="panel-body"><div class="list" id="reportTemps"></div></div></div>
+          <div class="panel"><div class="panel-head"><h3>Imóveis por finalidade</h3></div><div class="panel-body"><div class="list" id="reportPurposes"></div></div></div>
+          <div class="panel"><div class="panel-head"><h3>Captações por status</h3></div><div class="panel-body"><div class="list" id="reportCaptures"></div></div></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-ai">
+        <div class="grid-2">
+          <div class="panel"><div class="panel-head"><div><h3>Central IA</h3><p>OpenAI protegida por Supabase Edge Function</p></div><span class="badge green">JWT protegido</span></div><div class="panel-body">
+            <div class="hero" style="box-shadow:none"><h2>Assistente comercial da Leads Imóveis</h2><p>Analisa dados autorizados, sugere próximas ações, cria mensagens e descrições. Não publica nem altera imóveis automaticamente.</p><div class="hero-actions"><button class="btn ai-prompt">Prioridades de hoje</button><button class="btn ai-prompt">Leads quentes</button><button class="btn ai-prompt">Gerar follow-up</button><button class="btn ai-prompt">Analisar captações</button></div></div>
+          </div></div>
+          <div class="panel"><div class="panel-head"><h3>Rascunhos da IA</h3></div><div class="panel-body"><div class="list" id="aiDrafts"></div></div></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-settings">
+        <div class="grid-2">
+          <div class="panel"><div class="panel-head"><h3>Conta e perfil</h3></div><div class="panel-body"><div class="form-grid"><div class="field"><label>Nome</label><input id="settingsName" readonly></div><div class="field"><label>E-mail</label><input id="settingsEmail" readonly></div><div class="field"><label>Função</label><input id="settingsRole" readonly></div><div class="field"><label>Status</label><input id="settingsAccess" readonly></div></div></div></div>
+          <div class="panel"><div class="panel-head"><h3>Sistema</h3></div><div class="panel-body"><div class="list"><div class="row"><div class="dot">DB</div><div><b>Supabase</b><span id="settingsSupabase">Verificando conexão...</span></div></div><div class="row"><div class="dot">IA</div><div><b>Edge Function</b><span>crm-ai-assistant-openai-test</span></div></div><div class="row"><div class="dot">WEB</div><div><b>Publicação</b><span>Imóveis públicos sincronizados por regra do banco</span></div></div></div><button class="btn red" id="logoutBtn" style="margin-top:12px">Sair com segurança</button></div></div>
+        </div>
+      </section>
+    </section>
   </main>
-  <!-- O CRM-base permanece intacto. Esta camada apenas cria páginas internas e organização visual. -->
-  <!-- Módulos: Dashboard -->
-  <!-- Módulos: Leads -->
-  <!-- Módulos: Imóveis -->
-  <!-- Módulos: Captação -->
-  <!-- Módulos: Funil -->
-  <!-- Módulos: Agenda -->
-  <!-- Módulos: Corretores -->
-  <!-- Módulos: Relatórios -->
-  <!-- Módulos: Configurações -->
-  <!-- Módulos: IA Consultiva -->
-  <!-- Preserva: Perfil atual -->
-  <!-- Preserva: Supabase -->
-  <!-- Preserva: Realtime -->
-  <!-- Preserva: Fotos -->
-  <!-- Preserva: Publicação -->
-  <!-- Preserva: IDs e funções -->
-  <!-- Segurança: sem service_role -->
-  <!-- Segurança: sem chave OpenAI -->
-  <!-- Radar: usa sessão existente -->
-  <!-- Radar: importa somente para formulário -->
-  <!-- TV 4K: parâmetro ?tv=1 -->
-  <!-- TV automático: Tizen/WebOS/VIDAA/Roku -->
-  <!-- Celular: menu e IA responsivos -->
-  <!-- Tema: salvo localmente -->
-  <!-- Branch de teste recomendada -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <!-- Arquitetura Leads Imóveis -->
-  <script>
-(function LeadsCrmArchitectureLoader(){
-  "use strict";
-  var SOURCES=[
-    "https://raw.githubusercontent.com/NatanAlvezz/NatanAlvezz/1a43ab2441dd0c33e2cc8bf9bc00a0556f534ca8/crm.html",
-    "https://cdn.jsdelivr.net/gh/NatanAlvezz/NatanAlvezz@1a43ab2441dd0c33e2cc8bf9bc00a0556f534ca8/crm.html"
-  ];
-  var ARCHITECTURE_CSS=":root{--crm-side:270px;--crm-ai:340px;--crm-line:rgba(255,255,255,.10);--crm-soft:rgba(255,255,255,.035);--crm-gold:#d8b56d;--crm-radius:16px}\nbody{background:radial-gradient(circle at 12% -8%,rgba(216,181,109,.14),transparent 31%),linear-gradient(145deg,#050506,#090a0d 55%,#040405)!important}\n.app{grid-template-columns:var(--crm-side) minmax(0,1fr) var(--crm-ai)!important}.sidebar{padding:12px 10px!important;gap:10px!important}.nav{gap:5px!important;overflow:auto!important}.nav button{min-height:42px!important;padding:9px 11px!important;border-radius:11px!important;font-size:12px!important}.topbar{min-height:68px!important;padding:10px 14px!important}.content{max-width:1580px!important;padding:14px!important}.panel{margin-bottom:13px!important}.panel-head{padding:13px 15px!important}.panel-body{padding:14px 15px!important}.grid-kpi,.two-col,.cards,.grid-list{gap:12px!important}.kpi{min-height:92px!important;padding:14px!important}.rightbar{padding:12px 10px!important}.ai-card{height:calc(100dvh - 24px)!important;display:flex!important;flex-direction:column!important}.chat-log{flex:1!important;min-height:180px!important;max-height:none!important}\n.crm-tools{display:grid;gap:7px;padding:9px;border:1px solid rgba(216,181,109,.22);border-radius:13px;background:var(--crm-soft)}.crm-tools-title{font-size:9px;font-weight:900;letter-spacing:1.4px;color:var(--crm-gold)}.crm-search{display:flex;gap:6px}.crm-search input{min-height:38px!important;padding:8px 10px!important;font-size:12px!important}.crm-search button{width:38px;min-height:38px!important;padding:0!important}.crm-page-title{min-width:175px}.crm-page-title small{display:block;color:#8f8b82;font-size:9px;letter-spacing:1.2px}.crm-page-title strong{font-size:15px}.crm-side-toggle,.crm-ai-control{width:38px!important;height:38px!important;min-height:38px!important;padding:0!important;border-radius:11px!important}.crm-ai-controls{display:flex;gap:6px;margin-left:auto}.rightbar.crm-ai-mini .ai-hero,.rightbar.crm-ai-mini .ai-section,.rightbar.crm-ai-mini .quick{display:none!important}.crm-ai-open{display:none;position:fixed;right:16px;bottom:18px;z-index:170;width:54px;height:54px;border:0;border-radius:18px;color:#171006;background:linear-gradient(135deg,#efd28f,#d8b56d);font-weight:900;box-shadow:0 14px 35px rgba(0,0,0,.45)}body.crm-side-closed .app{grid-template-columns:78px minmax(0,1fr) var(--crm-ai)!important}body.crm-side-closed .brand>div:last-child,body.crm-side-closed .nav button span,body.crm-side-closed .plan,body.crm-side-closed .crm-tools{display:none!important}body.crm-side-closed .nav button{justify-content:center!important}body.crm-ai-closed .app{grid-template-columns:var(--crm-side) minmax(0,1fr) 0!important}body.crm-ai-closed .rightbar{display:none!important}body.crm-ai-closed .crm-ai-open{display:grid;place-items:center}body.crm-side-closed.crm-ai-closed .app{grid-template-columns:78px minmax(0,1fr) 0!important}\n.crm-tabs{display:flex;gap:7px;overflow-x:auto;padding:0 0 12px;scrollbar-width:thin}.crm-tab{flex:0 0 auto;min-height:36px!important;padding:7px 11px!important;border-radius:999px!important;background:rgba(255,255,255,.04)!important;border:1px solid rgba(255,255,255,.10)!important;color:#c9c4b9!important;font-size:11px!important}.crm-tab.active{color:#171006!important;background:linear-gradient(135deg,#efd28f,#d8b56d)!important;border-color:#d8b56d!important}\n.crm-module-hero{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px;border:1px solid rgba(216,181,109,.22);border-radius:18px;background:radial-gradient(circle at 100% 0,rgba(216,181,109,.14),transparent 45%),rgba(255,255,255,.025);margin-bottom:13px}.crm-module-hero h1{font-size:20px;margin:0 0 5px}.crm-module-hero p{color:#a9a7a0;font-size:12px;margin:0}.crm-module-actions{display:flex;gap:8px;flex-wrap:wrap}.crm-module-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:13px}.crm-stat,.crm-card{border:1px solid var(--crm-line);background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018));border-radius:var(--crm-radius);padding:15px;box-shadow:0 10px 28px rgba(0,0,0,.20)}.crm-stat small{display:block;color:#a9a7a0;font-size:10px;text-transform:uppercase;letter-spacing:.7px}.crm-stat strong{display:block;font-size:25px;color:#fff2cf;margin:6px 0 2px}.crm-stat span{color:#858179;font-size:11px}.crm-card h3{font-size:14px;margin:0 0 8px}.crm-card p{font-size:12px;color:#aaa69d;line-height:1.45;margin:4px 0}.crm-card-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}.crm-section-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:13px}.crm-empty{padding:25px;text-align:center;color:#8f8b82;border:1px dashed rgba(255,255,255,.12);border-radius:14px}.crm-radar-list,.crm-team-list{display:grid;gap:9px}.crm-radar-row,.crm-team-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;padding:12px;border:1px solid rgba(255,255,255,.09);border-radius:13px;background:rgba(255,255,255,.025)}.crm-radar-row b,.crm-team-row b{display:block;font-size:13px}.crm-radar-row span,.crm-team-row span{display:block;color:#969188;font-size:11px;margin-top:3px}.crm-radar-actions{display:flex;gap:6px}.crm-funnel{display:grid;grid-template-columns:repeat(6,minmax(220px,1fr));gap:10px;overflow-x:auto;padding-bottom:8px}.crm-funnel-col{border:1px solid rgba(255,255,255,.09);border-radius:14px;background:rgba(255,255,255,.02);padding:10px;min-height:280px}.crm-funnel-head{display:flex;justify-content:space-between;gap:8px;padding:3px 2px 10px;color:#fff0c6;font-size:12px;font-weight:900}.crm-funnel-item{padding:10px;margin-bottom:8px;border:1px solid rgba(255,255,255,.08);border-radius:11px;background:rgba(0,0,0,.22)}.crm-funnel-item b{font-size:12px}.crm-funnel-item span{display:block;color:#97938b;font-size:10px;margin-top:4px}.crm-theme-row{display:flex;gap:8px;flex-wrap:wrap}.crm-theme{width:40px;height:40px;min-height:40px!important;border-radius:12px!important;padding:0!important;border:2px solid rgba(255,255,255,.18)!important}.crm-theme[data-theme=\"gold\"]{background:#d8b56d!important}.crm-theme[data-theme=\"blue\"]{background:#73b8ff!important}.crm-theme[data-theme=\"green\"]{background:#63d68a!important}.crm-theme[data-theme=\"purple\"]{background:#a887ff!important}.crm-theme[data-theme=\"graphite\"]{background:#666b73!important}\nbody.crm-theme-blue{--gold:#73b8ff;--crm-gold:#73b8ff}body.crm-theme-green{--gold:#63d68a;--crm-gold:#63d68a}body.crm-theme-purple{--gold:#a887ff;--crm-gold:#a887ff}body.crm-theme-graphite{--gold:#a9adb3;--crm-gold:#a9adb3}\nbody.crm-tv .app{grid-template-columns:290px minmax(0,1fr) 370px!important}body.crm-tv .content{max-width:1800px!important}body.crm-tv .nav button{font-size:14px!important}body.crm-tv .panel-head h2{font-size:17px!important}\n@media(max-width:1250px) and (min-width:981px){.app{grid-template-columns:88px minmax(0,1fr) 315px!important}.crm-tools{display:none}.crm-module-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.content{padding:12px!important}.rightbar{padding:10px!important}}\n@media(max-width:980px){body{padding-bottom:calc(88px + var(--safe))!important}.app{display:block!important}.content{padding:10px!important}.topbar{gap:8px!important}.crm-page-title{order:2;flex:1}.topbar .search{order:3;width:100%!important}.crm-module-hero{align-items:flex-start;flex-direction:column}.crm-module-grid,.crm-section-grid{grid-template-columns:1fr!important}.rightbar{width:min(390px,100vw)!important}.ai-card{height:100dvh!important}.crm-ai-open{bottom:92px}.crm-funnel{grid-template-columns:repeat(6,260px)}}\n@media(max-width:620px){.grid-kpi,.form-grid,.central-actions{grid-template-columns:1fr!important}.panel-head{align-items:flex-start!important}.panel-head .btn{width:100%}.toolbar{display:grid!important;grid-template-columns:1fr!important}.property-card,.item-card{min-width:0!important}.crm-page-title strong{font-size:13px}.crm-radar-row,.crm-team-row{grid-template-columns:1fr}.crm-radar-actions{width:100%}.crm-radar-actions .btn{flex:1}}";
-  var ARCHITECTURE_JS="(function LeadsCrmArchitecture(){\n\"use strict\";\nif(window.__LEADS_CRM_ARCHITECTURE__)return;window.__LEADS_CRM_ARCHITECTURE__=\"2026.07.16-v2\";\nvar radarRows=[];\nfunction id(v){return document.getElementById(v)}\nfunction db(){return window.db&&typeof window.db===\"object\"?window.db:{imoveis:[],clientes:[],tarefas:[],settings:{}}}\nfunction esc(v){return String(v==null?\"\":v).replace(/[&<>\"']/g,function(m){return{\"&\":\"&amp;\",\"<\":\"&lt;\",\">\":\"&gt;\",'\"':\"&quot;\",\"'\":\"&#39;\"}[m]})}\nfunction money(v){var n=Number(v)||0;return n?n.toLocaleString(\"pt-BR\",{style:\"currency\",currency:\"BRL\",maximumFractionDigits:0}):\"A consultar\"}\nfunction call(name){var args=[].slice.call(arguments,1);if(typeof window[name]===\"function\")return window[name].apply(window,args)}\nfunction pageName(view){return({dashboard:\"Visão geral\",leads:\"Leads e clientes\",imoveis:\"Carteira de imóveis\",captacao:\"Captação de imóveis\",funil:\"Funil de negócios\",tarefas:\"Agenda e tarefas\",corretores:\"Corretores e acessos\",relatorios:\"Relatórios\",config:\"Configurações\",ia:\"IA Consultiva\"})[view]||\"CRM Premium\"}\nfunction addNavButton(view,icon,label,before){var nav=id(\"nav\");if(!nav||nav.querySelector('[data-view=\"'+view+'\"]'))return;var b=document.createElement(\"button\");b.type=\"button\";b.dataset.view=view;b.innerHTML=icon+' <span>'+label+'</span>';var ref=nav.querySelector('[data-view=\"'+before+'\"]');nav.insertBefore(b,ref||null)}\nfunction ensureNavigation(){addNavButton(\"captacao\",\"◇\",\"Captação\",\"tarefas\");addNavButton(\"funil\",\"▤\",\"Funil\",\"tarefas\");addNavButton(\"corretores\",\"♙\",\"Corretores\",\"relatorios\");addNavButton(\"ia\",\"✦\",\"IA Consultiva\",\"config\");var task=document.querySelector('#nav [data-view=\"tarefas\"] span');if(task)task.textContent=\"Agenda e tarefas\"}\nfunction ensureView(name,html,beforeId){if(id(\"view-\"+name))return id(\"view-\"+name);var content=document.querySelector(\".content\");if(!content)return null;var view=document.createElement(\"div\");view.className=\"view\";view.id=\"view-\"+name;view.innerHTML=html;var ref=id(beforeId||\"view-relatorios\");content.insertBefore(view,ref||null);return view}\nfunction capturePage(){return '<div class=\"crm-module-hero\"><div><h1>Captação de imóveis</h1><p>Cadastro autorizado, carteira interna e radar de oportunidades em uma página exclusiva.</p></div><div class=\"crm-module-actions\"><button class=\"btn\" type=\"button\" onclick=\"openImovelModal()\">＋ Nova captação</button><button class=\"btn btn-ghost\" type=\"button\" onclick=\"runCaptureRadar()\">📡 Atualizar radar</button></div></div><div class=\"crm-module-grid\" id=\"captureStats\"></div><div class=\"crm-section-grid\"><section class=\"panel\"><div class=\"panel-head\"><div><h2>Carteira em captação</h2><p>Imóveis ainda não finalizados ou publicados.</p></div></div><div class=\"panel-body\"><div class=\"cards\" id=\"capturePropertyList\"></div></div></section><section class=\"panel\"><div class=\"panel-head\"><div><h2>Radar de oportunidades</h2><p>Consulta a tabela captacoes_radar usando a sessão atual.</p></div></div><div class=\"panel-body\"><div class=\"crm-radar-list\" id=\"captureRadarList\"><div class=\"crm-empty\">Clique em Atualizar radar.</div></div></div></section></div>'}\nfunction funnelPage(){return '<div class=\"crm-module-hero\"><div><h1>Funil de negócios</h1><p>Leads organizados por etapa comercial, sem misturar com a lista principal.</p></div><div class=\"crm-module-actions\"><button class=\"btn\" type=\"button\" onclick=\"openLeadModal()\">＋ Novo lead</button></div></div><section class=\"panel\"><div class=\"panel-head\"><div><h2>Pipeline comercial</h2><p>Arraste visualmente a operação; a edição continua pelo cadastro seguro.</p></div></div><div class=\"panel-body\"><div class=\"crm-funnel\" id=\"crmFunnel\"></div></div></section>'}\nfunction teamPage(){return '<div class=\"crm-module-hero\"><div><h1>Corretores e acessos</h1><p>Perfis aprovados, funções e situação da equipe.</p></div><div class=\"crm-module-actions\"><button class=\"btn btn-ghost\" type=\"button\" onclick=\"loadCrmTeam()\">Atualizar equipe</button></div></div><div class=\"crm-module-grid\" id=\"teamStats\"></div><section class=\"panel\"><div class=\"panel-head\"><div><h2>Equipe cadastrada</h2><p>Os dados são lidos de user_profiles conforme as permissões atuais.</p></div></div><div class=\"panel-body\"><div class=\"crm-team-list\" id=\"crmTeamList\"><div class=\"crm-empty\">Carregando perfis...</div></div></div></section>'}\nfunction ensurePages(){ensureView(\"captacao\",capturePage(),\"view-tarefas\");ensureView(\"funil\",funnelPage(),\"view-tarefas\");ensureView(\"corretores\",teamPage(),\"view-relatorios\")}\nfunction buildTopbar(){var top=document.querySelector(\".topbar\");if(!top||id(\"crmPageTitle\"))return;var menu=document.createElement(\"button\");menu.className=\"round crm-side-toggle\";menu.type=\"button\";menu.title=\"Recolher menu\";menu.textContent=\"☰\";menu.onclick=function(){document.body.classList.toggle(\"crm-side-closed\")};top.insertBefore(menu,top.firstChild);var page=document.createElement(\"div\");page.id=\"crmPageTitle\";page.className=\"crm-page-title\";page.innerHTML=\"<small>LEADS IMÓVEIS</small><strong>Visão geral</strong>\";top.insertBefore(page,top.querySelector(\".search\"))}\nfunction setTitle(view){var box=id(\"crmPageTitle\");if(box)box.querySelector(\"strong\").textContent=pageName(view)}\nfunction buildSidebarTools(){var nav=id(\"nav\"),side=id(\"sidebar\");if(!nav||!side||id(\"crmSidebarTools\"))return;var box=document.createElement(\"section\");box.id=\"crmSidebarTools\";box.className=\"crm-tools\";box.innerHTML='<div class=\"crm-tools-title\">CONSULTA EXPRESSA</div><div class=\"crm-search\"><input id=\"crmQuickSearch\" autocomplete=\"off\" placeholder=\"Código, cliente ou imóvel\"><button type=\"button\" id=\"crmQuickButton\">⌕</button></div><button class=\"btn btn-sm\" type=\"button\" onclick=\"switchView(\\'captacao\\')\">＋ Nova captação</button>';side.insertBefore(box,nav);function search(){var value=id(\"crmQuickSearch\").value.trim(),global=id(\"globalSearch\");if(!value||!global)return;global.value=value;call(\"globalSearch\")}id(\"crmQuickButton\").onclick=search;id(\"crmQuickSearch\").onkeydown=function(e){if(e.key===\"Enter\")search()}}\nfunction tabs(viewId,items,handler){var view=id(viewId);if(!view||view.querySelector(\".crm-tabs\"))return;var body=view.querySelector(\".panel-body\");if(!body)return;var row=document.createElement(\"div\");row.className=\"crm-tabs\";items.forEach(function(item,index){var b=document.createElement(\"button\");b.type=\"button\";b.className=\"crm-tab\"+(index===0?\" active\":\"\");b.textContent=item.label;b.onclick=function(){row.querySelectorAll(\".crm-tab\").forEach(function(x){x.classList.remove(\"active\")});b.classList.add(\"active\");handler(item.value)};row.appendChild(b)});body.insertBefore(row,body.firstChild)}\nfunction buildTabs(){tabs(\"view-leads\",[{label:\"Todos\",value:\"\"},{label:\"Novos\",value:\"Novos leads\"},{label:\"Qualificação\",value:\"Qualificação\"},{label:\"Apresentação\",value:\"Apresentação\"},{label:\"Proposta\",value:\"Proposta\"},{label:\"Negociação\",value:\"Negociação\"},{label:\"Fechados\",value:\"Fechado\"}],function(v){var el=id(\"filterLeadStage\");if(el){el.value=v;call(\"renderLeads\")}});tabs(\"view-imoveis\",[{label:\"Todos\",value:\"\"},{label:\"Venda\",value:\"Venda\"},{label:\"Aluguel anual\",value:\"Aluguel Anual\"},{label:\"Temporada\",value:\"Temporada\"},{label:\"Publicados\",value:\"Publicado\"},{label:\"Internos\",value:\"Interno\"},{label:\"Rascunhos\",value:\"Rascunho\"}],function(v){var el=id(\"searchImoveis\");if(el){el.value=v;call(\"renderImoveis\")}})}\nfunction buildAIControls(){var head=document.querySelector(\".ai-head\"),right=id(\"rightbar\");if(!head||!right||id(\"crmAiControls\"))return;var controls=document.createElement(\"div\");controls.id=\"crmAiControls\";controls.className=\"crm-ai-controls\";controls.innerHTML='<button class=\"btn btn-ghost crm-ai-control\" type=\"button\" title=\"Minimizar IA\">−</button><button class=\"btn btn-ghost crm-ai-control\" type=\"button\" title=\"Fechar IA\">×</button>';head.appendChild(controls);controls.children[0].onclick=function(){right.classList.toggle(\"crm-ai-mini\")};controls.children[1].onclick=function(){document.body.classList.add(\"crm-ai-closed\")};var open=document.createElement(\"button\");open.className=\"crm-ai-open\";open.type=\"button\";open.textContent=\"IA\";open.onclick=function(){document.body.classList.remove(\"crm-ai-closed\");right.classList.add(\"open\")};document.body.appendChild(open)}\nfunction addThemePanel(){var body=document.querySelector(\"#view-config .panel-body\");if(!body||id(\"crmThemePanel\"))return;var panel=document.createElement(\"div\");panel.id=\"crmThemePanel\";panel.className=\"crm-card\";panel.style.marginTop=\"13px\";panel.innerHTML='<h3>Temas completos do layout</h3><p>Cada corretor escolhe a cor no próprio navegador.</p><div class=\"crm-theme-row\"><button class=\"crm-theme\" data-theme=\"gold\" title=\"Dourado Luxo\"></button><button class=\"crm-theme\" data-theme=\"blue\" title=\"Azul Prime\"></button><button class=\"crm-theme\" data-theme=\"green\" title=\"Verde Elite\"></button><button class=\"crm-theme\" data-theme=\"purple\" title=\"Roxo Premium\"></button><button class=\"crm-theme\" data-theme=\"graphite\" title=\"Grafite\"></button></div>';body.appendChild(panel);panel.querySelectorAll(\".crm-theme\").forEach(function(b){b.onclick=function(){setTheme(b.dataset.theme)}})}\nfunction setTheme(theme){[\"blue\",\"green\",\"purple\",\"graphite\"].forEach(function(x){document.body.classList.remove(\"crm-theme-\"+x)});if(theme&&theme!==\"gold\")document.body.classList.add(\"crm-theme-\"+theme);try{localStorage.setItem(\"leads_crm_theme_v2\",theme||\"gold\")}catch(e){}}\nfunction restoreTheme(){try{setTheme(localStorage.getItem(\"leads_crm_theme_v2\")||\"gold\")}catch(e){}}\nfunction renderCapture(){var data=db(),list=(data.imoveis||[]).filter(function(p){var s=String(p.etapa||p.status||\"\").toLowerCase();return s.indexOf(\"capta\")>=0||s.indexOf(\"rascun\")>=0||s.indexOf(\"intern\")>=0||!p.publicarSite&&!p.is_public});var all=data.imoveis||[],published=all.filter(function(p){return p.publicarSite===true||p.is_public===true||String(p.etapa||p.status).toLowerCase()===\"publicado\"}).length,noPhoto=all.filter(function(p){var photos=p.photos||p.fotos||[];return !photos.length}).length;var stats=id(\"captureStats\");if(stats)stats.innerHTML='<div class=\"crm-stat\"><small>Em captação</small><strong>'+list.length+'</strong><span>Carteira para avançar</span></div><div class=\"crm-stat\"><small>Publicados</small><strong>'+published+'</strong><span>Visíveis no site</span></div><div class=\"crm-stat\"><small>Sem fotos</small><strong>'+noPhoto+'</strong><span>Precisam de imagens</span></div><div class=\"crm-stat\"><small>Total</small><strong>'+all.length+'</strong><span>Imóveis cadastrados</span></div>';var area=id(\"capturePropertyList\");if(area)area.innerHTML=list.map(function(p){return '<article class=\"crm-card\"><h3>'+esc(p.titulo||p.title||\"Imóvel captado\")+'</h3><p>'+esc(p.bairro||p.neighborhood||\"Bairro não informado\")+' · '+esc(p.tipo||p.type||\"Imóvel\")+'</p><p>'+money(p.valor||p.price)+' · '+esc(p.etapa||p.status||\"Captação\")+'</p><div class=\"crm-card-actions\"><button class=\"btn btn-sm\" type=\"button\" onclick=\"openImovelModal(\\''+esc(p.id)+'\\')\">Editar</button><button class=\"btn btn-sm btn-ghost\" type=\"button\" onclick=\"askAI(\\'Crie um plano para avançar a captação do imóvel '+esc(p.titulo||p.title||\"\")+'\\')\">IA orientar</button></div></article>'}).join(\"\")||'<div class=\"crm-empty\">Nenhum imóvel em captação.</div>'}\nfunction renderFunnel(){var stages=[\"Novos leads\",\"Qualificação\",\"Apresentação\",\"Proposta\",\"Negociação\",\"Fechado\"],clients=db().clientes||[],area=id(\"crmFunnel\");if(!area)return;area.innerHTML=stages.map(function(stage){var rows=clients.filter(function(c){return String(c.etapa||\"\")===stage});return '<section class=\"crm-funnel-col\"><div class=\"crm-funnel-head\"><span>'+esc(stage)+'</span><b>'+rows.length+'</b></div>'+rows.map(function(c){return '<div class=\"crm-funnel-item\"><b>'+esc(c.nome||\"Lead\")+'</b><span>'+esc(c.bairro||\"Florianópolis\")+' · '+money(c.max||c.min)+'</span><button class=\"btn btn-sm btn-ghost\" style=\"margin-top:7px\" type=\"button\" onclick=\"openLeadModal(\\''+esc(c.id)+'\\')\">Abrir</button></div>'}).join(\"\")+'</section>'}).join(\"\")}\nasync function loadTeam(){var area=id(\"crmTeamList\"),stats=id(\"teamStats\"),client=window.supabaseClient;if(!area)return;var current=window.__LEADS_CURRENT_USER_PROFILE__;if(!client){area.innerHTML='<div class=\"crm-empty\">Supabase ainda não está disponível.</div>';return}area.innerHTML='<div class=\"crm-empty\">Atualizando equipe...</div>';try{var result=await client.from(\"user_profiles\").select(\"id,email,full_name,role,approved,active,avatar_url\").order(\"full_name\",{ascending:true});if(result.error)throw result.error;var rows=result.data||[];if(stats)stats.innerHTML='<div class=\"crm-stat\"><small>Corretores</small><strong>'+rows.filter(function(x){return x.role===\"corretor\"}).length+'</strong><span>Perfis cadastrados</span></div><div class=\"crm-stat\"><small>Administradores</small><strong>'+rows.filter(function(x){return x.role===\"admin\"}).length+'</strong><span>Gestão do sistema</span></div><div class=\"crm-stat\"><small>Aprovados</small><strong>'+rows.filter(function(x){return x.approved!==false}).length+'</strong><span>Acesso liberado</span></div><div class=\"crm-stat\"><small>Ativos</small><strong>'+rows.filter(function(x){return x.active!==false}).length+'</strong><span>Usuários operacionais</span></div>';area.innerHTML=rows.map(function(p){return '<div class=\"crm-team-row\"><div><b>'+esc(p.full_name||p.email||\"Usuário\")+'</b><span>'+esc(p.email||\"\")+' · '+esc(p.role||\"corretor\")+'</span></div><span class=\"pill '+(p.active===false?\"\":\"gold\")+'\">'+(p.active===false?\"Inativo\":p.approved===false?\"Pendente\":\"Ativo\")+'</span></div>'}).join(\"\")||'<div class=\"crm-empty\">Nenhum perfil encontrado.</div>'}catch(e){console.warn(\"[Equipe]\",e);area.innerHTML='<div class=\"crm-empty\">Sua permissão atual não permite listar toda a equipe. Perfil conectado: '+esc(current&&current.full_name||\"corretor\")+'.</div>'}}\nasync function runRadar(){var area=id(\"captureRadarList\"),client=window.supabaseClient;if(!area)return;area.innerHTML='<div class=\"crm-empty\">Buscando oportunidades...</div>';if(!client){area.innerHTML='<div class=\"crm-empty\">Supabase ainda não está disponível.</div>';return}try{var result=await client.from(\"captacoes_radar\").select(\"*\").order(\"created_at\",{ascending:false}).limit(30);if(result.error)throw result.error;radarRows=result.data||[];area.innerHTML=radarRows.map(function(r,i){return '<div class=\"crm-radar-row\"><div><b>'+esc(r.tipo_imovel||\"Imóvel\")+' · '+esc(r.bairro||\"Florianópolis\")+'</b><span>'+esc(r.nome_proprietario||\"Proprietário não informado\")+' · '+esc(r.preco||\"Valor a combinar\")+' · '+esc(r.origem||\"Radar\")+'</span></div><div class=\"crm-radar-actions\"><button class=\"btn btn-sm\" type=\"button\" onclick=\"importRadarCapture('+i+')\">Importar</button>'+(r.telefone?'<button class=\"btn btn-sm btn-green\" type=\"button\" onclick=\"window.open(\\'https://wa.me/'+String(r.telefone).replace(/\\\\D/g,\"\")+'\\',\\'_blank\\')\">WhatsApp</button>':\"\")+'</div></div>'}).join(\"\")||'<div class=\"crm-empty\">Nenhuma oportunidade encontrada.</div>'}catch(e){console.error(\"[Radar]\",e);area.innerHTML='<div class=\"crm-empty\">Não foi possível consultar captacoes_radar com a permissão atual.</div>'}}\nfunction importRadar(index){var r=radarRows[index];if(!r)return;call(\"openImovelModal\");setTimeout(function(){var map={p_titulo:(r.tipo_imovel||\"Imóvel\")+\" - \"+(r.bairro||\"Florianópolis\"),p_tipo:r.tipo_imovel||\"\",p_bairro:r.bairro||\"\",p_cidade:r.cidade||\"Florianópolis\",p_valor:String(r.preco||\"\").replace(/[^0-9]/g,\"\"),p_prop:r.nome_proprietario||\"\",p_tel:r.telefone||\"\",p_acao:\"Validar autorização do proprietário, condições e documentação antes de publicar.\"};Object.keys(map).forEach(function(k){var el=id(k);if(el&&map[k]!==\"\"){el.value=map[k];el.dispatchEvent(new Event(\"change\",{bubbles:true}))}});var title=id(\"modalTitle\");if(title)title.textContent=\"Nova captação importada do radar\"},100)}\nfunction renderCustom(view){if(view===\"captacao\")renderCapture();if(view===\"funil\")renderFunnel();if(view===\"corretores\")loadTeam()}\nfunction wrapSwitch(){if(window.__LEADS_SWITCH_WRAPPED__||typeof window.switchView!==\"function\")return;window.__LEADS_SWITCH_WRAPPED__=true;var original=window.switchView;window.switchView=function(view){if(view===\"ia\"){call(\"toggleAI\");setTitle(\"ia\");return}original(view);setTitle(view);renderCustom(view)}}\nfunction bindNav(){document.querySelectorAll(\"#nav button,#mobileNav button\").forEach(function(b){if(b.__crmBound)return;b.__crmBound=true;b.addEventListener(\"click\",function(){var view=b.dataset.view||\"dashboard\";setTitle(view);setTimeout(function(){renderCustom(view)},30)})})}\nfunction tvMode(){var q=new URLSearchParams(location.search),ua=navigator.userAgent||\"\",forced=q.get(\"tv\");var tv=forced===\"1\"||(forced!==\"0\"&&/(SmartTV|SMART-TV|Tizen|Web0S|WebOS|VIDAA|Roku|BRAVIA|NetCast|HbbTV)/i.test(ua));if(tv)document.body.classList.add(\"crm-tv\")}\nfunction boot(){ensureNavigation();ensurePages();buildTopbar();buildSidebarTools();buildTabs();buildAIControls();addThemePanel();restoreTheme();wrapSwitch();bindNav();tvMode();setTitle(document.querySelector(\"#nav button.active\")&&document.querySelector(\"#nav button.active\").dataset.view||\"dashboard\");renderCapture();renderFunnel();setTimeout(function(){wrapSwitch();bindNav()},500)}\nwindow.runCaptureRadar=runRadar;window.importRadarCapture=importRadar;window.loadCrmTeam=loadTeam;window.setCrmTheme=setTheme;\nif(document.readyState===\"loading\")document.addEventListener(\"DOMContentLoaded\",function(){setTimeout(boot,20)},{once:true});else setTimeout(boot,20);\n})();";
-  var TIMEOUT_MS=18000;
-  function screen(message,detail){document.body.innerHTML='<main class="loader-card"><div class="loader-logo">LI</div><p class="loader-kicker">LEADS IMÓVEIS</p><h1>'+message+'</h1><p>'+detail+'</p><button type="button" onclick="location.reload()">Tentar novamente</button></main>'}
-  async function get(url){var controller=new AbortController();var timer=setTimeout(function(){controller.abort()},TIMEOUT_MS);try{var response=await fetch(url,{mode:"cors",credentials:"omit",cache:"no-cache",signal:controller.signal});if(!response.ok)throw new Error("HTTP "+response.status);return await response.text()}finally{clearTimeout(timer)}}
-  function valid(html){return html.indexOf("<!DOCTYPE html")!==-1&&html.indexOf('id="propertyList"')!==-1&&html.indexOf('id="leadList"')!==-1&&html.indexOf("function renderImoveis")!==-1}
-  function inject(html,supabaseCode){var style='<style id="leadsCrmArchitectureStyles">'+ARCHITECTURE_CSS+'</style>';var script='<script id="leadsCrmArchitectureModule">'+ARCHITECTURE_JS.replace(/<\/script/gi,"<\\/script")+'<'+'/script>';if(supabaseCode)html=html.replace(/<script\b[^>]*src=["'][^"']*supabase-js[^"']*["'][^>]*><\/script>/i,'<script>'+supabaseCode+'<'+'/script>');html=html.replace(/<\/head>/i,style+"\n</head>");html=html.replace(/<\/body>\s*<\/html>\s*$/i,script+"\n</body>\n</html>");return html}
-  async function start(){var errors=[],supabaseCode="";try{supabaseCode=await get("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2")}catch(e){errors.push("Supabase: "+e)}for(var i=0;i<SOURCES.length;i++){try{var html=await get(SOURCES[i]);if(!valid(html))throw new Error("CRM-base incompleto");var finalHtml=inject(html,supabaseCode);document.open("text/html","replace");document.write(finalHtml);document.close();return}catch(e){errors.push(String(e))}}screen("Não foi possível carregar o CRM","Detalhes: "+errors.join(" · "))}
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
+</div>
+
+<button class="ai-fab" id="aiFab">IA</button>
+<aside class="ai-drawer" id="aiDrawer">
+  <div class="ai-head"><div><b>IA Consultiva</b><div style="font-size:9px;color:var(--green);margin-top:3px">OPENAI · SUPABASE</div></div><button class="icon-btn" id="closeAI">×</button></div>
+  <div class="ai-log" id="aiLog"><div class="msg">Olá. Posso analisar leads, imóveis, captações e sugerir próximas ações.</div></div>
+  <form class="ai-form" id="aiForm"><input id="aiInput" placeholder="Digite sua pergunta"><button class="btn">Enviar</button></form>
+</aside>
+
+<dialog id="modal">
+  <div class="modal"><div class="modal-head"><h3 id="modalTitle">Cadastro</h3><button class="icon-btn" id="modalClose">×</button></div><div class="modal-body" id="modalBody"></div><div class="modal-foot" id="modalFoot"></div></div>
+</dialog>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+const PROJECT_URL="https://zyfbgydbwsvbaogbxzrd.supabase.co";
+const AI_FUNCTION=PROJECT_URL+"/functions/v1/crm-ai-assistant-openai-test";
+const state={user:null,profile:null,properties:[],leads:[],captures:[],team:[],tasks:[],drafts:[],activeLeadTab:"todos",activePropertyTab:"todos"};
+const pageTitles={dashboard:"Visão geral",leads:"Leads",pipeline:"Funil comercial",properties:"Imóveis",capture:"Captação",agenda:"Agenda e tarefas",team:"Corretores",reports:"Relatórios",ai:"Central IA",settings:"Configurações"};
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const digits=v=>String(v||"").replace(/\D/g,"");
+const money=v=>Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0});
+const dateBR=v=>v?new Date(v).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"Não definido";
+const db=()=>window.supabaseClient||null;
+
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove("show"),2500)}
+function switchPage(page){$$(".page").forEach(x=>x.classList.remove("active"));$("#page-"+page)?.classList.add("active");$$("#nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===page));$("#pageTitle").textContent=pageTitles[page]||"CRM";$("#sidebar").classList.remove("open");if(page==="pipeline")renderPipeline();if(page==="reports")renderReports()}
+function openAI(prompt=""){$("#aiDrawer").classList.add("open");if(prompt){$("#aiInput").value=prompt;$("#aiInput").focus()}}
+function closeAI(){$("#aiDrawer").classList.remove("open")}
+function openModal(title,body,foot){$("#modalTitle").textContent=title;$("#modalBody").innerHTML=body;$("#modalFoot").innerHTML=foot;$("#modal").showModal()}
+function closeModal(){$("#modal").close()}
+
+async function init(){
+  bind();
+  const client=db();
+  if(!client){$("#syncStatus").textContent="Supabase não configurado";$("#settingsSupabase").textContent="Cliente não encontrado";toast("Supabase não configurado.");return}
+  try{
+    const {data:{session}}=await client.auth.getSession();
+    if(!session){location.href="login.html";return}
+    state.user=session.user;
+    await Promise.all([loadProfile(),loadProperties(),loadLeads(),loadCaptures(),loadTeam(),loadDrafts()]);
+    renderAll();
+    $("#syncStatus").textContent="Supabase conectado";
+    $("#settingsSupabase").textContent="Conectado e autenticado";
+  }catch(e){console.error(e);$("#syncStatus").textContent="Erro de sincronização";toast("Não foi possível carregar todos os dados.")}
+}
+function bind(){
+  $$("#nav button").forEach(b=>b.onclick=()=>switchPage(b.dataset.page));
+  $$("[data-open-page]").forEach(b=>b.onclick=()=>switchPage(b.dataset.openPage));
+  $("#menuBtn").onclick=()=>$("#sidebar").classList.toggle("open");
+  $("#refreshBtn").onclick=()=>init();
+  $("#quickNew").onclick=()=>openQuickNew();
+  $("#globalSearchBtn").onclick=globalSearch;
+  $("#globalSearch").onkeydown=e=>{if(e.key==="Enter")globalSearch()};
+  $("#newLeadBtn").onclick=openLeadModal;$("#newPropertyBtn").onclick=openPropertyModal;$("#newCaptureBtn").onclick=openCaptureModal;$("#newTaskBtn").onclick=openTaskModal;
+  $("#leadFilterBtn").onclick=renderLeads;$("#propertyFilterBtn").onclick=renderProperties;$("#captureFilterBtn").onclick=renderCaptures;
+  $("#aiFab").onclick=()=>openAI();$("#heroAI").onclick=()=>openAI("Analise meu CRM e diga as prioridades de hoje.");
+  $("#closeAI").onclick=closeAI;$("#aiForm").onsubmit=sendAI;$("#modalClose").onclick=closeModal;
+  $$(".ai-prompt").forEach(b=>b.onclick=()=>openAI(b.textContent));
+  $("#logoutBtn").onclick=logout;
+}
+async function loadProfile(){
+  const c=db();const {data}=await c.from("user_profiles").select("*").eq("id",state.user.id).maybeSingle();state.profile=data||{};
+  const name=state.profile.full_name||state.user.email?.split("@")[0]||"Corretor";
+  $("#profileName").textContent=name;$("#profileRole").textContent=state.profile.role||"corretor";$("#welcomeTitle").textContent=`Olá, ${name}. Sua operação está organizada.`;
+  $("#profileAvatar").src=state.profile.avatar_data||state.profile.avatar_url||"midia/logo-leads.png.jpeg";
+  $("#settingsName").value=name;$("#settingsEmail").value=state.user.email||"";$("#settingsRole").value=state.profile.role||"";$("#settingsAccess").value=state.profile.approved&&state.profile.active?"Aprovado e ativo":"Pendente ou inativo";
+}
+async function loadProperties(){const {data,error}=await db().from("crm_properties").select("*").order("updated_at",{ascending:false}).limit(500);if(error)throw error;state.properties=data||[]}
+async function loadLeads(){const {data,error}=await db().from("site_leads").select("*").order("created_at",{ascending:false}).limit(500);if(error)throw error;state.leads=data||[]}
+async function loadCaptures(){const {data,error}=await db().from("captacoes_radar").select("*").order("updated_at",{ascending:false}).limit(300);if(error)throw error;state.captures=data||[]}
+async function loadTeam(){const {data,error}=await db().from("user_profiles").select("*").order("full_name");if(error)throw error;state.team=data||[]}
+async function loadDrafts(){const {data}=await db().from("ai_property_drafts").select("*").eq("user_id",state.user.id).order("created_at",{ascending:false}).limit(20);state.drafts=data||[]}
+
+function renderAll(){renderDashboard();renderLeadTabs();renderLeads();renderPropertyTabs();renderProperties();renderCaptures();renderAgenda();renderTeam();renderDrafts();renderReports();fillFilters()}
+function renderDashboard(){
+  const hot=state.leads.filter(l=>(l.lead_score||0)>=60||String(l.lead_temperature).toLowerCase()==="quente");
+  const publicProps=state.properties.filter(p=>p.is_public);
+  const online=state.team.filter(u=>u.presence_status==="online");
+  $("#dashboardKpis").innerHTML=[
+    ["Leads novos",state.leads.filter(l=>["novo","new"].includes(String(l.lead_status||l.status).toLowerCase())).length,"Entradas recentes"],
+    ["Leads quentes",hot.length,"Prioridade comercial"],["Imóveis",state.properties.length,"Carteira total"],
+    ["Publicados",publicProps.length,"Visíveis no site"],["Corretores online",online.length,"Equipe disponível"]
+  ].map(k=>`<div class="kpi"><small>${k[0]}</small><strong>${k[1]}</strong><span>${k[2]}</span></div>`).join("");
+  $("#priorityLeads").innerHTML=hot.slice(0,6).map(leadRow).join("")||empty("Nenhum lead quente no momento.");
+  const next=state.leads.filter(l=>l.next_follow_up_at||l.visit_scheduled_at).sort((a,b)=>new Date(a.next_follow_up_at||a.visit_scheduled_at)-new Date(b.next_follow_up_at||b.visit_scheduled_at)).slice(0,6);
+  $("#nextAgenda").innerHTML=next.map(l=>`<div class="row"><div class="dot">▣</div><div><b>${esc(l.name||"Lead sem nome")}</b><span>${l.visit_scheduled_at?"Visita":"Retorno"} · ${dateBR(l.visit_scheduled_at||l.next_follow_up_at)}</span></div><button class="btn ghost" onclick="window.crmOpenLead('${l.id}')">Abrir</button></div>`).join("")||empty("Nenhum compromisso agendado.");
+}
+function renderLeadTabs(){
+  const tabs=[["todos","Todos",state.leads.length],["novo","Novos",countLead("novo")],["quente","Quentes",state.leads.filter(l=>(l.lead_score||0)>=60||l.lead_temperature==="quente").length],["em_atendimento","Em atendimento",countLead("em_atendimento")],["fechado","Fechados",countLead("fechado")]];
+  $("#leadTabs").innerHTML=tabs.map(t=>`<button class="tab ${state.activeLeadTab===t[0]?"active":""}" data-tab="${t[0]}">${t[1]} · ${t[2]}</button>`).join("");
+  $$("#leadTabs .tab").forEach(b=>b.onclick=()=>{state.activeLeadTab=b.dataset.tab;renderLeadTabs();renderLeads()});
+}
+function countLead(s){return state.leads.filter(l=>String(l.lead_status||l.status).toLowerCase()===s).length}
+function renderLeads(){
+  let list=[...state.leads];const q=$("#leadSearch").value.toLowerCase().trim(),temp=$("#leadTemp").value,status=$("#leadStatus").value,owner=$("#leadOwner").value;
+  if(state.activeLeadTab!=="todos"){if(state.activeLeadTab==="quente")list=list.filter(l=>(l.lead_score||0)>=60||l.lead_temperature==="quente");else list=list.filter(l=>String(l.lead_status||l.status).toLowerCase()===state.activeLeadTab)}
+  if(q)list=list.filter(l=>JSON.stringify(l).toLowerCase().includes(q));if(temp)list=list.filter(l=>l.lead_temperature===temp);if(status)list=list.filter(l=>String(l.lead_status||l.status).toLowerCase()===status);if(owner)list=list.filter(l=>l.assigned_user_id===owner);
+  $("#leadCards").innerHTML=list.map(leadCard).join("")||empty("Nenhum lead encontrado.");
+}
+function leadCard(l){
+  const phone=digits(l.phone),temp=l.lead_temperature||((l.lead_score||0)>=60?"quente":"frio"),status=l.lead_status||l.status||"novo";
+  return `<article class="card"><div class="card-body"><div style="display:flex;justify-content:space-between;gap:8px"><h4>${esc(l.name||"Lead sem nome")}</h4><span class="badge ${temp==="quente"?"hot":"blue"}">${esc(temp)} · ${l.lead_score||0}</span></div><p>${esc(l.intent||"Interesse não informado")} · ${esc(l.neighborhood||"Bairro não informado")}</p><p>${esc(l.property_type||"Tipo não informado")} · ${esc(l.budget||"Orçamento não informado")}</p><p><b>Próxima ação:</b> ${esc(l.ai_next_action||l.summary||"Registrar contato")}</p><span class="badge">${esc(status)}</span><div class="card-actions">${phone?`<a class="btn green" target="_blank" href="https://wa.me/${phone.length<=11?"55":""}${phone}">WhatsApp</a>`:""}<button class="btn" onclick="window.crmOpenLead('${l.id}')">Abrir</button><button class="btn ghost" onclick="window.crmAskAI('Crie uma mensagem de follow-up para o lead ${esc(l.name||"cliente")}')">IA</button></div></div></article>`;
+}
+function leadRow(l){return `<div class="row"><div class="dot">L</div><div><b>${esc(l.name||"Lead sem nome")}</b><span>${esc(l.neighborhood||"-")} · score ${l.lead_score||0} · ${esc(l.lead_temperature||"frio")}</span></div><button class="btn ghost" onclick="window.crmOpenLead('${l.id}')">Abrir</button></div>`}
+function renderPropertyTabs(){
+  const tabs=[["todos","Todos",state.properties.length],["public","Publicados",state.properties.filter(p=>p.is_public).length],["internal","Internos",state.properties.filter(p=>!p.is_public).length],["Venda","Venda",state.properties.filter(p=>p.purpose==="Venda").length],["Aluguel Anual","Aluguel",state.properties.filter(p=>p.purpose==="Aluguel Anual").length],["Temporada","Temporada",state.properties.filter(p=>p.purpose==="Temporada").length]];
+  $("#propertyTabs").innerHTML=tabs.map(t=>`<button class="tab ${state.activePropertyTab===t[0]?"active":""}" data-tab="${t[0]}">${t[1]} · ${t[2]}</button>`).join("");
+  $$("#propertyTabs .tab").forEach(b=>b.onclick=()=>{state.activePropertyTab=b.dataset.tab;renderPropertyTabs();renderProperties()});
+}
+function renderProperties(){
+  let list=[...state.properties];const q=$("#propertySearch").value.toLowerCase().trim(),purpose=$("#propertyPurpose").value,type=$("#propertyType").value,vis=$("#propertyVisibility").value;
+  if(state.activePropertyTab==="public")list=list.filter(p=>p.is_public);else if(state.activePropertyTab==="internal")list=list.filter(p=>!p.is_public);else if(!["todos"].includes(state.activePropertyTab))list=list.filter(p=>p.purpose===state.activePropertyTab);
+  if(q)list=list.filter(p=>JSON.stringify(p).toLowerCase().includes(q));if(purpose)list=list.filter(p=>p.purpose===purpose);if(type)list=list.filter(p=>p.type===type);if(vis)list=list.filter(p=>vis==="public"?p.is_public:!p.is_public);
+  $("#propertyCards").innerHTML=list.map(propertyCard).join("")||empty("Nenhum imóvel encontrado.");
+}
+function propertyCard(p){
+  const photos=Array.isArray(p.photos)?p.photos:[],cover=p.cover_image||photos[0]?.url||photos[0]?.data||"";
+  return `<article class="card"><div class="card-img" style="${cover?`background-image:url('${esc(cover)}')`:""}"><span class="badge ${p.is_public?"green":""}" style="position:absolute;left:9px;top:9px">${p.is_public?"Publicado":"Interno"}</span></div><div class="card-body"><h4>${esc(p.title||"Imóvel sem título")}</h4><p>${esc(p.neighborhood||"-")}, ${esc(p.city||"Florianópolis")} · ${esc(p.type||"Imóvel")}</p><p>${money(p.price)} · ${p.bedrooms||0} dorm. · ${p.parking||0} vagas</p><span class="badge hot">${esc(p.code||p.data?.code||"Sem código")}</span><div class="card-actions"><button class="btn" onclick="window.crmOpenProperty('${p.id}')">Editar</button><button class="btn ghost" onclick="window.crmToggleProperty('${p.id}',${!p.is_public})">${p.is_public?"Deixar interno":"Publicar"}</button><button class="btn ghost" onclick="window.crmAskAI('Crie uma descrição premium para o imóvel ${esc(p.title||"")}')">IA</button></div></div></article>`;
+}
+function renderCaptures(){
+  let list=[...state.captures];const q=$("#captureSearch").value.toLowerCase().trim(),temp=$("#captureTemp").value;if(q)list=list.filter(c=>JSON.stringify(c).toLowerCase().includes(q));if(temp)list=list.filter(c=>c.temperature===temp);
+  $("#captureCards").innerHTML=list.map(captureCard).join("")||empty("Nenhuma oportunidade de captação.");
+  $("#captureKpis").innerHTML=[["Oportunidades",state.captures.length,"Radar total"],["Quentes",state.captures.filter(c=>c.temperature==="quente").length,"Contato prioritário"],["Convertidas",state.captures.filter(c=>c.property_id).length,"Viraram imóveis"]].map(k=>`<div class="kpi"><small>${k[0]}</small><strong>${k[1]}</strong><span>${k[2]}</span></div>`).join("");
+}
+function captureCard(c){
+  const phone=digits(c.telefone);return `<article class="card"><div class="card-body"><div style="display:flex;justify-content:space-between;gap:8px"><h4>${esc(c.tipo_imovel||"Imóvel")} · ${esc(c.bairro||"-")}</h4><span class="badge ${c.temperature==="quente"?"hot":"blue"}">${esc(c.temperature||"frio")} · ${c.score||0}</span></div><p><b>Proprietário:</b> ${esc(c.nome_proprietario||"Não informado")}</p><p>${esc(c.endereco||"Endereço não informado")} · ${esc(c.preco||"Preço não informado")}</p><p>Origem: ${esc(c.origem_detalhe||c.origem||c.origem_tipo||"-")} · ${c.consentimento_contato?"Contato autorizado":"Sem consentimento"}</p><div class="card-actions">${phone&&c.consentimento_contato?`<a class="btn green" target="_blank" href="https://wa.me/${phone.length<=11?"55":""}${phone}">WhatsApp</a>`:""}<button class="btn" onclick="window.crmConvertCapture('${c.id}')">Converter em imóvel</button></div></div></article>`;
+}
+function renderPipeline(){
+  const stages=["novo","em_atendimento","aguardando","proposta","fechado"];
+  $("#pipelineBoard").innerHTML=stages.map(s=>{const rows=state.leads.filter(l=>String(l.lead_status||l.status).toLowerCase()===s);return `<section class="column"><div class="column-head"><b>${s.replace("_"," ").toUpperCase()}</b><span class="badge">${rows.length}</span></div><div class="column-body">${rows.map(l=>`<div class="mini"><b>${esc(l.name||"Lead")}</b><p>${esc(l.neighborhood||"-")} · score ${l.lead_score||0}</p><button class="btn ghost" onclick="window.crmOpenLead('${l.id}')">Abrir</button></div>`).join("")||empty("Sem leads")}</div></section>`}).join("");
+}
+function renderAgenda(){
+  const rows=state.leads.filter(l=>l.next_follow_up_at||l.visit_scheduled_at).sort((a,b)=>new Date(a.next_follow_up_at||a.visit_scheduled_at)-new Date(b.next_follow_up_at||b.visit_scheduled_at));
+  $("#agendaList").innerHTML=rows.map(l=>`<div class="row"><div class="dot">${l.visit_scheduled_at?"V":"R"}</div><div><b>${esc(l.name||"Lead")}</b><span>${l.visit_scheduled_at?"Visita":"Retorno"} · ${dateBR(l.visit_scheduled_at||l.next_follow_up_at)} · ${esc(l.neighborhood||"-")}</span></div><button class="btn ghost" onclick="window.crmOpenLead('${l.id}')">Abrir</button></div>`).join("")||empty("Nenhuma visita ou retorno agendado.");
+}
+function renderTeam(){
+  $("#teamCards").innerHTML=state.team.map(u=>`<article class="card"><div class="card-body" style="display:flex;gap:11px;align-items:center"><img class="avatar" src="${esc(u.avatar_data||u.avatar_url||"midia/logo-leads.png.jpeg")}"><div style="flex:1"><h4>${esc(u.full_name||u.email)}</h4><p>${esc(u.email)} · ${esc(u.role)}</p><span class="badge ${u.active&&u.approved?"green":""}">${u.approved&&u.active?"Ativo":"Pendente"}</span> <span class="badge blue">${esc(u.presence_status||"offline")}</span></div></div></article>`).join("")||empty("Nenhum usuário encontrado.");
+}
+function renderDrafts(){
+  $("#aiDrafts").innerHTML=state.drafts.map(d=>`<div class="row"><div class="dot">IA</div><div><b>${esc(d.generated_title||d.draft_type)}</b><span>${esc(d.status)} · ${dateBR(d.created_at)}</span></div></div>`).join("")||empty("Nenhum rascunho da IA.");
+}
+function renderReports(){
+  $("#reportKpis").innerHTML=[["VGV",money(state.properties.reduce((a,p)=>a+Number(p.price||0),0)),"Carteira cadastrada"],["Conversão",state.leads.length?Math.round(state.leads.filter(l=>String(l.lead_status||l.status)==="fechado").length/state.leads.length*100)+"%":"0%","Leads fechados"],["Captação",state.captures.filter(c=>c.property_id).length,"Convertidas em imóveis"],["Publicação",state.properties.filter(p=>p.is_public).length,"Imóveis no site"],["Equipe",state.team.filter(u=>u.active&&u.approved).length,"Usuários ativos"]].map(k=>`<div class="kpi"><small>${k[0]}</small><strong>${k[1]}</strong><span>${k[2]}</span></div>`).join("");
+  groupReport("#reportTemps",state.leads,l=>l.lead_temperature||"não informado");groupReport("#reportPurposes",state.properties,p=>p.purpose||"não informado");groupReport("#reportCaptures",state.captures,c=>c.status||"não informado");
+}
+function groupReport(sel,rows,key){const map={};rows.forEach(r=>{const k=key(r);map[k]=(map[k]||0)+1});$(sel).innerHTML=Object.entries(map).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="row"><div class="dot">${v}</div><div><b>${esc(k)}</b><span>${v} registro(s)</span></div></div>`).join("")||empty("Sem dados.")}
+function fillFilters(){
+  $("#leadOwner").innerHTML='<option value="">Todos os corretores</option>'+state.team.map(u=>`<option value="${u.id}">${esc(u.full_name||u.email)}</option>`).join("");
+  const types=[...new Set(state.properties.map(p=>p.type).filter(Boolean))];$("#propertyType").innerHTML='<option value="">Todos os tipos</option>'+types.map(x=>`<option>${esc(x)}</option>`).join("");
+}
+function empty(msg){return `<div class="empty">${esc(msg)}</div>`}
+function globalSearch(){const q=$("#globalSearch").value.toLowerCase().trim();if(!q)return;const p=state.properties.find(x=>JSON.stringify(x).toLowerCase().includes(q));const l=state.leads.find(x=>JSON.stringify(x).toLowerCase().includes(q));const c=state.captures.find(x=>JSON.stringify(x).toLowerCase().includes(q));if(p){switchPage("properties");$("#propertySearch").value=q;renderProperties()}else if(l){switchPage("leads");$("#leadSearch").value=q;renderLeads()}else if(c){switchPage("capture");$("#captureSearch").value=q;renderCaptures()}else toast("Nenhum resultado encontrado.")}
+function openQuickNew(){openModal("Novo cadastro",`<div class="grid-3"><button class="btn" onclick="document.getElementById('modal').close();document.getElementById('newLeadBtn').click()">Novo lead</button><button class="btn" onclick="document.getElementById('modal').close();document.getElementById('newPropertyBtn').click()">Novo imóvel</button><button class="btn" onclick="document.getElementById('modal').close();document.getElementById('newCaptureBtn').click()">Nova captação</button></div>`,`<button class="btn ghost" onclick="document.getElementById('modal').close()">Fechar</button>`)}
+
+function openLeadModal(id=""){
+  const l=state.leads.find(x=>x.id===id)||{};
+  openModal(id?"Editar lead":"Novo lead",`<div class="form-grid"><div class="field"><label>Nome</label><input id="mLeadName" value="${esc(l.name||"")}"></div><div class="field"><label>Telefone</label><input id="mLeadPhone" value="${esc(l.phone||"")}"></div><div class="field"><label>E-mail</label><input id="mLeadEmail" value="${esc(l.email||"")}"></div><div class="field"><label>Bairro</label><input id="mLeadNeighborhood" value="${esc(l.neighborhood||"")}"></div><div class="field"><label>Interesse</label><input id="mLeadIntent" value="${esc(l.intent||"")}"></div><div class="field"><label>Orçamento</label><input id="mLeadBudget" value="${esc(l.budget||"")}"></div><div class="field"><label>Status</label><select id="mLeadStatus">${["novo","em_atendimento","aguardando","proposta","fechado","perdido"].map(x=>`<option ${String(l.lead_status||l.status)===x?"selected":""}>${x}</option>`).join("")}</select></div><div class="field"><label>Próximo retorno</label><input id="mLeadFollow" type="datetime-local"></div><div class="field full"><label>Resumo</label><textarea id="mLeadSummary">${esc(l.summary||"")}</textarea></div></div>`,`<button class="btn ghost" onclick="document.getElementById('modal').close()">Cancelar</button><button class="btn" onclick="window.crmSaveLead('${id}')">Salvar lead</button>`);
+}
+async function saveLead(id){
+  const row={name:$("#mLeadName").value.trim(),phone:$("#mLeadPhone").value.trim(),email:$("#mLeadEmail").value.trim(),neighborhood:$("#mLeadNeighborhood").value.trim(),intent:$("#mLeadIntent").value.trim(),budget:$("#mLeadBudget").value.trim(),status:$("#mLeadStatus").value,lead_status:$("#mLeadStatus").value,summary:$("#mLeadSummary").value.trim(),next_follow_up_at:$("#mLeadFollow").value||null,consent_to_contact:true,payload:{}};
+  let r=id?await db().from("site_leads").update(row).eq("id",id):await db().from("site_leads").insert(row);if(r.error){console.error(r.error);toast("Erro ao salvar lead.");return}closeModal();await loadLeads();renderAll();toast("Lead salvo.");
+}
+function openPropertyModal(id=""){
+  const p=state.properties.find(x=>x.id===id)||{};
+  openModal(id?"Editar imóvel":"Novo imóvel",`<div class="form-grid"><div class="field full"><label>Título</label><input id="mPropTitle" value="${esc(p.title||"")}"></div><div class="field"><label>Código</label><input id="mPropCode" value="${esc(p.data?.code||"")}"></div><div class="field"><label>Tipo</label><input id="mPropType" value="${esc(p.type||"Apartamento")}"></div><div class="field"><label>Finalidade</label><select id="mPropPurpose">${["Venda","Aluguel Anual","Temporada"].map(x=>`<option ${p.purpose===x?"selected":""}>${x}</option>`).join("")}</select></div><div class="field"><label>Bairro</label><input id="mPropNeighborhood" value="${esc(p.neighborhood||"")}"></div><div class="field"><label>Cidade</label><input id="mPropCity" value="${esc(p.city||"Florianópolis")}"></div><div class="field"><label>Valor</label><input id="mPropPrice" type="number" value="${p.price||""}"></div><div class="field"><label>Área</label><input id="mPropArea" type="number" value="${p.area||""}"></div><div class="field"><label>Dormitórios</label><input id="mPropBedrooms" type="number" value="${p.bedrooms||""}"></div><div class="field"><label>Suítes</label><input id="mPropSuites" type="number" value="${p.suites||""}"></div><div class="field"><label>Vagas</label><input id="mPropParking" type="number" value="${p.parking||""}"></div><div class="field"><label>Visibilidade</label><select id="mPropPublic"><option value="false" ${!p.is_public?"selected":""}>Interno</option><option value="true" ${p.is_public?"selected":""}>Publicado</option></select></div><div class="field full"><label>Descrição</label><textarea id="mPropDescription">${esc(p.description||"")}</textarea></div></div>`,`<button class="btn ghost" onclick="document.getElementById('modal').close()">Cancelar</button><button class="btn" onclick="window.crmSaveProperty('${id}')">Salvar imóvel</button>`);
+}
+async function saveProperty(id){
+  const old=state.properties.find(x=>x.id===id)||{};const row={title:$("#mPropTitle").value.trim(),type:$("#mPropType").value.trim(),purpose:$("#mPropPurpose").value,neighborhood:$("#mPropNeighborhood").value.trim(),city:$("#mPropCity").value.trim(),price:Number($("#mPropPrice").value||0),area:Number($("#mPropArea").value||0),bedrooms:Number($("#mPropBedrooms").value||0),suites:Number($("#mPropSuites").value||0),parking:Number($("#mPropParking").value||0),description:$("#mPropDescription").value.trim(),is_public:$("#mPropPublic").value==="true",status:$("#mPropPublic").value==="true"?"Publicado":"Interno",data:{...(old.data||{}),code:$("#mPropCode").value.trim()},updated_at:new Date().toISOString()};
+  if(!row.title){toast("Informe o título.");return}let r=id?await db().from("crm_properties").update(row).eq("id",id):await db().from("crm_properties").insert({...row,id:"imv_"+Date.now(),captured_by_id:state.user.id,captured_by_email:state.user.email,captured_by_name:state.profile?.full_name||""});if(r.error){console.error(r.error);toast("Erro ao salvar imóvel.");return}closeModal();await loadProperties();renderAll();toast("Imóvel salvo.");
+}
+function openCaptureModal(){
+  openModal("Nova oportunidade de captação",`<div class="form-grid"><div class="field"><label>Proprietário</label><input id="mCapOwner"></div><div class="field"><label>Telefone</label><input id="mCapPhone"></div><div class="field"><label>E-mail</label><input id="mCapEmail"></div><div class="field"><label>Tipo de imóvel</label><input id="mCapType"></div><div class="field"><label>Bairro</label><input id="mCapNeighborhood"></div><div class="field"><label>Preço</label><input id="mCapPrice"></div><div class="field full"><label>Endereço</label><input id="mCapAddress"></div><div class="field"><label>Origem</label><input id="mCapOrigin" placeholder="Indicação, formulário, proprietário..."></div><div class="field"><label>Consentimento para contato</label><select id="mCapConsent"><option value="true">Sim</option><option value="false">Não</option></select></div><div class="field full"><label>Notas</label><textarea id="mCapNotes"></textarea></div></div>`,`<button class="btn ghost" onclick="document.getElementById('modal').close()">Cancelar</button><button class="btn" onclick="window.crmSaveCapture()">Salvar oportunidade</button>`);
+}
+async function saveCapture(){
+  const row={nome_proprietario:$("#mCapOwner").value.trim(),telefone:$("#mCapPhone").value.trim(),email_proprietario:$("#mCapEmail").value.trim(),tipo_imovel:$("#mCapType").value.trim(),bairro:$("#mCapNeighborhood").value.trim(),preco:$("#mCapPrice").value.trim(),endereco:$("#mCapAddress").value.trim(),origem:$("#mCapOrigin").value.trim(),origem_tipo:"manual",consentimento_contato:$("#mCapConsent").value==="true",notas:$("#mCapNotes").value.trim(),status:"novo",created_by:state.user.id,score:0,temperature:"frio"};
+  const r=await db().from("captacoes_radar").insert(row);if(r.error){console.error(r.error);toast("Erro ao salvar captação.");return}closeModal();await loadCaptures();renderAll();toast("Captação salva.");
+}
+function openTaskModal(){toast("As tarefas atuais são geradas pelos retornos e visitas dos leads.")}
+async function toggleProperty(id,isPublic){const r=await db().from("crm_properties").update({is_public:isPublic,status:isPublic?"Publicado":"Interno",updated_at:new Date().toISOString()}).eq("id",id);if(r.error){toast("Não foi possível alterar a publicação.");return}await loadProperties();renderAll();toast(isPublic?"Imóvel publicado.":"Imóvel deixado como interno.")}
+async function convertCapture(id){const c=state.captures.find(x=>String(x.id)===String(id));if(!c)return;openPropertyModal();setTimeout(()=>{$("#mPropTitle").value=`${c.tipo_imovel||"Imóvel"} em ${c.bairro||"Florianópolis"}`;$("#mPropType").value=c.tipo_imovel||"";$("#mPropNeighborhood").value=c.bairro||"";$("#mPropCity").value=c.cidade||"Florianópolis";$("#mPropDescription").value=`Captação de ${c.nome_proprietario||"proprietário"}. ${c.notas||""}`},20)}
+async function sendAI(e){e.preventDefault();const input=$("#aiInput"),q=input.value.trim();if(!q)return;input.value="";$("#aiLog").insertAdjacentHTML("beforeend",`<div class="msg me">${esc(q)}</div><div class="msg" id="aiLoading">Consultando IA...</div>`);$("#aiLog").scrollTop=$("#aiLog").scrollHeight;
+  try{const {data:{session}}=await db().auth.getSession();const res=await fetch(AI_FUNCTION,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},body:JSON.stringify({question:q,history:[],crm_state:{properties:state.properties.slice(0,40),leads:state.leads.slice(0,40),captures:state.captures.slice(0,30)}})});const data=await res.json().catch(()=>({}));$("#aiLoading").remove();$("#aiLog").insertAdjacentHTML("beforeend",`<div class="msg">${esc(data.reply||data.response||data.answer||data.message||"Não foi possível gerar a resposta.")}</div>`)}catch(err){console.error(err);$("#aiLoading")?.remove();$("#aiLog").insertAdjacentHTML("beforeend",`<div class="msg">Falha ao consultar a IA.</div>`)}$("#aiLog").scrollTop=$("#aiLog").scrollHeight}
+async function logout(){await db().auth.signOut();location.href="login.html"}
+
+window.crmOpenLead=openLeadModal;window.crmSaveLead=saveLead;window.crmOpenProperty=openPropertyModal;window.crmSaveProperty=saveProperty;window.crmToggleProperty=toggleProperty;window.crmConvertCapture=convertCapture;window.crmSaveCapture=saveCapture;window.crmAskAI=q=>openAI(q);
+
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
 })();
-  </script>
+</script>
 </body>
 </html>
