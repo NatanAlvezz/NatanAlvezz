@@ -1,0 +1,32 @@
+LEADS IMÓVEIS · CORREÇÃO FINAL DAS PÁGINAS DO CRM
+
+CAUSA CONFIRMADA
+O último commit enviou somente parte dos arquivos. Quando uma página como
+crm-leads.html não existe na raiz, o Vercel devolve 404.html.
+
+INSTALAÇÃO CORRETA
+1. Abra a raiz do repositório NatanAlvezz/NatanAlvezz.
+2. Use Add file > Upload files.
+3. Arraste TODOS os arquivos deste pacote ao mesmo tempo.
+4. Confirme que os nomes aparecem diretamente na raiz, sem uma pasta externa.
+5. Faça o commit.
+6. Aguarde o deployment ficar READY no Vercel.
+7. Atualize o navegador com Ctrl + Shift + R.
+
+NÃO APAGAR
+index.html, imovel.html, login.html, supabase-config.js, radar-leads.js e a pasta midia.
+
+ROTAS PARA TESTE
+/crm.html
+/crm-leads.html
+/crm-imoveis.html
+/crm-captacao-especial.html
+/crm-proprietarios.html
+
+O pacote inclui:
+- CRM principal completo;
+- sete páginas internas;
+- crm-modules.css e crm-modules.js;
+- auth-guard.js corrigido;
+- vercel.json com rotas específicas;
+- 404.html que mantém rotas internas dentro do CRM.

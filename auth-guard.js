@@ -1,37 +1,43 @@
-// Leads Imóveis · proteção segura do CRM interno
+// Leads Imóveis · proteção segura das páginas internas do CRM
 (function () {
   "use strict";
 
   const page = (location.pathname.split("/").pop() || "index.html").toLowerCase();
-  const publicPages = new Set(["", "index.html", "login.html"]);
+  const publicPages = new Set(["", "index.html", "login.html", "imovel.html", "404.html"]);
   if (publicPages.has(page)) return;
 
+  const nextPath = `${location.pathname}${location.search}`;
+  const redirectToLogin = (reason) => {
+    const next = encodeURIComponent(nextPath.startsWith("/") ? nextPath : "/crm.html");
+    location.replace(`login.html?reason=${encodeURIComponent(reason)}&next=${next}`);
+  };
+
   window.__LEADS_AUTH_READY__ = (async function () {
-    for (let attempt = 0; attempt < 100 && !window.supabaseClient; attempt += 1) {
+    for (let attempt = 0; attempt < 120 && !window.supabaseClient; attempt += 1) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     const client = window.supabaseClient;
-    if (!client || !client.auth) {
-      location.replace("login.html?reason=supabase&next=crm.html");
+    if (!client?.auth) {
+      redirectToLogin("supabase");
       return null;
     }
 
     try {
-      const result = await client.auth.getSession();
-      const session = result && result.data ? result.data.session : null;
-      if (result.error || !session) {
-        location.replace("login.html?reason=login&next=crm.html");
+      const { data, error } = await client.auth.getSession();
+      const session = data?.session || null;
+      if (error || !session) {
+        redirectToLogin("login");
         return null;
       }
 
       window.__LEADS_AUTH_SESSION__ = session;
-      window.__LEADS_CURRENT_USER_ID__ = session.user && session.user.id ? session.user.id : null;
-      window.__LEADS_CURRENT_USER_EMAIL__ = session.user && session.user.email ? session.user.email : "";
+      window.__LEADS_CURRENT_USER_ID__ = session.user?.id || null;
+      window.__LEADS_CURRENT_USER_EMAIL__ = session.user?.email || "";
       return session;
     } catch (error) {
       console.warn("Falha ao validar a sessão do CRM:", error);
-      location.replace("login.html?reason=auth&next=crm.html");
+      redirectToLogin("auth");
       return null;
     }
   })();
