@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#071018">
   <meta name="robots" content="noindex,nofollow">
-  <title>Leads Imóveis · CRM Next</title>
+  <title>Leads Imóveis · CRM Completo</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
@@ -43,6 +43,10 @@
       display:flex;align-items:center;gap:10px;text-align:left;transition:.18s}
     .nav button:hover,.nav button.active{border-color:rgba(101,217,255,.22);background:linear-gradient(90deg,rgba(101,217,255,.12),rgba(217,182,111,.05));color:#fff}
     .nav .ico{width:22px;text-align:center;font-size:16px}
+    .nav-link{border:1px solid transparent;background:transparent;color:#bdd0dc;min-height:43px;padding:9px 11px;border-radius:12px;display:flex;align-items:center;gap:10px;text-align:left;transition:.18s}
+    .nav-link:hover{border-color:color-mix(in srgb,var(--accent2) 32%,transparent);background:linear-gradient(90deg,color-mix(in srgb,var(--accent2) 15%,transparent),color-mix(in srgb,var(--accent) 7%,transparent));color:#fff}
+    .nav-link.nav-special{border-color:color-mix(in srgb,var(--accent) 34%,transparent);background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 14%,transparent),color-mix(in srgb,var(--accent2) 7%,transparent));color:#fff2c8}
+    .nav-link .ico{width:22px;text-align:center;font-size:16px}
     .sidebar-foot{margin-top:auto;border:1px solid var(--line);border-radius:15px;padding:12px;background:rgba(255,255,255,.025)}
     .sidebar-foot b{font-size:12px}.sidebar-foot p{font-size:11px;color:var(--muted);line-height:1.45;margin:6px 0 0}
     .main{min-width:0}
@@ -766,14 +770,70 @@
     }
     @media(max-width:560px){.kpis{grid-template-columns:1fr}.hero h2{font-size:20px}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.top-actions .icon-btn:nth-child(2){display:none}}
     @media(min-width:1700px){.content{max-width:1800px}.cards{grid-template-columns:repeat(auto-fill,minmax(310px,1fr))}}
-  
-    .portal-return{position:fixed;left:18px;bottom:18px;z-index:260;display:inline-flex;align-items:center;gap:7px;min-height:42px;padding:0 13px;border:1px solid rgba(217,182,111,.38);border-radius:999px;background:rgba(7,20,29,.92);color:#fff3cf;font-size:11px;font-weight:900;box-shadow:0 16px 40px rgba(0,0,0,.38);backdrop-filter:blur(16px)}
-    .portal-return:hover{transform:translateY(-2px);filter:brightness(1.12)}
-    @media(max-width:700px){.portal-return{left:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));font-size:10px}}
-</style>
+
+
+    /* =========================================================
+       IA CONSULTIVA FINAL · PAINEL ESTÁVEL E NÃO REPETITIVO
+       ========================================================= */
+    .ai-drawer{
+      top:max(10px,env(safe-area-inset-top,0px));
+      right:12px;
+      bottom:max(10px,env(safe-area-inset-bottom,0px));
+      width:min(440px,calc(100vw - 24px));
+      height:auto;
+      max-height:calc(100dvh - 20px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+      border:1px solid color-mix(in srgb,var(--accent2) 23%,var(--line));
+      border-radius:24px;
+      overflow:hidden;
+      transform:translateX(calc(100% + 34px)) scale(.98);
+      opacity:0;
+      pointer-events:none;
+      transition:transform .25s cubic-bezier(.2,.8,.2,1),opacity .2s ease,width .2s ease,height .2s ease;
+      display:grid;
+      grid-template-rows:auto auto minmax(0,1fr) auto auto
+    }
+    .ai-drawer.open{right:12px;transform:none;opacity:1;pointer-events:auto}
+    .ai-drawer.minimized{
+      top:auto;
+      left:auto;
+      width:min(330px,calc(100vw - 24px));
+      height:76px;
+      max-height:76px;
+      grid-template-rows:76px;
+      border-radius:22px
+    }
+    .ai-drawer.minimized .ai-context-bar,
+    .ai-drawer.minimized .ai-log,
+    .ai-drawer.minimized .ai-quick-prompts,
+    .ai-drawer.minimized .ai-form{display:none!important}
+    .ai-head{min-height:76px;padding:12px 13px;align-items:center;gap:10px}
+    .ai-head-main{display:flex;align-items:center;gap:11px;min-width:0}
+    .ai-avatar{flex:0 0 46px;width:46px;height:46px;display:grid;place-items:center;border-radius:16px;border:1px solid color-mix(in srgb,var(--accent2) 27%,var(--line));background:linear-gradient(145deg,color-mix(in srgb,var(--accent2) 20%,var(--surface3)),color-mix(in srgb,var(--accent) 16%,var(--surface)));font-size:14px;font-weight:950;box-shadow:0 10px 25px rgba(0,0,0,.22)}
+    .ai-head-copy{min-width:0}.ai-head-copy b{display:block;font-size:13px}.ai-head-copy span{display:flex;align-items:center;gap:6px;margin-top:4px;color:var(--muted);font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ai-live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px color-mix(in srgb,var(--green) 75%,transparent)}
+    .ai-head-actions{display:flex;align-items:center;gap:6px;margin-left:auto}.ai-head-actions .icon-btn{width:36px;height:36px;border-radius:11px}
+    .ai-context-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 13px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--surface2) 67%,transparent);font-size:9px;color:var(--muted)}
+    .ai-context-bar strong{color:var(--text)}.ai-new-chat{border:0;background:transparent;color:var(--accent2);font-size:9px;font-weight:900;padding:5px 6px;border-radius:8px}.ai-new-chat:hover{background:color-mix(in srgb,var(--accent2) 10%,transparent)}
+    .ai-log{min-height:260px;max-height:none;padding:14px 13px 8px;overscroll-behavior:contain;scrollbar-width:thin}
+    .msg{position:relative;max-width:92%;padding:11px 13px;font-size:11.5px;line-height:1.56;white-space:pre-wrap;overflow-wrap:anywhere}
+    .msg.ai-welcome{border-color:color-mix(in srgb,var(--accent) 18%,var(--line))}
+    .msg.ai-error{border-color:color-mix(in srgb,var(--red) 32%,var(--line));color:#ffe4e6}
+    .msg.ai-typing{display:flex;align-items:center;gap:5px;min-width:72px;width:max-content}.ai-typing i{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:aiTyping 1.05s infinite ease-in-out}.ai-typing i:nth-child(2){animation-delay:.13s}.ai-typing i:nth-child(3){animation-delay:.26s}
+    @keyframes aiTyping{0%,60%,100%{opacity:.35;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+    .ai-message-actions{display:flex;gap:5px;margin-top:8px}.ai-copy{border:1px solid var(--line);background:rgba(255,255,255,.035);color:var(--muted);border-radius:8px;padding:5px 7px;font-size:8px;font-weight:850}.ai-copy:hover{color:var(--text);border-color:color-mix(in srgb,var(--accent2) 30%,var(--line))}
+    .ai-quick-prompts{display:flex;gap:6px;overflow-x:auto;padding:7px 12px 9px;scrollbar-width:none}.ai-quick-prompts::-webkit-scrollbar{display:none}.ai-chip{flex:0 0 auto;min-height:31px;padding:0 10px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.03);color:#c9d8e1;font-size:9px;font-weight:800}.ai-chip:hover{border-color:color-mix(in srgb,var(--accent2) 33%,var(--line));background:color-mix(in srgb,var(--accent2) 9%,transparent);color:#fff}
+    .ai-form{align-items:flex-end;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--surface) 93%,transparent)}
+    .ai-form textarea{resize:none;min-height:44px;max-height:120px;line-height:1.45;padding:11px 12px}.ai-form .btn{min-height:44px;padding-inline:13px}.ai-form .btn:disabled{opacity:.55;cursor:not-allowed}
+    .ai-drawer.busy .ai-new-chat,.ai-drawer.busy .ai-chip{pointer-events:none;opacity:.55}
+    @media(max-width:700px){
+      .ai-drawer,.ai-drawer.open{top:max(6px,env(safe-area-inset-top,0px));right:6px;bottom:max(6px,env(safe-area-inset-bottom,0px));width:calc(100vw - 12px);max-height:calc(100dvh - 12px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));border-radius:21px}
+      .ai-drawer.minimized{top:auto;right:6px;bottom:calc(8px + env(safe-area-inset-bottom,0px));width:min(320px,calc(100vw - 12px));height:72px;max-height:72px}
+      .ai-head{min-height:72px}.ai-log{min-height:0}.ai-form textarea{font-size:16px}
+    }
+
+  </style>
 </head>
 <body>
-<a class="portal-return" href="crm.html" aria-label="Voltar ao portal modular">← Portal modular</a>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
@@ -789,6 +849,11 @@
       <button data-page="capture"><span class="ico">◎</span>Captação</button>
       <button data-page="owner-search"><span class="ico">⌖</span>Localizar proprietário</button>
       <button data-page="agenda"><span class="ico">▣</span>Agenda e tarefas</button>
+      <div class="nav-label">Páginas separadas</div>
+      <a class="nav-link nav-special" href="crm-captacao-especial.html"><span class="ico">◎</span>Captação Especial</a>
+      <a class="nav-link" href="crm-leads.html"><span class="ico">◆</span>Leads em página</a>
+      <a class="nav-link" href="crm-imoveis.html"><span class="ico">⌂</span>Imóveis em página</a>
+      <a class="nav-link" href="crm-proprietarios.html"><span class="ico">⌖</span>Consultar proprietários</a>
       <div class="nav-label">Gestão</div>
       <button data-page="team"><span class="ico">♙</span>Corretores</button>
       <button data-page="team-chat"><span class="ico">✉</span>Chat da equipe <span class="badge" id="chatUnreadBadge" style="margin-left:auto;display:none">0</span></button>
@@ -832,6 +897,8 @@
             <button class="btn" data-open-page="properties">Abrir imóveis</button>
             <button class="btn" data-open-page="capture">Nova captação</button>
             <button class="btn ghost" id="heroAI">Consultar IA</button>
+            <a class="btn ghost" href="crm-captacao-especial.html">Abrir Captação Especial</a>
+            <a class="btn ghost" href="crm-leads.html">Leads em página</a>
           </div>
         </div>
         <div class="kpis" id="dashboardKpis"></div>
@@ -999,7 +1066,7 @@
       <section class="page" id="page-ai">
         <div class="grid-2">
           <div class="panel"><div class="panel-head"><div><h3>Central Inteligente</h3><p>Assistente comercial seguro e integrado ao CRM</p></div><span class="badge green">Sistema protegido</span></div><div class="panel-body">
-            <div class="hero" style="box-shadow:none"><h2>Assistente comercial da Leads Imóveis</h2><p>Conversa com você de forma natural, analisa o cenário, dá conselhos práticos, sugere caminhos e prepara mensagens. Nenhuma alteração é feita sem sua decisão.</p><div class="hero-actions"><button class="btn ai-prompt">Prioridades de hoje</button><button class="btn ai-prompt">Leads quentes</button><button class="btn ai-prompt">Gerar follow-up</button><button class="btn ai-prompt">Analisar captações</button></div></div>
+            <div class="hero" style="box-shadow:none"><h2>Assistente comercial da Leads Imóveis</h2><p>Usa apenas o contexto necessário, evita respostas repetidas, prepara mensagens e indica uma próxima ação prática. Nenhuma alteração é feita sem sua decisão.</p><div class="hero-actions"><button class="btn ai-prompt">Prioridades de hoje</button><button class="btn ai-prompt">Leads quentes</button><button class="btn ai-prompt">Criar follow-up diferente</button><button class="btn ai-prompt">Analisar captações</button></div></div>
           </div></div>
           <div class="panel"><div class="panel-head"><h3>Rascunhos da IA</h3></div><div class="panel-body"><div class="list" id="aiDrafts"></div></div></div>
         </div>
@@ -1069,10 +1136,15 @@
     <span class="fab-tooltip">IA Consultiva</span>
   </button>
 </div>
-<aside class="ai-drawer" id="aiDrawer">
-  <div class="ai-head"><div><b>IA Consultiva</b><div style="font-size:9px;color:var(--green);margin-top:3px">ASSISTENTE ONLINE</div></div><button class="icon-btn" id="closeAI">×</button></div>
-  <div class="ai-log" id="aiLog"><div class="msg">Olá! Estou aqui para pensar junto com você. Posso analisar atendimentos, sugerir caminhos, preparar mensagens e ajudar a decidir a melhor próxima ação.</div></div>
-  <form class="ai-form" id="aiForm"><input id="aiInput" placeholder="Digite sua pergunta"><button class="btn">Enviar</button></form>
+<aside class="ai-drawer" id="aiDrawer" aria-hidden="true" aria-label="IA Consultiva do CRM">
+  <div class="ai-head">
+    <div class="ai-head-main"><div class="ai-avatar" aria-hidden="true">IA</div><div class="ai-head-copy"><b>IA Consultiva · Leads Imóveis</b><span><i class="ai-live-dot"></i><span id="aiStatusText">Online · pronta para ajudar</span></span></div></div>
+    <div class="ai-head-actions"><button class="icon-btn" id="minimizeAI" type="button" aria-label="Minimizar IA" title="Minimizar">−</button><button class="icon-btn" id="closeAI" type="button" aria-label="Fechar IA" title="Fechar">×</button></div>
+  </div>
+  <div class="ai-context-bar"><span>Contexto seguro: <strong id="aiContextLabel">dados resumidos do CRM</strong></span><button class="ai-new-chat" id="newAIChat" type="button">Nova conversa</button></div>
+  <div class="ai-log" id="aiLog" aria-live="polite"><div class="msg ai-welcome">Olá! Posso analisar prioridades, preparar mensagens, consultar imóveis e sugerir a próxima ação sem alterar nenhum dado.</div></div>
+  <div class="ai-quick-prompts" id="aiQuickPrompts"><button class="ai-chip" type="button">Prioridades de hoje</button><button class="ai-chip" type="button">Leads quentes</button><button class="ai-chip" type="button">Criar follow-up</button><button class="ai-chip" type="button">Analisar captações</button></div>
+  <form class="ai-form" id="aiForm"><textarea id="aiInput" rows="1" maxlength="1800" placeholder="Pergunte sobre leads, imóveis, captação ou atendimento…"></textarea><button class="btn" id="aiSendButton" type="submit">Enviar</button></form>
 </aside>
 
 <dialog id="modal">
@@ -1086,7 +1158,7 @@
 
 const PROJECT_URL="https://zyfbgydbwsvbaogbxzrd.supabase.co";
 const AI_FUNCTION=PROJECT_URL+"/functions/v1/crm-ai-assistant";
-const state={user:null,profile:null,properties:[],leads:[],captures:[],team:[],tasks:[],drafts:[],activeLeadTab:"todos",activePropertyTab:"todos",bound:false,theme:"dourado",chatRoom:null,chatMessages:[],chatChannel:null,chatPresence:{},chatUnread:0,chatTypingTimer:null,aiHistory:[],siteLeadChannel:null};
+const state={user:null,profile:null,properties:[],leads:[],captures:[],team:[],tasks:[],drafts:[],activeLeadTab:"todos",activePropertyTab:"todos",bound:false,theme:"dourado",chatRoom:null,chatMessages:[],chatChannel:null,chatPresence:{},chatUnread:0,chatTypingTimer:null,aiHistory:[],aiBusy:false,aiMinimized:false,aiAbort:null,siteLeadChannel:null};
 
 const MOTIVATION_PHRASES=[
   "Cada atendimento de hoje pode abrir a porta do próximo grande negócio.",
@@ -1276,21 +1348,51 @@ function switchPage(page){
     requestAnimationFrame(scrollChatToBottom);
   }
 }
+function setAIStatus(text){const el=$("#aiStatusText");if(el)el.textContent=text}
 function openAI(prompt=""){
   $("#sidebar")?.classList.remove("open");
-  $("#aiDrawer")?.classList.add("open");
+  const drawer=$("#aiDrawer");
+  drawer?.classList.add("open");
+  drawer?.classList.remove("minimized");
+  drawer?.setAttribute("aria-hidden","false");
+  state.aiMinimized=false;
+  $("#minimizeAI").textContent="−";
+  $("#minimizeAI").setAttribute("aria-label","Minimizar IA");
   $("#aiFab")?.setAttribute("aria-expanded","true");
   if(prompt)$("#aiInput").value=prompt;
   window.setTimeout(()=>$("#aiInput")?.focus(),180);
 }
+function minimizeAI(){
+  const drawer=$("#aiDrawer");
+  if(!drawer?.classList.contains("open"))return openAI();
+  state.aiMinimized=!drawer.classList.contains("minimized");
+  drawer.classList.toggle("minimized",state.aiMinimized);
+  $("#minimizeAI").textContent=state.aiMinimized?"□":"−";
+  $("#minimizeAI").setAttribute("aria-label",state.aiMinimized?"Restaurar IA":"Minimizar IA");
+  if(!state.aiMinimized)window.setTimeout(()=>$("#aiInput")?.focus(),120);
+}
 function closeAI(){
-  $("#aiDrawer")?.classList.remove("open");
+  const drawer=$("#aiDrawer");
+  drawer?.classList.remove("open","minimized","busy");
+  drawer?.setAttribute("aria-hidden","true");
+  state.aiMinimized=false;
   $("#aiFab")?.setAttribute("aria-expanded","false");
+}
+function resetAIConversation(){
+  if(state.aiBusy)return;
+  state.aiHistory=[];
+  sessionStorage.removeItem("leads_crm_ai_history_v2");
+  $("#aiLog").innerHTML='<div class="msg ai-welcome">Nova conversa iniciada. Diga o que você precisa e eu usarei apenas o contexto necessário.</div>';
+  setAIStatus("Online · nova conversa");
+  $("#aiQuickPrompts").innerHTML='<button class="ai-chip" type="button">Prioridades de hoje</button><button class="ai-chip" type="button">Leads quentes</button><button class="ai-chip" type="button">Criar follow-up</button><button class="ai-chip" type="button">Analisar captações</button>';
+  bindAIChips();
+  $("#aiInput")?.focus();
 }
 function openModal(title,body,foot){$("#modalTitle").textContent=title;$("#modalBody").innerHTML=body;$("#modalFoot").innerHTML=foot;$("#modal").showModal()}
 function closeModal(){$("#modal").close()}
 
 async function init(){
+  try{const saved=JSON.parse(sessionStorage.getItem("leads_crm_ai_history_v2")||"[]");if(Array.isArray(saved))state.aiHistory=saved.slice(-10)}catch(_){state.aiHistory=[]}
   bind();
   initMotivationTicker();
   applyTheme(localStorage.getItem(`${THEME_STORAGE}_last`)||"dourado",false);
@@ -1304,6 +1406,7 @@ async function init(){
     await loadProfile();
     await Promise.all([loadProperties(),loadLeads(),loadCaptures(),loadTeam(),loadDrafts(),loadChatRoom()]);
     renderAll();
+    if(new URLSearchParams(location.search).get("open")==="ai")openAI();
     subscribeTeamChat();
     subscribeSiteLeadUpdates();
     $("#syncStatus").textContent="Sistema online";
@@ -1330,8 +1433,12 @@ function bind(){
     requestAnimationFrame(scrollChatToBottom);
   };
   $("#heroAI").onclick=()=>openAI("Analise meu CRM e diga as prioridades de hoje.");
-  $("#closeAI").onclick=closeAI;$("#aiForm").onsubmit=sendAI;$("#modalClose").onclick=closeModal;
+  $("#closeAI").onclick=closeAI;$("#minimizeAI").onclick=minimizeAI;$("#newAIChat").onclick=resetAIConversation;$("#aiForm").onsubmit=sendAI;$("#modalClose").onclick=closeModal;
   $$(".ai-prompt").forEach(b=>b.onclick=()=>openAI(b.textContent));
+  $("#aiInput").addEventListener("input",autoSizeAIInput);
+  $("#aiInput").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("#aiForm").requestSubmit()}});
+  bindAIChips();
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("#aiDrawer")?.classList.contains("open"))closeAI()});
   $("#teamChatForm").onsubmit=sendTeamChatMessage;
   $("#teamChatInput").addEventListener("input",handleTeamChatInput);
   $("#teamChatInput").addEventListener("keydown",e=>{
@@ -1744,67 +1851,132 @@ async function saveCapture(){
 function openTaskModal(){toast("As tarefas atuais são geradas pelos retornos e visitas dos leads.")}
 async function toggleProperty(id,isPublic){const r=await db().from("crm_properties").update({is_public:isPublic,status:isPublic?"Publicado":"Interno",updated_at:new Date().toISOString()}).eq("id",id);if(r.error){toast("Não foi possível alterar a publicação.");return}await loadProperties();renderAll();toast(isPublic?"Imóvel publicado.":"Imóvel deixado como interno.")}
 async function convertCapture(id){const c=state.captures.find(x=>String(x.id)===String(id));if(!c)return;openPropertyModal();setTimeout(()=>{$("#mPropTitle").value=`${c.tipo_imovel||"Imóvel"} em ${c.bairro||"Florianópolis"}`;$("#mPropType").value=c.tipo_imovel||"";$("#mPropNeighborhood").value=c.bairro||"";$("#mPropCity").value=c.cidade||"Florianópolis";$("#mPropDescription").value=`Captação de ${c.nome_proprietario||"proprietário"}. ${c.notas||""}`},20)}
+function autoSizeAIInput(){const input=$("#aiInput");if(!input)return;input.style.height="auto";input.style.height=Math.min(input.scrollHeight,120)+"px"}
+function normalizeAIText(value){return String(value||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim()}
+function aiSimilarity(a,b){
+  const aa=new Set(normalizeAIText(a).split(" ").filter(x=>x.length>3));
+  const bb=new Set(normalizeAIText(b).split(" ").filter(x=>x.length>3));
+  if(!aa.size||!bb.size)return 0;
+  let common=0;aa.forEach(x=>{if(bb.has(x))common++});
+  return common/Math.max(aa.size,bb.size);
+}
+function isRepeatedAIReply(reply){
+  const previous=state.aiHistory.filter(x=>x.role==="assistant").slice(-4);
+  return previous.some(item=>aiSimilarity(item.content,reply)>=.72||normalizeAIText(item.content)===normalizeAIText(reply));
+}
+function appendAIMessage(content,role="assistant",kind=""){
+  const log=$("#aiLog");
+  const wrapper=document.createElement("div");
+  wrapper.className=`msg ${role==="user"?"me":""} ${kind}`.trim();
+  wrapper.textContent=String(content||"");
+  if(role==="assistant"&&kind!=="ai-typing"){
+    const actions=document.createElement("div");actions.className="ai-message-actions";
+    const copy=document.createElement("button");copy.type="button";copy.className="ai-copy";copy.textContent="Copiar";
+    copy.onclick=async()=>{try{await navigator.clipboard.writeText(String(content||""));copy.textContent="Copiado";setTimeout(()=>copy.textContent="Copiar",1300)}catch(_){toast("Não foi possível copiar.")}};
+    actions.appendChild(copy);wrapper.appendChild(actions);
+  }
+  log.appendChild(wrapper);log.scrollTop=log.scrollHeight;return wrapper;
+}
+function showAITyping(){const el=document.createElement("div");el.id="aiLoading";el.className="msg ai-typing";el.innerHTML="<i></i><i></i><i></i>";$("#aiLog").appendChild(el);$("#aiLog").scrollTop=$("#aiLog").scrollHeight}
+function compactCRMContext(question){
+  const tokens=normalizeAIText(question).split(" ").filter(x=>x.length>2);
+  const score=row=>{const searchable=normalizeAIText(Object.values(row||{}).filter(v=>typeof v!=="object").join(" "));return tokens.reduce((n,t)=>n+(searchable.includes(t)?1:0),0)};
+  const properties=state.properties.map(p=>({
+    id:p.id,code:p.data?.code||p.code||"",title:p.title||"",purpose:p.purpose||"",type:p.type||"",neighborhood:p.neighborhood||"",city:p.city||"",price:Number(p.price||0),bedrooms:Number(p.bedrooms||0),status:p.status||"",is_public:Boolean(p.is_public)
+  })).sort((a,b)=>score(b)-score(a)).slice(0,8);
+  const leads=state.leads.map(l=>({
+    id:l.id,name:l.name||"",intent:l.intent||"",neighborhood:l.neighborhood||"",budget:l.budget||"",status:l.lead_status||l.status||"",temperature:l.lead_temperature||"",score:Number(l.lead_score||0),next_action:l.ai_next_action||"",follow_up:l.next_follow_up_at||null
+  })).sort((a,b)=>(b.score-a.score)||(score(b)-score(a))).slice(0,7);
+  const captures=state.captures.map(c=>({
+    id:c.id,type:c.tipo_imovel||"",neighborhood:c.bairro||"",status:c.status||"",temperature:c.temperature||"",score:Number(c.score||0),origin:c.origem_tipo||c.origem||"",consent:Boolean(c.consentimento_contato),follow_up:c.next_follow_up_at||null
+  })).sort((a,b)=>(b.score-a.score)||(score(b)-score(a))).slice(0,6);
+  return {properties,leads,captures,teamOnline:Object.values(state.chatPresence||{}).flat().length,generatedAt:new Date().toISOString()};
+}
+function localAIFallback(question){
+  const q=normalizeAIText(question);
+  if(/prioridade|hoje|urgente/.test(q)){
+    const hot=[...state.leads].sort((a,b)=>Number(b.lead_score||0)-Number(a.lead_score||0)).slice(0,3);
+    if(hot.length)return "Prioridade prática agora:\n"+hot.map((l,i)=>`${i+1}. ${l.name||"Lead sem nome"} — score ${Number(l.lead_score||0)}, ${l.intent||"interesse não informado"}.`).join("\n")+"\nPróxima ação: contate o primeiro, registre o resultado e programe o retorno.";
+  }
+  if(/capta|proprietario/.test(q)){
+    const list=[...state.captures].sort((a,b)=>Number(b.score||0)-Number(a.score||0)).slice(0,3);
+    if(list.length)return "Captações para revisar:\n"+list.map((c,i)=>`${i+1}. ${c.tipo_imovel||"Imóvel"} em ${c.bairro||"local não informado"} — ${c.temperature||"sem temperatura"}.`).join("\n")+"\nConfirme consentimento antes do contato e registre a próxima ação.";
+  }
+  if(/follow|mensagem|whats/.test(q))return "Olá! Tudo bem? Estou entrando em contato para dar continuidade ao seu atendimento e entender se sua busca pelo imóvel continua ativa. Posso separar opções mais alinhadas ao que você procura?";
+  return "Não consegui acessar o provedor agora, mas o CRM continua seguro. Reformule em uma frase objetiva ou use um atalho como “Prioridades de hoje”, “Leads quentes” ou “Criar follow-up”.";
+}
+function bindAIChips(){
+  $$("#aiQuickPrompts .ai-chip").forEach(button=>button.onclick=()=>{openAI(button.textContent.trim());$("#aiForm").requestSubmit()});
+}
+function renderAISuggestions(suggestions){
+  const box=$("#aiQuickPrompts");
+  const defaults=["Prioridades de hoje","Leads quentes","Criar follow-up","Analisar captações"];
+  const values=(Array.isArray(suggestions)?suggestions:[]).map(x=>String(x||"").trim()).filter(Boolean).slice(0,4);
+  const final=values.length?values:defaults;
+  box.innerHTML=final.map(value=>`<button class="ai-chip" type="button">${esc(value)}</button>`).join("");bindAIChips();
+}
+async function requestCRM_AI(question,session,extraInstruction="",historyOverride=null){
+  state.aiAbort?.abort();
+  state.aiAbort=new AbortController();
+  const timeout=setTimeout(()=>state.aiAbort?.abort(),24000);
+  try{
+    const context=compactCRMContext(question);
+    const previousReplies=state.aiHistory.filter(x=>x.role==="assistant").slice(-3).map(x=>x.content.slice(0,500));
+    const effectiveQuestion=extraInstruction?`${question}\n\nINSTRUÇÃO OBRIGATÓRIA: ${extraInstruction}`:question;
+    const outboundHistory=Array.isArray(historyOverride)?historyOverride:state.aiHistory;
+    const response=await fetch(AI_FUNCTION,{
+      method:"POST",
+      signal:state.aiAbort.signal,
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},
+      body:JSON.stringify({
+        question:effectiveQuestion,
+        history:outboundHistory.slice(-8),
+        crmState:context,
+        context,
+        responseRules:{avoidRepeating:previousReplies,style:"direta, humana, profissional",extraInstruction}
+      })
+    });
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(data?.error||`AI_${response.status}`);
+    return {reply:String(data.reply||data.response||data.answer||data.resposta||data.message||"").trim(),suggestions:data.suggestions||[],meta:data.meta||{}};
+  }finally{clearTimeout(timeout)}
+}
 async function sendAI(e){
   e.preventDefault();
+  if(state.aiBusy)return;
   const input=$("#aiInput"),question=input.value.trim();
   if(!question)return;
+  if(question.length>1800){toast("A pergunta está muito longa.");return}
 
-  input.value="";
-  $("#aiLog").insertAdjacentHTML("beforeend",`<div class="msg me">${esc(question)}</div><div class="msg" id="aiLoading">Estou pensando no melhor caminho com você...</div>`);
-  $("#aiLog").scrollTop=$("#aiLog").scrollHeight;
-
-  const humanizedQuestion=[
-    "Converse comigo como uma parceira de trabalho experiente, humana, acolhedora e direta.",
-    "Analise a situação, dê sua recomendação principal, uma alternativa e a próxima ação prática.",
-    "Não fale como robô e não use motivação genérica.",
-    "Pergunta do corretor:",
-    question
-  ].join("\n");
+  state.aiBusy=true;$("#aiDrawer").classList.add("busy");$("#aiSendButton").disabled=true;
+  input.value="";autoSizeAIInput();appendAIMessage(question,"user");showAITyping();setAIStatus("Analisando o contexto necessário…");
 
   try{
     const {data:{session}}=await db().auth.getSession();
     if(!session)throw new Error("SESSION_MISSING");
 
-    const crmState={
-      properties:state.properties.slice(0,60),
-      leads:state.leads.slice(0,60),
-      captures:state.captures.slice(0,40),
-      teamOnline:Object.values(state.chatPresence||{}).flat().length
-    };
+    let result=await requestCRM_AI(question,session);
+    if(!result.reply)throw new Error("EMPTY_AI_REPLY");
 
-    const response=await fetch(AI_FUNCTION,{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":"Bearer "+session.access_token
-      },
-      body:JSON.stringify({
-        question:humanizedQuestion,
-        history:state.aiHistory.slice(-10),
-        crmState,
-        context:crmState
-      })
-    });
+    if(isRepeatedAIReply(result.reply)){
+      setAIStatus("Evitando resposta repetida…");
+      const retryHistory=[...state.aiHistory,{role:"user",content:question},{role:"assistant",content:result.reply}];
+      result=await requestCRM_AI(question,session,"A resposta anterior ficou semelhante. Entregue outra abordagem, com palavras, estrutura e próxima ação diferentes. Não repita a abertura nem a conclusão.",retryHistory);
+    }
 
-    const data=await response.json().catch(()=>({}));
-    if(!response.ok)throw new Error(data?.error||`AI_${response.status}`);
-
-    const reply=data.reply||data.response||data.answer||data.resposta||data.message||"Não consegui concluir a resposta.";
-    $("#aiLoading")?.remove();
-    $("#aiLog").insertAdjacentHTML("beforeend",`<div class="msg">${esc(reply)}</div>`);
-
-    state.aiHistory.push(
-      {role:"user",content:question},
-      {role:"assistant",content:String(reply)}
-    );
-    state.aiHistory=state.aiHistory.slice(-12);
+    $("#aiLoading")?.remove();appendAIMessage(result.reply||localAIFallback(question),"assistant");renderAISuggestions(result.suggestions);
+    state.aiHistory.push({role:"user",content:question},{role:"assistant",content:String(result.reply)});
+    state.aiHistory=state.aiHistory.slice(-10);
+    sessionStorage.setItem("leads_crm_ai_history_v2",JSON.stringify(state.aiHistory));
+    const provider=result.meta?.provider?` · ${result.meta.provider}`:"";setAIStatus(`Resposta concluída${provider}`);
   }catch(error){
-    console.error("[IA]",error);
-    $("#aiLoading")?.remove();
-    $("#aiLog").insertAdjacentHTML("beforeend",`<div class="msg">Tive uma instabilidade rápida. Nenhum dado foi alterado. Tente novamente em alguns segundos.</div>`);
+    console.error("[IA CRM]",error);$("#aiLoading")?.remove();
+    const fallback=localAIFallback(question);appendAIMessage(fallback,"assistant","ai-error");
+    state.aiHistory.push({role:"user",content:question},{role:"assistant",content:fallback});state.aiHistory=state.aiHistory.slice(-10);
+    setAIStatus(error?.name==="AbortError"?"Tempo de resposta excedido · modo local":"Modo local seguro ativo");
+  }finally{
+    state.aiBusy=false;$("#aiDrawer").classList.remove("busy");$("#aiSendButton").disabled=false;state.aiAbort=null;$("#aiLog").scrollTop=$("#aiLog").scrollHeight;window.setTimeout(()=>$("#aiInput")?.focus(),80);
   }
-
-  $("#aiLog").scrollTop=$("#aiLog").scrollHeight;
 }
 
 async function logout(){
