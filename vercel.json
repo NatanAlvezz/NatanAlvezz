@@ -3,30 +3,84 @@
   "cleanUrls": false,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/crm", "destination": "/crm.html" },
-    { "source": "/crm/leads", "destination": "/crm-leads.html" },
-    { "source": "/crm/leads/:id", "destination": "/crm-lead.html?id=:id" },
-    { "source": "/crm/imoveis", "destination": "/crm-imoveis.html" },
-    { "source": "/crm/imoveis/:id", "destination": "/crm-imovel.html?id=:id" },
-    { "source": "/crm/captacao", "destination": "/crm-captacao-especial.html" },
-    { "source": "/crm/captacao/:id", "destination": "/crm-captacao.html?id=:id" },
-    { "source": "/crm/proprietarios", "destination": "/crm-proprietarios.html" },
-    { "source": "/imovel/:codigo", "destination": "/imovel.html?codigo=:codigo" }
+    {
+      "source": "/crm",
+      "destination": "/crm.html"
+    },
+    {
+      "source": "/crm/leads",
+      "destination": "/crm-leads.html"
+    },
+    {
+      "source": "/crm/leads/:id",
+      "destination": "/crm-lead.html?id=:id"
+    },
+    {
+      "source": "/crm/imoveis",
+      "destination": "/crm-imoveis.html"
+    },
+    {
+      "source": "/crm/imoveis/:id",
+      "destination": "/crm-imovel.html?id=:id"
+    },
+    {
+      "source": "/crm/captacao",
+      "destination": "/crm-captacao-especial.html"
+    },
+    {
+      "source": "/crm/captacao/:id",
+      "destination": "/crm-captacao.html?id=:id"
+    },
+    {
+      "source": "/crm/proprietarios",
+      "destination": "/crm-proprietarios.html"
+    },
+    {
+      "source": "/imovel/:codigo",
+      "destination": "/imovel.html?codigo=:codigo"
+    }
   ],
   "headers": [
     {
       "source": "/crm(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "no-store, max-age=0" },
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+        },
+        {
+          "key": "X-DNS-Prefetch-Control",
+          "value": "off"
+        }
       ]
     },
     {
       "source": "/crm-modules.(js|css)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
       ]
     }
   ]

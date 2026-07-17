@@ -1,0 +1,10 @@
+# Arquivos internos e técnicos fora do deploy público
+.git/
+.github/
+*.sql
+*.txt
+*.md
+leads-imoveis-fase2-supabase/
+teste-ia.html
+crm-final-correto/
+**/*backup*
