@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -34,6 +35,8 @@
       --shadow-lg:0 28px 78px rgba(2,12,22,.30);
       --shadow-md:0 18px 46px rgba(3,18,31,.15);
       --safe-bottom:env(safe-area-inset-bottom,0px);
+      --header-h:78px;
+      --search-dock-h:68px;
     }
 
     *,*::before,*::after{box-sizing:border-box}
@@ -59,6 +62,23 @@
     .desktop-nav button:hover,.desktop-nav a:hover{color:#071422;background:linear-gradient(145deg,#eefbff,#9fe5ff);transform:translateY(-2px)}
     .menu-button{display:none;justify-self:end;width:44px;height:44px;place-items:center;border-radius:15px;color:var(--ink);background:rgba(7,20,34,.08);font-size:21px}
 
+    /* Busca rápida sempre visível abaixo do cabeçalho */
+    .quick-search-dock{position:fixed;top:var(--header-h);left:0;right:0;z-index:79;min-height:var(--search-dock-h);display:flex;align-items:center;color:var(--ink);background:linear-gradient(135deg,rgba(7,20,34,.96),rgba(18,55,77,.94));border-bottom:1px solid rgba(189,239,255,.22);box-shadow:0 13px 34px rgba(2,12,22,.22);backdrop-filter:blur(18px) saturate(145%);-webkit-backdrop-filter:blur(18px) saturate(145%)}
+    .quick-search-inner{width:min(1180px,calc(100% - 28px));margin-inline:auto;display:grid;grid-template-columns:minmax(260px,1fr) auto;gap:12px;align-items:center;padding:9px 0}
+    .quick-search-form{min-width:0;display:flex;align-items:center;gap:8px;padding:7px 8px 7px 14px;background:rgba(255,255,255,.97);border:1px solid rgba(189,239,255,.62);border-radius:18px;box-shadow:0 10px 28px rgba(0,0,0,.18)}
+    .quick-search-form span{flex:0 0 auto;color:#447187;font-size:16px}
+    .quick-search-form input{width:100%;min-width:0;height:38px;padding:0 4px;color:var(--ink);background:transparent;border:0;outline:0;font-size:14px}
+    .quick-search-form button{flex:0 0 auto;min-height:38px;padding:0 16px;color:#ecfbff;background:linear-gradient(135deg,var(--navy),var(--navy-3));border-radius:13px;font-size:12px;font-weight:900}
+    .quick-search-shortcuts{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none}
+    .quick-search-shortcuts::-webkit-scrollbar{display:none}
+    .quick-search-shortcuts button,.quick-search-shortcuts a{min-height:40px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 13px;white-space:nowrap;color:#eafcff;background:rgba(255,255,255,.10);border:1px solid rgba(189,239,255,.22);border-radius:999px;font-size:11px;font-weight:900;transition:.2s ease}
+    .quick-search-shortcuts button:hover,.quick-search-shortcuts a:hover{background:rgba(116,213,255,.20);transform:translateY(-1px)}
+    .quick-search-shortcuts .shortcut-whatsapp{color:#063b1b;background:#e8fff1;border-color:rgba(104,230,166,.58)}
+    .quick-search-shortcuts .shortcut-whatsapp:hover{background:#cffff0}
+    .quick-search-shortcuts .shortcut-ai{color:#071422;background:linear-gradient(135deg,#e3f9ff,#8ee1ff);border-color:rgba(189,239,255,.68)}
+    .quick-search-shortcuts .shortcut-contact{color:#fff;background:rgba(255,255,255,.16)}
+    .quick-search-shortcuts .shortcut-icon{font-size:14px;line-height:1}
+
     .overlay{display:none;position:fixed;inset:0;z-index:110;background:rgba(0,0,0,.52);backdrop-filter:blur(3px)}
     .overlay.visible{display:block}
     .mobile-menu{position:fixed;top:0;right:min(-330px,-90vw);z-index:120;width:min(320px,90vw);height:100dvh;padding:18px;color:var(--ink);background:linear-gradient(155deg,rgba(249,254,255,.99),rgba(223,248,255,.97));box-shadow:-26px 0 70px rgba(0,0,0,.32);transition:right .28s ease}
@@ -70,7 +90,7 @@
     .mobile-nav button,.mobile-nav a{min-height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;color:#102f42;background:rgba(255,255,255,.87);border:1px solid var(--line);border-radius:17px;box-shadow:0 9px 22px rgba(4,12,22,.07);font-size:13px;font-weight:850}
     .mobile-nav button::after,.mobile-nav a::after{content:"›";color:#39758f;font-size:20px}
 
-    .hero{position:relative;isolation:isolate;min-height:100svh;display:grid;align-items:center;padding:116px 0 72px;overflow:hidden;background:var(--navy)}
+    .hero{position:relative;isolation:isolate;min-height:100svh;display:grid;align-items:center;padding:calc(var(--header-h) + var(--search-dock-h) + 46px) 0 72px;overflow:hidden;background:var(--navy)}
     .hero-bg{position:absolute;inset:0;z-index:0;background-image:url("hero-leads-floripa-final.webp");background-position:center 45%;background-size:cover;transform:scale(1.015);animation:heroZoom 28s ease-in-out infinite alternate}
     .hero-bg::before{content:"";position:absolute;inset:0;background:linear-gradient(96deg,rgba(5,14,24,.90),rgba(7,20,34,.60) 48%,rgba(6,17,28,.24) 74%,rgba(5,14,24,.70)),linear-gradient(180deg,rgba(5,13,21,.08),rgba(5,13,21,.76))}
     .hero::after{content:"";position:absolute;inset:auto 0 -2px;z-index:1;height:165px;background:linear-gradient(180deg,transparent,rgba(7,20,34,.35) 44%,var(--navy) 100%)}
@@ -105,13 +125,14 @@
     .assistant-answer{min-height:94px;padding:13px;color:#31566c;background:#f8fdff;border:1px solid #daeff8;border-radius:19px;font-size:13px;line-height:1.5}
 
     .main-content{position:relative;z-index:3;color:var(--ink);background:var(--surface)}
-    .search-section{padding:72px 0 34px;background:linear-gradient(180deg,var(--navy),#0b2437 14%,var(--surface) 100%)}
-    .search-box{padding:22px;border-radius:30px}
+    #buscar,#imoveis,#contato{scroll-margin-top:calc(var(--header-h) + var(--search-dock-h) + 14px)}
+    .search-section{scroll-margin-top:calc(var(--header-h) + var(--search-dock-h) + 12px);padding:72px 0 34px;background:linear-gradient(180deg,var(--navy),#0b2437 14%,var(--surface) 100%)}
+    .search-box{position:relative;padding:22px;border-radius:30px;box-shadow:0 26px 72px rgba(2,12,22,.23),inset 0 1px 0 rgba(255,255,255,.86)}
     .search-heading,.section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:18px}
     .section-kicker{display:block;margin-bottom:6px;color:#3b758f;font-size:11px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase}
     .search-heading h2,.section-heading h2{margin:0;color:var(--ink);font-size:clamp(25px,4vw,40px);line-height:1.08;letter-spacing:-1px}
     .search-heading p,.section-heading p{max-width:620px;margin:8px 0 0;color:var(--ink-soft);font-size:14px;line-height:1.55}
-    .filter-grid{display:grid;grid-template-columns:1.05fr 1.1fr 1.1fr 1fr auto;gap:10px;align-items:end}
+    .filter-grid{display:grid;grid-template-columns:1fr 1.1fr 1.1fr 1.35fr auto;gap:10px;align-items:end}
     .field label{display:block;margin:0 0 7px 3px;color:#40677d;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.7px}
     .field select,.field input{width:100%;min-height:48px;padding:0 14px;color:var(--ink);background:#fff;border:1px solid #d7edf6;border-radius:16px;outline:none}
     .field select:focus,.field input:focus{border-color:var(--sky);box-shadow:0 0 0 4px rgba(116,213,255,.16)}
@@ -120,7 +141,7 @@
     .filter-actions button{color:#356178;background:transparent;font-size:12px;font-weight:800}
     .filter-status{color:#527487;font-size:12px}
 
-    .properties-section{position:relative;padding:42px 0 80px;overflow:hidden;background:var(--surface)}
+    .properties-section{scroll-margin-top:calc(var(--header-h) + var(--search-dock-h) + 12px);position:relative;padding:42px 0 80px;overflow:hidden;background:var(--surface)}
     .properties-section::before{content:"";position:absolute;top:5%;left:50%;width:min(900px,90vw);height:520px;background:radial-gradient(ellipse,rgba(116,213,255,.16),transparent 68%);filter:blur(26px);transform:translateX(-50%);pointer-events:none}
     .properties-section>.shell{position:relative}
     .property-count{padding:10px 14px;color:#28536a;background:#eaf8fd;border:1px solid #d3edf7;border-radius:999px;font-size:12px;font-weight:900}
@@ -190,8 +211,8 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     @keyframes typing{0%,60%,100%{opacity:.35;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
 
-    @media(max-width:980px){.topbar{display:flex}.desktop-nav{display:none}.menu-button{display:grid;margin-left:auto}.hero-grid{grid-template-columns:1fr}.assistant-card{width:min(570px,100%)}.filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.properties-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.contact-grid{grid-template-columns:1fr}}
-    @media(max-width:700px){.hero-bg{background-image:url("hero-leads-floripa-mobile.webp");background-position:center top;transform:none;animation:none}.topbar{min-height:70px;padding:7px 14px}.brand{width:54px;height:54px}.brand img{width:39px;height:39px}.hero{padding:104px 0 58px}.hero-logo{width:min(270px,74vw)}.phrase-panel{min-height:220px;padding:18px;border-radius:23px}.phrase-panel h1{font-size:clamp(32px,10.2vw,50px);letter-spacing:-1.35px}.quick-options{grid-template-columns:1fr}.quick-option{min-height:72px}.search-section{padding-top:58px}.search-box{padding:17px;border-radius:24px}.search-heading,.section-heading{align-items:flex-start;flex-direction:column}.filter-grid,.properties-grid{grid-template-columns:1fr}.property-card.revealed:hover{transform:none}.property-bottom{align-items:stretch;flex-direction:column}.card-actions{width:100%}.card-actions>*{flex:1}.contact-section{min-height:auto;background-position:center}.footer-content{align-items:flex-start;flex-direction:column}.footer-copy{text-align:left}.floating-ai{right:10px;bottom:calc(12px + var(--safe-bottom));width:62px;height:62px}.ai-panel{right:8px;bottom:calc(80px + var(--safe-bottom));width:calc(100vw - 16px);max-height:calc(100dvh - 94px - var(--safe-bottom));border-radius:24px}.lia-thread{min-height:230px;max-height:calc(100dvh - 270px)}}
+    @media(max-width:980px){.topbar{display:flex}.desktop-nav{display:none}.menu-button{display:grid;margin-left:auto}.quick-search-inner{grid-template-columns:minmax(0,1fr)}.quick-search-shortcuts{padding-bottom:1px}.hero-grid{grid-template-columns:1fr}.assistant-card{width:min(570px,100%)}.filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.filter-submit{grid-column:1/-1}.properties-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.contact-grid{grid-template-columns:1fr}}
+    @media(max-width:700px){:root{--header-h:70px;--search-dock-h:116px}.hero-bg{background-image:url("hero-leads-floripa-mobile.webp");background-position:center top;transform:none;animation:none}.topbar{min-height:var(--header-h);padding:7px 14px}.brand{width:54px;height:54px}.brand img{width:39px;height:39px}.quick-search-dock{top:var(--header-h)}.quick-search-inner{width:calc(100% - 20px);gap:7px;padding:8px 0}.quick-search-form{border-radius:15px;padding-left:11px}.quick-search-form button{padding:0 12px}.quick-search-shortcuts{gap:6px}.quick-search-shortcuts button,.quick-search-shortcuts a{min-height:35px;padding:0 11px;font-size:10px}.hero{min-height:auto;padding:calc(var(--header-h) + var(--search-dock-h) + 34px) 0 58px}.hero-logo{width:min(270px,74vw)}.phrase-panel{min-height:205px;padding:18px;border-radius:23px}.phrase-panel h1{font-size:clamp(32px,10.2vw,50px);letter-spacing:-1.35px}.quick-options{grid-template-columns:1fr}.quick-option{min-height:72px}.assistant-card{animation:none!important}.search-section{padding-top:46px}.search-box{padding:17px;border-radius:24px}.search-heading,.section-heading{align-items:flex-start;flex-direction:column}.filter-grid,.properties-grid{grid-template-columns:1fr}.filter-submit{grid-column:auto;width:100%}.filter-actions{align-items:flex-start;flex-direction:column}.property-card.revealed:hover{transform:none}.property-bottom{align-items:stretch;flex-direction:column}.card-actions{width:100%}.card-actions>*{flex:1}.contact-section{min-height:auto;background-position:center}.footer-content{align-items:flex-start;flex-direction:column}.footer-copy{text-align:left}.floating-ai{right:10px;bottom:calc(12px + var(--safe-bottom));width:62px;height:62px}.ai-panel{right:8px;bottom:calc(80px + var(--safe-bottom));width:calc(100vw - 16px);max-height:calc(100dvh - 94px - var(--safe-bottom));border-radius:24px}.lia-thread{min-height:230px;max-height:calc(100dvh - 270px)}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}.hero-bg,.brand,.hero-logo,.assistant-card,.floating-ai,.hero-copy{animation:none!important}.property-card{opacity:1!important;transform:none!important}.phrase-panel{transition:none!important}}
 
 
@@ -274,19 +295,117 @@
       }
     }
 
+
+
+    /* ============================================================
+       LEADS IMÓVEIS · COMMAND BAR PREMIUM 2026
+       Navegação única ao lado da logo, sem faixa duplicada.
+    ============================================================ */
+    :root{--header-h:94px;--search-dock-h:0px}
+    .topbar{min-height:var(--header-h);display:block;padding:11px clamp(12px,2vw,28px);color:var(--ink);background:linear-gradient(180deg,rgba(4,14,24,.58),rgba(4,14,24,.08));border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+    .topbar::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,11,19,.34),transparent);pointer-events:none}
+    .topbar-shell{position:relative;width:min(1380px,100%);min-height:72px;margin-inline:auto;display:grid;grid-template-columns:68px minmax(0,1fr) 48px;align-items:center;gap:12px}
+    .brand{width:64px;height:64px;border-radius:22px;background:linear-gradient(145deg,#071422,#173e58);border:1px solid rgba(189,239,255,.36);box-shadow:0 18px 40px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.12);z-index:2}
+    .brand img{width:46px;height:46px}
+    .command-bar{min-width:0;min-height:70px;display:grid;grid-template-columns:auto minmax(210px,1fr) auto;align-items:center;gap:8px;padding:7px 8px 7px 10px;border:1px solid rgba(255,255,255,.78);border-radius:25px;background:linear-gradient(135deg,rgba(255,255,255,.97),rgba(232,249,255,.89));box-shadow:0 22px 56px rgba(2,12,22,.24),inset 0 1px 0 rgba(255,255,255,.98);backdrop-filter:blur(26px) saturate(160%);-webkit-backdrop-filter:blur(26px) saturate(160%);overflow:hidden}
+    .command-group{display:flex;align-items:center;gap:4px;min-width:0}
+    .command-properties{padding-right:7px;border-right:1px solid rgba(42,94,119,.13)}
+    .command-services{padding-left:7px;border-left:1px solid rgba(42,94,119,.13)}
+    .command-action{min-width:112px;min-height:54px;display:flex;align-items:center;gap:9px;padding:7px 10px;color:#17384b;background:transparent;border:1px solid transparent;border-radius:17px;text-align:left;transition:transform .2s ease,background .2s ease,border-color .2s ease,box-shadow .2s ease}
+    .command-action:hover,.command-action.is-active{color:#071422;background:linear-gradient(145deg,#f4fcff,#d7f4ff);border-color:rgba(116,188,219,.30);box-shadow:0 10px 22px rgba(8,55,79,.10);transform:translateY(-1px)}
+    .command-icon{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;color:#1d6687;background:linear-gradient(145deg,#eaf9ff,#d6f2fc);border:1px solid rgba(116,188,219,.25);border-radius:12px}
+    .command-action.is-active .command-icon{color:#f1fbff;background:linear-gradient(145deg,#071422,#28536d);border-color:transparent}
+    .command-icon svg,.command-search-icon svg,.command-search button svg,.command-icon-action svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .command-copy{min-width:0}.command-copy strong,.command-copy small{display:block;white-space:nowrap}.command-copy strong{font-size:11.5px;line-height:1.15}.command-copy small{margin-top:4px;color:#69899b;font-size:8.5px;font-weight:750;letter-spacing:.2px}
+    .command-search{min-width:0;height:52px;display:flex;align-items:center;gap:8px;padding:5px 5px 5px 12px;background:rgba(255,255,255,.84);border:1px solid rgba(116,188,219,.28);border-radius:17px;box-shadow:inset 0 1px 0 rgba(255,255,255,.94);transition:border-color .2s ease,box-shadow .2s ease,background .2s ease}
+    .command-search:focus-within{background:#fff;border-color:rgba(40,120,200,.48);box-shadow:0 0 0 4px rgba(116,213,255,.15),inset 0 1px 0 #fff}
+    .command-search-icon{display:grid;place-items:center;color:#4d7b90;flex:0 0 auto}
+    .command-search input{width:100%;min-width:80px;height:38px;padding:0;color:#0c2636;background:transparent;border:0;outline:0;font-size:12px;font-weight:720}
+    .command-search input::placeholder{color:#7893a1;font-weight:650}
+    .command-search button{height:40px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 13px;color:#f4fcff;background:linear-gradient(145deg,#071422,#28536d);border-radius:13px;font-size:10.5px;font-weight:900;box-shadow:0 9px 20px rgba(7,20,34,.18);transition:transform .2s ease,filter .2s ease}
+    .command-search button:hover{filter:brightness(1.12);transform:translateX(1px)}
+    .command-search button svg{width:15px;height:15px}
+    .command-icon-action{min-width:54px;min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:5px 8px;color:#315f76;background:transparent;border:1px solid transparent;border-radius:16px;font-size:8px;font-weight:900;white-space:nowrap;transition:.2s ease}
+    .command-icon-action:hover{color:#071422;background:#edfaff;border-color:rgba(116,188,219,.26);transform:translateY(-1px)}
+    .command-whatsapp{color:#0c6d3a}.command-whatsapp:hover{color:#07532c;background:#e6fff0;border-color:rgba(67,187,118,.28)}
+    .command-lia{color:#0d5878;background:linear-gradient(145deg,rgba(227,249,255,.7),rgba(142,225,255,.40));border-color:rgba(116,188,219,.20)}
+    .menu-button{display:none;width:46px;height:46px;align-content:center;justify-content:center;gap:5px;padding:0;border-radius:16px;color:#fff;background:rgba(7,20,34,.78);border:1px solid rgba(189,239,255,.24);box-shadow:0 12px 26px rgba(0,0,0,.18)}
+    .menu-button span{width:19px;height:2px;display:block;background:currentColor;border-radius:999px;transition:.2s ease}
+    .topbar.scrolled{min-height:var(--header-h);background:linear-gradient(180deg,rgba(4,14,24,.74),rgba(4,14,24,.14));box-shadow:none}
+    .topbar.scrolled .command-bar{background:linear-gradient(135deg,rgba(255,255,255,.985),rgba(232,249,255,.95));box-shadow:0 18px 46px rgba(2,12,22,.28),inset 0 1px 0 #fff}
+    .hero{padding:calc(var(--header-h) + 46px) 0 72px}
+    #buscar,#imoveis,#contato,.search-section,.properties-section{scroll-margin-top:calc(var(--header-h) + 14px)}
+
+    @media(max-width:1220px){
+      .command-action{min-width:94px;padding-inline:8px}.command-copy small{display:none}.command-search button span{display:none}.command-search button{width:40px;padding:0}.command-icon-action span{display:none}.command-icon-action{min-width:44px;padding-inline:5px}
+    }
+    @media(max-width:980px){
+      :root{--header-h:82px}
+      .topbar{padding:7px 10px}.topbar-shell{min-height:68px;grid-template-columns:58px minmax(0,1fr) 44px;gap:8px}.brand{width:56px;height:56px;border-radius:19px}.brand img{width:40px;height:40px}
+      .command-bar{min-height:60px;display:flex;gap:4px;padding:5px 6px;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:none}.command-bar::-webkit-scrollbar{display:none}
+      .command-properties,.command-services{display:contents}.command-action{min-width:76px;min-height:48px;justify-content:center;padding:4px 7px;text-align:center}.command-icon{width:29px;height:29px;flex-basis:29px}.command-copy strong{font-size:9px}.command-copy small{display:none}
+      .command-search{min-width:190px;height:48px;padding-left:9px}.command-search input{font-size:10px}.command-search button{width:37px;height:36px;padding:0}
+      .command-icon-action{min-width:48px;min-height:48px}.menu-button{display:grid}
+    }
+    @media(max-width:700px){
+      :root{--header-h:76px;--search-dock-h:0px}
+      .topbar{padding:6px 7px}.topbar-shell{min-height:64px;grid-template-columns:52px minmax(0,1fr) 42px;gap:6px}.brand{width:50px;height:50px;border-radius:17px}.brand img{width:36px;height:36px}
+      .command-bar{min-height:54px;border-radius:19px;padding:4px}.command-action{min-width:63px;min-height:44px;gap:4px;flex-direction:column;border-radius:14px}.command-icon{width:25px;height:25px;flex-basis:25px;border-radius:9px}.command-icon svg{width:15px;height:15px}.command-copy strong{font-size:8px}.command-search{min-width:145px;height:44px;border-radius:14px;padding:3px 3px 3px 8px}.command-search-icon{display:none}.command-search input{font-size:9px}.command-search button{width:34px;height:34px;border-radius:11px}.command-icon-action{min-width:42px;min-height:44px;border-radius:13px}.command-icon-action svg{width:17px;height:17px}.menu-button{width:40px;height:40px;border-radius:14px}.menu-button span{width:17px}
+      .hero{padding:calc(var(--header-h) + 30px) 0 58px}
+    }
+
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="#inicio" aria-label="Leads Imóveis - início"><img src="leads-monograma-v3.webp" alt="Leads Imóveis" /></a>
-    <nav class="desktop-nav" aria-label="Navegação principal">
-      <button type="button" data-purpose="Venda">Venda</button>
-      <button type="button" data-purpose="Temporada">Temporada</button>
-      <button type="button" data-purpose="Aluguel Anual">Aluguel anual</button>
-      <button type="button" data-focus-code>Código</button>
-      <a href="#contato">Contato</a>
-    </nav>
-    <button class="menu-button" id="openMenu" type="button" aria-label="Abrir menu">☰</button>
+  <header class="topbar" id="siteHeader">
+    <div class="topbar-shell">
+      <a class="brand" href="#inicio" aria-label="Leads Imóveis — página inicial">
+        <img src="leads-monograma-v3.webp" alt="Leads Imóveis" />
+      </a>
+
+      <nav class="command-bar" aria-label="Navegação e pesquisa de imóveis">
+        <div class="command-group command-properties" aria-label="Finalidade do imóvel">
+          <button class="command-action" type="button" data-purpose="Venda" aria-label="Ver imóveis à venda">
+            <span class="command-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M9.5 20v-5.5h5V20"/></svg></span>
+            <span class="command-copy"><strong>Comprar</strong><small>Imóveis à venda</small></span>
+          </button>
+          <button class="command-action" type="button" data-purpose="Aluguel Anual" aria-label="Ver imóveis para aluguel anual">
+            <span class="command-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="8" cy="12" r="3.25"/><path d="m11.2 12 8.3 0M16 12v3M19 12v2"/></svg></span>
+            <span class="command-copy"><strong>Alugar</strong><small>Aluguel anual</small></span>
+          </button>
+          <button class="command-action" type="button" data-purpose="Temporada" aria-label="Ver imóveis de temporada">
+            <span class="command-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.3"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4"/></svg></span>
+            <span class="command-copy"><strong>Temporada</strong><small>Viva Florianópolis</small></span>
+          </button>
+        </div>
+
+        <form class="command-search" id="quickSearchForm" role="search">
+          <label class="sr-only" for="quickSearchInput">Pesquisar imóvel por código, bairro, tipo ou nome</label>
+          <span class="command-search-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m15.4 15.4 4.1 4.1"/></svg></span>
+          <input id="quickSearchInput" type="search" autocomplete="off" enterkeyhint="search" placeholder="Código, bairro ou imóvel" />
+          <button type="submit" aria-label="Pesquisar imóveis"><span>Buscar</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5"/></svg></button>
+        </form>
+
+        <div class="command-group command-services" aria-label="Atendimento">
+          <button class="command-icon-action" type="button" data-scroll-contact aria-label="Ver contatos" title="Contato">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 5.5c0-1.1.9-2 2-2h2.1l1.6 4.1-2.1 1.6a15 15 0 0 0 6.7 6.7l1.6-2.1 4.1 1.6v2.1c0 1.1-.9 2-2 2h-.8A13.2 13.2 0 0 1 4.5 6.3v-.8Z"/></svg>
+            <span>Contato</span>
+          </button>
+          <a class="command-icon-action command-whatsapp" href="https://wa.me/5548991115992?text=Olá%2C%20vim%20pelo%20site%20da%20Leads%20Imóveis%20e%20gostaria%20de%20falar%20com%20um%20especialista." target="_blank" rel="noopener noreferrer" aria-label="Falar com a Leads Imóveis pelo WhatsApp" title="WhatsApp">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.7a8 8 0 0 1-11.8 7L4 20l1.3-4.1A8 8 0 1 1 20 11.7Z"/><path d="M8.2 8.4c.4 3.2 2.1 5 5.4 5.8"/></svg>
+            <span>WhatsApp</span>
+          </a>
+          <button class="command-icon-action command-lia" type="button" data-open-ai aria-label="Abrir Lia, assistente virtual" title="Lia IA">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3Z"/><path d="m19 16 .7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z"/></svg>
+            <span>Lia IA</span>
+          </button>
+        </div>
+      </nav>
+
+      <button class="menu-button" id="openMenu" type="button" aria-label="Abrir menu" aria-controls="mobileMenu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </header>
 
   <div class="overlay" id="overlay"></div>
@@ -341,7 +460,7 @@
             <div class="field"><label for="purposeFilter">Objetivo</label><select id="purposeFilter"><option value="">Todos</option><option value="Venda">Venda</option><option value="Temporada">Temporada</option><option value="Aluguel Anual">Aluguel anual</option></select></div>
             <div class="field"><label for="neighborhoodFilter">Bairro</label><select id="neighborhoodFilter"><option value="">Todos</option></select></div>
             <div class="field"><label for="typeFilter">Tipo</label><select id="typeFilter"><option value="">Todos</option></select></div>
-            <div class="field"><label for="codeFilter">Código</label><input id="codeFilter" type="search" autocomplete="off" placeholder="Ex.: LI-1234" /></div>
+            <div class="field"><label for="codeFilter">Código ou palavra</label><input id="codeFilter" type="search" autocomplete="off" placeholder="Ex.: LI-1234, Ingleses, apartamento" /></div>
             <button class="button dark filter-submit" type="submit">Buscar</button>
           </div></form>
           <div class="filter-actions"><button id="clearFilters" type="button">Limpar filtros</button><span class="filter-status" id="connectionStatus" aria-live="polite">Conectando ao banco de imóveis…</span></div>
@@ -802,13 +921,48 @@
       if (counter) counter.textContent = `${next+1} / ${property.photos.length}`;
     }
 
-    function openMenu() { $("mobileMenu").classList.add("open"); $("overlay").classList.add("visible"); document.body.classList.add("locked"); }
-    function closeMenu() { $("mobileMenu").classList.remove("open"); $("overlay").classList.remove("visible"); document.body.classList.remove("locked"); }
+    function openMenu() {
+      $("mobileMenu").classList.add("open");
+      $("mobileMenu").setAttribute("aria-hidden","false");
+      $("overlay").classList.add("visible");
+      $("openMenu").setAttribute("aria-expanded","true");
+      document.body.classList.add("locked");
+    }
+    function closeMenu() {
+      $("mobileMenu").classList.remove("open");
+      $("mobileMenu").setAttribute("aria-hidden","true");
+      $("overlay").classList.remove("visible");
+      $("openMenu").setAttribute("aria-expanded","false");
+      document.body.classList.remove("locked");
+    }
     function openAi() { $("aiPanel").classList.add("open"); $("aiPanel").setAttribute("aria-hidden","false"); setTimeout(()=>$("panelAssistantInput").focus(),180); }
     function closeAi() { $("aiPanel").classList.remove("open"); $("aiPanel").setAttribute("aria-hidden","true"); }
-    function setPurpose(purpose) { $("purposeFilter").value = purpose; applyFilters({scroll:true}); closeMenu(); }
+    function syncPurposeNavigation(purpose="") {
+      const target = normalizeText(purpose);
+      document.querySelectorAll("[data-purpose],[data-quick-purpose]").forEach(element=>{
+        const value = normalizeText(element.dataset.purpose || element.dataset.quickPurpose || "");
+        const active = Boolean(target && value === target);
+        element.classList.toggle("is-active",active);
+        element.setAttribute("aria-pressed",String(active));
+      });
+    }
+    function setPurpose(purpose) {
+      $("purposeFilter").value = purpose;
+      $("quickSearchInput").value = "";
+      $("codeFilter").value = "";
+      syncPurposeNavigation(purpose);
+      applyFilters({scroll:true});
+      closeMenu();
+    }
     function scrollSearch() { closeMenu(); $("buscar").scrollIntoView({behavior:"smooth",block:"start"}); }
+    function scrollContact() { closeMenu(); $("contato").scrollIntoView({behavior:"smooth",block:"start"}); }
     function focusCode() { scrollSearch(); setTimeout(()=>$("codeFilter").focus(),450); }
+    function runQuickSearch() {
+      const query = $("quickSearchInput").value.trim();
+      $("codeFilter").value = query;
+      applyFilters({scroll:true});
+      window.setTimeout(()=>$("codeFilter").focus({preventScroll:true}),500);
+    }
 
     function renderChips() {
       const html = suggestions.map(suggestion=>`<button class="chip" type="button" data-query="${escapeHtml(suggestion)}">${escapeHtml(suggestion)}</button>`).join("");
@@ -960,11 +1114,16 @@
       $("openAi").onclick = ()=>$("aiPanel").classList.contains("open") ? closeAi() : openAi();
       $("closeAi").onclick = closeAi;
       document.querySelectorAll("[data-purpose]").forEach(element=>element.onclick=()=>setPurpose(element.dataset.purpose));
+      document.querySelectorAll("[data-quick-purpose]").forEach(element=>element.onclick=()=>setPurpose(element.dataset.quickPurpose));
       document.querySelectorAll("[data-scroll-search]").forEach(element=>element.onclick=scrollSearch);
+      document.querySelectorAll("[data-scroll-contact]").forEach(element=>element.onclick=scrollContact);
+      document.querySelectorAll("[data-open-ai]").forEach(element=>element.onclick=()=>{ closeMenu(); openAi(); });
       document.querySelectorAll("[data-focus-code]").forEach(element=>element.onclick=focusCode);
+      $("quickSearchForm").onsubmit = event=>{ event.preventDefault(); runQuickSearch(); };
       $("filterForm").onsubmit = event=>{ event.preventDefault(); applyFilters({scroll:true}); };
-      $("clearFilters").onclick = ()=>{ $("filterForm").reset(); applyFilters({scroll:false}); };
-      ["purposeFilter","neighborhoodFilter","typeFilter"].forEach(id=>$(id).onchange=()=>applyFilters({scroll:false}));
+      $("clearFilters").onclick = ()=>{ $("filterForm").reset(); $("quickSearchInput").value=""; syncPurposeNavigation(""); applyFilters({scroll:false}); };
+      ["purposeFilter","neighborhoodFilter","typeFilter"].forEach(id=>$(id).onchange=()=>{ if(id==="purposeFilter") syncPurposeNavigation($(id).value); applyFilters({scroll:false}); });
+      $("codeFilter").oninput = ()=>{ $("quickSearchInput").value = $("codeFilter").value; };
       $("heroAssistantForm").onsubmit = event=>{ event.preventDefault(); sendLia($("heroAssistantInput").value); };
       $("panelAssistantForm").onsubmit = event=>{ event.preventDefault(); sendLia($("panelAssistantInput").value); };
       document.addEventListener("click",event=>{ const chip=event.target.closest("[data-query]"); if (chip) sendLia(chip.dataset.query); });
