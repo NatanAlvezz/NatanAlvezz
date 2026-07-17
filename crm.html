@@ -189,6 +189,193 @@
     .theme-custom input[type="color"]{height:44px;padding:4px;cursor:pointer}
     .privacy-note{font-size:10px;color:var(--muted);line-height:1.55;margin:10px 0 0}
 
+
+    /* =========================================================
+       EXPERIÊNCIA VISUAL CONFORTÁVEL · LEADS IMÓVEIS
+       ========================================================= */
+    .brand img{
+      animation:crmLogoFloat 4.8s ease-in-out infinite;
+      transform-origin:center;
+      will-change:transform,filter;
+      filter:drop-shadow(0 8px 16px color-mix(in srgb,var(--accent) 18%,transparent));
+      transition:transform .28s ease,filter .28s ease,box-shadow .28s ease
+    }
+    .brand:hover img{
+      transform:translateY(-3px) scale(1.055) rotate(-1deg);
+      filter:drop-shadow(0 0 13px color-mix(in srgb,var(--accent) 62%,transparent))
+             drop-shadow(0 10px 20px rgba(0,0,0,.28))
+    }
+    @keyframes crmLogoFloat{
+      0%,100%{transform:translateY(0) rotate(0)}
+      50%{transform:translateY(-5px) rotate(.6deg)}
+    }
+
+    .nav button,.icon-btn,.ai-fab,.btn,.theme-card{
+      position:relative;
+      overflow:hidden;
+      isolation:isolate
+    }
+    .nav button::after,.icon-btn::after,.ai-fab::after,.btn::after,.theme-card::before{
+      content:"";
+      position:absolute;
+      inset:-45%;
+      z-index:-1;
+      opacity:0;
+      transform:translateX(-65%) rotate(18deg);
+      background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--accent2) 34%,transparent),transparent);
+      transition:opacity .22s ease,transform .48s ease
+    }
+    .nav button:hover::after,.icon-btn:hover::after,.ai-fab:hover::after,.btn:hover::after,.theme-card:hover::before{
+      opacity:1;
+      transform:translateX(65%) rotate(18deg)
+    }
+    .nav button:hover .ico{
+      color:var(--accent2);
+      text-shadow:0 0 13px color-mix(in srgb,var(--accent2) 68%,transparent);
+      transform:translateY(-1px) scale(1.10)
+    }
+    .nav .ico{transition:transform .22s ease,color .22s ease,text-shadow .22s ease}
+    .icon-btn:hover{
+      transform:translateY(-2px);
+      border-color:color-mix(in srgb,var(--accent2) 48%,transparent);
+      box-shadow:0 0 0 3px color-mix(in srgb,var(--accent2) 8%,transparent),
+                 0 10px 24px rgba(0,0,0,.23)
+    }
+
+    .ai-fab{
+      background:
+        radial-gradient(circle at 28% 22%,rgba(255,255,255,.34),transparent 22%),
+        linear-gradient(135deg,color-mix(in srgb,var(--surface3) 82%,transparent),color-mix(in srgb,var(--accent) 78%,transparent));
+      backdrop-filter:blur(14px) saturate(145%);
+      -webkit-backdrop-filter:blur(14px) saturate(145%);
+      box-shadow:
+        0 16px 38px rgba(0,0,0,.38),
+        inset 0 1px 0 rgba(255,255,255,.28),
+        0 0 24px color-mix(in srgb,var(--accent) 17%,transparent);
+      animation:aiComfortPulse 3.8s ease-in-out infinite;
+      transition:transform .28s ease,box-shadow .28s ease,filter .28s ease
+    }
+    .ai-fab:hover{
+      transform:translateY(-5px) scale(1.075);
+      filter:brightness(1.12);
+      box-shadow:
+        0 20px 48px rgba(0,0,0,.42),
+        inset 0 1px 0 rgba(255,255,255,.38),
+        0 0 35px color-mix(in srgb,var(--accent) 42%,transparent)
+    }
+    @keyframes aiComfortPulse{
+      0%,100%{box-shadow:0 16px 38px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.28),0 0 18px color-mix(in srgb,var(--accent) 14%,transparent)}
+      50%{box-shadow:0 18px 43px rgba(0,0,0,.40),inset 0 1px 0 rgba(255,255,255,.34),0 0 29px color-mix(in srgb,var(--accent) 31%,transparent)}
+    }
+    .ai-drawer{
+      background:
+        linear-gradient(145deg,color-mix(in srgb,var(--surface) 78%,transparent),color-mix(in srgb,var(--bg) 84%,transparent));
+      backdrop-filter:blur(24px) saturate(145%);
+      -webkit-backdrop-filter:blur(24px) saturate(145%);
+      box-shadow:-26px 0 80px rgba(0,0,0,.48);
+      border-left-color:color-mix(in srgb,var(--accent2) 22%,transparent)
+    }
+    .ai-head{
+      background:linear-gradient(90deg,color-mix(in srgb,var(--accent2) 7%,transparent),color-mix(in srgb,var(--accent) 9%,transparent));
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px)
+    }
+    .msg{
+      background:color-mix(in srgb,var(--surface2) 63%,transparent);
+      border:1px solid color-mix(in srgb,var(--accent2) 10%,var(--line));
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+      box-shadow:0 8px 22px rgba(0,0,0,.13)
+    }
+    .msg.me{
+      background:color-mix(in srgb,var(--accent2) 14%,transparent);
+      border-color:color-mix(in srgb,var(--accent2) 24%,transparent)
+    }
+
+    .motivation-strip{
+      margin-top:15px;
+      width:min(780px,100%);
+      min-height:52px;
+      display:flex;
+      align-items:center;
+      gap:11px;
+      padding:11px 14px;
+      border:1px solid color-mix(in srgb,var(--accent) 24%,var(--line));
+      border-radius:15px;
+      background:
+        linear-gradient(90deg,color-mix(in srgb,var(--accent) 8%,transparent),color-mix(in srgb,var(--accent2) 6%,transparent)),
+        color-mix(in srgb,var(--surface) 56%,transparent);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 10px 28px rgba(0,0,0,.14);
+      overflow:hidden
+    }
+    .motivation-symbol{
+      flex:0 0 32px;
+      width:32px;height:32px;border-radius:11px;
+      display:grid;place-items:center;
+      color:var(--accent);
+      background:color-mix(in srgb,var(--accent) 11%,transparent);
+      border:1px solid color-mix(in srgb,var(--accent) 22%,transparent);
+      text-shadow:0 0 12px color-mix(in srgb,var(--accent) 50%,transparent)
+    }
+    .motivation-content{min-width:0;flex:1}
+    .motivation-label{
+      display:block;
+      margin-bottom:3px;
+      color:var(--accent);
+      font-size:8px;
+      font-weight:900;
+      letter-spacing:1.4px;
+      text-transform:uppercase
+    }
+    #motivationPhrase{
+      margin:0;
+      max-width:none;
+      color:var(--text);
+      font-size:12px;
+      line-height:1.45;
+      font-weight:720;
+      transition:opacity .36s ease,transform .36s ease,filter .36s ease
+    }
+    #motivationPhrase.is-changing{
+      opacity:0;
+      transform:translateY(6px);
+      filter:blur(2px)
+    }
+    .motivation-progress{
+      position:absolute;
+      left:0;right:0;bottom:0;
+      height:2px;
+      background:linear-gradient(90deg,var(--accent),var(--accent2));
+      transform-origin:left;
+      animation:motivationProgress var(--phrase-duration,3000ms) linear forwards
+    }
+    @keyframes motivationProgress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+
+    .panel,.card,.kpi,.row,.column,.hero{
+      transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease,background-color .22s ease
+    }
+    .card:hover,.kpi:hover,.row:hover{
+      transform:translateY(-2px);
+      border-color:color-mix(in srgb,var(--accent2) 22%,var(--line));
+      box-shadow:0 14px 34px rgba(0,0,0,.19)
+    }
+
+    @media(hover:none){
+      .brand:hover img,.ai-fab:hover,.icon-btn:hover,.card:hover,.kpi:hover,.row:hover{transform:none}
+      .nav button::after,.icon-btn::after,.ai-fab::after,.btn::after,.theme-card::before{display:none}
+    }
+    @media(prefers-reduced-motion:reduce){
+      *,*::before,*::after{
+        scroll-behavior:auto!important;
+        animation-duration:.01ms!important;
+        animation-iteration-count:1!important;
+        transition-duration:.01ms!important
+      }
+      .brand img,.ai-fab{animation:none!important}
+    }
+
     @media(max-width:1180px){.kpis{grid-template-columns:repeat(3,1fr)}.grid-3{grid-template-columns:1fr 1fr}}
     @media(max-width:900px){
       .app{display:block}.sidebar{position:fixed;left:-285px;width:270px;transition:.22s;box-shadow:25px 0 70px rgba(0,0,0,.5)}.sidebar.open{left:0}
@@ -244,6 +431,14 @@
         <div class="hero">
           <h2 id="welcomeTitle">Central de operação imobiliária</h2>
           <p>Um CRM modular para organizar atendimento, imóveis, captação, agenda, equipe e inteligência comercial sem acumular todas as informações na mesma tela.</p>
+          <div class="motivation-strip" aria-live="polite" aria-atomic="true">
+            <span class="motivation-symbol" aria-hidden="true">✦</span>
+            <div class="motivation-content">
+              <span class="motivation-label">Impulso do corretor</span>
+              <p id="motivationPhrase">Cada atendimento de hoje pode abrir a porta do próximo grande negócio.</p>
+            </div>
+            <span class="motivation-progress" id="motivationProgress" aria-hidden="true"></span>
+          </div>
           <div class="hero-actions">
             <button class="btn" data-open-page="leads">Atender leads</button>
             <button class="btn" data-open-page="properties">Abrir imóveis</button>
@@ -474,6 +669,80 @@
 const PROJECT_URL="https://zyfbgydbwsvbaogbxzrd.supabase.co";
 const AI_FUNCTION=PROJECT_URL+"/functions/v1/crm-ai-assistant-openai-test";
 const state={user:null,profile:null,properties:[],leads:[],captures:[],team:[],tasks:[],drafts:[],activeLeadTab:"todos",activePropertyTab:"todos",bound:false,theme:"dourado"};
+
+const MOTIVATION_PHRASES=[
+  "Cada atendimento de hoje pode abrir a porta do próximo grande negócio.",
+  "Quem acompanha com atenção transforma interesse em confiança.",
+  "O corretor que escuta bem encontra o imóvel certo mais rápido.",
+  "Consistência diária constrói resultados extraordinários.",
+  "Uma boa pergunta pode revelar a verdadeira necessidade do cliente.",
+  "Seu próximo fechamento começa em um contato bem realizado.",
+  "Organização comercial é liberdade para vender melhor.",
+  "Confiança se conquista com presença, clareza e compromisso.",
+  "Todo imóvel tem uma história; apresente o valor que ela carrega.",
+  "O melhor momento para fazer o follow-up é antes de ser esquecido.",
+  "Atendimento humano continua sendo o maior diferencial.",
+  "Grandes negociações nascem de pequenos detalhes bem cuidados.",
+  "A oportunidade favorece quem mantém o CRM atualizado.",
+  "Seu conhecimento da região pode ser decisivo para o cliente.",
+  "Quem responde com agilidade demonstra profissionalismo.",
+  "O cliente lembra de quem tornou a decisão mais segura.",
+  "Uma visita bem preparada vale mais do que muitas visitas improvisadas.",
+  "Não venda apenas metros quadrados; apresente possibilidades de vida.",
+  "Persistência com respeito é uma habilidade comercial poderosa.",
+  "A excelência aparece quando ninguém precisa pedir duas vezes.",
+  "Cada lead merece uma próxima ação clara.",
+  "O imóvel certo encontra o cliente certo através de um corretor preparado.",
+  "Resultados sólidos vêm de processos simples executados todos os dias.",
+  "Uma mensagem personalizada cria mais conexão que uma mensagem genérica.",
+  "O corretor profissional antecipa dúvidas e facilita decisões.",
+  "Hoje é um excelente dia para reativar uma oportunidade.",
+  "Seu atendimento pode transformar insegurança em decisão.",
+  "A disciplina de registrar informações fortalece toda a equipe.",
+  "Captação de qualidade começa com relacionamento de confiança.",
+  "Quem domina o produto transmite segurança sem pressionar.",
+  "O próximo contrato pode estar em uma conversa que ficou pendente.",
+  "Acompanhe o cliente com atenção, não com insistência.",
+  "Uma carteira organizada multiplica suas chances de fazer bons matches.",
+  "Profissionalismo é cumprir o combinado mesmo nos pequenos detalhes.",
+  "A melhor apresentação começa antes da visita ao imóvel.",
+  "Cada retorno registrado aproxima você do fechamento.",
+  "Clientes satisfeitos se tornam sua melhor fonte de indicações.",
+  "O sucesso comercial é resultado de preparação, ação e acompanhamento.",
+  "Faça o simples com excelência e os resultados ganharão força.",
+  "Você não precisa fazer tudo de uma vez; precisa avançar todos os dias."
+];
+let motivationIndex=0;
+let motivationTimer=null;
+function nextMotivationPhrase(){
+  const phrase=$("#motivationPhrase");
+  const progress=$("#motivationProgress");
+  if(!phrase||!progress||!MOTIVATION_PHRASES.length)return;
+
+  const duration=2000+Math.floor(Math.random()*2001);
+  document.documentElement.style.setProperty("--phrase-duration",duration+"ms");
+  progress.style.animation="none";
+  void progress.offsetWidth;
+  progress.style.animation="motivationProgress var(--phrase-duration,3000ms) linear forwards";
+
+  motivationTimer=window.setTimeout(()=>{
+    phrase.classList.add("is-changing");
+    window.setTimeout(()=>{
+      motivationIndex=(motivationIndex+1)%MOTIVATION_PHRASES.length;
+      phrase.textContent=MOTIVATION_PHRASES[motivationIndex];
+      phrase.classList.remove("is-changing");
+      nextMotivationPhrase();
+    },360);
+  },Math.max(1200,duration-360));
+}
+function initMotivationTicker(){
+  window.clearTimeout(motivationTimer);
+  motivationIndex=Math.floor(Math.random()*MOTIVATION_PHRASES.length);
+  const phrase=$("#motivationPhrase");
+  if(phrase)phrase.textContent=MOTIVATION_PHRASES[motivationIndex];
+  nextMotivationPhrase();
+}
+
 const pageTitles={dashboard:"Visão geral",leads:"Leads",pipeline:"Funil comercial",properties:"Imóveis",capture:"Captação","owner-search":"Localizar proprietário",agenda:"Agenda e tarefas",team:"Corretores",reports:"Relatórios",ai:"Central IA",settings:"Configurações"};
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
@@ -582,6 +851,7 @@ function closeModal(){$("#modal").close()}
 
 async function init(){
   bind();
+  initMotivationTicker();
   applyTheme(localStorage.getItem(`${THEME_STORAGE}_last`)||"dourado",false);
   const client=db();
   if(!client){$("#syncStatus").textContent="Sistema indisponível";$("#settingsSupabase").textContent="Conexão indisponível";toast("Não foi possível conectar ao sistema.");return}
