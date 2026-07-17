@@ -376,6 +376,101 @@
       .brand img,.ai-fab{animation:none!important}
     }
 
+
+    /* CHAT INTERNO EM TEMPO REAL */
+    .team-chat-layout{
+      display:grid;
+      grid-template-columns:300px minmax(0,1fr);
+      gap:14px;
+      min-height:calc(100vh - 110px)
+    }
+    .chat-people-panel,.chat-main-panel{margin:0;min-height:0}
+    .chat-room-card{
+      display:grid;
+      grid-template-columns:auto 1fr;
+      gap:10px;
+      align-items:center;
+      padding:11px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:color-mix(in srgb,var(--surface2) 70%,transparent)
+    }
+    .chat-room-card.active{
+      border-color:color-mix(in srgb,var(--accent2) 35%,transparent);
+      background:linear-gradient(135deg,color-mix(in srgb,var(--accent2) 13%,transparent),color-mix(in srgb,var(--accent) 7%,transparent))
+    }
+    .chat-room-card b{font-size:11px}.chat-room-card span{display:block;color:var(--muted);font-size:9px;margin-top:3px}
+    .chat-room-icon{
+      width:38px;height:38px;border-radius:13px;display:grid;place-items:center;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:color-mix(in srgb,var(--bg) 90%,#000);font-weight:950;font-size:11px;
+      box-shadow:0 8px 20px color-mix(in srgb,var(--accent) 18%,transparent)
+    }
+    .chat-room-icon.large{width:44px;height:44px;border-radius:15px}
+    .chat-online-list{display:flex;flex-direction:column;gap:7px}
+    .chat-online-person{
+      display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;
+      padding:9px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.022)
+    }
+    .chat-online-avatar{
+      width:34px;height:34px;border-radius:11px;object-fit:cover;
+      background:linear-gradient(135deg,var(--accent),var(--surface3))
+    }
+    .chat-online-person b{font-size:10px}.chat-online-person span{display:block;color:var(--muted);font-size:8px;margin-top:2px}
+    .presence-dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 12px color-mix(in srgb,var(--green) 70%,transparent)}
+    .chat-main-panel{display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;height:calc(100vh - 110px)}
+    .chat-main-head{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:13px 15px;border-bottom:1px solid var(--line);
+      background:linear-gradient(90deg,color-mix(in srgb,var(--accent2) 7%,transparent),color-mix(in srgb,var(--accent) 6%,transparent))
+    }
+    .chat-room-title{display:flex;align-items:center;gap:10px}
+    .chat-room-title h3{margin:0;font-size:13px}.chat-room-title p{margin:3px 0 0;color:var(--muted);font-size:9px}
+    .chat-head-actions{display:flex;align-items:center;gap:7px}
+    .chat-messages{
+      overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px;
+      background:
+        radial-gradient(circle at 70% 0,color-mix(in srgb,var(--accent2) 5%,transparent),transparent 36%),
+        color-mix(in srgb,var(--bg) 72%,transparent);
+      scroll-behavior:smooth
+    }
+    .team-message{display:grid;grid-template-columns:38px minmax(0,1fr);gap:9px;align-items:start;max-width:min(760px,88%)}
+    .team-message.mine{margin-left:auto;grid-template-columns:minmax(0,1fr) 38px}
+    .team-message.mine .team-message-avatar{grid-column:2}.team-message.mine .team-message-content{grid-column:1;grid-row:1}
+    .team-message-avatar{width:36px;height:36px;border-radius:12px;object-fit:cover;background:linear-gradient(135deg,var(--accent),var(--surface3))}
+    .team-message-bubble{
+      padding:10px 12px;border-radius:5px 15px 15px 15px;
+      border:1px solid var(--line);
+      background:color-mix(in srgb,var(--surface2) 72%,transparent);
+      backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+      box-shadow:0 8px 20px rgba(0,0,0,.12)
+    }
+    .team-message.mine .team-message-bubble{
+      border-radius:15px 5px 15px 15px;
+      background:linear-gradient(135deg,color-mix(in srgb,var(--accent2) 16%,var(--surface2)),color-mix(in srgb,var(--accent) 10%,var(--surface2)));
+      border-color:color-mix(in srgb,var(--accent2) 25%,transparent)
+    }
+    .team-message-meta{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+    .team-message-meta b{font-size:9px;color:var(--accent2)}.team-message-meta time{font-size:8px;color:var(--muted)}
+    .team-message-text{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;line-height:1.55;color:var(--text)}
+    .chat-day-separator{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:8px;margin:5px 0}
+    .chat-day-separator::before,.chat-day-separator::after{content:"";height:1px;background:var(--line);flex:1}
+    .chat-typing{min-height:25px;padding:5px 15px;color:var(--muted);font-size:9px;border-top:1px solid color-mix(in srgb,var(--line) 65%,transparent)}
+    .team-chat-form{padding:11px 13px;border-top:1px solid var(--line);background:color-mix(in srgb,var(--surface) 88%,transparent)}
+    .team-chat-form textarea{
+      resize:none;min-height:43px;max-height:130px;line-height:1.45;
+      background:color-mix(in srgb,var(--bg) 48%,transparent)
+    }
+    .chat-compose-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:7px}
+    .chat-compose-actions span{font-size:8px;color:var(--muted)}
+    #chatUnreadBadge{min-width:20px;justify-content:center;background:var(--red);color:#fff;border-color:transparent}
+    @media(max-width:900px){
+      .team-chat-layout{grid-template-columns:1fr;min-height:auto}
+      .chat-people-panel{display:none}
+      .chat-main-panel{height:calc(100dvh - 150px);min-height:560px}
+      .team-message{max-width:94%}
+    }
+
     @media(max-width:1180px){.kpis{grid-template-columns:repeat(3,1fr)}.grid-3{grid-template-columns:1fr 1fr}}
     @media(max-width:900px){
       .app{display:block}.sidebar{position:fixed;left:-285px;width:270px;transition:.22s;box-shadow:25px 0 70px rgba(0,0,0,.5)}.sidebar.open{left:0}
@@ -404,6 +499,7 @@
       <button data-page="agenda"><span class="ico">▣</span>Agenda e tarefas</button>
       <div class="nav-label">Gestão</div>
       <button data-page="team"><span class="ico">♙</span>Corretores</button>
+      <button data-page="team-chat"><span class="ico">✉</span>Chat da equipe <span class="badge" id="chatUnreadBadge" style="margin-left:auto;display:none">0</span></button>
       <button data-page="reports"><span class="ico">◫</span>Relatórios</button>
       <button data-page="ai"><span class="ico">✦</span>Central IA</button>
       <button data-page="settings"><span class="ico">⚙</span>Configurações</button>
@@ -581,6 +677,64 @@
         <div class="panel"><div class="panel-head"><div><h3>Equipe e acessos</h3><p>Corretores, administradores, aprovação e presença</p></div></div><div class="panel-body"><div class="cards" id="teamCards"></div></div></div>
       </section>
 
+
+      <section class="page" id="page-team-chat">
+        <div class="team-chat-layout">
+          <aside class="panel chat-people-panel">
+            <div class="panel-head">
+              <div>
+                <h3>Equipe conectada</h3>
+                <p id="chatOnlineSummary">Verificando corretores online...</p>
+              </div>
+              <span class="badge green" id="chatOnlineCount">0 online</span>
+            </div>
+            <div class="panel-body">
+              <div class="chat-room-card active">
+                <div class="chat-room-icon">LI</div>
+                <div>
+                  <b>Equipe Leads Imóveis</b>
+                  <span>Sala geral da operação</span>
+                </div>
+              </div>
+              <div class="nav-label" style="padding-left:0;margin-top:15px">Online agora</div>
+              <div class="chat-online-list" id="chatOnlineList">
+                <div class="empty">Carregando presença...</div>
+              </div>
+            </div>
+          </aside>
+
+          <section class="panel chat-main-panel">
+            <div class="chat-main-head">
+              <div class="chat-room-title">
+                <div class="chat-room-icon large">LI</div>
+                <div>
+                  <h3>Equipe Leads Imóveis</h3>
+                  <p>Conversa interna em tempo real</p>
+                </div>
+              </div>
+              <div class="chat-head-actions">
+                <span class="badge green" id="chatConnectionStatus">Conectando...</span>
+                <button class="icon-btn" id="chatRefreshBtn" title="Atualizar mensagens">↻</button>
+              </div>
+            </div>
+
+            <div class="chat-messages" id="teamChatMessages">
+              <div class="empty">Carregando mensagens...</div>
+            </div>
+
+            <div class="chat-typing" id="chatTypingStatus" aria-live="polite"></div>
+
+            <form class="team-chat-form" id="teamChatForm">
+              <textarea id="teamChatInput" maxlength="2000" rows="1" placeholder="Escreva uma mensagem para a equipe..." aria-label="Mensagem para a equipe"></textarea>
+              <div class="chat-compose-actions">
+                <span id="chatCharacterCount">0/2000</span>
+                <button class="btn" type="submit">Enviar ➤</button>
+              </div>
+            </form>
+          </section>
+        </div>
+      </section>
+
       <section class="page" id="page-reports">
         <div class="kpis" id="reportKpis"></div>
         <div class="grid-3">
@@ -668,7 +822,7 @@
 
 const PROJECT_URL="https://zyfbgydbwsvbaogbxzrd.supabase.co";
 const AI_FUNCTION=PROJECT_URL+"/functions/v1/crm-ai-assistant-openai-test";
-const state={user:null,profile:null,properties:[],leads:[],captures:[],team:[],tasks:[],drafts:[],activeLeadTab:"todos",activePropertyTab:"todos",bound:false,theme:"dourado"};
+const state={user:null,profile:null,properties:[],leads:[],captures:[],team:[],tasks:[],drafts:[],activeLeadTab:"todos",activePropertyTab:"todos",bound:false,theme:"dourado",chatRoom:null,chatMessages:[],chatChannel:null,chatPresence:{},chatUnread:0,chatTypingTimer:null};
 
 const MOTIVATION_PHRASES=[
   "Cada atendimento de hoje pode abrir a porta do próximo grande negócio.",
@@ -743,7 +897,7 @@ function initMotivationTicker(){
   nextMotivationPhrase();
 }
 
-const pageTitles={dashboard:"Visão geral",leads:"Leads",pipeline:"Funil comercial",properties:"Imóveis",capture:"Captação","owner-search":"Localizar proprietário",agenda:"Agenda e tarefas",team:"Corretores",reports:"Relatórios",ai:"Central IA",settings:"Configurações"};
+const pageTitles={dashboard:"Visão geral",leads:"Leads",pipeline:"Funil comercial",properties:"Imóveis",capture:"Captação","owner-search":"Localizar proprietário",agenda:"Agenda e tarefas",team:"Corretores","team-chat":"Chat da equipe",reports:"Relatórios",ai:"Central IA",settings:"Configurações"};
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const digits=v=>String(v||"").replace(/\D/g,"");
@@ -843,7 +997,21 @@ function renderThemeOptions(){
 
 
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove("show"),2500)}
-function switchPage(page){$$(".page").forEach(x=>x.classList.remove("active"));$("#page-"+page)?.classList.add("active");$$("#nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===page));$("#pageTitle").textContent=pageTitles[page]||"CRM";$("#sidebar").classList.remove("open");if(page==="pipeline")renderPipeline();if(page==="reports")renderReports()}
+function switchPage(page){
+  $$(".page").forEach(x=>x.classList.remove("active"));
+  $("#page-"+page)?.classList.add("active");
+  $$("#nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===page));
+  $("#pageTitle").textContent=pageTitles[page]||"CRM";
+  $("#sidebar").classList.remove("open");
+  if(page==="pipeline")renderPipeline();
+  if(page==="reports")renderReports();
+  if(page==="team-chat"){
+    state.chatUnread=0;
+    updateChatUnreadBadge();
+    renderTeamChat();
+    requestAnimationFrame(scrollChatToBottom);
+  }
+}
 function openAI(prompt=""){$("#aiDrawer").classList.add("open");if(prompt){$("#aiInput").value=prompt;$("#aiInput").focus()}}
 function closeAI(){$("#aiDrawer").classList.remove("open")}
 function openModal(title,body,foot){$("#modalTitle").textContent=title;$("#modalBody").innerHTML=body;$("#modalFoot").innerHTML=foot;$("#modal").showModal()}
@@ -860,8 +1028,10 @@ async function init(){
     if(!session){location.href="login.html";return}
     state.user=session.user;
     loadSavedTheme();
-    await Promise.all([loadProfile(),loadProperties(),loadLeads(),loadCaptures(),loadTeam(),loadDrafts()]);
+    await loadProfile();
+    await Promise.all([loadProperties(),loadLeads(),loadCaptures(),loadTeam(),loadDrafts(),loadChatRoom()]);
     renderAll();
+    subscribeTeamChat();
     $("#syncStatus").textContent="Sistema online";
     $("#settingsSupabase").textContent="Online e protegido";
   }catch(e){console.error("[CRM]",e);$("#syncStatus").textContent="Conexão instável";toast("Não foi possível carregar todos os dados.")}
@@ -886,6 +1056,12 @@ function bind(){
   $("#aiFab").onclick=()=>openAI();$("#heroAI").onclick=()=>openAI("Analise meu CRM e diga as prioridades de hoje.");
   $("#closeAI").onclick=closeAI;$("#aiForm").onsubmit=sendAI;$("#modalClose").onclick=closeModal;
   $$(".ai-prompt").forEach(b=>b.onclick=()=>openAI(b.textContent));
+  $("#teamChatForm").onsubmit=sendTeamChatMessage;
+  $("#teamChatInput").addEventListener("input",handleTeamChatInput);
+  $("#teamChatInput").addEventListener("keydown",e=>{
+    if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("#teamChatForm").requestSubmit()}
+  });
+  $("#chatRefreshBtn").onclick=async()=>{await loadChatMessages();renderTeamChat();scrollChatToBottom()};
   $("#logoutBtn").onclick=logout;
   $("#themeCustomApply").onclick=()=>applyCustomTheme($("#themeCustomColor").value);
   $("#themeResetBtn").onclick=()=>applyTheme("dourado");
@@ -903,7 +1079,7 @@ async function loadCaptures(){const {data,error}=await db().from("captacoes_rada
 async function loadTeam(){const {data,error}=await db().from("user_profiles").select("*").order("full_name");if(error)throw error;state.team=data||[]}
 async function loadDrafts(){const {data}=await db().from("ai_property_drafts").select("*").eq("user_id",state.user.id).order("created_at",{ascending:false}).limit(20);state.drafts=data||[]}
 
-function renderAll(){renderDashboard();renderLeadTabs();renderLeads();renderPropertyTabs();renderProperties();renderCaptures();renderAgenda();renderTeam();renderDrafts();renderReports();fillFilters();renderThemeOptions();if(!$("#ownerResults").innerHTML.trim())clearOwnerSearch()}
+function renderAll(){renderDashboard();renderLeadTabs();renderLeads();renderPropertyTabs();renderProperties();renderCaptures();renderAgenda();renderTeam();renderTeamChat();renderDrafts();renderReports();fillFilters();renderThemeOptions();if(!$("#ownerResults").innerHTML.trim())clearOwnerSearch()}
 function renderDashboard(){
   const hot=state.leads.filter(l=>(l.lead_score||0)>=60||String(l.lead_temperature).toLowerCase()==="quente");
   const publicProps=state.properties.filter(p=>p.is_public);
@@ -1059,6 +1235,212 @@ function renderAgenda(){
 function renderTeam(){
   $("#teamCards").innerHTML=state.team.map(u=>`<article class="card"><div class="card-body" style="display:flex;gap:11px;align-items:center"><img class="avatar" src="${esc(u.avatar_data||u.avatar_url||"midia/logo-leads.png.jpeg")}"><div style="flex:1"><h4>${esc(u.full_name||u.email)}</h4><p>${esc(u.email)} · ${esc(u.role)}</p><span class="badge ${u.active&&u.approved?"green":""}">${u.approved&&u.active?"Ativo":"Pendente"}</span> <span class="badge blue">${esc(u.presence_status||"offline")}</span></div></div></article>`).join("")||empty("Nenhum usuário encontrado.");
 }
+
+async function loadChatRoom(){
+  const client=db();
+  const {data,error}=await client
+    .from("crm_chat_rooms")
+    .select("id,name,room_type,is_active")
+    .eq("room_type","team")
+    .eq("is_active",true)
+    .limit(1)
+    .maybeSingle();
+  if(error){console.error("[Chat] Sala:",error);return}
+  state.chatRoom=data||null;
+  if(state.chatRoom)await loadChatMessages();
+}
+async function loadChatMessages(){
+  if(!state.chatRoom)return;
+  const {data,error}=await db()
+    .from("crm_chat_messages")
+    .select("id,room_id,sender_id,sender_name,sender_avatar,message,message_type,reply_to,edited_at,deleted_at,created_at")
+    .eq("room_id",state.chatRoom.id)
+    .is("deleted_at",null)
+    .order("created_at",{ascending:true})
+    .limit(200);
+  if(error){console.error("[Chat] Mensagens:",error);return}
+  state.chatMessages=data||[];
+}
+function subscribeTeamChat(){
+  if(!state.chatRoom||!state.user)return;
+  const client=db();
+  if(state.chatChannel){
+    try{client.removeChannel(state.chatChannel)}catch(_){}
+  }
+  const key=state.user.id;
+  state.chatChannel=client.channel(`crm-team-chat-${state.chatRoom.id}`,{
+    config:{presence:{key},broadcast:{self:false}}
+  })
+  .on("postgres_changes",{
+    event:"INSERT",schema:"public",table:"crm_chat_messages",
+    filter:`room_id=eq.${state.chatRoom.id}`
+  },payload=>{
+    const row=payload.new;
+    if(!state.chatMessages.some(m=>m.id===row.id))state.chatMessages.push(row);
+    const active=$("#page-team-chat")?.classList.contains("active");
+    if(!active&&row.sender_id!==state.user.id){
+      state.chatUnread+=1;
+      updateChatUnreadBadge();
+    }
+    renderTeamChatMessages();
+    if(active)scrollChatToBottom();
+  })
+  .on("postgres_changes",{
+    event:"UPDATE",schema:"public",table:"crm_chat_messages",
+    filter:`room_id=eq.${state.chatRoom.id}`
+  },payload=>{
+    const i=state.chatMessages.findIndex(m=>m.id===payload.new.id);
+    if(i>=0)state.chatMessages[i]=payload.new;
+    renderTeamChatMessages();
+  })
+  .on("presence",{event:"sync"},()=>{
+    state.chatPresence=state.chatChannel.presenceState()||{};
+    renderChatPresence();
+  })
+  .on("broadcast",{event:"typing"},({payload})=>{
+    if(!payload||payload.user_id===state.user.id)return;
+    showChatTyping(payload.name,payload.typing);
+  })
+  .subscribe(async status=>{
+    const label=$("#chatConnectionStatus");
+    if(status==="SUBSCRIBED"){
+      if(label){label.textContent="Tempo real ativo";label.className="badge green"}
+      await state.chatChannel.track({
+        user_id:state.user.id,
+        name:state.profile?.full_name||state.user.email?.split("@")[0]||"Corretor",
+        avatar:state.profile?.avatar_data||state.profile?.avatar_url||"",
+        role:state.profile?.role||"corretor",
+        online_at:new Date().toISOString()
+      });
+    }else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){
+      if(label){label.textContent="Reconectando...";label.className="badge hot"}
+    }
+  });
+}
+function renderTeamChat(){
+  renderTeamChatMessages();
+  renderChatPresence();
+  updateChatUnreadBadge();
+}
+function renderTeamChatMessages(){
+  const el=$("#teamChatMessages");
+  if(!el)return;
+  if(!state.chatRoom){
+    el.innerHTML=empty("A sala da equipe não está disponível.");
+    return;
+  }
+  if(!state.chatMessages.length){
+    el.innerHTML=empty("Nenhuma mensagem ainda. Inicie a conversa com a equipe.");
+    return;
+  }
+  let lastDay="";
+  const html=[];
+  state.chatMessages.forEach(message=>{
+    if(message.deleted_at)return;
+    const date=new Date(message.created_at);
+    const day=date.toLocaleDateString("pt-BR",{day:"2-digit",month:"long",year:"numeric"});
+    if(day!==lastDay){
+      html.push(`<div class="chat-day-separator">${esc(day)}</div>`);
+      lastDay=day;
+    }
+    const mine=message.sender_id===state.user?.id;
+    const avatar=message.sender_avatar||"midia/logo-leads.png.jpeg";
+    html.push(`<article class="team-message ${mine?"mine":""}">
+      <img class="team-message-avatar" src="${esc(avatar)}" alt="">
+      <div class="team-message-content">
+        <div class="team-message-bubble">
+          <div class="team-message-meta">
+            <b>${mine?"Você":esc(message.sender_name||"Corretor")}</b>
+            <time datetime="${esc(message.created_at)}">${date.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}</time>
+          </div>
+          <div class="team-message-text">${esc(message.message||"")}</div>
+        </div>
+      </div>
+    </article>`);
+  });
+  el.innerHTML=html.join("");
+}
+function renderChatPresence(){
+  const list=$("#chatOnlineList"),count=$("#chatOnlineCount"),summary=$("#chatOnlineSummary");
+  if(!list||!count||!summary)return;
+  const people=[];
+  Object.values(state.chatPresence||{}).forEach(entries=>{
+    (entries||[]).forEach(person=>{
+      if(person&&person.user_id&&!people.some(p=>p.user_id===person.user_id))people.push(person);
+    });
+  });
+  people.sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"pt-BR"));
+  count.textContent=`${people.length} online`;
+  summary.textContent=people.length===1?"1 corretor conectado":`${people.length} corretores conectados`;
+  list.innerHTML=people.map(person=>`<div class="chat-online-person">
+    <img class="chat-online-avatar" src="${esc(person.avatar||"midia/logo-leads.png.jpeg")}" alt="">
+    <div><b>${esc(person.name||"Corretor")}</b><span>${esc(person.role||"corretor")}</span></div>
+    <span class="presence-dot" title="Online"></span>
+  </div>`).join("")||empty("Nenhum corretor online agora.");
+}
+async function sendTeamChatMessage(event){
+  event.preventDefault();
+  const input=$("#teamChatInput");
+  const message=input.value.trim();
+  if(!message||!state.chatRoom||!state.user)return;
+  if(message.length>2000){toast("A mensagem deve ter no máximo 2.000 caracteres.");return}
+  const payload={
+    room_id:state.chatRoom.id,
+    sender_id:state.user.id,
+    sender_name:state.profile?.full_name||state.user.email?.split("@")[0]||"Corretor",
+    sender_avatar:state.profile?.avatar_data||state.profile?.avatar_url||null,
+    message,
+    message_type:"text"
+  };
+  input.disabled=true;
+  const {error}=await db().from("crm_chat_messages").insert(payload);
+  input.disabled=false;
+  if(error){console.error("[Chat] Envio:",error);toast("Não foi possível enviar a mensagem.");return}
+  input.value="";
+  input.style.height="auto";
+  $("#chatCharacterCount").textContent="0/2000";
+  broadcastChatTyping(false);
+  input.focus();
+}
+function handleTeamChatInput(){
+  const input=$("#teamChatInput");
+  $("#chatCharacterCount").textContent=`${input.value.length}/2000`;
+  input.style.height="auto";
+  input.style.height=Math.min(input.scrollHeight,130)+"px";
+  broadcastChatTyping(Boolean(input.value.trim()));
+  clearTimeout(state.chatTypingTimer);
+  state.chatTypingTimer=setTimeout(()=>broadcastChatTyping(false),1200);
+}
+function broadcastChatTyping(typing){
+  if(!state.chatChannel||!state.user)return;
+  state.chatChannel.send({
+    type:"broadcast",event:"typing",
+    payload:{
+      user_id:state.user.id,
+      name:state.profile?.full_name||"Corretor",
+      typing:Boolean(typing)
+    }
+  }).catch(()=>{});
+}
+function showChatTyping(name,typing){
+  const el=$("#chatTypingStatus");
+  if(!el)return;
+  if(!typing){el.textContent="";return}
+  el.textContent=`${name||"Um corretor"} está digitando...`;
+  clearTimeout(el._typingTimer);
+  el._typingTimer=setTimeout(()=>{el.textContent=""},1800);
+}
+function scrollChatToBottom(){
+  const el=$("#teamChatMessages");
+  if(el)el.scrollTop=el.scrollHeight;
+}
+function updateChatUnreadBadge(){
+  const badge=$("#chatUnreadBadge");
+  if(!badge)return;
+  badge.textContent=String(state.chatUnread||0);
+  badge.style.display=state.chatUnread>0?"inline-flex":"none";
+}
+
 function renderDrafts(){
   $("#aiDrafts").innerHTML=state.drafts.map(d=>`<div class="row"><div class="dot">IA</div><div><b>${esc(d.generated_title||d.draft_type)}</b><span>${esc(d.status)} · ${dateBR(d.created_at)}</span></div></div>`).join("")||empty("Nenhum rascunho da IA.");
 }
@@ -1103,7 +1485,13 @@ async function toggleProperty(id,isPublic){const r=await db().from("crm_properti
 async function convertCapture(id){const c=state.captures.find(x=>String(x.id)===String(id));if(!c)return;openPropertyModal();setTimeout(()=>{$("#mPropTitle").value=`${c.tipo_imovel||"Imóvel"} em ${c.bairro||"Florianópolis"}`;$("#mPropType").value=c.tipo_imovel||"";$("#mPropNeighborhood").value=c.bairro||"";$("#mPropCity").value=c.cidade||"Florianópolis";$("#mPropDescription").value=`Captação de ${c.nome_proprietario||"proprietário"}. ${c.notas||""}`},20)}
 async function sendAI(e){e.preventDefault();const input=$("#aiInput"),q=input.value.trim();if(!q)return;input.value="";$("#aiLog").insertAdjacentHTML("beforeend",`<div class="msg me">${esc(q)}</div><div class="msg" id="aiLoading">Consultando IA...</div>`);$("#aiLog").scrollTop=$("#aiLog").scrollHeight;
   try{const {data:{session}}=await db().auth.getSession();const res=await fetch(AI_FUNCTION,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token},body:JSON.stringify({question:q,history:[],crm_state:{properties:state.properties.slice(0,40),leads:state.leads.slice(0,40),captures:state.captures.slice(0,30)}})});const data=await res.json().catch(()=>({}));$("#aiLoading").remove();$("#aiLog").insertAdjacentHTML("beforeend",`<div class="msg">${esc(data.reply||data.response||data.answer||data.message||"Não foi possível gerar a resposta.")}</div>`)}catch(err){console.error(err);$("#aiLoading")?.remove();$("#aiLog").insertAdjacentHTML("beforeend",`<div class="msg">Falha ao consultar a IA.</div>`)}$("#aiLog").scrollTop=$("#aiLog").scrollHeight}
-async function logout(){await db().auth.signOut();location.href="login.html"}
+async function logout(){
+  if(state.chatChannel){
+    try{await db().removeChannel(state.chatChannel)}catch(_){}
+  }
+  await db().auth.signOut();
+  location.href="login.html";
+}
 
 window.crmOpenLead=openLeadModal;window.crmSaveLead=saveLead;window.crmOpenProperty=openPropertyModal;window.crmSaveProperty=saveProperty;window.crmToggleProperty=toggleProperty;window.crmConvertCapture=convertCapture;window.crmSaveCapture=saveCapture;window.crmAskAI=q=>openAI(q);
 
