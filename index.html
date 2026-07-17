@@ -1391,13 +1391,30 @@
     }
 
     function startRealtime() {
-      state.realtimeChannel = state.db
-        .channel("leads-site-properties-v1")
-        .on("postgres_changes",{event:"*",schema:"public",table:"properties"},scheduleRealtimeReload)
-        .subscribe(status=>{
-          if (status === "SUBSCRIBED") setStatus(`Tempo real conectado · ${state.properties.length} imóvel(is) publicado(s).`);
-          if (["CHANNEL_ERROR","TIMED_OUT"].includes(status)) setStatus("Tempo real indisponível. Atualização de segurança continua ativa.",true);
-        });
+      if (!state.db || state.realtimeChannel || !navigator.onLine) return;
+
+      window.setTimeout(()=>{
+        if (document.hidden || state.realtimeChannel || !navigator.onLine) return;
+
+        const channel = state.db
+          .channel("leads-site-properties-v2",{
+            config:{broadcast:{self:false},presence:{key:"public-site"}}
+          })
+          .on("postgres_changes",{event:"*",schema:"public",table:"properties"},scheduleRealtimeReload)
+          .subscribe(status=>{
+            if (status === "SUBSCRIBED") {
+              setStatus(`Tempo real conectado · ${state.properties.length} imóvel(is) publicado(s).`);
+              return;
+            }
+
+            if (["CHANNEL_ERROR","TIMED_OUT","CLOSED"].includes(status)) {
+              state.realtimeChannel = null;
+              setStatus(`Supabase conectado · ${state.properties.length} imóvel(is) publicado(s).`);
+            }
+          });
+
+        state.realtimeChannel = channel;
+      },1400);
     }
 
     function startSafetyRefresh() {
@@ -1439,12 +1456,16 @@
       document.addEventListener("click",event=>{ const chip=event.target.closest("[data-query]"); if (chip) sendLia(chip.dataset.query); });
       document.addEventListener("keydown",event=>{ if (event.key==="Escape") { closeMenu(); closeAi(); } });
       window.addEventListener("scroll",()=>document.querySelector(".topbar")?.classList.toggle("scrolled",scrollY>18),{passive:true});
-      window.addEventListener("online",()=>loadProperties({silent:true}));
+      window.addEventListener("online",()=>{
+        loadProperties({silent:true});
+        startRealtime();
+      });
       window.addEventListener("offline",()=>setStatus("Sem internet. Exibindo os dados já carregados.",true));
       window.addEventListener("pagehide",()=>{
         clearInterval(state.refreshTimer);
         clearTimeout(state.realtimeDebounce);
-        if (state.realtimeChannel) state.db.removeChannel(state.realtimeChannel);
+        // O navegador encerra a conexão sozinho. Não removemos o canal aqui,
+        // evitando o aviso de WebSocket fechado durante recargas rápidas.
       });
     }
 
