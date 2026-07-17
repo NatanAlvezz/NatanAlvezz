@@ -354,6 +354,95 @@
       .hero{padding:calc(var(--header-h) + 30px) 0 58px}
     }
 
+
+    /* ============================================================
+       AJUSTES FINAIS · LOGO CENTRAL, LIA MINIMIZÁVEL E WHATSAPP
+    ============================================================ */
+    .hero-grid{grid-template-columns:minmax(0,1fr) 370px;gap:24px 34px}
+    .hero-brand-stage{grid-column:1/-1;display:flex;align-items:center;justify-content:center;width:100%;margin:2px 0 4px;position:relative;z-index:3}
+    .hero-logo-aura{position:relative;width:min(610px,66vw);min-height:116px;display:grid;place-items:center;padding:14px 46px;border:1px solid rgba(189,239,255,.24);border-radius:34px;background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(116,213,255,.045));box-shadow:0 26px 72px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.16);backdrop-filter:blur(15px) saturate(135%);-webkit-backdrop-filter:blur(15px) saturate(135%);overflow:hidden}
+    .hero-logo-aura::before{content:"";position:absolute;inset:-70% 8%;background:radial-gradient(circle,rgba(116,213,255,.28),transparent 64%);filter:blur(18px);pointer-events:none}
+    .hero-logo-aura::after{content:"";position:absolute;left:14%;right:14%;bottom:7px;height:1px;background:linear-gradient(90deg,transparent,rgba(189,239,255,.58),transparent);pointer-events:none}
+    .hero-logo{position:relative;z-index:1;width:min(510px,100%);max-height:142px;object-fit:contain;margin:0 auto;filter:drop-shadow(0 22px 42px rgba(0,0,0,.48))}
+    .hero-copy{padding-top:4px}
+
+    .command-whatsapp .whatsapp-mark{width:22px;height:22px;overflow:visible}
+    .command-whatsapp .whatsapp-circle{fill:currentColor;stroke:none}
+    .command-whatsapp .whatsapp-phone{fill:none;stroke:#fff;stroke-width:1.45;stroke-linecap:round;stroke-linejoin:round}
+
+    .ai-panel-actions{display:flex;align-items:center;gap:7px;flex:0 0 auto}
+    .ai-panel-actions button{width:38px;height:38px;display:grid;place-items:center;padding:0;color:#fff;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.08);border-radius:12px;transition:background .18s ease,transform .18s ease}
+    .ai-panel-actions button:hover{background:rgba(255,255,255,.18);transform:translateY(-1px)}
+    .ai-panel-actions svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+    .ai-panel.minimized{width:min(360px,calc(100vw - 28px));max-height:76px;bottom:calc(96px + var(--safe-bottom));border-radius:22px}
+    .ai-panel.minimized .ai-panel-body{display:none}
+    .ai-panel.minimized .ai-panel-head{min-height:74px;border-radius:21px}
+    #minimizeAi .restore-glyph{display:none}
+    .ai-panel.minimized #minimizeAi .minimize-glyph{display:none}
+    .ai-panel.minimized #minimizeAi .restore-glyph{display:block}
+
+    @media(max-width:980px){
+      .hero-grid{grid-template-columns:1fr;gap:22px}
+      .hero-brand-stage{grid-column:1}
+      .hero-logo-aura{width:min(570px,84vw)}
+      .hero-logo{width:min(470px,100%)}
+    }
+    @media(max-width:700px){
+      .hero-brand-stage{margin-top:0}
+      .hero-logo-aura{width:calc(100vw - 28px);min-height:94px;padding:10px 24px;border-radius:26px}
+      .hero-logo{width:min(370px,100%);max-height:112px}
+      .ai-panel.minimized{right:8px;width:calc(100vw - 16px);bottom:calc(80px + var(--safe-bottom));max-height:72px}
+      .ai-panel.minimized .ai-panel-head{min-height:70px}
+    }
+
+
+    /* ============================================================
+       CAMPANHA PARA PROPRIETÁRIOS · 5 CENAS PREMIUM
+    ============================================================ */
+    .owner-campaign{position:relative;min-height:470px;overflow:hidden;color:#fff;border:1px solid rgba(189,239,255,.30);border-radius:32px;background:#061521;box-shadow:0 30px 78px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.14);isolation:isolate;outline:none}
+    .owner-campaign:focus-visible{box-shadow:0 0 0 4px rgba(116,213,255,.28),0 30px 78px rgba(0,0,0,.34)}
+    .owner-slides{position:relative;min-height:470px}
+    .owner-slide{position:absolute;inset:0;display:flex;align-items:flex-end;opacity:0;visibility:hidden;pointer-events:none;transform:scale(1.035);transition:opacity .72s ease,transform 1.1s cubic-bezier(.2,.75,.25,1),visibility .72s;overflow:hidden}
+    .owner-slide.active{opacity:1;visibility:visible;pointer-events:auto;transform:scale(1)}
+    .owner-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .owner-slide-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,9,15,.05) 15%,rgba(3,13,22,.24) 44%,rgba(3,12,20,.94) 100%),linear-gradient(90deg,rgba(3,13,22,.78),rgba(3,13,22,.08) 68%)}
+    .owner-slide-content{position:relative;z-index:2;width:100%;padding:28px 26px 84px;transform:translateY(15px);opacity:.2;transition:transform .66s .16s ease,opacity .66s .16s ease}
+    .owner-slide.active .owner-slide-content{transform:none;opacity:1}
+    .owner-kicker{display:inline-flex;align-items:center;min-height:28px;padding:0 11px;color:#dff8ff;background:rgba(116,213,255,.12);border:1px solid rgba(189,239,255,.34);border-radius:999px;font-size:9px;font-weight:950;letter-spacing:1.3px;text-transform:uppercase;backdrop-filter:blur(12px)}
+    .owner-slide h2{max-width:440px;margin:12px 0 0;color:#fff;font-size:clamp(27px,3.1vw,43px);line-height:1.02;letter-spacing:-1.2px;text-shadow:0 14px 35px rgba(0,0,0,.48)}
+    .owner-slide p{max-width:430px;margin:11px 0 0;color:rgba(235,249,255,.76);font-size:13px;line-height:1.55}
+    .owner-cta{min-height:44px;display:inline-flex;align-items:center;justify-content:center;margin-top:17px;padding:0 17px;color:#071422;background:linear-gradient(135deg,#effcff,#8ee1ff);border:1px solid rgba(255,255,255,.66);border-radius:999px;box-shadow:0 13px 30px rgba(116,213,255,.20);font-size:11px;font-weight:950;transition:transform .2s ease,filter .2s ease}
+    .owner-cta:hover{transform:translateY(-2px);filter:brightness(1.04)}
+    .owner-campaign-ui{position:absolute;left:0;right:0;bottom:0;z-index:4;padding:0 20px 17px}
+    .owner-progress{height:3px;overflow:hidden;background:rgba(255,255,255,.13);border-radius:999px}
+    .owner-progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,#bdefff,#74d5ff);border-radius:inherit}
+    .owner-progress span.running{animation:ownerProgress 4.5s linear forwards}
+    .owner-controls{min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:7px}
+    .owner-controls>button{width:36px;height:36px;display:grid;place-items:center;flex:0 0 auto;color:#eafcff;background:rgba(7,20,34,.64);border:1px solid rgba(189,239,255,.25);border-radius:12px;backdrop-filter:blur(10px)}
+    .owner-controls>button:hover{background:rgba(116,213,255,.18)}
+    .owner-controls svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .owner-dots{display:flex;align-items:center;justify-content:center;gap:7px;flex:1}
+    .owner-dot{width:8px;height:8px;padding:0;border-radius:999px;background:rgba(255,255,255,.34);transition:width .2s ease,background .2s ease}
+    .owner-dot.active{width:28px;background:#bdefff}
+    @keyframes ownerProgress{from{width:0}to{width:100%}}
+
+    @media(max-width:980px){
+      .owner-campaign,.owner-slides{min-height:440px}
+      .owner-slide-content{padding:26px 24px 82px}
+      .owner-slide h2{max-width:560px}
+    }
+    @media(max-width:700px){
+      .owner-campaign,.owner-slides{min-height:430px;border-radius:26px}
+      .owner-slide-content{padding:22px 19px 80px}
+      .owner-slide h2{font-size:clamp(26px,8vw,38px)}
+      .owner-slide p{font-size:12px}
+      .owner-campaign-ui{padding:0 14px 13px}
+    }
+    @media(prefers-reduced-motion:reduce){
+      .owner-slide,.owner-slide-content{transition:none}
+      .owner-progress span.running{animation:none;width:100%}
+    }
+
   </style>
 </head>
 <body>
@@ -392,7 +481,10 @@
             <span>Contato</span>
           </button>
           <a class="command-icon-action command-whatsapp" href="https://wa.me/5548991115992?text=Olá%2C%20vim%20pelo%20site%20da%20Leads%20Imóveis%20e%20gostaria%20de%20falar%20com%20um%20especialista." target="_blank" rel="noopener noreferrer" aria-label="Falar com a Leads Imóveis pelo WhatsApp" title="WhatsApp">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.7a8 8 0 0 1-11.8 7L4 20l1.3-4.1A8 8 0 1 1 20 11.7Z"/><path d="M8.2 8.4c.4 3.2 2.1 5 5.4 5.8"/></svg>
+            <svg class="whatsapp-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <circle class="whatsapp-circle" cx="12" cy="12" r="10"/>
+              <path class="whatsapp-phone" d="M8.1 7.4c.35-.42.96-.42 1.3.02l1.25 1.75c.23.33.2.78-.08 1.07l-.88.82a9.2 9.2 0 0 0 4.25 4.25l.82-.88c.29-.28.74-.31 1.07-.08l1.75 1.25c.44.34.44.95.02 1.3l-.62.56c-.8.74-1.93 1.02-2.98.72a10.9 10.9 0 0 1-7.18-7.18c-.3-1.05-.02-2.18.72-2.98l.56-.62Z"/>
+            </svg>
             <span>WhatsApp</span>
           </a>
           <button class="command-icon-action command-lia" type="button" data-open-ai aria-label="Abrir Lia, assistente virtual" title="Lia IA">
@@ -425,8 +517,12 @@
     <section class="hero" id="inicio">
       <div class="hero-bg" aria-hidden="true"></div>
       <div class="shell hero-grid">
+        <div class="hero-brand-stage" aria-label="Leads Imóveis">
+          <div class="hero-logo-aura">
+            <img class="hero-logo" src="leads-logo-completa-v3.webp" alt="Leads Imóveis" />
+          </div>
+        </div>
         <div class="hero-copy">
-          <img class="hero-logo" src="leads-logo-completa-v3.webp" alt="Leads Imóveis" />
           <span class="eyebrow">Florianópolis · Jurerê · Norte da Ilha</span>
           <div class="phrase-panel" id="phrasePanel" aria-live="polite">
             <h1 id="phraseTitle">Seu próximo imóvel pode ser o começo da sua melhor fase.</h1>
@@ -436,18 +532,116 @@
             <button class="button" type="button" data-scroll-search>Ver imóveis</button>
             <a class="button secondary" href="https://wa.me/5548991115992?text=Olá%2C%20vim%20pelo%20site%20da%20Leads%20Imóveis%20e%20gostaria%20de%20falar%20com%20um%20especialista." target="_blank" rel="noopener noreferrer">Falar com especialista</a>
           </div>
-          <div class="quick-options">
-            <button class="quick-option" type="button" data-purpose="Venda"><span>⌂</span><strong>Comprar</strong><span>Casas e apartamentos selecionados.</span></button>
-            <button class="quick-option" type="button" data-purpose="Temporada"><span>☀</span><strong>Temporada</strong><span>Opções para viver Floripa de perto.</span></button>
-            <button class="quick-option" type="button" data-purpose="Aluguel Anual"><span>⌂</span><strong>Aluguel anual</strong><span>Imóveis para morar o ano inteiro.</span></button>
-          </div>
         </div>
 
-        <section class="assistant-card glass" aria-labelledby="assistantTitle">
-          <div class="assistant-head"><div class="assistant-orb">IA</div><div><strong id="assistantTitle">Lia · Assistente virtual</strong><span>Online · atendimento inteligente</span></div></div>
-          <form class="assistant-search" id="heroAssistantForm"><label class="sr-only" for="heroAssistantInput">Digite o imóvel que procura</label><input id="heroAssistantInput" type="search" autocomplete="off" placeholder="Ex.: casa em Jurerê" /><button type="submit" aria-label="Enviar">➜</button></form>
-          <div class="assistant-chips" id="heroChips"></div>
-          <div class="assistant-answer" id="heroAnswer" aria-live="polite">Olá! Eu sou a Lia. Conte o que você procura e eu ajudo a encontrar as melhores opções publicadas.</div>
+        <section class="owner-campaign" id="ownerCampaign" aria-labelledby="ownerCampaignTitle" aria-roledescription="carrossel" tabindex="0">
+          <div class="owner-slides">
+            <article class="owner-slide active" data-owner-slide aria-hidden="false">
+              <svg class="owner-art" viewBox="0 0 720 640" role="img" aria-label="Residência premium apresentada pela Leads Imóveis">
+                <defs><linearGradient id="ownerG1" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#123b55"/><stop offset="1" stop-color="#04111d"/></linearGradient><linearGradient id="ownerL1" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#bdefff" stop-opacity=".82"/><stop offset="1" stop-color="#74d5ff" stop-opacity=".12"/></linearGradient></defs>
+                <rect width="720" height="640" fill="url(#ownerG1)"/><circle cx="560" cy="116" r="190" fill="#74d5ff" opacity=".11"/><circle cx="105" cy="550" r="210" fill="#bdefff" opacity=".07"/>
+                <path d="M105 424 356 208l254 216v128H105Z" fill="#eafcff" opacity=".12" stroke="#bdefff" stroke-opacity=".45" stroke-width="3"/>
+                <path d="m74 426 282-246 289 246" fill="none" stroke="url(#ownerL1)" stroke-width="18" stroke-linecap="round"/>
+                <rect x="298" y="374" width="116" height="178" rx="10" fill="#071422" opacity=".74" stroke="#bdefff" stroke-opacity=".55"/>
+                <rect x="150" y="382" width="104" height="88" rx="12" fill="#74d5ff" opacity=".20" stroke="#bdefff" stroke-opacity=".55"/>
+                <rect x="462" y="382" width="104" height="88" rx="12" fill="#74d5ff" opacity=".20" stroke="#bdefff" stroke-opacity=".55"/>
+                <path d="M92 557h548" stroke="#bdefff" stroke-opacity=".4" stroke-width="3"/>
+              </svg>
+              <div class="owner-slide-shade"></div>
+              <div class="owner-slide-content">
+                <span class="owner-kicker">Captação premium</span>
+                <h2 id="ownerCampaignTitle">Seu imóvel merece uma apresentação à altura.</h2>
+                <p>Fotos profissionais, página exclusiva e divulgação planejada para valorizar cada detalhe.</p>
+                <a class="owner-cta" href="https://wa.me/5548991115992?text=Olá%2C%20quero%20anunciar%20meu%20imóvel%20com%20a%20Leads%20Imóveis." target="_blank" rel="noopener noreferrer">Anunciar meu imóvel</a>
+              </div>
+            </article>
+
+            <article class="owner-slide" data-owner-slide aria-hidden="true">
+              <svg class="owner-art" viewBox="0 0 720 640" role="img" aria-label="Escudo de segurança para locação de imóvel">
+                <defs><linearGradient id="ownerG2" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0b3143"/><stop offset="1" stop-color="#020c14"/></linearGradient><linearGradient id="ownerS2" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e9fbff"/><stop offset="1" stop-color="#69d9ff"/></linearGradient></defs>
+                <rect width="720" height="640" fill="url(#ownerG2)"/><path d="M360 86c87 66 171 79 228 84v147c0 126-77 210-228 266-151-56-228-140-228-266V170c57-5 141-18 228-84Z" fill="#74d5ff" opacity=".12" stroke="#bdefff" stroke-opacity=".48" stroke-width="4"/>
+                <path d="M360 151c61 43 121 54 163 59v102c0 86-50 145-163 190-113-45-163-104-163-190V210c42-5 102-16 163-59Z" fill="url(#ownerS2)" opacity=".22"/>
+                <circle cx="344" cy="316" r="72" fill="#061521" stroke="#bdefff" stroke-opacity=".58" stroke-width="5"/>
+                <circle cx="344" cy="316" r="25" fill="none" stroke="#dff8ff" stroke-width="10"/>
+                <path d="M368 316h126m-32 0v37m-38-37v25" stroke="#dff8ff" stroke-width="12" stroke-linecap="round"/>
+              </svg>
+              <div class="owner-slide-shade"></div>
+              <div class="owner-slide-content">
+                <span class="owner-kicker">Locação acompanhada</span>
+                <h2>Alugue com mais segurança e organização.</h2>
+                <p>Triagem de interessados, comunicação registrada e acompanhamento durante todo o processo.</p>
+                <a class="owner-cta" href="https://wa.me/5548991115992?text=Olá%2C%20quero%20saber%20como%20funciona%20a%20locação%20do%20meu%20imóvel." target="_blank" rel="noopener noreferrer">Conhecer a locação</a>
+              </div>
+            </article>
+
+            <article class="owner-slide" data-owner-slide aria-hidden="true">
+              <svg class="owner-art" viewBox="0 0 720 640" role="img" aria-label="Análise de desempenho e contrato de locação">
+                <defs><linearGradient id="ownerG3" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#17384c"/><stop offset="1" stop-color="#04101a"/></linearGradient><linearGradient id="ownerC3" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f4fdff"/><stop offset="1" stop-color="#bdefff"/></linearGradient></defs>
+                <rect width="720" height="640" fill="url(#ownerG3)"/><circle cx="586" cy="92" r="190" fill="#74d5ff" opacity=".09"/>
+                <rect x="150" y="94" width="420" height="470" rx="34" fill="url(#ownerC3)" opacity=".14" stroke="#dff8ff" stroke-opacity=".42" stroke-width="3"/>
+                <rect x="210" y="165" width="220" height="18" rx="9" fill="#dff8ff" opacity=".72"/><rect x="210" y="205" width="300" height="10" rx="5" fill="#bdefff" opacity=".33"/><rect x="210" y="235" width="260" height="10" rx="5" fill="#bdefff" opacity=".25"/>
+                <path d="M222 450V330m0 120h282" stroke="#bdefff" stroke-opacity=".46" stroke-width="5" stroke-linecap="round"/>
+                <path d="m245 423 64-58 63 28 92-103" fill="none" stroke="#eafcff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="245" cy="423" r="10" fill="#74d5ff"/><circle cx="309" cy="365" r="10" fill="#74d5ff"/><circle cx="372" cy="393" r="10" fill="#74d5ff"/><circle cx="464" cy="290" r="10" fill="#eafcff"/>
+              </svg>
+              <div class="owner-slide-shade"></div>
+              <div class="owner-slide-content">
+                <span class="owner-kicker">Estratégia imobiliária</span>
+                <h2>Menos tempo parado. Mais clareza para decidir.</h2>
+                <p>Preço, apresentação e divulgação alinhados para aumentar a qualidade dos contatos recebidos.</p>
+                <a class="owner-cta" href="https://wa.me/5548991115992?text=Olá%2C%20gostaria%20de%20uma%20avaliação%20para%20meu%20imóvel." target="_blank" rel="noopener noreferrer">Solicitar avaliação</a>
+              </div>
+            </article>
+
+            <article class="owner-slide" data-owner-slide aria-hidden="true">
+              <svg class="owner-art" viewBox="0 0 720 640" role="img" aria-label="Divulgação digital integrada do imóvel">
+                <defs><linearGradient id="ownerG4" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#12425b"/><stop offset="1" stop-color="#030d16"/></linearGradient><radialGradient id="ownerR4"><stop stop-color="#bdefff" stop-opacity=".56"/><stop offset="1" stop-color="#74d5ff" stop-opacity="0"/></radialGradient></defs>
+                <rect width="720" height="640" fill="url(#ownerG4)"/><circle cx="360" cy="310" r="270" fill="url(#ownerR4)" opacity=".28"/>
+                <rect x="211" y="98" width="298" height="444" rx="42" fill="#effcff" opacity=".14" stroke="#dff8ff" stroke-opacity=".5" stroke-width="4"/>
+                <rect x="242" y="146" width="236" height="310" rx="24" fill="#071422" opacity=".72"/>
+                <path d="m273 325 87-75 88 75v91H273Z" fill="#74d5ff" opacity=".21" stroke="#dff8ff" stroke-opacity=".54" stroke-width="4"/>
+                <path d="m258 326 102-91 104 91" fill="none" stroke="#eafcff" stroke-width="10" stroke-linecap="round"/>
+                <circle cx="360" cy="495" r="14" fill="#eafcff" opacity=".72"/>
+                <circle cx="115" cy="180" r="48" fill="#74d5ff" opacity=".16" stroke="#bdefff" stroke-opacity=".45"/><circle cx="602" cy="194" r="58" fill="#74d5ff" opacity=".14" stroke="#bdefff" stroke-opacity=".45"/><circle cx="599" cy="455" r="48" fill="#74d5ff" opacity=".12" stroke="#bdefff" stroke-opacity=".42"/>
+                <path d="M159 197 235 234M510 233l45-22M508 408l48 30" stroke="#bdefff" stroke-opacity=".52" stroke-width="4" stroke-dasharray="9 10"/>
+              </svg>
+              <div class="owner-slide-shade"></div>
+              <div class="owner-slide-content">
+                <span class="owner-kicker">Divulgação conectada</span>
+                <h2>Seu imóvel visto pelas pessoas certas.</h2>
+                <p>Site, página individual, CRM, WhatsApp e atendimento trabalhando de forma integrada.</p>
+                <a class="owner-cta" href="https://wa.me/5548991115992?text=Olá%2C%20quero%20divulgar%20meu%20imóvel%20na%20Leads%20Imóveis." target="_blank" rel="noopener noreferrer">Quero divulgar</a>
+              </div>
+            </article>
+
+            <article class="owner-slide" data-owner-slide aria-hidden="true">
+              <svg class="owner-art" viewBox="0 0 720 640" role="img" aria-label="Entrega das chaves de um imóvel">
+                <defs><linearGradient id="ownerG5" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0f3549"/><stop offset="1" stop-color="#020b12"/></linearGradient><linearGradient id="ownerK5" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffffff"/><stop offset="1" stop-color="#74d5ff"/></linearGradient></defs>
+                <rect width="720" height="640" fill="url(#ownerG5)"/><circle cx="570" cy="130" r="210" fill="#74d5ff" opacity=".10"/><path d="M90 497c90-96 179-119 270-70 93 51 174 52 270-37v190H90Z" fill="#74d5ff" opacity=".10"/>
+                <circle cx="293" cy="292" r="84" fill="none" stroke="url(#ownerK5)" stroke-width="22"/>
+                <path d="M370 292h218m-68 0v70m-64-70v48" stroke="url(#ownerK5)" stroke-width="24" stroke-linecap="round"/>
+                <path d="M150 494c57-41 116-52 176-29l83 31c42 16 83 13 122-8l62-34" fill="none" stroke="#dff8ff" stroke-opacity=".54" stroke-width="18" stroke-linecap="round"/>
+                <circle cx="149" cy="494" r="20" fill="#eafcff" opacity=".78"/>
+              </svg>
+              <div class="owner-slide-shade"></div>
+              <div class="owner-slide-content">
+                <span class="owner-kicker">Leads Imóveis</span>
+                <h2>Anuncie hoje e comece com orientação profissional.</h2>
+                <p>Venda ou alugue com uma operação moderna, atendimento humano e acompanhamento organizado.</p>
+                <a class="owner-cta" href="https://wa.me/5548991115992?text=Olá%2C%20sou%20proprietário%20e%20quero%20anunciar%20meu%20imóvel%20hoje." target="_blank" rel="noopener noreferrer">Falar com especialista</a>
+              </div>
+            </article>
+          </div>
+
+          <div class="owner-campaign-ui">
+            <div class="owner-progress" aria-hidden="true"><span id="ownerProgressBar"></span></div>
+            <div class="owner-controls">
+              <button id="ownerPrevious" type="button" aria-label="Propaganda anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button>
+              <div class="owner-dots" id="ownerDots" aria-label="Selecionar propaganda"></div>
+              <button id="ownerNext" type="button" aria-label="Próxima propaganda"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+            </div>
+          </div>
+          <span class="sr-only" id="ownerCampaignStatus" aria-live="polite">Propaganda 1 de 5</span>
         </section>
       </div>
     </section>
@@ -491,8 +685,18 @@
   <footer><div class="shell footer-content"><div class="footer-brand"><img src="leads-monograma-v3.webp" alt="Leads Imóveis" /><div><strong>Leads Imóveis</strong><span>Conectando sonhos. Realizando histórias.</span></div></div><div class="footer-copy">© <span id="currentYear"></span> Leads Imóveis · Florianópolis/SC</div></div></footer>
 
   <button class="floating-ai" id="openAi" type="button" aria-label="Abrir Lia"><span class="floating-ai-symbol">L</span><span class="floating-ai-label">Lia</span></button>
-  <aside class="ai-panel" id="aiPanel" aria-hidden="true">
-    <div class="ai-panel-head"><div class="lia-head"><div class="lia-avatar">L</div><div><strong>Lia · Assistente virtual</strong><span><i class="lia-dot"></i>Online · atendimento inteligente</span></div></div><button id="closeAi" type="button" aria-label="Fechar Lia">×</button></div>
+  <aside class="ai-panel" id="aiPanel" aria-hidden="true" aria-label="Lia, assistente virtual">
+    <div class="ai-panel-head">
+      <div class="lia-head"><div class="lia-avatar">L</div><div><strong>Lia · Assistente virtual</strong><span><i class="lia-dot"></i>Online · atendimento inteligente</span></div></div>
+      <div class="ai-panel-actions">
+        <button id="minimizeAi" type="button" aria-label="Minimizar Lia" title="Minimizar Lia" aria-expanded="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path class="minimize-glyph" d="M6 12h12"/><path class="restore-glyph" d="m7 14 5-5 5 5"/></svg>
+        </button>
+        <button id="closeAi" type="button" aria-label="Fechar Lia" title="Fechar Lia">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>
+        </button>
+      </div>
+    </div>
     <div class="ai-panel-body"><div class="lia-thread" id="liaThread" aria-live="polite"><div class="lia-message ai" id="panelAnswer">Olá! Eu sou a Lia. Conte o que você procura em Florianópolis.</div></div><form class="assistant-search" id="panelAssistantForm"><label class="sr-only" for="panelAssistantInput">Digite o imóvel que procura</label><input id="panelAssistantInput" type="search" autocomplete="off" placeholder="Converse com a Lia…" /><button type="submit" aria-label="Enviar">➜</button></form><div class="assistant-chips" id="panelChips"></div></div>
   </aside>
 
@@ -935,8 +1139,37 @@
       $("openMenu").setAttribute("aria-expanded","false");
       document.body.classList.remove("locked");
     }
-    function openAi() { $("aiPanel").classList.add("open"); $("aiPanel").setAttribute("aria-hidden","false"); setTimeout(()=>$("panelAssistantInput").focus(),180); }
-    function closeAi() { $("aiPanel").classList.remove("open"); $("aiPanel").setAttribute("aria-hidden","true"); }
+    function restoreAi() {
+      const panel = $("aiPanel");
+      panel.classList.remove("minimized");
+      $("minimizeAi").setAttribute("aria-expanded","true");
+      $("minimizeAi").setAttribute("aria-label","Minimizar Lia");
+      $("minimizeAi").setAttribute("title","Minimizar Lia");
+    }
+    function openAi() {
+      const panel = $("aiPanel");
+      panel.classList.add("open");
+      panel.setAttribute("aria-hidden","false");
+      restoreAi();
+      setTimeout(()=>$("panelAssistantInput")?.focus(),180);
+    }
+    function minimizeAi() {
+      const panel = $("aiPanel");
+      if (!panel.classList.contains("open")) { openAi(); return; }
+      const minimized = !panel.classList.contains("minimized");
+      panel.classList.toggle("minimized",minimized);
+      $("minimizeAi").setAttribute("aria-expanded",String(!minimized));
+      $("minimizeAi").setAttribute("aria-label",minimized ? "Restaurar Lia" : "Minimizar Lia");
+      $("minimizeAi").setAttribute("title",minimized ? "Restaurar Lia" : "Minimizar Lia");
+    }
+    function closeAi() {
+      const panel = $("aiPanel");
+      panel.classList.remove("open","minimized");
+      panel.setAttribute("aria-hidden","true");
+      $("minimizeAi").setAttribute("aria-expanded","true");
+      $("minimizeAi").setAttribute("aria-label","Minimizar Lia");
+      $("minimizeAi").setAttribute("title","Minimizar Lia");
+    }
     function syncPurposeNavigation(purpose="") {
       const target = normalizeText(purpose);
       document.querySelectorAll("[data-purpose],[data-quick-purpose]").forEach(element=>{
@@ -966,7 +1199,6 @@
 
     function renderChips() {
       const html = suggestions.map(suggestion=>`<button class="chip" type="button" data-query="${escapeHtml(suggestion)}">${escapeHtml(suggestion)}</button>`).join("");
-      $("heroChips").innerHTML = html;
       $("panelChips").innerHTML = html;
     }
 
@@ -1019,7 +1251,6 @@
       liaSending = true;
       addMessage("me",clean);
       const typing = addMessage("ai","",true);
-      $("heroAnswer").textContent = "Estou analisando sua mensagem…";
 
       try {
         const session = localStorage.getItem("leads_lia_session") || (crypto.randomUUID?.() || String(Date.now()));
@@ -1043,7 +1274,6 @@
         if (!response.ok || data.ok===false) throw new Error(data.message || `HTTP ${response.status}`);
         typing.remove();
         const reply = String(data.reply || data.message || "Posso ajudar você a encontrar o imóvel ideal.");
-        $("heroAnswer").textContent = reply;
         addMessage("ai",reply);
         const codes = Array.isArray(data.recommendedCodes) ? data.recommendedCodes.map(normalizeText) : [];
         const recommendations = codes.length ? state.properties.filter(property=>codes.includes(normalizeText(property.code))).slice(0,4) : localMatches(clean);
@@ -1053,14 +1283,89 @@
         typing.remove();
         const matches = localMatches(clean);
         const reply = matches.length ? `Encontrei ${matches.length} ${matches.length===1?"opção relacionada":"opções relacionadas"}. Toque em uma delas para abrir a página completa.` : "Não encontrei uma correspondência exata. Conte o bairro, o tipo de imóvel e se procura compra, aluguel anual ou temporada.";
-        $("heroAnswer").textContent = reply;
         addMessage("ai",reply);
         renderRecommendations(matches);
       } finally {
         liaSending = false;
-        $("heroAssistantInput").value = "";
         $("panelAssistantInput").value = "";
       }
+    }
+
+
+    const OWNER_SLIDE_DELAY = 4500;
+    let ownerCampaignIndex = 0;
+    let ownerCampaignTimer = null;
+    let ownerCampaignPaused = false;
+    let ownerCampaignPointerX = null;
+
+    function ownerSlides() { return [...document.querySelectorAll("[data-owner-slide]")]; }
+    function ownerDots() { return [...document.querySelectorAll(".owner-dot")]; }
+
+    function restartOwnerProgress() {
+      const bar = $("ownerProgressBar");
+      if (!bar) return;
+      bar.classList.remove("running");
+      void bar.offsetWidth;
+      if (!ownerCampaignPaused && !document.hidden) bar.classList.add("running");
+    }
+
+    function showOwnerSlide(index,{restart=true}={}) {
+      const slides = ownerSlides();
+      if (!slides.length) return;
+      ownerCampaignIndex = (index + slides.length) % slides.length;
+      slides.forEach((slide,i)=>{
+        const active = i === ownerCampaignIndex;
+        slide.classList.toggle("active",active);
+        slide.setAttribute("aria-hidden",String(!active));
+      });
+      ownerDots().forEach((dot,i)=>{
+        const active = i === ownerCampaignIndex;
+        dot.classList.toggle("active",active);
+        dot.setAttribute("aria-current",active ? "true" : "false");
+      });
+      const status = $("ownerCampaignStatus");
+      if (status) status.textContent = `Propaganda ${ownerCampaignIndex+1} de ${slides.length}`;
+      if (restart) restartOwnerProgress();
+    }
+
+    function stopOwnerCampaign() {
+      clearInterval(ownerCampaignTimer);
+      ownerCampaignTimer = null;
+      $("ownerProgressBar")?.classList.remove("running");
+    }
+
+    function startOwnerCampaign() {
+      stopOwnerCampaign();
+      if (ownerCampaignPaused || document.hidden || ownerSlides().length < 2) return;
+      restartOwnerProgress();
+      ownerCampaignTimer = setInterval(()=>showOwnerSlide(ownerCampaignIndex+1),OWNER_SLIDE_DELAY);
+    }
+
+    function initOwnerCampaign() {
+      const campaign = $("ownerCampaign");
+      const dots = $("ownerDots");
+      if (!campaign || !dots) return;
+      dots.innerHTML = ownerSlides().map((_,i)=>`<button class="owner-dot ${i===0?"active":""}" type="button" aria-label="Ver propaganda ${i+1}" aria-current="${i===0?"true":"false"}"></button>`).join("");
+      ownerDots().forEach((dot,i)=>dot.onclick=()=>{ showOwnerSlide(i); startOwnerCampaign(); });
+      $("ownerPrevious").onclick = ()=>{ showOwnerSlide(ownerCampaignIndex-1); startOwnerCampaign(); };
+      $("ownerNext").onclick = ()=>{ showOwnerSlide(ownerCampaignIndex+1); startOwnerCampaign(); };
+
+      campaign.addEventListener("mouseenter",()=>{ ownerCampaignPaused=true; stopOwnerCampaign(); });
+      campaign.addEventListener("mouseleave",()=>{ ownerCampaignPaused=false; startOwnerCampaign(); });
+      campaign.addEventListener("focusin",()=>{ ownerCampaignPaused=true; stopOwnerCampaign(); });
+      campaign.addEventListener("focusout",event=>{
+        if (!campaign.contains(event.relatedTarget)) { ownerCampaignPaused=false; startOwnerCampaign(); }
+      });
+      campaign.addEventListener("pointerdown",event=>{ ownerCampaignPointerX=event.clientX; });
+      campaign.addEventListener("pointerup",event=>{
+        if (ownerCampaignPointerX===null) return;
+        const delta=event.clientX-ownerCampaignPointerX;
+        ownerCampaignPointerX=null;
+        if (Math.abs(delta)>55) { showOwnerSlide(ownerCampaignIndex+(delta<0?1:-1)); startOwnerCampaign(); }
+      });
+      document.addEventListener("visibilitychange",()=>document.hidden?stopOwnerCampaign():startOwnerCampaign());
+      showOwnerSlide(0,{restart:false});
+      startOwnerCampaign();
     }
 
     function startPhrases() {
@@ -1111,7 +1416,13 @@
       $("openMenu").onclick = openMenu;
       $("closeMenu").onclick = closeMenu;
       $("overlay").onclick = closeMenu;
-      $("openAi").onclick = ()=>$("aiPanel").classList.contains("open") ? closeAi() : openAi();
+      $("openAi").onclick = ()=>{
+        const panel = $("aiPanel");
+        if (!panel.classList.contains("open")) openAi();
+        else if (panel.classList.contains("minimized")) restoreAi();
+        else closeAi();
+      };
+      $("minimizeAi").onclick = minimizeAi;
       $("closeAi").onclick = closeAi;
       document.querySelectorAll("[data-purpose]").forEach(element=>element.onclick=()=>setPurpose(element.dataset.purpose));
       document.querySelectorAll("[data-quick-purpose]").forEach(element=>element.onclick=()=>setPurpose(element.dataset.quickPurpose));
@@ -1124,7 +1435,6 @@
       $("clearFilters").onclick = ()=>{ $("filterForm").reset(); $("quickSearchInput").value=""; syncPurposeNavigation(""); applyFilters({scroll:false}); };
       ["purposeFilter","neighborhoodFilter","typeFilter"].forEach(id=>$(id).onchange=()=>{ if(id==="purposeFilter") syncPurposeNavigation($(id).value); applyFilters({scroll:false}); });
       $("codeFilter").oninput = ()=>{ $("quickSearchInput").value = $("codeFilter").value; };
-      $("heroAssistantForm").onsubmit = event=>{ event.preventDefault(); sendLia($("heroAssistantInput").value); };
       $("panelAssistantForm").onsubmit = event=>{ event.preventDefault(); sendLia($("panelAssistantInput").value); };
       document.addEventListener("click",event=>{ const chip=event.target.closest("[data-query]"); if (chip) sendLia(chip.dataset.query); });
       document.addEventListener("keydown",event=>{ if (event.key==="Escape") { closeMenu(); closeAi(); } });
@@ -1142,6 +1452,7 @@
       $("currentYear").textContent = new Date().getFullYear();
       renderChips();
       bindEvents();
+      initOwnerCampaign();
       startPhrases();
 
       try {
@@ -1158,7 +1469,6 @@
       const hour = new Date().getHours();
       const greeting = hour<12 ? "Bom dia" : hour<18 ? "Boa tarde" : "Boa noite";
       $("panelAnswer").textContent = `${greeting}! Eu sou a Lia. Conte o que você procura em Florianópolis.`;
-      $("heroAnswer").textContent = `${greeting}! Escreva o que procura como se estivesse conversando com uma pessoa.`;
     }
 
     window.addEventListener("DOMContentLoaded",init);
