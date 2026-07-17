@@ -118,6 +118,12 @@
     .ai-head{padding:14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}.ai-log{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
     .msg{max-width:88%;padding:10px 11px;border-radius:13px;font-size:11px;line-height:1.5;background:rgba(255,255,255,.05)}.msg.me{margin-left:auto;background:rgba(101,217,255,.11)}
     .ai-form{display:flex;gap:7px;padding:12px;border-top:1px solid var(--line)}
+    #page-owner-search .hero{background:
+      radial-gradient(circle at 85% 10%,rgba(86,213,138,.10),transparent 34%),
+      radial-gradient(circle at 10% 0,rgba(101,217,255,.10),transparent 36%),
+      linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.018))}
+    #ownerResults .card{border-color:rgba(101,217,255,.12)}
+    #ownerResults .card p b{color:#dceaf2}
     @media(max-width:1180px){.kpis{grid-template-columns:repeat(3,1fr)}.grid-3{grid-template-columns:1fr 1fr}}
     @media(max-width:900px){
       .app{display:block}.sidebar{position:fixed;left:-285px;width:270px;transition:.22s;box-shadow:25px 0 70px rgba(0,0,0,.5)}.sidebar.open{left:0}
@@ -142,6 +148,7 @@
       <button data-page="pipeline"><span class="ico">▥</span>Funil comercial</button>
       <button data-page="properties"><span class="ico">⌂</span>Imóveis</button>
       <button data-page="capture"><span class="ico">◎</span>Captação</button>
+      <button data-page="owner-search"><span class="ico">⌖</span>Localizar proprietário</button>
       <button data-page="agenda"><span class="ico">▣</span>Agenda e tarefas</button>
       <div class="nav-label">Gestão</div>
       <button data-page="team"><span class="ico">♙</span>Corretores</button>
@@ -226,6 +233,86 @@
         </div>
       </section>
 
+
+      <section class="page" id="page-owner-search">
+        <div class="hero">
+          <h2>Localizar proprietário por endereço</h2>
+          <p>Pesquisa interna e autorizada em captações e imóveis já registrados pela Leads Imóveis. Dados pessoais aparecem somente quando existe consentimento, relação comercial ou outra base legal registrada.</p>
+          <div class="hero-actions">
+            <a class="btn ghost" href="https://www.cnj.jus.br/sistemas/srei/" target="_blank" rel="noopener noreferrer">Consultar serviços oficiais do SREI</a>
+            <button class="btn ghost" id="ownerClearBtn">Limpar pesquisa</button>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:14px">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>Pesquisa por imóvel</h3>
+                <p>Endereço, número, CEP, inscrição imobiliária ou matrícula</p>
+              </div>
+              <span class="badge green">LGPD protegida</span>
+            </div>
+            <div class="panel-body">
+              <div class="form-grid">
+                <div class="field full">
+                  <label>Finalidade da consulta</label>
+                  <select id="ownerPurpose">
+                    <option value="">Selecione a finalidade</option>
+                    <option value="captacao">Captação imobiliária legítima</option>
+                    <option value="cadastro">Atualização de cadastro autorizado</option>
+                    <option value="atendimento">Atendimento solicitado pelo proprietário</option>
+                    <option value="diligencia">Diligência documental de negociação</option>
+                  </select>
+                </div>
+                <div class="field full"><label>Rua ou endereço</label><input id="ownerAddress" placeholder="Ex.: Rua João Roberto Soares"></div>
+                <div class="field"><label>Número</label><input id="ownerNumber" placeholder="Ex.: 1270"></div>
+                <div class="field"><label>Complemento</label><input id="ownerComplement" placeholder="Apto, bloco, casa..."></div>
+                <div class="field"><label>Bairro</label><input id="ownerNeighborhood" placeholder="Ex.: Ingleses"></div>
+                <div class="field"><label>Cidade</label><input id="ownerCity" value="Florianópolis"></div>
+                <div class="field"><label>CEP</label><input id="ownerCep" inputmode="numeric" placeholder="88000-000"></div>
+                <div class="field"><label>Inscrição imobiliária</label><input id="ownerRegistration" placeholder="Número cadastral municipal"></div>
+                <div class="field full"><label>Matrícula do imóvel</label><input id="ownerRegistry" placeholder="Matrícula do Registro de Imóveis"></div>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+                <button class="btn" id="ownerSearchBtn">⌕ Localizar registros</button>
+                <button class="btn ghost" id="ownerSearchAllBtn">Ver registros autorizados</button>
+              </div>
+              <p style="font-size:10px;color:var(--muted);line-height:1.5;margin:12px 0 0">
+                Esta ferramenta não consulta CPF, não invade bases privadas e não promete identificar proprietários fora das fontes autorizadas. Para comprovação oficial da titularidade, solicite matrícula ou certidão ao Registro de Imóveis competente.
+              </p>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <div><h3>Como a localização funciona</h3><p>Fluxo profissional e juridicamente seguro</p></div>
+            </div>
+            <div class="panel-body">
+              <div class="list">
+                <div class="row"><div class="dot">1</div><div><b>Busca no CRM</b><span>Captações, imóveis, endereços e matrículas já autorizados.</span></div></div>
+                <div class="row"><div class="dot">2</div><div><b>Validação da origem</b><span>Exibe origem, consentimento e base legal registrada.</span></div></div>
+                <div class="row"><div class="dot">3</div><div><b>Contato protegido</b><span>Telefone e WhatsApp somente quando o contato está autorizado.</span></div></div>
+                <div class="row"><div class="dot">4</div><div><b>Confirmação oficial</b><span>A matrícula ou certidão do cartório é a fonte para comprovar titularidade.</span></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:14px">
+          <div class="panel-head">
+            <div>
+              <h3>Resultados encontrados</h3>
+              <p id="ownerResultSummary">Preencha pelo menos um campo para pesquisar.</p>
+            </div>
+            <span class="badge" id="ownerResultCount">0 resultados</span>
+          </div>
+          <div class="panel-body">
+            <div class="cards" id="ownerResults"></div>
+          </div>
+        </div>
+      </section>
+
       <section class="page" id="page-agenda">
         <div class="panel"><div class="panel-head"><div><h3>Agenda e tarefas</h3><p>Visitas, retornos, propostas e prioridades</p></div><button class="btn" id="newTaskBtn">＋ Nova tarefa</button></div><div class="panel-body"><div class="tabs" id="agendaTabs"><button class="tab active">Hoje</button><button class="tab">Próximas</button><button class="tab">Visitas</button><button class="tab">Retornos</button><button class="tab">Concluídas</button></div><div class="list" id="agendaList" style="margin-top:12px"></div></div></div>
       </section>
@@ -281,7 +368,7 @@
 const PROJECT_URL="https://zyfbgydbwsvbaogbxzrd.supabase.co";
 const AI_FUNCTION=PROJECT_URL+"/functions/v1/crm-ai-assistant-openai-test";
 const state={user:null,profile:null,properties:[],leads:[],captures:[],team:[],tasks:[],drafts:[],activeLeadTab:"todos",activePropertyTab:"todos"};
-const pageTitles={dashboard:"Visão geral",leads:"Leads",pipeline:"Funil comercial",properties:"Imóveis",capture:"Captação",agenda:"Agenda e tarefas",team:"Corretores",reports:"Relatórios",ai:"Central IA",settings:"Configurações"};
+const pageTitles={dashboard:"Visão geral",leads:"Leads",pipeline:"Funil comercial",properties:"Imóveis",capture:"Captação","owner-search":"Localizar proprietário",agenda:"Agenda e tarefas",team:"Corretores",reports:"Relatórios",ai:"Central IA",settings:"Configurações"};
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const digits=v=>String(v||"").replace(/\D/g,"");
@@ -320,6 +407,12 @@ function bind(){
   $("#globalSearch").onkeydown=e=>{if(e.key==="Enter")globalSearch()};
   $("#newLeadBtn").onclick=openLeadModal;$("#newPropertyBtn").onclick=openPropertyModal;$("#newCaptureBtn").onclick=openCaptureModal;$("#newTaskBtn").onclick=openTaskModal;
   $("#leadFilterBtn").onclick=renderLeads;$("#propertyFilterBtn").onclick=renderProperties;$("#captureFilterBtn").onclick=renderCaptures;
+  $("#ownerSearchBtn").onclick=()=>searchOwners(false);
+  $("#ownerSearchAllBtn").onclick=()=>searchOwners(true);
+  $("#ownerClearBtn").onclick=clearOwnerSearch;
+  ["ownerAddress","ownerNumber","ownerComplement","ownerNeighborhood","ownerCity","ownerCep","ownerRegistration","ownerRegistry"].forEach(id=>{
+    $("#"+id).addEventListener("keydown",e=>{if(e.key==="Enter")searchOwners(false)});
+  });
   $("#aiFab").onclick=()=>openAI();$("#heroAI").onclick=()=>openAI("Analise meu CRM e diga as prioridades de hoje.");
   $("#closeAI").onclick=closeAI;$("#aiForm").onsubmit=sendAI;$("#modalClose").onclick=closeModal;
   $$(".ai-prompt").forEach(b=>b.onclick=()=>openAI(b.textContent));
@@ -338,7 +431,7 @@ async function loadCaptures(){const {data,error}=await db().from("captacoes_rada
 async function loadTeam(){const {data,error}=await db().from("user_profiles").select("*").order("full_name");if(error)throw error;state.team=data||[]}
 async function loadDrafts(){const {data}=await db().from("ai_property_drafts").select("*").eq("user_id",state.user.id).order("created_at",{ascending:false}).limit(20);state.drafts=data||[]}
 
-function renderAll(){renderDashboard();renderLeadTabs();renderLeads();renderPropertyTabs();renderProperties();renderCaptures();renderAgenda();renderTeam();renderDrafts();renderReports();fillFilters()}
+function renderAll(){renderDashboard();renderLeadTabs();renderLeads();renderPropertyTabs();renderProperties();renderCaptures();renderAgenda();renderTeam();renderDrafts();renderReports();fillFilters();if(!$("#ownerResults").innerHTML.trim())clearOwnerSearch()}
 function renderDashboard(){
   const hot=state.leads.filter(l=>(l.lead_score||0)>=60||String(l.lead_temperature).toLowerCase()==="quente");
   const publicProps=state.properties.filter(p=>p.is_public);
@@ -392,6 +485,101 @@ function renderCaptures(){
 function captureCard(c){
   const phone=digits(c.telefone);return `<article class="card"><div class="card-body"><div style="display:flex;justify-content:space-between;gap:8px"><h4>${esc(c.tipo_imovel||"Imóvel")} · ${esc(c.bairro||"-")}</h4><span class="badge ${c.temperature==="quente"?"hot":"blue"}">${esc(c.temperature||"frio")} · ${c.score||0}</span></div><p><b>Proprietário:</b> ${esc(c.nome_proprietario||"Não informado")}</p><p>${esc(c.endereco||"Endereço não informado")} · ${esc(c.preco||"Preço não informado")}</p><p>Origem: ${esc(c.origem_detalhe||c.origem||c.origem_tipo||"-")} · ${c.consentimento_contato?"Contato autorizado":"Sem consentimento"}</p><div class="card-actions">${phone&&c.consentimento_contato?`<a class="btn green" target="_blank" href="https://wa.me/${phone.length<=11?"55":""}${phone}">WhatsApp</a>`:""}<button class="btn" onclick="window.crmConvertCapture('${c.id}')">Converter em imóvel</button></div></div></article>`;
 }
+
+function normalizeSearchValue(value){
+  return String(value||"")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .toLowerCase().replace(/\s+/g," ").trim();
+}
+function maskPhone(value){
+  const d=digits(value);
+  if(d.length<8)return "Contato protegido";
+  return `${d.slice(0,2)} *****-${d.slice(-4)}`;
+}
+function ownerSourceText(row){
+  return [
+    row.endereco,row.numero,row.complemento,row.bairro,row.cidade,row.uf,row.cep,
+    row.inscricao_imobiliaria,row.matricula_imovel,row.nome_proprietario,
+    row.owner_name,row.owner_email,row.title,row.type,row.neighborhood,
+    row.data?.endereco,row.data?.address,row.data?.numero,row.data?.cep,
+    row.data?.inscricao_imobiliaria,row.data?.matricula_imovel
+  ].map(normalizeSearchValue).join(" ");
+}
+function clearOwnerSearch(){
+  $("#ownerPurpose").value="";
+  ["ownerAddress","ownerNumber","ownerComplement","ownerNeighborhood","ownerCep","ownerRegistration","ownerRegistry"].forEach(id=>$("#"+id).value="");
+  $("#ownerCity").value="Florianópolis";
+  $("#ownerResults").innerHTML=empty("Preencha pelo menos um campo para pesquisar.");
+  $("#ownerResultSummary").textContent="Preencha pelo menos um campo para pesquisar.";
+  $("#ownerResultCount").textContent="0 resultados";
+}
+function searchOwners(showAll=false){
+  const purpose=$("#ownerPurpose").value;
+  if(!purpose){toast("Selecione a finalidade legítima da consulta.");$("#ownerPurpose").focus();return}
+
+  const terms=[
+    $("#ownerAddress").value,$("#ownerNumber").value,$("#ownerComplement").value,
+    $("#ownerNeighborhood").value,$("#ownerCity").value,$("#ownerCep").value,
+    $("#ownerRegistration").value,$("#ownerRegistry").value
+  ].map(normalizeSearchValue).filter(Boolean);
+
+  if(!showAll && !terms.length){toast("Informe endereço, CEP, inscrição ou matrícula.");$("#ownerAddress").focus();return}
+
+  const captureRows=state.captures.map(row=>({...row,__source:"captacao"}));
+  const propertyRows=state.properties.map(row=>({...row,__source:"imovel"}));
+  let rows=[...captureRows,...propertyRows];
+
+  if(!showAll){
+    rows=rows.filter(row=>{
+      const source=ownerSourceText(row);
+      return terms.every(term=>source.includes(term));
+    });
+  }
+
+  rows=rows.slice(0,100);
+  $("#ownerResultCount").textContent=`${rows.length} resultado${rows.length===1?"":"s"}`;
+  $("#ownerResultSummary").textContent=rows.length
+    ? "Registros internos compatíveis com a pesquisa."
+    : "Nenhum registro autorizado foi localizado. Confirme o endereço ou solicite uma certidão oficial.";
+
+  $("#ownerResults").innerHTML=rows.map(ownerResultCard).join("")||empty("Nenhum registro autorizado encontrado.");
+}
+function ownerResultCard(row){
+  const isCapture=row.__source==="captacao";
+  const owner=isCapture?(row.nome_proprietario||"Proprietário não informado"):(row.owner_name||row.data?.owner_name||"Proprietário não informado");
+  const address=isCapture
+    ? [row.endereco,row.numero,row.complemento,row.bairro,row.cidade,row.uf,row.cep].filter(Boolean).join(", ")
+    : [row.data?.endereco||row.data?.address,row.data?.numero,row.neighborhood,row.city,row.data?.cep].filter(Boolean).join(", ");
+  const registration=isCapture?(row.inscricao_imobiliaria||"Não informada"):(row.data?.inscricao_imobiliaria||"Não informada");
+  const registry=isCapture?(row.matricula_imovel||"Não informada"):(row.data?.matricula_imovel||"Não informada");
+  const allowed=isCapture?Boolean(row.consentimento_contato):Boolean(row.data?.consentimento_contato);
+  const phone=isCapture?row.telefone:(row.data?.telefone_proprietario||row.data?.owner_phone||"");
+  const email=isCapture?row.email_proprietario:(row.owner_email||row.data?.email_proprietario||"");
+  const legalBasis=isCapture?(row.base_legal||row.origem_tipo||"Origem registrada no CRM"):(row.data?.base_legal||"Relação comercial registrada");
+  const source=isCapture?(row.origem_detalhe||row.origem||row.fonte_url||"Captação interna"):"Carteira de imóveis";
+  const phoneText=allowed&&phone?phone:maskPhone(phone);
+
+  return `<article class="card">
+    <div class="card-body">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
+        <h4>${esc(owner)}</h4>
+        <span class="badge ${allowed?"green":"hot"}">${allowed?"Contato autorizado":"Dados protegidos"}</span>
+      </div>
+      <p><b>Endereço:</b> ${esc(address||"Endereço incompleto")}</p>
+      <p><b>Inscrição imobiliária:</b> ${esc(registration)}</p>
+      <p><b>Matrícula:</b> ${esc(registry)}</p>
+      <p><b>Contato:</b> ${esc(phoneText)}${allowed&&email?` · ${esc(email)}`:""}</p>
+      <p><b>Origem:</b> ${esc(source)}</p>
+      <p><b>Base registrada:</b> ${esc(legalBasis)}</p>
+      <div class="card-actions">
+        ${allowed&&phone?`<a class="btn green" target="_blank" rel="noopener noreferrer" href="https://wa.me/${digits(phone).length<=11?"55":""}${digits(phone)}">WhatsApp</a>`:""}
+        ${isCapture?`<button class="btn" onclick="window.crmConvertCapture('${row.id}')">Abrir captação</button>`:`<button class="btn" onclick="window.crmOpenProperty('${row.id}')">Abrir imóvel</button>`}
+        <a class="btn ghost" href="https://www.cnj.jus.br/sistemas/srei/" target="_blank" rel="noopener noreferrer">Confirmar no registro oficial</a>
+      </div>
+    </div>
+  </article>`;
+}
+
 function renderPipeline(){
   const stages=["novo","em_atendimento","aguardando","proposta","fechado"];
   $("#pipelineBoard").innerHTML=stages.map(s=>{const rows=state.leads.filter(l=>String(l.lead_status||l.status).toLowerCase()===s);return `<section class="column"><div class="column-head"><b>${s.replace("_"," ").toUpperCase()}</b><span class="badge">${rows.length}</span></div><div class="column-body">${rows.map(l=>`<div class="mini"><b>${esc(l.name||"Lead")}</b><p>${esc(l.neighborhood||"-")} · score ${l.lead_score||0}</p><button class="btn ghost" onclick="window.crmOpenLead('${l.id}')">Abrir</button></div>`).join("")||empty("Sem leads")}</div></section>`}).join("");
