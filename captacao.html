@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#061018">
+  <title>Anuncie seu imóvel · Leads Imóveis</title>
+  <meta name="description" content="Venda ou alugue seu imóvel em Florianópolis com a Leads Imóveis. Avaliação profissional, divulgação e acompanhamento completo.">
+  <style>
+    :root{
+      --bg:#061018;--surface:#0b1721;--surface2:#101f2b;
+      --line:rgba(255,255,255,.09);--text:#f7fbff;--muted:#8fa5b5;
+      --accent:#d9b66f;--accent2:#65d9ff;--green:#56d58a;--red:#ff6f75;
+      --radius:18px;--shadow:0 20px 55px rgba(0,0,0,.32);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+    body{background:
+      radial-gradient(circle at 10% -10%,rgba(101,217,255,.09),transparent 34%),
+      radial-gradient(circle at 85% 0,rgba(217,182,111,.10),transparent 35%),
+      linear-gradient(150deg,#061018,#08141d 45%,#04090e)}
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:1080px;margin:0 auto;padding:22px 18px 60px}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0 22px}
+    .brand{display:flex;gap:11px;align-items:center}
+    .brand img{width:46px;height:46px;border-radius:14px;object-fit:cover;border:1px solid rgba(217,182,111,.35)}
+    .brand strong{display:block;letter-spacing:1.4px;font-size:14px}
+    .brand small{display:block;color:var(--accent);font-size:9px;letter-spacing:2.2px;margin-top:3px}
+    .back{border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:11px;padding:9px 13px;font-size:12px;color:#d9e5ed}
+    .back:hover{border-color:rgba(101,217,255,.35)}
+    .hero{border:1px solid var(--line);border-radius:22px;padding:26px 24px;box-shadow:var(--shadow);background:
+      radial-gradient(circle at 80% 10%,rgba(101,217,255,.12),transparent 35%),
+      radial-gradient(circle at 10% 0,rgba(217,182,111,.14),transparent 35%),
+      linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.018))}
+    .hero small{color:var(--accent);font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:900}
+    .hero h1{margin:8px 0 0;font-size:clamp(24px,4vw,34px);line-height:1.2}
+    .hero p{margin:10px 0 0;color:var(--muted);max-width:640px;line-height:1.6;font-size:14px}
+    .grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;margin-top:16px;align-items:start}
+    .panel{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.015));box-shadow:0 12px 35px rgba(0,0,0,.18);overflow:hidden}
+    .panel-head{padding:16px 18px;border-bottom:1px solid var(--line)}
+    .panel-head h2{margin:0;font-size:15px}
+    .panel-head p{margin:5px 0 0;color:var(--muted);font-size:11px}
+    .panel-body{padding:18px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .full{grid-column:1/-1}
+    .field label{display:block;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin:0 0 6px;font-weight:800}
+    input,select,textarea{width:100%;border:1px solid var(--line);background:rgba(0,0,0,.22);color:#fff;border-radius:11px;padding:12px;outline:none;font:inherit;font-size:14px}
+    input:focus,select:focus,textarea:focus{border-color:rgba(101,217,255,.42);box-shadow:0 0 0 3px rgba(101,217,255,.07)}
+    select option{background:#0b1721}
+    textarea{resize:vertical;min-height:96px}
+    .consent{display:flex;gap:10px;align-items:flex-start;border:1px solid rgba(217,182,111,.24);border-radius:13px;padding:12px;background:rgba(217,182,111,.06);margin-top:12px}
+    .consent input{width:18px;height:18px;margin-top:2px;flex:0 0 auto;accent-color:var(--accent)}
+    .consent span{font-size:11px;color:#d9e5ed;line-height:1.55}
+    .send{width:100%;margin-top:14px;border:1px solid rgba(217,182,111,.4);background:linear-gradient(135deg,rgba(217,182,111,.30),rgba(101,217,255,.09));color:#fff6db;border-radius:12px;padding:14px;font-weight:900;font-size:14px;cursor:pointer;transition:.18s}
+    .send:hover{filter:brightness(1.12)}
+    .send:disabled{opacity:.55;cursor:not-allowed}
+    .status{margin-top:12px;border-radius:12px;padding:12px 14px;font-size:12px;line-height:1.5;display:none}
+    .status.ok{display:block;border:1px solid rgba(86,213,138,.35);background:rgba(86,213,138,.10);color:#d9ffe8}
+    .status.err{display:block;border:1px solid rgba(255,111,117,.35);background:rgba(255,111,117,.10);color:#ffd9dc}
+    .steps{display:flex;flex-direction:column;gap:9px}
+    .step{display:grid;grid-template-columns:auto 1fr;gap:11px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.023)}
+    .step .n{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:rgba(101,217,255,.10);color:var(--accent2);font-weight:900}
+    .step b{font-size:12px}
+    .step span{display:block;color:var(--muted);font-size:10px;margin-top:3px;line-height:1.45}
+    .privacy{font-size:10px;color:var(--muted);line-height:1.6;margin:14px 0 0}
+    .honeypot{position:absolute;left:-9999px;opacity:0;height:0;overflow:hidden}
+    @media(max-width:860px){.grid{grid-template-columns:1fr}}
+    @media(max-width:560px){.form-grid{grid-template-columns:1fr}.full{grid-column:auto}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="index.html">
+      <img src="midia/logo-leads.png.jpeg" alt="Leads Imóveis">
+      <div><strong>LEADS IMÓVEIS</strong><small>FLORIANÓPOLIS · SC</small></div>
+    </a>
+    <a class="back" href="index.html">← Voltar ao site</a>
+  </header>
+
+  <section class="hero">
+    <small>Captação de imóveis</small>
+    <h1>Quer vender ou alugar seu imóvel?</h1>
+    <p>Envie os dados abaixo e um corretor da Leads Imóveis entra em contato para avaliar seu imóvel, orientar sobre valor e cuidar da divulgação completa. Sem custo para cadastrar.</p>
+  </section>
+
+  <div class="grid">
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Cadastre seu imóvel</h2>
+        <p>Leva menos de 2 minutos. Seus dados ficam protegidos e são usados apenas para este atendimento.</p>
+      </div>
+      <div class="panel-body">
+        <form id="formCaptacao" novalidate>
+          <div class="form-grid">
+            <div class="field"><label for="capNome">Seu nome *</label><input id="capNome" name="nome_proprietario" autocomplete="name" required maxlength="120" placeholder="Nome completo"></div>
+            <div class="field"><label for="capFone">WhatsApp com DDD *</label><input id="capFone" name="telefone" inputmode="tel" autocomplete="tel" required maxlength="20" placeholder="(48) 99999-9999"></div>
+            <div class="field"><label for="capEmail">E-mail</label><input id="capEmail" name="email" type="email" autocomplete="email" maxlength="140" placeholder="opcional"></div>
+            <div class="field"><label for="capObjetivo">Objetivo</label><select id="capObjetivo" name="objetivo"><option>Vender</option><option>Alugar (anual)</option><option>Temporada</option><option>Ainda não decidi</option></select></div>
+            <div class="field"><label for="capTipo">Tipo do imóvel</label><select id="capTipo" name="tipo_imovel"><option>Apartamento</option><option>Casa</option><option>Cobertura</option><option>Terreno</option><option>Sala comercial</option><option>Outro</option></select></div>
+            <div class="field"><label for="capBairro">Bairro</label><input id="capBairro" name="bairro" maxlength="80" placeholder="Ex.: Campeche"></div>
+            <div class="field"><label for="capCidade">Cidade</label><input id="capCidade" name="cidade" maxlength="80" value="Florianópolis"></div>
+            <div class="field"><label for="capPreco">Valor desejado</label><input id="capPreco" name="preco" maxlength="60" placeholder="Ex.: R$ 850.000"></div>
+            <div class="field full"><label for="capEndereco">Endereço (opcional)</label><input id="capEndereco" name="endereco" autocomplete="street-address" maxlength="200" placeholder="Rua e número — ajuda na avaliação"></div>
+            <div class="field full"><label for="capNotas">Conte um pouco sobre o imóvel</label><textarea id="capNotas" name="notas" maxlength="1000" placeholder="Quartos, vagas, estado de conservação, diferenciais..."></textarea></div>
+          </div>
+
+          <div class="honeypot" aria-hidden="true">
+            <label>Não preencha este campo</label>
+            <input name="website" tabindex="-1" autocomplete="off">
+          </div>
+
+          <label class="consent">
+            <input type="checkbox" id="capConsent" required>
+            <span><b>Autorizo o contato da Leads Imóveis</b> por telefone, WhatsApp ou e-mail sobre este imóvel. Você pode retirar a autorização a qualquer momento.</span>
+          </label>
+
+          <button class="send" id="capEnviar" type="submit">Enviar meu imóvel para avaliação</button>
+          <div class="status" id="capStatus" role="status" aria-live="polite"></div>
+        </form>
+        <p class="privacy">Seus dados são enviados de forma segura para o sistema interno da Leads Imóveis e não são compartilhados com terceiros. Base legal: consentimento do titular (LGPD).</p>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="panel-head">
+        <h2>Como funciona</h2>
+        <p>Do seu cadastro até a divulgação</p>
+      </div>
+      <div class="panel-body">
+        <div class="steps">
+          <div class="step"><div class="n">1</div><div><b>Você envia os dados</b><span>O imóvel entra na hora no nosso radar de captação.</span></div></div>
+          <div class="step"><div class="n">2</div><div><b>Corretor entra em contato</b><span>Retornamos pelo WhatsApp para entender seu objetivo.</span></div></div>
+          <div class="step"><div class="n">3</div><div><b>Visita e avaliação</b><span>Fotos profissionais, análise de valor e documentação.</span></div></div>
+          <div class="step"><div class="n">4</div><div><b>Divulgação completa</b><span>Seu imóvel publicado com acompanhamento de cada interessado.</span></div></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const ENDPOINT="https://zyfbgydbwsvbaogbxzrd.supabase.co/functions/v1/captacao-publica";
+  const form=document.getElementById("formCaptacao");
+  const btn=document.getElementById("capEnviar");
+  const status=document.getElementById("capStatus");
+
+  function show(kind,msg){status.className="status "+kind;status.textContent=msg}
+
+  form.addEventListener("submit",async function(e){
+    e.preventDefault();
+    status.className="status";status.textContent="";
+
+    const nome=document.getElementById("capNome").value.trim();
+    const fone=document.getElementById("capFone").value.replace(/\D/g,"");
+    if(nome.length<2){show("err","Informe seu nome para continuarmos.");return}
+    if(fone.length<10||fone.length>13){show("err","Informe um WhatsApp válido com DDD, ex.: (48) 99999-9999.");return}
+    if(!document.getElementById("capConsent").checked){show("err","Marque a autorização de contato para enviar.");return}
+
+    const data=Object.fromEntries(new FormData(form).entries());
+    data.consentimento_contato=true;
+    data.pagina=location.href;
+    data.notas=[data.objetivo?("Objetivo: "+data.objetivo+"."):"",data.notas||""].filter(Boolean).join(" ");
+
+    btn.disabled=true;btn.textContent="Enviando…";
+    try{
+      const resp=await fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});
+      const out=await resp.json().catch(()=>({}));
+      if(resp.ok&&out.ok!==false){
+        show("ok",out.message||"Recebemos seus dados! Um corretor da Leads Imóveis entrará em contato em breve.");
+        form.reset();
+        document.getElementById("capCidade").value="Florianópolis";
+      }else{
+        show("err",out.error||"Não foi possível enviar agora. Tente novamente em instantes.");
+      }
+    }catch(_){
+      show("err","Falha de conexão. Verifique sua internet e tente novamente.");
+    }finally{
+      btn.disabled=false;btn.textContent="Enviar meu imóvel para avaliação";
+    }
+  });
+})();
+</script>
+</body>
+</html>
