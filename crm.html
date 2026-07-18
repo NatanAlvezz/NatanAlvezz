@@ -180,7 +180,7 @@
     .ai-drawer,.modal{background:color-mix(in srgb,var(--surface) 94%,#000)}
     .page-title small,.brand small{color:var(--accent)}
     .brand img{border-color:color-mix(in srgb,var(--accent) 42%,transparent)}
-    .theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+    .theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;max-height:470px;overflow:auto;padding:3px 5px 8px 3px;scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--accent) 55%,transparent) transparent}
     .theme-card{
       border:1px solid var(--line);border-radius:15px;padding:10px;background:color-mix(in srgb,var(--surface2) 74%,transparent);
       color:var(--text);text-align:left;transition:.18s;min-height:82px
@@ -406,7 +406,34 @@
     .owner-contact-line{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:11px;color:var(--text)}
     .owner-contact-line span:first-child{width:24px;height:24px;border-radius:8px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent2) 12%,transparent);color:var(--accent2)}
     .owner-contact-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
-    @media(max-width:700px){.owner-quick-search{grid-template-columns:1fr}}
+    .owner-contact-grid{display:flex;flex-direction:column;gap:9px}
+    .owner-directory-row{
+      display:grid;
+      grid-template-columns:minmax(92px,120px) minmax(180px,1.2fr) minmax(190px,1fr) auto;
+      gap:14px;
+      align-items:center;
+      min-height:76px;
+      padding:12px 14px;
+      border:1px solid color-mix(in srgb,var(--accent2) 16%,var(--line));
+      border-radius:15px;
+      background:linear-gradient(135deg,color-mix(in srgb,var(--surface2) 76%,transparent),color-mix(in srgb,var(--surface) 62%,transparent));
+      box-shadow:0 10px 28px rgba(0,0,0,.13);
+      transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease
+    }
+    .owner-directory-row:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent2) 38%,var(--line));box-shadow:0 15px 35px rgba(0,0,0,.20)}
+    .owner-code-pill{display:inline-flex;align-items:center;justify-content:center;min-width:82px;min-height:34px;padding:7px 10px;border-radius:11px;border:1px solid color-mix(in srgb,var(--accent) 38%,transparent);background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);font-size:11px;font-weight:950;letter-spacing:.5px;text-transform:uppercase}
+    .owner-cell{min-width:0}.owner-cell b{display:block;font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.owner-cell span{display:block;margin-top:4px;color:var(--muted);font-size:9px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .owner-phone{font-size:13px!important;letter-spacing:.2px}
+    .owner-row-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}
+    .owner-whatsapp-btn{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:8px 11px;border:1px solid color-mix(in srgb,var(--green) 42%,transparent);border-radius:11px;background:color-mix(in srgb,var(--green) 13%,transparent);color:#dcffe9;font-size:10px;font-weight:900}
+    .owner-whatsapp-btn:hover{filter:brightness(1.12);transform:translateY(-1px)}
+    .owner-whatsapp-btn svg{width:17px;height:17px;fill:currentColor;flex:0 0 auto}
+    @media(max-width:900px){
+      .owner-directory-row{grid-template-columns:100px minmax(0,1fr);gap:10px}
+      .owner-directory-row .owner-contact-cell{grid-column:2}
+      .owner-row-actions{grid-column:1/-1;justify-content:flex-start;padding-top:3px}
+    }
+    @media(max-width:700px){.owner-quick-search{grid-template-columns:1fr}.owner-directory-row{grid-template-columns:1fr}.owner-directory-row .owner-contact-cell,.owner-row-actions{grid-column:auto}.owner-code-pill{justify-self:start}.owner-cell b,.owner-cell span{white-space:normal}}
 
     /* CHAT INTERNO EM TEMPO REAL */
     .team-chat-layout{
@@ -951,24 +978,24 @@
 
       <section class="page" id="page-owner-search">
         <div class="hero">
-          <h2>Captei · Localizar contato autorizado</h2>
-          <p>Digite um endereço e encontre rapidamente os contatos que já fazem parte da operação da Leads Imóveis. O resultado mostra somente nome, telefone e e-mail quando existe autorização de contato ativa.</p>
+          <h2>Proprietários · contatos da carteira</h2>
+          <p>Consulte em uma linha organizada o código do imóvel, nome do proprietário, telefone e acesso direto ao WhatsApp. A lista reúne imóveis e captações autorizadas já cadastradas no CRM.</p>
         </div>
 
         <div class="panel" style="margin-top:14px">
           <div class="panel-head">
             <div>
-              <h3>Pesquisar por endereço</h3>
-              <p>Rua, número, complemento, bairro, cidade ou CEP</p>
+              <h3>Pesquisar proprietário ou imóvel</h3>
+              <p>Código, nome, telefone, endereço, bairro ou e-mail</p>
             </div>
             <span class="badge green">Consulta protegida</span>
           </div>
           <div class="panel-body">
             <div class="owner-quick-search">
-              <input id="ownerQuickAddress" autocomplete="street-address" placeholder="Ex.: Rua João Roberto Soares, 1270, Ingleses">
+              <input id="ownerQuickAddress" autocomplete="street-address" placeholder="Ex.: COD-01, Raul Alves, telefone ou endereço">
               <button class="btn" id="ownerQuickSearchBtn">⌕ Procurar contato</button>
             </div>
-            <p class="privacy-note">A pesquisa utiliza somente contatos autorizados já cadastrados no CRM. Não consulta CPF, documentos pessoais ou bases clandestinas.</p>
+            <p class="privacy-note">Os dados exibidos vêm somente do banco interno da Leads Imóveis. Contatos com bloqueio ou retirada de autorização não aparecem.</p>
           </div>
         </div>
 
@@ -976,13 +1003,13 @@
           <div class="panel-head">
             <div>
               <h3>Contatos encontrados</h3>
-              <p id="ownerResultSummary">Digite um endereço para iniciar.</p>
+              <p id="ownerResultSummary">Carregando contatos cadastrados...</p>
             </div>
             <span class="badge" id="ownerResultCount">0 resultados</span>
           </div>
           <div class="panel-body">
             <div class="owner-contact-grid" id="ownerResults">
-              <div class="empty">Aguardando pesquisa.</div>
+              <div class="empty">Carregando proprietários...</div>
             </div>
           </div>
         </div>
@@ -1107,15 +1134,15 @@
             <div class="theme-grid" id="themeGrid"></div>
             <div class="theme-custom">
               <div class="field">
-                <label>Cor personalizada</label>
-                <input id="themeCustomColor" type="color" value="#d9b66f" aria-label="Escolher cor personalizada">
+                <label>Cor personalizada completa</label>
+                <input id="themeCustomColor" type="color" value="#d9b66f" aria-label="Escolher cor personalizada para todo o CRM">
               </div>
               <button class="btn" id="themeCustomApply">Aplicar cor</button>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:11px">
               <button class="btn ghost" id="themeResetBtn">Restaurar Dourado Luxo</button>
             </div>
-            <p class="privacy-note">A escolha altera o CRM inteiro: fundo, menu, cabeçalho, painéis, cartões, botões, campos, abas, IA e destaques. Ela não muda as cores dos outros corretores.</p>
+            <p class="privacy-note"><b>Paleta ampliada:</b> escolha uma opção pronta ou qualquer cor no seletor. A cor personalizada agora cria automaticamente uma combinação completa para fundo, menu, cabeçalho, painéis, cartões, botões, campos, abas, IA e destaques. Ela fica salva apenas para o usuário conectado.</p>
           </div>
         </div>
       </section>
@@ -1256,7 +1283,28 @@ const THEMES={
   grafite:{label:"Grafite Pro",desc:"Discreto e executivo",accent:"#aeb7c2",accent2:"#d9e0e8",bg:"#090b0e",surface:"#11151a",surface2:"#1a2027",surface3:"#252d36",text:"#f7f8fa",muted:"#929aa5"},
   bronze:{label:"Bronze Nobre",desc:"Clássico e exclusivo",accent:"#b97a45",accent2:"#e1b382",bg:"#130d08",surface:"#20150d",surface2:"#302015",surface3:"#432e1e",text:"#fff9f3",muted:"#b9a08d"},
   branco:{label:"Claro Premium",desc:"Leve e luminoso",accent:"#ad7b24",accent2:"#2878c8",bg:"#eef2f5",surface:"#ffffff",surface2:"#f4f7f9",surface3:"#e5ebef",text:"#14202a",muted:"#60717e"},
-  preto:{label:"Preto Absoluto",desc:"Luxo minimalista",accent:"#e7c477",accent2:"#b9c8d6",bg:"#000000",surface:"#080808",surface2:"#111111",surface3:"#1b1b1b",text:"#ffffff",muted:"#999999"}
+  preto:{label:"Preto Absoluto",desc:"Luxo minimalista",accent:"#e7c477",accent2:"#b9c8d6",bg:"#000000",surface:"#080808",surface2:"#111111",surface3:"#1b1b1b",text:"#ffffff",muted:"#999999"},
+  marinho:{label:"Azul Marinho",desc:"Sóbrio e profissional",accent:"#315fbd",accent2:"#6ea8ff",bg:"#030916",surface:"#081326",surface2:"#0d203a",surface3:"#153052",text:"#f4f8ff",muted:"#8c9fb8"},
+  safira:{label:"Safira Real",desc:"Luxo azul intenso",accent:"#246bfd",accent2:"#6cc8ff",bg:"#020a1b",surface:"#07162e",surface2:"#0c2447",surface3:"#123563",text:"#f2f7ff",muted:"#8fa5bf"},
+  indigo:{label:"Índigo Digital",desc:"Tecnologia e foco",accent:"#6266f1",accent2:"#9aa7ff",bg:"#080819",surface:"#101127",surface2:"#191b3b",surface3:"#262957",text:"#f7f7ff",muted:"#9c9db9"},
+  lavanda:{label:"Lavanda Premium",desc:"Suave e sofisticado",accent:"#b48cff",accent2:"#e0b7ff",bg:"#110a18",surface:"#1c1127",surface2:"#2b193a",surface3:"#3d2451",text:"#fff8ff",muted:"#b5a0bd"},
+  magenta:{label:"Magenta Vision",desc:"Criativo e marcante",accent:"#e847c3",accent2:"#ff88df",bg:"#170713",surface:"#250d20",surface2:"#37132f",surface3:"#4d1c43",text:"#fff6fc",muted:"#bd98b2"},
+  vinho:{label:"Vinho Imperial",desc:"Clássico e refinado",accent:"#b83a62",accent2:"#e77997",bg:"#16070c",surface:"#240d15",surface2:"#35131f",surface3:"#4a1b2d",text:"#fff6f8",muted:"#b89aa3"},
+  cereja:{label:"Cereja Prime",desc:"Elegante e vibrante",accent:"#e6385a",accent2:"#ff758b",bg:"#17070b",surface:"#260d14",surface2:"#38131d",surface3:"#4e1b29",text:"#fff6f7",muted:"#bd999f"},
+  coral:{label:"Coral Exclusive",desc:"Moderno e acolhedor",accent:"#ff6f61",accent2:"#ffad8f",bg:"#180b09",surface:"#271310",surface2:"#391c17",surface3:"#4f2920",text:"#fff8f5",muted:"#bda19a"},
+  ambar:{label:"Âmbar Executivo",desc:"Energia com elegância",accent:"#f6b73c",accent2:"#ffe07a",bg:"#171105",surface:"#261b09",surface2:"#38280d",surface3:"#4e3913",text:"#fffaf0",muted:"#b9aa89"},
+  lima:{label:"Lima Performance",desc:"Resultado e dinamismo",accent:"#94d82d",accent2:"#c9f46a",bg:"#0c1505",surface:"#142208",surface2:"#1e310c",surface3:"#2c4512",text:"#f9fff1",muted:"#a2b48c"},
+  oliva:{label:"Oliva Nobre",desc:"Natural e exclusivo",accent:"#9aaa52",accent2:"#ccd68a",bg:"#101207",surface:"#1a1d0c",surface2:"#272b12",surface3:"#383e1a",text:"#fbfcef",muted:"#aaad91"},
+  menta:{label:"Menta Clean",desc:"Leve e contemporâneo",accent:"#5ce1b9",accent2:"#9df4da",bg:"#041510",surface:"#08221b",surface2:"#0d3328",surface3:"#13483a",text:"#f2fff9",muted:"#8eb5a8"},
+  turquesa:{label:"Turquesa Prime",desc:"Fresco e tecnológico",accent:"#20c9c3",accent2:"#67eee8",bg:"#031414",surface:"#071f20",surface2:"#0b3031",surface3:"#104445",text:"#f1ffff",muted:"#8bb4b4"},
+  petroleo:{label:"Petróleo Luxo",desc:"Profundo e corporativo",accent:"#2aa5a1",accent2:"#66d4d0",bg:"#031112",surface:"#071b1d",surface2:"#0b292c",surface3:"#103a3e",text:"#f2ffff",muted:"#8caeaf"},
+  celeste:{label:"Celeste Light",desc:"Clareza e confiança",accent:"#56b4ff",accent2:"#91dcff",bg:"#05121b",surface:"#0a1e2b",surface2:"#102d40",surface3:"#174158",text:"#f4fbff",muted:"#91aab9"},
+  prata:{label:"Prata Executivo",desc:"Neutro e moderno",accent:"#c3cad4",accent2:"#eef2f7",bg:"#080a0d",surface:"#10141a",surface2:"#191f27",surface3:"#252d38",text:"#fafcff",muted:"#969fa9"},
+  aco:{label:"Aço Azul",desc:"Robusto e tecnológico",accent:"#7795b8",accent2:"#b2c7df",bg:"#070d13",surface:"#0e1822",surface2:"#162532",surface3:"#213546",text:"#f6faff",muted:"#929fac"},
+  areia:{label:"Areia Premium",desc:"Elegância discreta",accent:"#c9a66b",accent2:"#ead2a5",bg:"#15110b",surface:"#211a11",surface2:"#31271a",surface3:"#443724",text:"#fffaf2",muted:"#b5a58f"},
+  chocolate:{label:"Chocolate Nobre",desc:"Quente e sofisticado",accent:"#a86f4c",accent2:"#d6a47f",bg:"#120b07",surface:"#1e120c",surface2:"#2d1b12",surface3:"#40271a",text:"#fff8f2",muted:"#b49c8d"},
+  neon:{label:"Neon Future",desc:"Impacto tecnológico",accent:"#8cff00",accent2:"#35f4ff",bg:"#030a05",surface:"#08140b",surface2:"#0d2112",surface3:"#14321c",text:"#f7fff4",muted:"#91aa94"},
+  aurora:{label:"Aurora Boreal",desc:"Verde, azul e inovação",accent:"#48e0b5",accent2:"#58a6ff",bg:"#031311",surface:"#071f1c",surface2:"#0b302b",surface3:"#10453e",text:"#f2fffc",muted:"#8db2aa"}
 };
 function themeStorageKey(){
   return `${THEME_STORAGE}_${state.user?.id||"local"}`;
@@ -1286,7 +1334,22 @@ function applyTheme(name,persist=true){
 }
 function applyCustomTheme(color,persist=true){
   const safe=/^#[0-9a-f]{6}$/i.test(color)?color:"#d9b66f";
-  const custom={...THEMES.grafite,label:"Personalizado",desc:"Sua cor exclusiva",accent:safe,accent2:mixHex(safe,"#ffffff",.28)};
+  const lum=hexLuminance(safe);
+  const accent=lum<.12?mixHex(safe,"#ffffff",.34):safe;
+  const accent2=lum>.70?mixHex(accent,"#000000",.25):mixHex(accent,"#ffffff",.34);
+  const custom={
+    label:"Personalizado Completo",
+    desc:"Sua paleta exclusiva em todo o CRM",
+    accent,
+    accent2,
+    bg:mixHex(safe,"#000000",.88),
+    surface:mixHex(safe,"#000000",.78),
+    surface2:mixHex(safe,"#000000",.66),
+    surface3:mixHex(safe,"#000000",.53),
+    text:"#f7fbff",
+    muted:mixHex(accent,"#c8d2db",.66),
+    line:mixHex(accent,"#ffffff",.18)+"2b"
+  };
   THEMES.personalizado=custom;
   state.theme="personalizado";
   setThemeVariables(custom);
@@ -1300,12 +1363,21 @@ function applyCustomTheme(color,persist=true){
     }catch(_){}
   }
   renderThemeOptions();
+  if(persist)toast("Paleta personalizada aplicada em todo o CRM.");
 }
 function mixHex(a,b,amount){
   const pa=parseInt(a.slice(1),16),pb=parseInt(b.slice(1),16);
   const ar=(pa>>16)&255,ag=(pa>>8)&255,ab=pa&255,br=(pb>>16)&255,bg=(pb>>8)&255,bb=pb&255;
   const ch=(x,y)=>Math.round(x+(y-x)*amount).toString(16).padStart(2,"0");
   return `#${ch(ar,br)}${ch(ag,bg)}${ch(ab,bb)}`;
+}
+function hexLuminance(hex){
+  const n=parseInt(hex.slice(1),16);
+  const rgb=[(n>>16)&255,(n>>8)&255,n&255].map(v=>{
+    const c=v/255;
+    return c<=.03928?c/12.92:Math.pow((c+.055)/1.055,2.4);
+  });
+  return .2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2];
 }
 function loadSavedTheme(){
   let saved="dourado",custom="";
@@ -1406,7 +1478,7 @@ async function init(){
     await loadProfile();
     await Promise.all([loadProperties(),loadLeads(),loadCaptures(),loadTeam(),loadDrafts(),loadChatRoom()]);
     renderAll();
-    if(new URLSearchParams(location.search).get("open")==="ai")openAI();
+    const urlParams=new URLSearchParams(location.search);if(urlParams.get("open")==="ai")openAI(urlParams.get("prompt")||"");
     subscribeTeamChat();
     subscribeSiteLeadUpdates();
     $("#syncStatus").textContent="Sistema online";
@@ -1462,7 +1534,7 @@ async function loadCaptures(){const {data,error}=await db().from("captacoes_rada
 async function loadTeam(){const {data,error}=await db().from("user_profiles").select("*").order("full_name");if(error)throw error;state.team=data||[]}
 async function loadDrafts(){const {data}=await db().from("ai_property_drafts").select("*").eq("user_id",state.user.id).order("created_at",{ascending:false}).limit(20);state.drafts=data||[]}
 
-function renderAll(){renderDashboard();renderLeadTabs();renderLeads();renderPropertyTabs();renderProperties();renderCaptures();renderAgenda();renderTeam();renderTeamChat();renderDrafts();renderReports();fillFilters();renderThemeOptions();}
+function renderAll(){renderDashboard();renderLeadTabs();renderLeads();renderPropertyTabs();renderProperties();renderCaptures();renderOwnerDirectory();renderAgenda();renderTeam();renderTeamChat();renderDrafts();renderReports();fillFilters();renderThemeOptions();}
 function renderDashboard(){
   const hot=state.leads.filter(l=>(l.lead_score||0)>=60||String(l.lead_temperature).toLowerCase()==="quente");
   const publicProps=state.properties.filter(p=>p.is_public);
@@ -1521,52 +1593,146 @@ function captureCard(c){
 function normalizeSearchValue(value){
   return String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s+/g," ").trim();
 }
-function authorizedContactSearchText(row){
-  return [
-    row.endereco,row.numero,row.complemento,row.bairro,row.cidade,row.uf,row.cep,
-    row.nome_proprietario,row.email_proprietario,row.tipo_imovel
-  ].map(normalizeSearchValue).join(" ");
-}
-function searchAuthorizedOwnerContacts(){
-  const input=$("#ownerQuickAddress");
-  const query=normalizeSearchValue(input?.value);
-  if(query.length<4){
-    toast("Digite um endereço com pelo menos 4 caracteres.");
-    input?.focus();
-    return;
+function firstFilled(...values){
+  for(const value of values){
+    if(value!==undefined&&value!==null&&String(value).trim()!=="")return value;
   }
-
-  const tokens=query.split(" ").filter(token=>token.length>=2);
-  const results=state.captures
-    .filter(row=>row.consentimento_contato===true&&!row.opt_out_at)
-    .filter(row=>{
-      const source=authorizedContactSearchText(row);
-      return tokens.every(token=>source.includes(token));
-    })
-    .slice(0,30);
-
-  $("#ownerResultCount").textContent=`${results.length} resultado${results.length===1?"":"s"}`;
-  $("#ownerResultSummary").textContent=results.length
-    ?"Contatos autorizados compatíveis com o endereço informado."
-    :"Nenhum contato autorizado foi encontrado para esse endereço.";
-
-  $("#ownerResults").innerHTML=results.map(authorizedOwnerContactCard).join("")
-    ||empty("Nenhum contato autorizado encontrado.");
+  return "";
 }
-function authorizedOwnerContactCard(row){
-  const name=row.nome_proprietario||"Contato sem nome";
-  const phone=digits(row.telefone);
-  const email=String(row.email_proprietario||"").trim();
-  return `<article class="owner-contact-card">
-    <h4>${esc(name)}</h4>
-    <div class="owner-contact-line"><span>☎</span><b>${esc(row.telefone||"Telefone não informado")}</b></div>
-    <div class="owner-contact-line"><span>✉</span><b>${esc(email||"E-mail não informado")}</b></div>
-    <div class="owner-contact-actions">
-      ${phone?`<a class="btn green" target="_blank" rel="noopener noreferrer" href="https://wa.me/${phone.length<=11?"55":""}${phone}">WhatsApp</a>`:""}
-      ${email?`<a class="btn ghost" href="mailto:${esc(email)}">Enviar e-mail</a>`:""}
-      <button class="btn ghost" onclick="window.crmConvertCapture('${row.id}')">Abrir captação</button>
+function objectValue(value){return value&&typeof value==="object"&&!Array.isArray(value)?value:{}}
+function formatPhoneBR(value){
+  const number=digits(value).replace(/^55(?=\d{10,11}$)/,"");
+  if(number.length===11)return `(${number.slice(0,2)}) ${number.slice(2,7)}-${number.slice(7)}`;
+  if(number.length===10)return `(${number.slice(0,2)}) ${number.slice(2,6)}-${number.slice(6)}`;
+  return String(value||"Telefone não informado");
+}
+function whatsappNumber(value){
+  const number=digits(value);
+  if(!number)return "";
+  return number.startsWith("55")?number:(number.length===10||number.length===11?"55"+number:number);
+}
+function normalizePropertyCode(value){
+  const raw=String(value||"").trim();
+  if(!raw)return "SEM CÓDIGO";
+  return raw.toUpperCase().replace(/^COD\s*(\d+)/i,"COD-$1").replace(/^COD-(\d)$/i,"COD-0$1");
+}
+function propertyOwnerContact(property){
+  const data=objectValue(property?.data);
+  const owner=objectValue(data.owner||data.proprietario);
+  const name=firstFilled(data.owner_name,data.nome_proprietario,data.proprietario_nome,owner.name,owner.nome,property?.owner_name,property?.nome_proprietario,property?.proprietario_nome,property?.proprietario);
+  const phone=firstFilled(data.owner_phone,data.owner_whatsapp,data.telefone_proprietario,data.proprietario_telefone,owner.phone,owner.telefone,owner.whatsapp,property?.owner_phone,property?.owner_whatsapp,property?.telefone_proprietario,property?.proprietario_telefone,property?.whatsapp_proprietario);
+  const email=firstFilled(data.owner_email,data.email_proprietario,data.proprietario_email,owner.email,property?.owner_email,property?.email_proprietario,property?.proprietario_email);
+  const explicitAuthorization=firstFilled(property?.owner_contact_authorized,data.owner_contact_authorized,owner.contact_authorized,owner.contato_autorizado);
+  const blocked=Boolean(firstFilled(property?.owner_opt_out_at,data.owner_opt_out_at,owner.opt_out_at))||explicitAuthorization===false||String(explicitAuthorization).toLowerCase()==="false";
+  return {
+    key:`property:${property?.id||firstFilled(property?.code,data.code)}`,
+    source:"property",
+    propertyId:property?.id||"",
+    captureId:"",
+    code:normalizePropertyCode(firstFilled(data.code,property?.code,data.codigo,data.property_code)),
+    title:firstFilled(property?.title,data.title,data.titulo,"Imóvel cadastrado"),
+    name:String(name||"Proprietário não informado").trim(),
+    phone:String(phone||"").trim(),
+    email:String(email||"").trim(),
+    address:String(firstFilled(property?.address,property?.endereco,data.address,data.endereco,data.rua)||"").trim(),
+    neighborhood:String(firstFilled(property?.neighborhood,property?.bairro,data.neighborhood,data.bairro)||"").trim(),
+    authorized:!blocked
+  };
+}
+function captureOwnerContact(capture){
+  const explicitAuthorization=firstFilled(capture?.consentimento_contato,capture?.contact_authorized);
+  const blocked=Boolean(capture?.opt_out_at)||explicitAuthorization===false||String(explicitAuthorization).toLowerCase()==="false";
+  return {
+    key:`capture:${capture?.id||Date.now()}`,
+    source:"capture",
+    propertyId:String(capture?.property_id||""),
+    captureId:capture?.id||"",
+    code:normalizePropertyCode(firstFilled(capture?.property_code,capture?.codigo_imovel,capture?.codigo,capture?.code,capture?.property_id?"CAPTAÇÃO":"")),
+    title:firstFilled(capture?.tipo_imovel,capture?.title,"Captação cadastrada"),
+    name:String(firstFilled(capture?.nome_proprietario,capture?.owner_name,"Proprietário não informado")).trim(),
+    phone:String(firstFilled(capture?.telefone,capture?.owner_phone,capture?.whatsapp)||"").trim(),
+    email:String(firstFilled(capture?.email_proprietario,capture?.owner_email,capture?.email)||"").trim(),
+    address:String(firstFilled(capture?.endereco,capture?.address)||"").trim(),
+    neighborhood:String(firstFilled(capture?.bairro,capture?.neighborhood)||"").trim(),
+    authorized:!blocked&&(explicitAuthorization===true||String(explicitAuthorization).toLowerCase()==="true")
+  };
+}
+function buildOwnerDirectory(){
+  const byPropertyId=new Map();
+  const rows=[];
+  state.properties.forEach(property=>{
+    const row=propertyOwnerContact(property);
+    byPropertyId.set(String(property.id),row);
+    rows.push(row);
+  });
+  state.captures.forEach(capture=>{
+    const cap=captureOwnerContact(capture);
+    const linked=cap.propertyId&&byPropertyId.get(String(cap.propertyId));
+    if(linked){
+      if(!linked.phone&&cap.phone)linked.phone=cap.phone;
+      if((!linked.name||linked.name==="Proprietário não informado")&&cap.name)linked.name=cap.name;
+      if(!linked.email&&cap.email)linked.email=cap.email;
+      if(!linked.address&&cap.address)linked.address=cap.address;
+      if(!linked.neighborhood&&cap.neighborhood)linked.neighborhood=cap.neighborhood;
+      linked.authorized=linked.authorized&&capture?.consentimento_contato!==false&&!capture?.opt_out_at;
+      linked.captureId=cap.captureId;
+    }else rows.push(cap);
+  });
+  const seen=new Set();
+  return rows
+    .filter(row=>row.authorized&&row.phone)
+    .filter(row=>{
+      const unique=`${row.propertyId||row.code}|${digits(row.phone)}|${normalizeSearchValue(row.name)}`;
+      if(seen.has(unique))return false;
+      seen.add(unique);return true;
+    })
+    .sort((a,b)=>a.code.localeCompare(b.code,"pt-BR",{numeric:true,sensitivity:"base"})||a.name.localeCompare(b.name,"pt-BR"));
+}
+function ownerContactSearchText(row){
+  return [row.code,row.title,row.name,row.phone,row.email,row.address,row.neighborhood].map(normalizeSearchValue).join(" ");
+}
+function ownerWhatsAppMessage(row){
+  const ownerName=row.name&&row.name!=="Proprietário não informado"?` ${row.name.split(" ")[0]}`:"";
+  const propertyRef=row.code&&row.code!=="SEM CÓDIGO"?` referente ao imóvel ${row.code}`:" referente ao seu imóvel";
+  return `Olá${ownerName}, tudo bem? Gostaria de confirmar se o seu imóvel ainda está disponível. Tenho um cliente real com interesse${propertyRef}. Podemos conversar?`;
+}
+function ownerWhatsAppHref(row){
+  const phone=whatsappNumber(row.phone);
+  return phone?`https://wa.me/${phone}?text=${encodeURIComponent(ownerWhatsAppMessage(row))}`:"#";
+}
+function renderOwnerDirectory(queryValue){
+  const input=$("#ownerQuickAddress");
+  const query=normalizeSearchValue(queryValue!==undefined?queryValue:input?.value);
+  const tokens=query.split(" ").filter(token=>token.length>=2);
+  const all=buildOwnerDirectory();
+  const results=tokens.length?all.filter(row=>{const source=ownerContactSearchText(row);return tokens.every(token=>source.includes(token))}):all;
+  const count=$("#ownerResultCount"),summary=$("#ownerResultSummary"),container=$("#ownerResults");
+  if(!count||!summary||!container)return;
+  count.textContent=`${results.length} resultado${results.length===1?"":"s"}`;
+  summary.textContent=query?(results.length?"Contatos compatíveis com a pesquisa informada.":"Nenhum proprietário foi encontrado para essa pesquisa."):(results.length?"Proprietários com WhatsApp disponível na carteira.":"Nenhum contato de proprietário está disponível no momento.");
+  container.innerHTML=results.map(authorizedOwnerContactRow).join("")||empty("Nenhum contato autorizado encontrado.");
+  container.querySelectorAll("[data-owner-ai]").forEach(button=>button.onclick=()=>askOwnerMessageAI(button.dataset.ownerAi));
+}
+function searchAuthorizedOwnerContacts(){renderOwnerDirectory($("#ownerQuickAddress")?.value||"")}
+function whatsappIcon(){return '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M19.11 17.36c-.27-.14-1.6-.79-1.85-.88-.25-.09-.43-.14-.61.14-.18.27-.7.88-.86 1.06-.16.18-.32.2-.59.07-.27-.14-1.15-.42-2.19-1.35-.81-.72-1.35-1.61-1.51-1.88-.16-.27-.02-.42.12-.55.12-.12.27-.32.41-.48.14-.16.18-.27.27-.45.09-.18.05-.34-.02-.48-.07-.14-.61-1.47-.84-2.01-.22-.53-.45-.46-.61-.47h-.52c-.18 0-.48.07-.73.34-.25.27-.95.93-.95 2.26s.97 2.62 1.1 2.8c.14.18 1.9 2.9 4.61 4.07.64.28 1.15.45 1.54.57.65.21 1.23.18 1.69.11.52-.08 1.6-.65 1.83-1.29.23-.63.23-1.17.16-1.29-.07-.11-.25-.18-.52-.32zM16.03 3.2c-7.02 0-12.72 5.68-12.72 12.69 0 2.24.59 4.43 1.71 6.35L3.2 28.8l6.72-1.76a12.75 12.75 0 0 0 6.1 1.55h.01c7.01 0 12.72-5.69 12.72-12.7S23.04 3.2 16.03 3.2zm0 23.25h-.01a10.55 10.55 0 0 1-5.37-1.47l-.38-.23-3.99 1.05 1.06-3.88-.25-.4a10.48 10.48 0 0 1-1.61-5.63c0-5.81 4.73-10.54 10.56-10.54 5.82 0 10.55 4.73 10.55 10.54 0 5.82-4.73 10.56-10.56 10.56z"/></svg>'}
+function authorizedOwnerContactRow(row){
+  const location=[row.address,row.neighborhood].filter(Boolean).join(" · ")||row.title||"Imóvel cadastrado";
+  const contactMeta=row.email||"Contato interno do CRM";
+  return `<article class="owner-directory-row">
+    <div><span class="owner-code-pill">${esc(row.code)}</span></div>
+    <div class="owner-cell"><b>${esc(row.name)}</b><span>${esc(location)}</span></div>
+    <div class="owner-cell owner-contact-cell"><b class="owner-phone">${esc(formatPhoneBR(row.phone))}</b><span>${esc(contactMeta)}</span></div>
+    <div class="owner-row-actions">
+      <a class="owner-whatsapp-btn" target="_blank" rel="noopener noreferrer" href="${esc(ownerWhatsAppHref(row))}" aria-label="Conversar com ${esc(row.name)} no WhatsApp">${whatsappIcon()}<span>WhatsApp</span></a>
+      <button class="btn ghost" type="button" data-owner-ai="${esc(row.key)}">✦ Mensagem IA</button>
+      ${row.captureId?`<button class="btn ghost" type="button" onclick="window.crmConvertCapture('${esc(row.captureId)}')">Abrir</button>`:""}
     </div>
   </article>`;
+}
+function askOwnerMessageAI(key){
+  const row=buildOwnerDirectory().find(item=>item.key===key);
+  if(!row){toast("Contato não encontrado.");return}
+  openAI(`Crie uma mensagem curta, humana e profissional para o proprietário ${row.name}, referente ao imóvel ${row.code}. Objetivo: confirmar se o imóvel continua disponível e informar que existe um cliente real interessado. Não invente informações e não pressione o proprietário.`);
 }
 
 function renderPipeline(){
@@ -1835,12 +2001,53 @@ async function saveLead(id){
 }
 function openPropertyModal(id=""){
   const p=state.properties.find(x=>x.id===id)||{};
-  openModal(id?"Editar imóvel":"Novo imóvel",`<div class="form-grid"><div class="field full"><label>Título</label><input id="mPropTitle" value="${esc(p.title||"")}"></div><div class="field"><label>Código</label><input id="mPropCode" value="${esc(p.data?.code||"")}"></div><div class="field"><label>Tipo</label><input id="mPropType" value="${esc(p.type||"Apartamento")}"></div><div class="field"><label>Finalidade</label><select id="mPropPurpose">${["Venda","Aluguel Anual","Temporada"].map(x=>`<option ${p.purpose===x?"selected":""}>${x}</option>`).join("")}</select></div><div class="field"><label>Bairro</label><input id="mPropNeighborhood" value="${esc(p.neighborhood||"")}"></div><div class="field"><label>Cidade</label><input id="mPropCity" value="${esc(p.city||"Florianópolis")}"></div><div class="field"><label>Valor</label><input id="mPropPrice" type="number" value="${p.price||""}"></div><div class="field"><label>Área</label><input id="mPropArea" type="number" value="${p.area||""}"></div><div class="field"><label>Dormitórios</label><input id="mPropBedrooms" type="number" value="${p.bedrooms||""}"></div><div class="field"><label>Suítes</label><input id="mPropSuites" type="number" value="${p.suites||""}"></div><div class="field"><label>Vagas</label><input id="mPropParking" type="number" value="${p.parking||""}"></div><div class="field"><label>Visibilidade</label><select id="mPropPublic"><option value="false" ${!p.is_public?"selected":""}>Interno</option><option value="true" ${p.is_public?"selected":""}>Publicado</option></select></div><div class="field full"><label>Descrição</label><textarea id="mPropDescription">${esc(p.description||"")}</textarea></div></div>`,`<button class="btn ghost" onclick="document.getElementById('modal').close()">Cancelar</button><button class="btn" onclick="window.crmSaveProperty('${id}')">Salvar imóvel</button>`);
+  const owner=propertyOwnerContact(p);
+  const ownerAllowed=owner.authorized!==false;
+  openModal(id?"Editar imóvel":"Novo imóvel",`<div class="form-grid">
+    <div class="field full"><label>Título</label><input id="mPropTitle" value="${esc(p.title||"")}"></div>
+    <div class="field"><label>Código</label><input id="mPropCode" value="${esc(firstFilled(p.data?.code,p.code,""))}"></div>
+    <div class="field"><label>Tipo</label><input id="mPropType" value="${esc(p.type||"Apartamento")}"></div>
+    <div class="field"><label>Finalidade</label><select id="mPropPurpose">${["Venda","Aluguel Anual","Temporada"].map(x=>`<option ${p.purpose===x?"selected":""}>${x}</option>`).join("")}</select></div>
+    <div class="field"><label>Bairro</label><input id="mPropNeighborhood" value="${esc(p.neighborhood||"")}"></div>
+    <div class="field"><label>Cidade</label><input id="mPropCity" value="${esc(p.city||"Florianópolis")}"></div>
+    <div class="field"><label>Valor</label><input id="mPropPrice" type="number" value="${p.price||""}"></div>
+    <div class="field"><label>Área</label><input id="mPropArea" type="number" value="${p.area||""}"></div>
+    <div class="field"><label>Dormitórios</label><input id="mPropBedrooms" type="number" value="${p.bedrooms||""}"></div>
+    <div class="field"><label>Suítes</label><input id="mPropSuites" type="number" value="${p.suites||""}"></div>
+    <div class="field"><label>Vagas</label><input id="mPropParking" type="number" value="${p.parking||""}"></div>
+    <div class="field"><label>Visibilidade</label><select id="mPropPublic"><option value="false" ${!p.is_public?"selected":""}>Interno</option><option value="true" ${p.is_public?"selected":""}>Publicado</option></select></div>
+    <div class="field full" style="margin-top:4px;padding:12px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.025)"><b style="font-size:12px;color:var(--accent)">Dados internos do proprietário</b><p style="margin:5px 0 0;color:var(--muted);font-size:9px">Esses dados aparecem somente dentro do CRM para usuários autorizados.</p></div>
+    <div class="field"><label>Nome do proprietário</label><input id="mPropOwnerName" value="${esc(owner.name==="Proprietário não informado"?"":owner.name)}"></div>
+    <div class="field"><label>Telefone / WhatsApp</label><input id="mPropOwnerPhone" inputmode="tel" value="${esc(owner.phone||"")}" placeholder="(48) 99999-9999"></div>
+    <div class="field"><label>E-mail do proprietário</label><input id="mPropOwnerEmail" type="email" value="${esc(owner.email||"")}"></div>
+    <div class="field"><label>Contato autorizado</label><select id="mPropOwnerAuthorized"><option value="true" ${ownerAllowed?"selected":""}>Sim</option><option value="false" ${!ownerAllowed?"selected":""}>Não / bloqueado</option></select></div>
+    <div class="field full"><label>Descrição</label><textarea id="mPropDescription">${esc(p.description||"")}</textarea></div>
+  </div>`,`<button class="btn ghost" onclick="document.getElementById('modal').close()">Cancelar</button><button class="btn" onclick="window.crmSaveProperty('${id}')">Salvar imóvel</button>`);
 }
 async function saveProperty(id){
-  const old=state.properties.find(x=>x.id===id)||{};const row={title:$("#mPropTitle").value.trim(),type:$("#mPropType").value.trim(),purpose:$("#mPropPurpose").value,neighborhood:$("#mPropNeighborhood").value.trim(),city:$("#mPropCity").value.trim(),price:Number($("#mPropPrice").value||0),area:Number($("#mPropArea").value||0),bedrooms:Number($("#mPropBedrooms").value||0),suites:Number($("#mPropSuites").value||0),parking:Number($("#mPropParking").value||0),description:$("#mPropDescription").value.trim(),is_public:$("#mPropPublic").value==="true",status:$("#mPropPublic").value==="true"?"Publicado":"Interno",data:{...(old.data||{}),code:$("#mPropCode").value.trim()},updated_at:new Date().toISOString()};
-  if(!row.title){toast("Informe o título.");return}let r=id?await db().from("crm_properties").update(row).eq("id",id):await db().from("crm_properties").insert({...row,id:"imv_"+Date.now(),captured_by_id:state.user.id,captured_by_email:state.user.email,captured_by_name:state.profile?.full_name||""});if(r.error){console.error(r.error);toast("Erro ao salvar imóvel.");return}closeModal();await loadProperties();renderAll();toast("Imóvel salvo.");
+  const old=state.properties.find(x=>x.id===id)||{};
+  const oldData=objectValue(old.data);
+  const oldOwner=objectValue(oldData.owner||oldData.proprietario);
+  const ownerName=$("#mPropOwnerName").value.trim();
+  const ownerPhone=$("#mPropOwnerPhone").value.trim();
+  const ownerEmail=$("#mPropOwnerEmail").value.trim();
+  const ownerAuthorized=$("#mPropOwnerAuthorized").value==="true";
+  const propertyCode=$("#mPropCode").value.trim();
+  const row={
+    title:$("#mPropTitle").value.trim(),type:$("#mPropType").value.trim(),purpose:$("#mPropPurpose").value,
+    neighborhood:$("#mPropNeighborhood").value.trim(),city:$("#mPropCity").value.trim(),price:Number($("#mPropPrice").value||0),
+    area:Number($("#mPropArea").value||0),bedrooms:Number($("#mPropBedrooms").value||0),suites:Number($("#mPropSuites").value||0),parking:Number($("#mPropParking").value||0),
+    description:$("#mPropDescription").value.trim(),is_public:$("#mPropPublic").value==="true",status:$("#mPropPublic").value==="true"?"Publicado":"Interno",
+    data:{...oldData,code:propertyCode,owner_name:ownerName,owner_phone:ownerPhone,owner_email:ownerEmail,owner_contact_authorized:ownerAuthorized,owner:{...oldOwner,name:ownerName,phone:ownerPhone,email:ownerEmail,contact_authorized:ownerAuthorized}},
+    updated_at:new Date().toISOString()
+  };
+  if(!row.title){toast("Informe o título.");return}
+  if(ownerPhone&&digits(ownerPhone).length<10){toast("Confira o telefone do proprietário.");return}
+  let result=id?await db().from("crm_properties").update(row).eq("id",id):await db().from("crm_properties").insert({...row,id:"imv_"+Date.now(),captured_by_id:state.user.id,captured_by_email:state.user.email,captured_by_name:state.profile?.full_name||""});
+  if(result.error){console.error(result.error);toast("Erro ao salvar imóvel.");return}
+  closeModal();await loadProperties();renderAll();toast("Imóvel e proprietário salvos.");
 }
+
 function openCaptureModal(){
   openModal("Nova oportunidade de captação",`<div class="form-grid"><div class="field"><label>Proprietário</label><input id="mCapOwner"></div><div class="field"><label>Telefone</label><input id="mCapPhone"></div><div class="field"><label>E-mail</label><input id="mCapEmail"></div><div class="field"><label>Tipo de imóvel</label><input id="mCapType"></div><div class="field"><label>Bairro</label><input id="mCapNeighborhood"></div><div class="field"><label>Preço</label><input id="mCapPrice"></div><div class="field full"><label>Endereço</label><input id="mCapAddress"></div><div class="field"><label>Origem</label><input id="mCapOrigin" placeholder="Indicação, formulário, proprietário..."></div><div class="field"><label>Consentimento para contato</label><select id="mCapConsent"><option value="true">Sim</option><option value="false">Não</option></select></div><div class="field full"><label>Notas</label><textarea id="mCapNotes"></textarea></div></div>`,`<button class="btn ghost" onclick="document.getElementById('modal').close()">Cancelar</button><button class="btn" onclick="window.crmSaveCapture()">Salvar oportunidade</button>`);
 }
@@ -1850,7 +2057,7 @@ async function saveCapture(){
 }
 function openTaskModal(){toast("As tarefas atuais são geradas pelos retornos e visitas dos leads.")}
 async function toggleProperty(id,isPublic){const r=await db().from("crm_properties").update({is_public:isPublic,status:isPublic?"Publicado":"Interno",updated_at:new Date().toISOString()}).eq("id",id);if(r.error){toast("Não foi possível alterar a publicação.");return}await loadProperties();renderAll();toast(isPublic?"Imóvel publicado.":"Imóvel deixado como interno.")}
-async function convertCapture(id){const c=state.captures.find(x=>String(x.id)===String(id));if(!c)return;openPropertyModal();setTimeout(()=>{$("#mPropTitle").value=`${c.tipo_imovel||"Imóvel"} em ${c.bairro||"Florianópolis"}`;$("#mPropType").value=c.tipo_imovel||"";$("#mPropNeighborhood").value=c.bairro||"";$("#mPropCity").value=c.cidade||"Florianópolis";$("#mPropDescription").value=`Captação de ${c.nome_proprietario||"proprietário"}. ${c.notas||""}`},20)}
+async function convertCapture(id){const c=state.captures.find(x=>String(x.id)===String(id));if(!c)return;openPropertyModal();setTimeout(()=>{$("#mPropTitle").value=`${c.tipo_imovel||"Imóvel"} em ${c.bairro||"Florianópolis"}`;$("#mPropType").value=c.tipo_imovel||"";$("#mPropNeighborhood").value=c.bairro||"";$("#mPropCity").value=c.cidade||"Florianópolis";$("#mPropOwnerName").value=c.nome_proprietario||"";$("#mPropOwnerPhone").value=c.telefone||"";$("#mPropOwnerEmail").value=c.email_proprietario||"";$("#mPropOwnerAuthorized").value=c.consentimento_contato===false?"false":"true";$("#mPropDescription").value=`Captação de ${c.nome_proprietario||"proprietário"}. ${c.notas||""}`},20)}
 function autoSizeAIInput(){const input=$("#aiInput");if(!input)return;input.style.height="auto";input.style.height=Math.min(input.scrollHeight,120)+"px"}
 function normalizeAIText(value){return String(value||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim()}
 function aiSimilarity(a,b){
@@ -1990,7 +2197,7 @@ async function logout(){
   location.href="login.html";
 }
 
-window.crmOpenLead=openLeadModal;window.crmSaveLead=saveLead;window.crmOpenProperty=openPropertyModal;window.crmSaveProperty=saveProperty;window.crmToggleProperty=toggleProperty;window.crmConvertCapture=convertCapture;window.crmSaveCapture=saveCapture;window.crmAskAI=q=>openAI(q);
+window.crmOpenLead=openLeadModal;window.crmSaveLead=saveLead;window.crmOpenProperty=openPropertyModal;window.crmSaveProperty=saveProperty;window.crmToggleProperty=toggleProperty;window.crmConvertCapture=convertCapture;window.crmSaveCapture=saveCapture;window.crmAskAI=q=>openAI(q);window.crmAskOwnerAI=askOwnerMessageAI;
 
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
 })();
